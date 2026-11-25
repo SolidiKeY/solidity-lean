@@ -15,3 +15,6 @@
 | `Correctness/Lowering/Total/Versions/CalleeBinding.lean` | Structural callee declaration/output interface, ordinary and recursive endpoints, with translator and semantic obligations open. |
 | `Correctness/Lowering/Total/Decode/Callee/Parameters.lean` | Callee primitive parameter/return spelling, ordered type correspondence and actual Source frame construction. |
 | `Correctness/Lowering/Total/Decode/Callee/Functions.lean` | Ordinary function declaration assembly with original body spelling, ordered modifiers and exact Source frame correspondence. |
+| `Correctness/Lowering/Total/Versions/CalleeBinding/Resolved.lean` | Executable whole-unit elaboration and exact selected-declaration frame/body binding to the Source program. |
+| `Correctness/Lowering/Total/Decode/Callee/Metadata.lean` | Ordinary function assembly from retained source identity, visibility and mutability, with exact header correspondence. |
+| `Correctness/Lowering/Total/Decode/Callee/Declarations.lean` | Ordered assembly of all function entries, exact collected-declaration correspondence and count preservation. |

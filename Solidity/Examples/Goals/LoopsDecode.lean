@@ -1,3 +1,6 @@
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
+import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
 import Solidity.Source.Elaborate
 import Solidity.Correctness.Lowering.Total.Versions
 import Solidity.Correctness.Lowering.Total.Decode.BytesLiteral.Evaluation
@@ -575,5 +578,114 @@ example : (Decode.Callee.modifiers Decode.tablesB CallSpellExt.registry1
     pure (Source.elabBody { decls := [d] } d).isSome
   unless actual == some false do
     throw (IO.userError "unresolved callee modifiers were not rejected"))
+
+/-! Bind the translated function to its complete elaborated Source unit. -/
+private def identityResolution : Source.Resolution :=
+  let d := identityDecl.get (by rfl)
+  Source.resolveUnit { pipeline := .legacy }
+    (.unit (.cons (.contract false "C" .none .nil (.cons d.node .nil)) .nil))
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let d := identityDecl.get (by rfl)
+  let actual := Version.CalleeBinding.fromResolution identityResolution d
+  unless actual.isSome do
+    throw (IO.userError "translated identity unit failed resolved-body binding"))
+
+/-- The general binding certificate identifies the actual program body for
+this translated declaration, rather than an independently chosen derivation. -/
+example {s : Version.CalleeBinding.Output}
+    (h : Version.CalleeBinding.fromResolution identityResolution
+      (identityDecl.get (by rfl)) = some s) :
+    s.source.prog.body (identityDecl.get (by rfl)) = some s.body :=
+  (Version.CalleeBinding.fromResolution_bound h).2.2.2.2.1
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let actual := Version.CalleeBinding.fromResolutionAt identityResolution 1
+  unless actual.map (fun s => s.declaration.name) == some "identity" do
+    throw (IO.userError "indexed callee selection failed")
+  unless (Version.CalleeBinding.fromResolutionAt identityResolution 0).isNone do
+    throw (IO.userError "bodyless contract declaration was bound as a function")
+  unless (Version.CalleeBinding.fromResolutionAt identityResolution 2).isNone do
+    throw (IO.userError "out-of-range callee selection succeeded"))
+
+example {s : Version.CalleeBinding.Output}
+    (h : Version.CalleeBinding.fromResolutionAt identityResolution 1 = some s) :
+    s.declaration ∈ s.source.res.env.decls :=
+  (Version.CalleeBinding.fromResolutionAt_member h).2.1
+
+/-! Retained ordinary headers supply source identity and call flags. -/
+private def importedCallee : FunDecl :=
+  let source : SourceFunction :=
+    { name := "sourceIdentity", mutability := .viewFn,
+      callable := .abi .externalFn .selected none }
+  { identityCallee with sourceDecl := some source }
+
+example : (Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+    "C" importedCallee).map (fun d => d.name) = some "sourceIdentity" := rfl
+example : (do
+    let d ← Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1 "C" importedCallee
+    let f ← d.frame? { decls := [d] }
+    pure f.msgValue) = some false := rfl
+
+example {d : Source.Decl}
+    (h : Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+      "C" importedCallee = some d) : d.name = "sourceIdentity" := by
+  obtain ⟨source, _, hs, _, _, hn, _⟩ := Decode.Callee.fromMetadata_header h
+  cases hs
+  exact hn
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let d := (Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+    "C" importedCallee).get (by rfl)
+  let res := Source.resolveUnit { pipeline := .legacy }
+    (.unit (.cons (.contract false "C" .none .nil (.cons d.node .nil)) .nil))
+  unless (Version.CalleeBinding.fromResolution res d).isSome do
+    throw (IO.userError "retained metadata function failed Source binding"))
+
+example : Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1
+    "C" identityCallee = none := rfl
+example : Decode.Callee.ordinaryVisibility (.local .freeFn) = none := rfl
+example : Decode.Callee.ordinaryVisibility (.abi .publicFn .retained none) = none := rfl
+example : Decode.Callee.ordinaryVisibility .constructor = none := rfl
+example : [SourceMutability.nonpayable, .pureFn, .viewFn, .payable].map
+    Decode.Callee.sourceMutability = [none, some .pure, some .view, some .payable] := rfl
+
+/-! The complete function-entry list is assembled in its original order. -/
+private def secondImportedCallee : FunDecl :=
+  let source : SourceFunction :=
+    { name := "secondIdentity", callable := .local .internalFn }
+  { identityCallee with sourceDecl := some source }
+private def importedFunctions : List (Name × FunDecl) :=
+  [("modelAlias1", importedCallee), ("modelAlias2", secondImportedCallee)]
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let actual := do
+    let parts ← Decode.Callee.functionParts Decode.tablesB CallSpellExt.registry1 "C" importedFunctions
+    let res := Source.resolveUnit { pipeline := .legacy }
+      (.unit (.cons (.contract false "C" .none .nil parts) .nil))
+    let first ← Version.CalleeBinding.fromResolutionAt res 1
+    let second ← Version.CalleeBinding.fromResolutionAt res 2
+    pure (first.declaration.name, second.declaration.name)
+  unless actual == some ("sourceIdentity", "secondIdentity") do
+    throw (IO.userError "function-list assembly lost source identity or order"))
+
+example {parts : Source.Syn (.list (.part false))}
+    (h : Decode.Callee.functionParts Decode.tablesB CallSpellExt.registry1
+      "C" importedFunctions = some parts) :
+    (parts.collect (some "C")).map some =
+      importedFunctions.map (fun f =>
+        Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1 "C" f.2) ∧
+    (parts.collect (some "C")).length = 2 :=
+  ⟨Decode.Callee.functionParts_faithful _ _ _ _ _ h,
+    Decode.Callee.functionParts_length h⟩
+
+/-- A missing-metadata entry between valid functions fails the entire list. -/
+example : Decode.Callee.functionParts Decode.tablesB CallSpellExt.registry1 "C"
+    [("first", importedCallee), ("unsupported", identityCallee),
+      ("second", secondImportedCallee)] = none := rfl
 
 end Solidity.Examples.Goals.LoopsDecode
