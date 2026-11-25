@@ -3,21 +3,13 @@ import Solidity.Correctness.Lowering.Total.CalleeInference.Args
 /-!
 # The dispatch order of `f(args)` in `Typed.inferN`
 
-`Typed.inferN (n + 1) Γ (f(args))` first tries `tryConst`, which never fires on a
-call (`tryConst_call`); then infers the arguments with `TypedArgs.inferN n`, and a
-failure there fails the call (`inferN_call_args_none`). From the argument types it
-tries, in order, a conversion (`convTarget`, one argument), a struct construction
-(`structOf`), a builtin (`resolve` to `.builtin`), and only then `inferCall`
-(`inferN_call_dispatch`, under the three local facts `NotOther`).
-
-`NotOther` holds whenever the callee name denotes a declaration set containing a
-function-kind declaration (`notOther_of_function`), in particular whenever some
-callable function is visible under it (`notOther_of_functions`), and under a
-local of the name (`notOther_local`). `NotOther` is sufficient, not necessary:
-the conversion branch fires only on one argument, so with zero or several
-arguments a conversion target alone would not prevent `inferCall`. Where no
-function-kind declaration is denoted, the competing branches stay possible and
-`NotOther` is a local fact the caller must supply.
+`tryConst` never fires on a call; argument failure fails the call; then come
+conversion, struct construction and builtins, and only then `inferCall`
+(`inferN_call_dispatch`, under `NotOther`). `NotOther` is sufficient, not
+necessary (conversion fires only on one argument). It holds when the name
+denotes a declaration set with a function (`notOther_of_function`,
+`notOther_of_functions`) and under a local (`notOther_local`); otherwise it is a
+local fact the caller supplies.
 -/
 namespace Solidity.Correctness.Lowering.Total.CalleeInference
 

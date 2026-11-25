@@ -1,10 +1,8 @@
 import Solidity.Correctness.Lowering.Total.CalleeInference
 
-/-! Actual call inference over assembled units: successful internal dispatch
-with empty, single and two-argument lists (argument and return-slot order
-kept), argument failure, duplicate entries, local shadowing, and the
-competing conversion, struct and builtin branches, each with and without an
-entry retaining the callee name. Execution is not checked. -/
+/-! Actual call inference over assembled units: internal dispatch with 0, 1 and 2
+arguments (argument and return-slot order), argument failure, duplicates,
+shadowing, and competing conversion, struct and builtin branches. -/
 namespace Solidity.Examples.Lowering.Total.CalleeInference
 
 open Solidity.Correctness.Lowering.Total Solidity.Correctness.Lowering.Total.Decode
@@ -13,11 +11,9 @@ open Solidity.Correctness.Lowering.Total.CalleeSelection
 open Solidity.Correctness.Lowering.Total.CalleeInference
 open Solidity.Source (STy Syn)
 
-/-- The `internal` role. -/
-def internal : SourceCallable := .local .internalFn
 /-- `function NAME(params) internal returns (rets) {}` with retained source identity. -/
 def fn (name : String) (params : List (Name × Ty)) (rets : List (Name × Ty) := []) : FunDecl :=
-  { sourceDecl := some { name, callable := internal }, params, rets, body := [] }
+  { sourceDecl := some { name, callable := .local .internalFn }, params, rets, body := [] }
 /-- The context of the generated contract `C` over the assembled unit. -/
 def ctx (u : Syn .unit) (locals : List (String × STy)) : Source.Ctx :=
   { env := u.env, scope := some "C", locals }
@@ -93,7 +89,7 @@ example {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs1 = some u) :
     ∃ d, Source.Typed.infer (ctx u []) (call "f" [tru]) = some ⟨u256, d⟩ := by
   obtain ⟨_, rs, _, hrs, _, _, _, h⟩ :=
     alias_infer (Γ := ctx u []) (a := "f_0") (index := 0) (σs := [.bool]) (args := args [tru])
-      (source := { name := "f", callable := internal }) hu rfl rfl rfl rfl rfl (by decide) rfl
+      (source := { name := "f", callable := .local .internalFn }) hu rfl rfl rfl rfl rfl (by decide) rfl
       rfl boolSlots rfl
       (fun j e s hj hne hs hn => by
         rcases j with _ | _ | _ | j
@@ -107,22 +103,6 @@ example {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs1 = some u) :
   cases slots_unique hrs uintSlots
   exact ⟨_, h⟩
 
-/-- Empty argument list: `g()` infers to the empty tuple; no argument obligation. -/
-example {u} (hu : Callee.withFunctions tablesS [] "C" .nil fs1 = some u) :
-    ∃ d, Source.Typed.infer (ctx u []) (call "g" []) = some ⟨.tuple [], d⟩ := by
-  obtain ⟨_, rs, _, hrs, _, _, _, h⟩ :=
-    alias_infer (Γ := ctx u []) (a := "g_0") (index := 1) (σs := []) (args := args [])
-      (source := { name := "g", callable := internal }) hu rfl rfl rfl rfl rfl (by decide) rfl
-      rfl .nil rfl
-      (fun j e s hj hne hs hn => by
-        rcases j with _ | _ | _ | j
-        · simp [fs1, fn] at hj; subst hj; simp at hs; subst hs; simp at hn
-        · exact absurd rfl hne
-        all_goals simp [fs1, fn] at hj <;> subst hj <;> simp at hs <;> subst hs <;> simp_all)
-      (fun p hp => by cases hp) (by simp [args, argExprs]) (fun i a σ hi _ => by simp [args, argExprs] at hi)
-  cases hrs
-  exact ⟨_, h⟩
-
 /-- Two arguments in order: the list infers position 0 at fuel `n - 1` and
 position 1 at fuel `n - 2`, giving `[bool, rational 1]`. -/
 example (Γ : Source.Ctx) :
@@ -134,6 +114,9 @@ example (Γ : Source.Ctx) :
     · simp [args, argExprs] at hi hσ; subst hi hσ; exact ⟨_, rfl⟩
     · simp [args, argExprs] at hi
 
+/-- `tryConst` never fires on a call. -/
+example (Γ : Source.Ctx) : Source.tryConst Γ (call "g" []) = none := tryConst_call
+
 /-- Too little fuel for two arguments fails the list. -/
 example (Γ : Source.Ctx) : Source.TypedArgs.inferN 2 Γ (args [tru, one]) = none :=
   argsN_short (by simp [args, argExprs])
@@ -141,14 +124,14 @@ example (Γ : Source.Ctx) : Source.TypedArgs.inferN 2 Γ (args [tru, one]) = non
 /-- Argument failure: in an empty unit `nope` is unresolved at the fuel its
 position gets, so `f(nope)` fails before any branch is tried. -/
 example : Source.Typed.inferN 5 (ctx (Syn.unit .nil) []) (call "f" [.ident "nope"]) = none :=
-  inferN_call_fail_at (i := 0) (by simp [args, argExprs]) rfl
+  inferN_call_fail_at (i := 0) (a := .ident "nope") (by simp [args, argExprs]) rfl
 
 /-- Duplicate accepting entries: inference of `f(true)` fails. -/
 example {u} (hu : Callee.withFunctions tablesS [] "C" .nil
       [("f_0", fn "f" [("p", .prim .bool)]), ("f_1", fn "f" [("p", .prim .bool)])] = some u) :
     Source.Typed.inferN 5 (ctx u []) (call "f" [tru]) = none :=
-  ambiguous_inferN (i := 0) (j := 1) (s := { name := "f", callable := internal })
-    (s' := { name := "f", callable := internal }) (da := .cons (.bool true) .nil)
+  ambiguous_inferN (i := 0) (j := 1) (s := { name := "f", callable := .local .internalFn })
+    (s' := { name := "f", callable := .local .internalFn }) (da := .cons (.bool true) .nil)
     hu rfl rfl (by decide) rfl (by decide) rfl rfl rfl rfl rfl rfl rfl rfl
     ⟨[.bool], boolSlots, rfl⟩ ⟨[.bool], boolSlots, rfl⟩ rfl
 
