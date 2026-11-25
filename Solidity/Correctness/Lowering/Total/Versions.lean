@@ -15,10 +15,12 @@ bytes-aware `Decode.tablesB` and the caller-aware `Decode.tablesS`:
   Source address with that number, or to the Source `bytesN` whose big-endian
   value (`Source.bytesNat`) is that number. Globals as in
   `loopRel`: primitive state variables of the running account, `msg.value`,
-  the timestamp, a writable checking frame; and the caller: the model's
-  `msg.sender` is the Source frame's sender. The caller clause is part of
-  `Version.rel`, so it holds at every version's boundary, also where the
-  decoder has no reading of `msg.sender`.
+  the timestamp, a writable checking frame; the caller: the model's
+  `msg.sender` is the Source frame's sender; and the running account: the
+  model's own address is the Source frame's, and its own balance is the
+  balance Source observes for that account (`Relation.ownBalance`). These
+  clauses are part of `Version.rel`, so they hold at every version's boundary,
+  also where the decoder has no reading of `msg.sender` or `address(this)`.
 * `Version.Sound`: what total initial matching needs of a version's tables
   (`soundW`, `soundA`, `soundB`, `soundS`). It is not a correctness criterion for the tables: it
   does not say they agree with the types the model declared.
@@ -50,7 +52,8 @@ scopes, and contracts with functions, a constructor, initializers or transient
 roots. The address-aware version reads marked locals and state variables and
 the name `address`; between such operands the shared expressions (copy, `==`,
 comparison) are spelled and Source types them, but `msg.sender` (read only by
-the caller-aware version), `address(this)`, `address(e)`/`payable(e)`, an address against a numeric
+the caller-aware version), `address(this)` and its balance (read only by the
+self-aware `Decode.tablesT`, `Versions.Self`), `address(e)`/`payable(e)`, an address against a numeric
 literal, and payable-only operations are gaps (`address payable` is read as
 `address`), and a captured address, whose shape carries the marker twice, is a
 gap too. `a.balance` over a marked operand is typed by Source, while the state
