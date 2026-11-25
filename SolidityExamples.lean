@@ -217,6 +217,7 @@ import Solidity.Examples.Lowering.Sim.State
 import Solidity.Examples.Lowering.Sim.StatementV2
 import Solidity.Examples.Lowering.Sim.Stmt
 import Solidity.Examples.Lowering.Total.ArithmeticInference
+import Solidity.Examples.Lowering.Total.ArgumentInference
 import Solidity.Examples.Lowering.Total.CallSpellExt
 import Solidity.Examples.Lowering.Total.CalleeAliases
 import Solidity.Examples.Lowering.Total.CalleeInference
