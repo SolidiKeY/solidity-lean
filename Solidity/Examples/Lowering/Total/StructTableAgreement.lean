@@ -84,6 +84,9 @@ example : ((parts F).collect (some "K")).filter (StructDecode.named "K" "Token")
   (fallback_unbound decodedF hEF (s := "Token") rfl rfl).2.2.1
 example : (v.env.lookup (some "K") "Token").map (fun d => (d.scope, d.name)) = [(none, "Token")] := by
   decide +kernel
+/-- Without the file-level `Token` the declaration is absent: lookup finds nothing. -/
+def v' : Syn .unit := unit fileInner.node (parts F)
+example : (v'.env.lookup (some "K") "Token").isEmpty = true := by decide +kernel
 
 /-! ## Ambiguous names and first entry -/
 

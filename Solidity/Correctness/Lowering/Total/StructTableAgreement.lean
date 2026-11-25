@@ -3,43 +3,24 @@ import Solidity.Correctness.Lowering.Total.StructTableAgreement.Refs
 /-!
 # Nested struct references and the declarations of their model tables
 
-The obligation `StructDecode` and `StructRows` leave open: that a resolved nested
-struct has its table type's members. The environment holds the actual successful
-`StructDecode.decode C = .ok ps` output for the contract `c` between arbitrary
-surrounding declaration lists: `E.decls = pre ++ ps.collect (some c) ++ post`.
-
-For a struct reference in a member of a model table, `written_entry` connects
-`ReferenceDecode.written?` and `Contract.structName?` to the `Contract.structs`
-entries: the written name's first entry is keyed to the referenced table type
-(`written_first`), or it has no entry and is the implicit table-name fallback.
-`agrees` then derives `Agrees`: the generated declaration of that entry is the one
-`Source.Env.lookup` selects and `Source.Env.declOf` finds, its identity is the
-`Resolved` one, and `Source.Env.structFields` at any location the table's members
-allow (`Placed`) are the referenced table's ordered members related by
-`ReferenceDecode.Rep` (`StructDecode.Fields`). The premises are table facts only:
-the written name is keyed once (`StructDecode.Declared` of the referencing table),
-the referenced table is `Declared`, and no surrounding declaration of the scope
-carries a keyed name (`StructDecode.Free`).
-
-`edge_agrees` covers every reference of a member of every entry table, inside
-arrays, fixed arrays and mapping values at the location `refsTy` gives it, when all
-entry tables are `Declared` (`Closed`): the referenced table is again an entry
-table, so the statement is pointwise over the finite table graph, cycles included,
-and claims no expansion of recursive types. `table_agreement` adds that each
-member's elaborated type has, at every such reference, the `Rep.struct` leaf whose
-declaration identity is the generated one of the written name.
-
-Distinguished failures: `fallback_unbound` (the written name has no entry: no
-generated declaration carries it, so only surrounding declarations can); an
-ambiguous written name — keyed more than once — is unresolved (`ambiguous`), while
-`Source.Env.declOf` still selects the first entry, whose table is the referenced one
-(`first_fields`); a member a location does not admit fails `Placed` (examples).
-Absent and ambiguous written spellings (`unknownStruct`, `ambiguousStruct`) cannot
-follow a successful decoding (`decode_written`).
-
-Left to the decoder lane: discharging `Closed` and `Free` over the frozen production
-domain, the `pre ++ generated ++ post` shape of its assembled unit, retained `RawTy`
-agreement, frame correspondence and complete semantic binding.
+Closes the nested resolved-table obligation `StructDecode`/`StructRows` leave open,
+in `E.decls = pre ++ ps.collect (some c) ++ post` with `decode C = .ok ps`.
+`written_entry` ties `written?` and `Contract.structName?` to the first
+`Contract.structs` entry of the written name (the referenced table, `written_first`)
+or the entry-less fallback. `agrees` derives `Agrees` (that entry's generated
+declaration is what `lookup` selects and `declOf` finds, with the `Resolved` identity,
+and `structFields` at every `Placed` location are the table's members related by
+`Rep`) from table facts only: `Declared` of both tables, `Free` surroundings.
+`edge_agrees` and `table_agreement` cover every reference (arrays, fixed arrays,
+mapping values at the `refsTy` location) of every entry table under `Closed`,
+pointwise over the table graph with no acyclicity premise (ranked model tables have
+no cycles, so that case is vacuous) and no expansion of recursive types. `Closed`
+keys each written name once: fallback references get only `fallback_unbound`
+(no generated declaration; lookup sees the surroundings), repeated keys `ambiguous`
+(unresolved) and `first_fields` (`declOf` takes the first entry). Absent or ambiguous
+spellings fail decoding (`decode_written`); unplaced locations are in the examples.
+Left to the decoder lane: `Closed` and `Free` over the production domain, the unit
+shape, `RawTy` agreement, frames and semantic binding.
 -/
 namespace Solidity.Correctness.Lowering.Total.StructTableAgreement
 
@@ -115,7 +96,8 @@ theorem agrees (free : Free C c (pre ++ post)) {s w : Name} (hw : written? C s =
   exact ⟨he, ⟨d, g, look, decl⟩, res, fun loc here =>
     StructDecode.structFields_closed h hE free he dec loc here⟩
 
-/-- **Every referenced table**: when all entry tables are `Declared`, every reference
+/-- **Every referenced table**: when all entry tables are `Declared` (which excludes
+fallback and ambiguous written names), every reference
 of a member of an entry table has a written name agreeing with the referenced table,
 which is again an entry table. -/
 theorem edge_agrees (free : Free C c (pre ++ post)) (closed : Closed C) {t : Name}

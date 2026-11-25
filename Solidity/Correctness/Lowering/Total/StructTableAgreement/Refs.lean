@@ -3,17 +3,10 @@ import Solidity.Correctness.Lowering.Total.StructDecode
 /-!
 # Struct references of a model type and the table entry of a written name
 
-`refsTy`/`refsRef` list the struct table types a model type mentions, each with the
-location its Source type is elaborated at: arrays and fixed arrays keep the location,
-a mapping's value is in `storage` (`ReferenceDecode.spellRef`, `Rep.mapping`). Their
-names are `ReferenceDecode.structsTy` (`refsTy_names`). `Rep.leaf` finds, for every
-listed reference, the `Rep.struct` leaf with its written name and resolution.
-
-`written_entry`: the written name of a table type is either keyed to that table type
-by its first `Contract.structs` entry, or is the table name itself by the implicit
-fallback of `Contract.structName?` with no entry at all. `decode_written`: a
-successful `StructDecode.decode` spells every referenced table, so every reference
-of an entry has a written name.
+`refsTy` lists a type's struct table types with their elaboration location (a mapping
+value in storage); `Rep.leaf` finds each one's `Rep.struct` leaf. `written_entry`: a
+written name's first entry is the table type, or it has none and is the
+`structName?` fallback. `decode_written`: a successful decoding writes every reference.
 -/
 namespace Solidity.Correctness.Lowering.Total.StructTableAgreement
 
@@ -105,9 +98,7 @@ theorem lookupBy_none {α : Type} {w : Name} {l : List (Name × α)}
 
 theorem lookupBy_some_of_filter {α : Type} {w : Name} {l : List (Name × α)}
     (h : l.filter (·.1 == w) ≠ []) : ∃ e, lookupBy w l = some e := by
-  cases hl : lookupBy w l with
-  | some e => exact ⟨e, rfl⟩
-  | none => exact absurd (lookupBy_none hl) h
+  cases hl : lookupBy w l <;> first | exact absurd (lookupBy_none hl) h | exact ⟨_, rfl⟩
 
 /-- **The entry of a written name**: its first entry is keyed to the table type, or it
 has no entry and is the table name itself (the implicit fallback of `structName?`). -/
@@ -144,28 +135,14 @@ theorem spellRef_written : (R : RefTy) → (key : Name) → (loc : DataLoc) → 
       · rename_i w hw; intro s' hs'
         simp only [structsRef, List.mem_singleton] at hs'; subst hs'; exact ⟨w, hw⟩
       · cases h
-  | .array T, key, loc, t, h => by
-      simp only [spellRef, bind_ok] at h
-      obtain ⟨t', ht, -⟩ := h
-      simpa only [structsRef] using spellType_written T _ loc t' ht
-  | .fixed T n, key, loc, t, h => by
-      simp only [spellRef] at h
-      split at h
-      · cases h
-      · simp only [bind_ok] at h
-        obtain ⟨t', ht, -⟩ := h
-        simpa only [structsRef] using spellType_written T _ loc t' ht
+  | .array T, key, loc, t, h | .fixed T _, key, loc, t, h => by
+      simp only [spellRef] at h; repeat' split at h
+      all_goals first | cases h | obtain ⟨t', ht, -⟩ := bind_ok.1 h
+      all_goals simpa only [structsRef] using spellType_written T _ loc t' ht
   | .mapping K V, key, loc, t, h => by
-      simp only [spellRef] at h
-      split at h
-      · split at h
-        · split at h
-          · cases h
-          · simp only [bind_ok] at h
-            obtain ⟨t', ht, -⟩ := h
-            simpa only [structsRef] using spellType_written V _ .storage t' ht
-        · cases h
-      · cases h
+      simp only [spellRef] at h; repeat' split at h
+      all_goals first | cases h | obtain ⟨t', ht, -⟩ := bind_ok.1 h
+      simpa only [structsRef] using spellType_written V _ .storage t' ht
 end
 
 theorem members_written : ∀ {fs : List (Name × Ty)} {ms : Source.Syn (.list .structMember)},
