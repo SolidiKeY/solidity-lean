@@ -15,11 +15,14 @@ import Solidity.Source.Eval
   the frame's own address and to the balance Source observes for it
   (`Relation.ownBalance`), leaving the Source state unchanged.
 * `selfAddress_faithful`, `selfBalance_faithful`: under related globals the
-  model's `address(this)` and `address(this).balance` are value-related to
-  those Source results.
+  model state's own address and own balance (`σ.tx.selfAddress`,
+  `σ.selfBalance`, the components the model's two reads denote) are
+  value-related to those Source results.
 
-Not shown here: that the model keeps the two globals related along a run (the
-simulation obligation), and the remaining gaps of every version listed in
+Not shown here: that the model's elaborated reads evaluate to those state
+components; that a run keeps the two globals related (the simulation
+obligation, which the two clauses add to for every version: the ledger
+balance depends on the Source event history); and the remaining gaps of every version listed in
 `Total.Versions`. No goal is stated.
 -/
 namespace Solidity.Correctness.Lowering.Total

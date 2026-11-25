@@ -338,7 +338,8 @@ example : FullDomain Version.boundaryS := Version.boundaryAt_fullDomain _ _
 `Decode.tablesT` reads `address(this)` and its balance; the state relation
 relates the running account's address and observed balance. -/
 
-/-- `a = address(this)` types for an address `a` and not for a `uint`;
+/-- The own-address read (`.env .selfAddress`, the raw form of `this` where an
+address stands) assigned to an address `a` types, and not to a `uint`;
 `n = address(this).balance` types for a `uint` `n` and not for an address. The
 caller-aware version reads neither. -/
 example : (Decode.tablesT.decode
@@ -416,10 +417,14 @@ casts has no reading of either. A conversion Source refuses (`uint256` to
 #guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
   [.whileLoop {} (.binop .lt (.call "uint16" [.call "uint8" [.name "n"]]) (.num 7))
     [.incDec .postInc (.name "n")]])).isSome
-/- The cast names: integers, `address`, `bool`, `bytesN`; nothing else. -/
+/- The surface `address(this)` is the raw `address` of the own-address read. -/
+#guard (Decode.Casts.decode Decode.tablesT [] (addressRequest
+  [.assign (.name "a") (.call "address" [.env .selfAddress])])).isSome
+/- The cast names: integers, `address`, `bytesN`; nothing else. -/
 #guard (Decode.Casts.target "uint8").isSome && (Decode.Casts.target "int").isSome &&
   (Decode.Casts.target "bytes4").isSome && (Decode.Casts.target "address").isSome &&
   (Decode.Casts.target "f").isNone && (Decode.Casts.target "uint7").isNone &&
+  (Decode.Casts.target "bool").isNone &&
   (Decode.Casts.intTarget (.bool, 8)).isNone
 #guard Decode.Casts.isCast (.call "uint8" [.name "n"]) && !Decode.Casts.isCast (.call "f" [.name "n"])
 example : Decode.Casts.single (.cons (.ident "n") .nil) = some (.ident "n") := rfl
@@ -439,8 +444,8 @@ example {T : Decode.Tables} {R : CallSpellExt.Registry} (e : RawExpr) (es : List
     Decode.Casts.conservative_components es hs⟩
 example : Decode.Casts.CastFree (.binop .add (.name "n") (.num 1)) := by
   simp [Decode.Casts.CastFree, RawExpr.any, Decode.Casts.isCast]
-/-- Typing, and value faithfulness at integer targets: `uint8(300)` is `44`,
-`int8(200)` is `-56`, as the model's `lowBits` and `signedAt` compute. -/
+/-- Typing, and the arithmetic of integer targets: a word holding `300` wraps
+to `44` at `uint8`, one holding `200` to `-56` at `int8`. -/
 example {Γ : Source.Ctx} {a : Source.Syn .expr} (argument : Source.Typed Γ a (.address false)) :
     Source.Typed Γ (Decode.Casts.conversion .address (by decide) a) (.address false) :=
   Decode.Casts.typed .address (by decide) argument rfl

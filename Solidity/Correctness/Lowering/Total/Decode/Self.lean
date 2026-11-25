@@ -4,7 +4,11 @@ import Solidity.Correctness.Lowering.Total.Decode.Marked
 # The running account: `address(this)` and its balance
 
 `tablesT`: as the caller-aware `tablesS`, and the two remaining environment
-reads are spelled. The model's `address(this)` is the Source conversion
+reads are spelled. The keys are the model's own-address read
+(`EnvKey.selfAddress`: the grammar's `this` where an address stands; the
+surface `address(this)` is the raw call `address` of it, a cast, read by
+`Decode.Casts`) and own-balance read (`EnvKey.selfBalance`). The model's
+own-address read is the Source conversion
 `address(this)`, an `address`; the model's `address(this).balance` is the
 Source `address(this).balance`, a `uint256`. With these the environment table
 has no gap: `envT_total`.
