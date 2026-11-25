@@ -4,44 +4,29 @@ import Solidity.Correctness.Lowering.Total.ConstructorPlacement
 /-!
 # Reference state roots and the constructor in assembled function units
 
-Composes the landed components `ReferenceStateDecode.state` (every root,
-primitive or reference, with its initializer), `Constructor.constructorPart`
-and `Callee.withFunctions`, leaving each definition as it is.
+Composes `ReferenceStateDecode.state`, `Constructor.constructorPart` and
+`Callee.withFunctions`, each unchanged: `prefixParts` is the explicit
+constructor, if any, then every root, primitive or reference, with its
+initializer (the order of `Constructor.declarationParts`); `assemble` puts it
+before the translated functions. A refusing component is a named `Error`, a
+representation gap, not an accepted-input restriction.
 
-* **Prefix.** `prefixParts` is the explicit constructor, if any, then the
-  reference-aware state parts: the order `Constructor.declarationParts` uses.
-  `assemble` places it in front of the translated function entries. A refusal
-  of a component is a named `Error`: a representation gap of that component,
-  not an accepted-input restriction.
-* **Placement.** `Constructor.withFunctions_placed_prefix` (reused, not
-  reproved) gives `Placed u.env scope parts`; collection, kinds and filtering
-  are read off the construction. The unit's constructors and non-constant
-  state variables of `scope` are exactly the generated constructor
-  declarations and roots, in order (`assemble_owned`); function entries
-  contribute only ordinary functions (`assemble_functions`).
-* **Roots and initializers.** `partsOf_faithful`, exported for the actual
-  `u.env.stateVarsOf scope` (`assemble_roots`), and, under the existing
-  `Source.elaborates` condition, for `Source.progOf`'s initializer list
-  (`assemble_inits`).
-* **Constructor.** `u.env.ctorDecl`, `ctorFrame` and `progOf`'s constructor are
-  the assembled constructor's Source projections (`assemble_ctor`), explicit
-  (`assemble_ctor_explicit`, with `constructorPart_faithful`'s frame) or
-  implicit (`assemble_ctor_implicit`).
-* **Declared types.** `partsOf_typed` for `u.env.stateVarsOf scope`, under
-  `ReferenceStateDecode`'s explicit struct-resolution obligations only
-  (`assemble_typed`). The assembled unit declares no struct, so it resolves no
-  struct name (`assemble_unresolved`): the obligation holds there exactly when
-  no root mentions a written struct, and its discharge stays with the struct
-  and complete-unit composition work.
-* **Compatibility.** Where `Constructor.declarationParts` succeeds, `prefixParts`
-  gives the same parts and `assemble` the same unit as the primitive
-  placement (`assemble_of_declarationParts`), so both families of facts hold
-  for it.
+From a successful assembly, with placement by
+`Constructor.withFunctions_placed_prefix`: the unit's constructors and state
+variables of `scope` are exactly the generated ones, in order
+(`assemble_owned`, `assemble_functions`); `partsOf_faithful` holds for
+`u.env.stateVarsOf scope` (`assemble_roots`) and, under `Source.elaborates`,
+for `progOf`'s initializers (`assemble_inits`); `ctorDecl`, `ctorFrame` and
+`progOf`'s constructor are the assembled constructor's (`assemble_ctor*`,
+explicit and implicit); `partsOf_typed` holds under the explicit
+struct-resolution obligations only (`assemble_typed`), which the unit alone,
+declaring no struct, never discharges (`assemble_unresolved`). Where
+`declarationParts` succeeds the unit is the primitive placement's.
 
-Not claimed here (the original decoder and assigned lanes): Source frame
-correspondence of the whole unit, struct and function integration, metadata
-recovery, whole-unit elaboration success, registry/inference completeness and
-semantic binding. No `lowerLoopsCorrect` or execution-equivalence credit.
+Open (the original decoder and assigned lanes): whole-unit frame
+correspondence, struct and function integration, metadata recovery,
+whole-unit elaboration success, registry/inference completeness and semantic
+binding. No `lowerLoopsCorrect` or execution-equivalence credit.
 -/
 namespace Solidity.Correctness.Lowering.Total.ReferenceStatePlacement
 
@@ -90,8 +75,6 @@ def assemble (T : Tables) (R : CallSpellExt.Registry) (C : Contract) (scope : St
 
 variable {T : Tables} {R : CallSpellExt.Registry} {C : Contract} {scope : String}
   {fs : List (Name × FunDecl)} {u : Syn .unit} {parts : Syn (.list (.part false))}
-
-/-! ## Order helpers -/
 
 theorem ordered_mem {α β : Type} {r : α → β → Prop} :
     ∀ {as : List α} {bs : List β}, Ordered r as bs → ∀ b ∈ bs, ∃ a ∈ as, r a b
@@ -205,9 +188,8 @@ theorem placed_filter {E : Source.Env} (h : Placed E scope parts) (q : Source.De
     gone before (fun d hd => List.mem_append_left _ hd),
     gone after (fun d hd => List.mem_append_right _ hd), List.nil_append, List.append_nil]
 
-/-- **Exactly the generated constructor and roots.** The unit's constructors
-and state variables of `scope` are the generated constructor declarations,
-then the roots' declarations, in order; nothing else of either kind occurs. -/
+/-- **Exactly the generated constructor and roots**, in order: no other
+constructor or state variable of `scope` occurs in the unit. -/
 theorem assemble_owned (h : assemble T R C scope fs = .ok u) :
     ∃ st ctors, state T R C = .ok st ∧ ctorDecls T R scope C.ctor = some ctors ∧
       u.env.decls.filter (fun d => d.scope == some scope &&
@@ -284,10 +266,8 @@ theorem assemble_ctor_implicit (h : assemble T R C scope fs = .ok u) (hc : C.cto
   rw [hc] at hcs; cases hcs
   exact ⟨hd, hf, hb⟩
 
-/-- **The explicit constructor**: the declaration is the assembled constructor
-part, with `constructorPart_faithful`'s Source frame (original parameter
-names, table-corresponding parameter types, no return slot, the spelled body,
-`msg.value` exactly when payable); the program's body is its elaboration. -/
+/-- **The explicit constructor**: the assembled constructor part, with
+`constructorPart_faithful`'s frame; the program's body is its elaboration. -/
 theorem assemble_ctor_explicit (h : assemble T R C scope fs = .ok u) {d : FunDecl}
     (hc : C.ctor = some d) :
     ∃ node f, constructorPart T R d = some node ∧
@@ -344,10 +324,8 @@ theorem assemble_noStruct (h : assemble T R C scope fs = .ok u) :
     · rw [(state_kind hs scope d hm).1]; nofun
   · rw [Constructor.functionParts_kind hf d hm]; nofun
 
-/-- **No struct resolves in the assembled unit alone.** So `assemble_typed`'s
-obligation holds for `u.env` only when no root mentions a written struct;
-discharging it for struct roots needs the generated struct declarations of the
-complete unit, which this module does not supply. -/
+/-- **No struct resolves in the assembled unit alone**: discharging
+`assemble_typed`'s obligation for struct roots needs the complete unit's structs. -/
 theorem assemble_unresolved (h : assemble T R C scope fs = .ok u) (s : Option String)
     (w : Name) (d : Source.DeclName) : ¬ Resolved u.env s w d := by
   rintro ⟨decl, look, kind, _⟩
@@ -364,38 +342,16 @@ theorem prefixParts_of_declarationParts (h : declarationParts T R C = some parts
   have hst : state T R C = .ok st := ReferenceStateDecode.partsOf_stateParts C _ _ st hs
   unfold prefixParts
   rw [hst]
-  cases hc : C.ctor with
-  | none =>
-      rw [hc] at h
-      simp only [Option.pure_def, Option.some.injEq] at h
-      subst h; rfl
-  | some d =>
-      rw [hc] at h
-      simp only [Option.pure_def, Option.bind_eq_some_iff, Option.some.injEq] at h
-      obtain ⟨node, hn, rfl⟩ := h
-      simp only [hn]
+  cases hc : C.ctor <;> rw [hc] at h <;>
+    simp only [Option.pure_def, Option.bind_eq_some_iff, Option.some.injEq] at h
+  · subst h; rfl
+  · obtain ⟨node, hn, rfl⟩ := h; simp only [hn]
 
-/-- **Compatibility.** On the common successful domain the assembled unit is
-the primitive placement's unit, so `Constructor.withFunctions_inits`,
-`withFunctions_ctor` and `withFunctions_decls` describe it too. -/
+/-- **Compatibility**: where `declarationParts` succeeds the unit is the primitive
+placement's, so `Constructor.withFunctions_inits`/`_ctor`/`_decls` describe it. -/
 theorem assemble_of_declarationParts (hp : declarationParts T R C = some parts)
     (hu : withFunctions T R scope parts fs = some u) : assemble T R C scope fs = .ok u := by
-  unfold assemble
-  rw [prefixParts_of_declarationParts hp]
-  simp only [hu]
-
-/-- Conversely, an assembly whose prefix is the primitive parts places them:
-its roots satisfy both the primitive (`VarSlot`) and reference (`RootSlot`)
-slots, for the same `u.env.stateVarsOf scope`. -/
-theorem assemble_primitive_slots (hp : declarationParts T R C = some parts)
-    (h : assemble T R C scope fs = .ok u) :
-    Ordered (Constructor.VarSlot (TransientDecode.elemOf C) (trOf C) scope) C.vars
-      (u.env.stateVarsOf scope) ∧
-    Ordered (RootSlot (rootTyOf C) (trOf C) scope) C.vars (u.env.stateVarsOf scope) := by
-  obtain ⟨parts', hp', hu⟩ := assemble_ok h
-  rw [prefixParts_of_declarationParts hp] at hp'
-  cases hp'
-  exact ⟨(Constructor.withFunctions_inits hp hu).1, (assemble_roots h).1⟩
+  simp only [assemble, prefixParts_of_declarationParts hp, hu]
 
 /-! ## Gaps: each component refusal is named -/
 

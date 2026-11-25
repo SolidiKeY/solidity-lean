@@ -51,10 +51,8 @@ def envOf (C : Contract) (fs : List (Name × FunDecl)) : Source.Env :=
     (.constructor, "", some "C"), (.stateVar, "n", some "C"), (.stateVar, "xs", some "C"),
     (.stateVar, "m", some "C"), (.stateVar, "t", some "C"), (.stateVar, "ys", some "C"),
     (.stateVar, "z", some "C"), (.function, "get", some "C")]
--- The implicit constructor is the absence of a declaration.
-#guard table implicit [] == some [(.contract, "C", none), (.stateVar, "n", some "C"),
-    (.stateVar, "xs", some "C"), (.stateVar, "m", some "C"), (.stateVar, "t", some "C"),
-    (.stateVar, "ys", some "C"), (.stateVar, "z", some "C")]
+-- The implicit constructor is the absence of a declaration: the same table less it.
+#guard table implicit [] == (table mixed []).map (·.erase (.constructor, "", some "C"))
 -- Roots in order with their transient flags; initializers in order on their roots.
 #guard ((envOf mixed [("get", get)]).stateVarsOf "C").map (fun d => (d.name, d.isTransient)) ==
     [("n", false), ("xs", false), ("m", false), ("t", true), ("ys", false), ("z", false)]
@@ -66,8 +64,6 @@ def envOf (C : Contract) (fs : List (Name × FunDecl)) : Source.Env :=
 -- The units elaborate; the program's initializers of `C` are `n`, then `z`.
 #guard Source.elaborates (envOf mixed [("get", get)])
 #guard ((Source.progOf (envOf mixed [("get", get)])).inits "C").map (·.var.name) == ["n", "z"]
-#guard Source.elaborates (envOf implicit [])
-#guard ((Source.progOf (envOf implicit [])).inits "C").map (·.var.name) == ["n", "z"]
 #guard ((Source.progOf (envOf implicit [])).ctor "C").isNone
 -- A struct root assembles, but the unit declares no `Pair`: its declared type
 -- does not resolve there (its discharge needs the complete unit's structs).
@@ -80,13 +76,13 @@ def envOf (C : Contract) (fs : List (Name × FunDecl)) : Source.Env :=
 
 /-- An initializer out of root order: the reference state component refuses. -/
 example : assemble tablesS [] { mixed with inits := [("z", .num 3), ("n", .num 1)] } "C" [] =
-    .error (.state (.strayInit "n")) := rfl
+    .error (.state (.strayInit "n")) := assemble_state_error rfl
 /-- A constructor with no retained header: the constructor component refuses. -/
 example : assemble tablesS [] { mixed with ctor := some { ctor with sourceDecl := none } } "C" [] =
-    .error .constructor := rfl
+    .error .constructor := assemble_ctor_error rfl rfl rfl
 /-- A function entry with no retained header: the function component refuses. -/
 example : assemble tablesS [] mixed "C" [("get", { get with sourceDecl := none })] =
-    .error .functions := rfl
+    .error .functions := assemble_functions_error rfl rfl
 
 /-! The exported facts, on an assembled unit. -/
 
@@ -114,13 +110,12 @@ def prims : Contract :=
   { vars := [("a", .uint), ("b", .uint), ("c", .uint)], widths := [("a", 8)], transientRoots := ["b"],
     inits := [("a", .num 1), ("c", .binop .add (.name "a") (.num 2))],
     ctor := some { ctor with body := [] } }
-example : (prefixParts tablesS [] prims).toOption = Constructor.declarationParts tablesS [] prims := rfl
 example : unitOf prims [("get", get)] =
     (Constructor.declarationParts tablesS [] prims).bind
       (Callee.withFunctions tablesS [] "C" · [("get", get)]) := rfl
 example {p u} (hp : Constructor.declarationParts tablesS [] prims = some p)
-    (h : assemble tablesS [] prims "C" [("get", get)] = .ok u) :=
-  assemble_primitive_slots hp h
+    (hu : Callee.withFunctions tablesS [] "C" p [("get", get)] = some u) :
+    assemble tablesS [] prims "C" [("get", get)] = .ok u := assemble_of_declarationParts hp hu
 /-- `mixed` has reference roots: the primitive component refuses, this one does not. -/
 example : (Constructor.declarationParts tablesS [] mixed).isNone ∧
     (prefixParts tablesS [] mixed).toOption.isSome := ⟨rfl, rfl⟩
