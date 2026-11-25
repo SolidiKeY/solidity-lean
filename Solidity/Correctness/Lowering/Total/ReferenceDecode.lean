@@ -14,9 +14,15 @@ Proved against `Source.Syn.tys` and `Source.Frame.mk?` under `Resolved`
 obligations on the struct names used; `paramCtx_reverse` relates declared
 locations to `FunDecl.paramCtx`, where `memory` and `calldata` coincide.
 
+`rawType` spells a retained `RawTy` (a declaration in a body, as read) with
+leaves by `Decode.typeNameB` or a struct name as written; `rawType_typed` proves
+it against `Source.Syn.tys`, `rawLeaf_spellRef` and `rawStruct_written` tie its
+struct names to `spellRef`'s written name.
+
 Open: `bytes`/`string`, enum and function types, payability, struct declarations
-and member widths, discharging `Resolved`, retained `RawTy` declarations, unit
-coverage and semantic binding. A component; it defines no admission predicate.
+and member widths, discharging `Resolved`, integrating `rawType` with the
+complete-unit decoder, unit coverage and semantic binding. A component; it
+defines no admission predicate.
 -/
 namespace Solidity.Correctness.Lowering.Total.ReferenceDecode
 
@@ -419,5 +425,159 @@ theorem paramCtx_reverse {d : FunDecl} {Γ : ECtx} (h : d.paramCtx = .ok Γ) :
       _ _ h
   exact ⟨by rw [eq, List.map_reverse, List.reverse_reverse],
     fun x mx => all x (List.mem_reverse.mpr mx)⟩
+
+/-! ## Retained `RawTy`
+
+A declaration in a body keeps its type as read. Its spelling needs no width
+rows: a leaf is the name `Decode.typeNameB` reads, or a struct name as written. -/
+
+/-- Why a retained type as read has no Source spelling here. These are local
+limitations of this component, not exclusions from decoder coverage. -/
+inductive RawError where
+  /-- An enum, function-type, `bytes`/`string` or member-spelling name: its
+  reading stays with the complete-unit decoder. -/
+  | unsupportedName (s : String)
+  | unknownName (s : String) -- neither a marked elementary type nor a struct
+  | unsupportedKey (K : RawTy) -- a key that is not a marked elementary name
+  | zeroLength -- a fixed array of length zero
+  | mappingOutsideStorage (loc : DataLoc)
+  deriving Repr
+
+/-- The elementary type the marked decoder reads a name as. -/
+def rawElem (s : String) : Option Source.Elem :=
+  match Decode.typeNameB (.named s) with
+  | some (.elem e) => some e
+  | _ => none
+
+/-- A leaf name: its marked elementary type, or a struct name as written. -/
+def rawLeaf (C : Contract) (s : String) : Except RawError (Syn .typeName) :=
+  match rawElem s with
+  | some e => .ok (.elem e)
+  | none =>
+    if (lookupBy s C.enums).isSome || fnTy? s || dynBytesTy s || isEnc s then
+      .error (.unsupportedName s)
+    else match C.structName? s with
+      | some _ => .ok (.userType ⟨s, []⟩)
+      | none => .error (.unknownName s)
+
+/-- A mapping key: a marked elementary type name, never payable. -/
+def rawKey : RawTy → Except RawError Source.MapKey
+  | .named k =>
+    match rawElem k with
+    | some e =>
+      if h : e = .addressPayable then .error (.unsupportedKey (.named k)) else .ok (.elem e h)
+    | none => .error (.unsupportedKey (.named k))
+  | K => .error (.unsupportedKey K)
+
+/-- The Source type name of a type as read, in the location `loc`. -/
+def rawType (C : Contract) : DataLoc → RawTy → Except RawError (Syn .typeName)
+  | _, .named s => rawLeaf C s
+  | loc, .array T => do .ok (.array (← rawType C loc T) .none)
+  | loc, .fixed T n =>
+    if n = 0 then .error .zeroLength else do .ok (.array (← rawType C loc T) (.some (lenLit n)))
+  | loc, .mapping K V =>
+    if loc = .storage then do .ok (.mapping (← rawKey K) none (← rawType C .storage V) none)
+    else .error (.mappingOutsideStorage loc)
+
+/-- The names a type as read mentions outside mapping keys. -/
+def rawNames : RawTy → List String
+  | .named s => [s]
+  | .array T => rawNames T
+  | .fixed T _ => rawNames T
+  | .mapping _ V => rawNames V
+
+/-- What a successful spelling of a type as read denotes: the marked elementary
+type of each leaf name, the same nesting and lengths, a mapping's key and value,
+and for a struct name its table type and the declaration it resolves to. -/
+inductive RawRep (C : Contract) (E : Source.Env) (scope : Option String) :
+    DataLoc → RawTy → STy → Prop where
+  | elem {loc s e} : rawElem s = some e → RawRep C E scope loc (.named s) (e.ty loc)
+  | struct {loc s table d} : rawElem s = none → C.structName? s = some table →
+      isEnc s = false → Resolved E scope s d → RawRep C E scope loc (.named s) (.struct loc d)
+  | array {loc T τ} : RawRep C E scope loc T τ →
+      RawRep C E scope loc (.array T) (.array loc τ none)
+  | fixed {loc T τ n} : 0 < n → RawRep C E scope loc T τ →
+      RawRep C E scope loc (.fixed T n) (.array loc τ (some n))
+  | mapping {k V e τ} : rawElem k = some e → RawRep C E scope .storage V τ →
+      RawRep C E scope .storage (.mapping (.named k) V) (.mapping (e.ty .memory) τ)
+
+theorem rawKey_ok {K : RawTy} {key : Source.MapKey} (h : rawKey K = .ok key) :
+    ∃ k e ne, K = .named k ∧ key = .elem e ne ∧ rawElem k = some e := by
+  unfold rawKey at h
+  split at h
+  · split at h
+    · rename_i e he; split at h; · cases h
+      · cases h; exact ⟨_, e, _, rfl, rfl, he⟩
+    · cases h
+  · cases h
+
+/-- A struct leaf: no elementary reading, a struct of the contract, plain. -/
+theorem rawLeaf_struct {s : String} {t : Syn .typeName} (h : rawLeaf C s = .ok t)
+    (he : rawElem s = none) :
+    t = .userType ⟨s, []⟩ ∧ (∃ table, C.structName? s = some table) ∧ isEnc s = false := by
+  unfold rawLeaf at h; rw [he] at h
+  simp only [Bool.or_eq_true] at h
+  split at h; · cases h
+  rename_i plain
+  split at h
+  · cases h; exact ⟨rfl, ⟨_, by assumption⟩, by simpa using fun h => plain (.inr h)⟩
+  · cases h
+
+/-- A successful spelling of a type as read elaborates, under the resolution
+obligations of the struct names it mentions, to the type it represents. -/
+theorem rawType_typed : (T : RawTy) → (loc : DataLoc) → (t : Syn .typeName) →
+    rawType C loc T = .ok t → (∀ s ∈ rawNames T, rawElem s = none → ∃ d, Resolved E scope s d) →
+    ∃ τ, t.tys E scope loc = some [τ] ∧ RawRep C E scope loc T τ
+  | .named s, loc, t, h, res => by
+      simp only [rawType] at h
+      cases he : rawElem s with
+      | some e =>
+        unfold rawLeaf at h; rw [he] at h; cases h; exact ⟨e.ty loc, rfl, .elem he⟩
+      | none =>
+        obtain ⟨rfl, ⟨table, ht⟩, ident⟩ := rawLeaf_struct h he
+        obtain ⟨d, hd⟩ := res s (by simp [rawNames]) he
+        exact ⟨.struct loc d, by simp [Source.Syn.tys, hd.userTy loc], .struct he ht ident hd⟩
+  | .array T, loc, t, h, res => by
+      simp only [rawType, bind_ok] at h
+      obtain ⟨t', ht, h⟩ := h; cases h
+      obtain ⟨τ, typed, rep⟩ := rawType_typed T loc t' ht (by simpa only [rawNames] using res)
+      exact ⟨_, by simp [Source.Syn.tys, typed, Source.arrayLen], .array rep⟩
+  | .fixed T n, loc, t, h, res => by
+      simp only [rawType] at h
+      split at h; · cases h
+      rename_i pos
+      simp only [bind_ok] at h
+      obtain ⟨t', ht, h⟩ := h; cases h
+      obtain ⟨τ, typed, rep⟩ := rawType_typed T loc t' ht (by simpa only [rawNames] using res)
+      exact ⟨_, by simp [Source.Syn.tys, typed, arrayLen_lenLit pos],
+        .fixed (Nat.pos_of_ne_zero pos) rep⟩
+  | .mapping K V, loc, t, h, res => by
+      simp only [rawType] at h
+      split at h
+      · rename_i hloc; subst hloc
+        simp only [bind_ok] at h
+        obtain ⟨key, hk, t', ht, h⟩ := h; cases h
+        obtain ⟨τ, typed, rep⟩ := rawType_typed V .storage t' ht
+          (by simpa only [rawNames] using res)
+        obtain ⟨k, e, ne, rfl, rfl, he⟩ := rawKey_ok hk
+        exact ⟨_, by simp [Source.Syn.tys, typed, Source.Env.keyTy], .mapping he rep⟩
+      · cases h
+
+/-- A struct name as read and the written name of its table type are the same
+name: the two spellings agree on struct identity. -/
+theorem rawStruct_written {loc : DataLoc} {s w table : Name} {τ : STy}
+    (h : RawRep C E scope loc (.named s) τ) (ht : C.structName? s = some table)
+    (hw : written? C table = some w) (he : rawElem s = none) : w = s := by
+  cases h with
+  | elem he' => rw [he] at he'; cases he'
+  | struct _ _ ident _ => exact ((written?_iff hw s).1 ⟨ht, ident⟩).symm
+
+/-- A struct leaf as read is spelled exactly as `spellRef` spells its table type. -/
+theorem rawLeaf_spellRef {s table w key : Name} {loc : DataLoc} {t : Syn .typeName}
+    (h : rawLeaf C s = .ok t) (he : rawElem s = none) (ht : C.structName? s = some table)
+    (hw : written? C table = some w) : spellRef C widths key loc (.struct table) = .ok t := by
+  obtain ⟨rfl, -, ident⟩ := rawLeaf_struct h he
+  rw [(written?_iff hw s).1 ⟨ht, ident⟩]
+  simp [spellRef, hw]
 
 end Solidity.Correctness.Lowering.Total.ReferenceDecode
