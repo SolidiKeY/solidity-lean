@@ -2516,6 +2516,8 @@ import Solidity.Correctness.Lowering.Sim.Stmt.Jump
 import Solidity.Correctness.Lowering.Sim.Stmt.Main
 import Solidity.Correctness.Lowering.Total.Boundary
 import Solidity.Correctness.Lowering.Total.CallSpellExt
+import Solidity.Correctness.Lowering.Total.CalleeAliases
+import Solidity.Correctness.Lowering.Total.CalleeAliases.Lookup
 import Solidity.Correctness.Lowering.Total.ConstructorDecode
 import Solidity.Correctness.Lowering.Total.ConstructorPlacement
 import Solidity.Correctness.Lowering.Total.Contract
