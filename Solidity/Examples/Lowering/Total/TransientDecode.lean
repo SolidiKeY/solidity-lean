@@ -16,7 +16,7 @@ def mixed : Contract where
 
 /-- Each variable at its marked type and width, transient exactly at the roots,
 in declaration order. -/
-example : decls mixed = .ok
+theorem mixed_decls : decls mixed = .ok
     (.cons (stateVarDecl (.int false 8 (by decide)) false "a")
     (.cons (stateVarDecl .bool true "t")
     (.cons (stateVarDecl .address true "o")
@@ -28,12 +28,15 @@ example : decls mixed ≠ .ok
     (.cons (stateVarDecl .bool false "t")
     (.cons (stateVarDecl .address false "o")
     (.cons (stateVarDecl (.fixedBytes 2 (by decide)) false "b") .nil)))) := by
-  decide
+  intro h
+  have flags := (decls_ok_iff.mp h).transient
+  simp [stateViews, stateView, stateVarDecl, mixed] at flags
 
 /-- The flags, in order. -/
 example : (match decls mixed with
     | .ok parts => (stateViews parts).map (Option.map (·.2.2))
-    | .error _ => []) = [some false, some true, some true, some false] := rfl
+    | .error _ => []) = [some false, some true, some true, some false] := by
+  rw [mixed_decls]; simp [stateViews, stateView, stateVarDecl]
 
 /-- A transient root of a narrow integer keeps its width. -/
 def narrow : Contract where

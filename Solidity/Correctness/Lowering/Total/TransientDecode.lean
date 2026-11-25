@@ -41,7 +41,7 @@ still discharge:
 namespace Solidity.Correctness.Lowering.Total.TransientDecode
 
 open Source (Syn)
-open Solidity.Roadmap.G49Final
+open Version (Prim)
 
 /-! ## The decoder -/
 
@@ -256,7 +256,7 @@ order, none dropped and none added. -/
 theorem names : {vars : List (Name × Ty)} → {parts : Syn (.list (.part false))} →
     Faithful el roots vars parts →
     (stateViews parts).map (Option.map (·.1)) = vars.map (some ·.1)
-  | _, _, .nil => rfl
+  | _, _, .nil => by simp [stateViews]
   | _, _, .cons _ hr => by
       simp only [stateViews, stateView, stateVarDecl, List.map_cons, Option.map_some]
       rw [hr.names]
@@ -266,19 +266,26 @@ variable is a root, in order. -/
 theorem transient : {vars : List (Name × Ty)} → {parts : Syn (.list (.part false))} →
     Faithful el roots vars parts →
     (stateViews parts).map (Option.map (·.2.2)) = vars.map (some <| roots.contains ·.1)
-  | _, _, .nil => rfl
+  | _, _, .nil => by simp [stateViews]
   | _, _, .cons _ hr => by
       simp only [stateViews, stateView, stateVarDecl, List.map_cons, Option.map_some]
       rw [hr.transient]
 
-/-- **Types**: each declaration has the elementary type the table gives its
-state variable, in order. -/
+/-- **Types**: the declaration at each position has the elementary type the
+table gives the state variable at that position. -/
 theorem types : {vars : List (Name × Ty)} → {parts : Syn (.list (.part false))} →
-    Faithful el roots vars parts →
-    List.Forall₂ (fun v view => ∃ p e, v.2 = .prim p ∧ el v.1 p = some e ∧
-      view = some (v.1, .elem e, roots.contains v.1)) vars (stateViews parts)
-  | _, _, .nil => .nil
-  | _, _, .cons he hr => .cons ⟨_, _, rfl, he, rfl⟩ hr.types
+    Faithful el roots vars parts → (i : Nat) → (v : Name × Ty) → vars[i]? = some v →
+    ∃ p e, v.2 = .prim p ∧ el v.1 p = some e ∧
+      (stateViews parts)[i]? = some (some (v.1, .elem e, roots.contains v.1))
+  | _, _, .nil, _, _, hv => by simp at hv
+  | _, _, .cons he hr, 0, v, hv => by
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at hv
+      subst hv
+      exact ⟨_, _, rfl, he, by simp [stateViews, stateView, stateVarDecl]⟩
+  | _, _, .cons _ hr, i + 1, v, hv => by
+      simp only [List.getElem?_cons_succ] at hv
+      obtain ⟨p, e, hp, he, hi⟩ := hr.types i v hv
+      exact ⟨p, e, hp, he, by simpa [stateViews] using hi⟩
 
 /-- The number of declarations is the number of state variables. -/
 theorem length {vars : List (Name × Ty)} {parts : Syn (.list (.part false))}
@@ -360,19 +367,22 @@ theorem elemB_represents {widths : List (Name × Nat)} {x : Name} {p : PrimTy}
       have addr : Decode.isAddress widths x = false := by simpa using addr
       cases p with
       | bool =>
-        unfold Decode.primElem at h
-        split at h
-        · rename_i bits; cases h; exact .bool hn addr bits
-        · cases h
+        simp only [Decode.primElem] at h
+        by_cases hb : Decode.stateBits widths x = 256
+        · simp only [hb, if_true, Option.some.injEq] at h
+          subst h; exact .bool hn addr hb
+        · simp [hb] at h
       | uint =>
-        unfold Decode.primElem at h
+        simp only [Decode.primElem] at h
         split at h
-        · cases h; exact .int (signed := false) hn addr
+        · simp only [Option.some.injEq] at h
+          subst h; exact .int (signed := false) hn addr
         · cases h
       | int =>
-        unfold Decode.primElem at h
+        simp only [Decode.primElem] at h
         split at h
-        · cases h; exact .int (signed := true) hn addr
+        · simp only [Option.some.injEq] at h
+          subst h; exact .int (signed := true) hn addr
         · cases h
 
 /-- **Success is faithfulness**, for a contract. -/
@@ -395,9 +405,9 @@ theorem decls_find {C : Contract} {parts : Syn (.list (.part false))} (h : decls
   obtain ⟨p, rfl⟩ := hf.prim x U mem
   obtain ⟨e, he, found⟩ := hf.find x p (Simulation.lookup_of_mem _ C.vars_nodup x _ mem)
   have hc : C.transientRoots.contains x = decide (x ∈ C.transientRoots) := by
-    simp [List.contains_iff_mem]
+    simp
   rw [hc] at found
-  exact ⟨p, e, rfl, elemB_represents he, Version.elemB_prim he, found⟩
+  exact ⟨p, e, rfl, elemB_represents he, (Version.elemB_prim he).1, (Version.elemB_prim he).2, found⟩
 
 /-- **Transient roots stay transient**: every transient root is declared, as
 `transient`, never dropped and never read as persistent storage. -/
@@ -418,14 +428,15 @@ theorem decls_root {C : Contract} {parts : Syn (.list (.part false))} (h : decls
       induction vs with
       | nil => simp [Semantics.lookupBy] at hl
       | cons v vs ih =>
+        obtain ⟨y, V⟩ := v
         simp only [Semantics.lookupBy] at hl
         split at hl
-        · rename_i same; cases hl; simp at same; subst same; exact List.mem_cons_self
+        · rename_i same; cases hl; subst same; exact List.mem_cons_self
         · exact List.mem_cons_of_mem _ (ih hl)
-    obtain ⟨p', e, same, rep, _, _, found⟩ := decls_find h mem
+    obtain ⟨q, e, same, rep, _, _, found⟩ := decls_find h mem
     cases same
     simp only [decide_eq_true root] at found
-    exact ⟨p', e, hl, rep, found⟩
+    exact ⟨p, e, hl, rep, found⟩
   · cases hr
 
 /-- **Persistent variables stay persistent**: a state variable that is no
