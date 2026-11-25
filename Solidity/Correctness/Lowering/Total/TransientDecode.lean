@@ -3,40 +3,27 @@ import Solidity.Correctness.Lowering.Total.Versions.Marked
 /-!
 # Loop lowering: transient state-variable declarations
 
-The declaration component of complete-unit decoding: the model contract's
-state variables (`Contract.vars`, in declaration order), each read as a Source
-`stateVar` declaration at the elementary type the marked decoder gives it
-(`Decode.elemB`, over the width and marker rows of `Contract.widths`), with its
-`transient` flag set exactly when its name is a transient root
-(`Contract.transientRoots`).
+The declaration component of complete-unit decoding: the state variables
+(`Contract.vars`, in order), each a Source `stateVar` at the elementary type
+the marked decoder reads from `Contract.widths` (`Decode.elemB`), `transient`
+exactly when its name is in `Contract.transientRoots`. An error names the first
+variable with no reading (a reference type, no elementary type, or an enum or
+function-type marker `elemB` does not read): none is dropped, retyped or made
+persistent. An error is a coverage gap, like a `none` of `Decode.unitOf`, not
+an admission check. `Represents` restates `elemB`'s reading per case; that it
+is the declared Solidity type is the elaborator's contract.
 
-Failure is an error naming the first declaration that has no Source reading
-(a reference type, or a primitive the table gives no elementary type): no
-declaration is dropped and none is read as persistent storage in place of
-transient storage. This component restricts nothing: it is not an admission
-check, and the unit-level gaps of `Decode.unitOf` are left to the composer.
-
-## Obligations not discharged by the model metadata
-
-The component reads only `vars`, `transientRoots` and `widths`. What these do
-not guarantee, and what the complete-unit decoder or the semantic binding must
-still discharge:
-
-* **Initializers.** Solidity rejects an initializer on a `transient` state
-  variable, but `Contract.inits` may name a transient root (`transient_ok`
-  constrains only the type). The declarations built here carry no initializer;
-  the composer must refuse, not drop, such an initializer.
-* **Width and marker rows.** Rows of `widths` that name no state variable, or
-  marker rows the table does not read, are not inspected here (the composer's
-  `keyB` check). Names that look like marker rows (`plainKey`) are not refused
-  here either.
-* **Root multiplicity.** `transientRoots` may repeat a name; membership is all
-  that is read, so a repeat changes nothing here.
-* **Compiler version.** `transient` needs a compiler that accepts it (solc
-  0.8.28 or later for value types); the unit's pragma is not built here.
-* **Storage regions.** That a Source `transient` declaration denotes the model's
-  transaction-local root of the joint store (and a persistent one a persistent
-  root) is the semantic binding, not shown here.
+Obligations the metadata (`vars`, `transientRoots`, `widths`) leaves open, for
+the unit composer or the semantic binding:
+* an initializer of a transient root (`Contract.inits` may name one; Solidity
+  rejects it): it must be refused, not dropped;
+* width rows of no state variable, rows below a reference and names like marker
+  rows (the composer's `keyB` and `plainKey`); `address payable` reads `address`;
+* identifier validity and distinctness from the contract's name;
+* the pragma (`transient` needs solc 0.8.28 or later);
+* that a Source `transient` declaration denotes the model's transaction-local
+  root, and a persistent one a persistent root (the semantic binding).
+Repeated roots change nothing: only membership is read.
 -/
 namespace Solidity.Correctness.Lowering.Total.TransientDecode
 
@@ -45,12 +32,10 @@ open Version (Prim)
 
 /-! ## The decoder -/
 
-/-- Why a state variable has no Source declaration. -/
+/-- Why a state variable has no declaration: a reference type, or a primitive
+the element table gives no elementary type. -/
 inductive Gap where
-  /-- A state variable of a reference type. -/
   | reference
-  /-- A primitive the element table gives no elementary type at its width and
-  markers. -/
   | noElem (p : PrimTy)
   deriving DecidableEq, Repr
 
@@ -84,15 +69,29 @@ def declsT (el : Name → PrimTy → Option Source.Elem) (roots : List Name) :
     | .error err, _ => .error err
     | .ok _, .error err => .error err
 
-/-- The element table of the marked decoder for a contract. -/
-def elemOf (C : Contract) : Name → PrimTy → Option Source.Elem := Decode.elemB C.widths
+/-- Whether the width table carries a marker of `x` the marked decoder does not
+read: an enum's (`x#enum`) or a function type's (`x#function(…)`). Such a
+state variable is a `uint` in the model but no `uintN` in the source. -/
+def unreadMarker (widths : List (Name × Nat)) (x : Name) : Bool :=
+  (Semantics.lookupBy (x ++ "#enum") widths).isSome ||
+    widths.any fun w => (x ++ "#function(").data.isPrefixOf w.1.data
+
+/-- The element table for a contract: the marked decoder's, refusing a state
+variable with a marker it does not read. -/
+def elemOf (C : Contract) (x : Name) (p : PrimTy) : Option Source.Elem :=
+  if unreadMarker C.widths x then none else Decode.elemB C.widths x p
+
+theorem elemOf_some {C : Contract} {x : Name} {p : PrimTy} {e : Source.Elem}
+    (h : elemOf C x p = some e) : unreadMarker C.widths x = false ∧ Decode.elemB C.widths x p = some e := by
+  unfold elemOf at h
+  split at h
+  · cases h
+  · rename_i hm; exact ⟨by simpa using hm, h⟩
 
 /-- **The state-variable declarations of a contract**, transient roots marked
 `transient`. -/
 def decls (C : Contract) : Except DeclError (Syn (.list (.part false))) :=
   declsT (elemOf C) C.transientRoots C.vars
-
-/-! ## The faithfulness relation -/
 
 /-- `parts` declares exactly the state variables `vars`, in order, each at the
 elementary type `el` gives it and transient exactly when its name is in
@@ -115,8 +114,6 @@ def stateViews : Syn (.list (.part false)) → List (Option (Name × Syn .typeNa
   | .nil => []
   | .cons d ds => stateView d :: stateViews ds
 
-/-! ## Success and inversion -/
-
 theorem declT_prim_ok {el : Name → PrimTy → Option Source.Elem} {roots : List Name}
     {x : Name} {p : PrimTy} {d : Syn (.part false)} :
     declT el roots (x, .prim p) = .ok d ↔
@@ -128,10 +125,6 @@ theorem declT_prim_ok {el : Name → PrimTy → Option Source.Elem} {roots : Lis
       rw [h] at he; cases he; exact hd.symm⟩
   · simp only [reduceCtorEq, false_iff, not_exists, not_and]
     intro e he; rw [h] at he; cases he
-
-theorem declT_ref_not_ok {el : Name → PrimTy → Option Source.Elem} {roots : List Name}
-    {x : Name} {R : RefTy} {d : Syn (.part false)} : declT el roots (x, .ref R) ≠ .ok d := by
-  simp [declT]
 
 /-- **Success is faithfulness**: the decoder succeeds exactly on the part list
 that declares every state variable, in order, at its table type and with its
@@ -153,7 +146,7 @@ theorem declsT_ok_iff {el : Name → PrimTy → Option Source.Elem} {roots : Lis
         constructor
         · rintro rfl
           cases U with
-          | ref R => exact absurd hd declT_ref_not_ok
+          | ref R => simp [declT] at hd
           | prim p =>
             obtain ⟨e, he, rfl⟩ := declT_prim_ok.mp hd
             exact .cons he ((ih ds).mp hds)
@@ -215,28 +208,17 @@ theorem declsT_error {el : Name → PrimTy → Option Source.Elem} {roots : List
       · cases h
       · rename_i e _ hd
         cases h
-        refine ⟨[], U, rest, ?_, by simp, ?_⟩
-        · cases U with
-          | prim p =>
-            simp only [declT] at hd
-            split at hd
-            · cases hd
-            · cases hd; rfl
-          | ref R => simp only [declT] at hd; cases hd; rfl
-        · cases U with
-          | prim p =>
-            simp only [declT] at hd
-            split at hd
-            · cases hd
-            · rename_i hn; cases hd; exact ⟨rfl, hn⟩
-          | ref R => simp only [declT] at hd; cases hd; exact ⟨R, rfl⟩
+        cases U with
+        | prim p =>
+          simp only [declT] at hd; split at hd
+          · cases hd
+          · rename_i hn; cases hd; exact ⟨[], _, rest, rfl, by simp, rfl, hn⟩
+        | ref R => simp only [declT] at hd; cases hd; exact ⟨[], _, rest, rfl, by simp, R, rfl⟩
       · rename_i d e hd hds
         cases h
         obtain ⟨pre, U', post, rfl, hpre, hgap⟩ := declsT_error rest hds
         exact ⟨(x, U) :: pre, U', post, rfl, by
           simp only [List.mem_cons, forall_eq_or_imp]; exact ⟨⟨d, hd⟩, hpre⟩, hgap⟩
-
-/-! ## What a faithful part list preserves -/
 
 namespace Faithful
 
@@ -271,27 +253,6 @@ theorem transient : {vars : List (Name × Ty)} → {parts : Syn (.list (.part fa
       simp only [stateViews, stateView, stateVarDecl, List.map_cons, Option.map_some]
       rw [hr.transient]
 
-/-- **Types**: the declaration at each position has the elementary type the
-table gives the state variable at that position. -/
-theorem types : {vars : List (Name × Ty)} → {parts : Syn (.list (.part false))} →
-    Faithful el roots vars parts → (i : Nat) → (v : Name × Ty) → vars[i]? = some v →
-    ∃ p e, v.2 = .prim p ∧ el v.1 p = some e ∧
-      (stateViews parts)[i]? = some (some (v.1, .elem e, roots.contains v.1))
-  | _, _, .nil, _, _, hv => by simp at hv
-  | _, _, .cons he hr, 0, v, hv => by
-      simp only [List.getElem?_cons_zero, Option.some.injEq] at hv
-      subst hv
-      exact ⟨_, _, rfl, he, by simp [stateViews, stateView, stateVarDecl]⟩
-  | _, _, .cons _ hr, i + 1, v, hv => by
-      simp only [List.getElem?_cons_succ] at hv
-      obtain ⟨p, e, hp, he, hi⟩ := hr.types i v hv
-      exact ⟨p, e, hp, he, by simpa [stateViews] using hi⟩
-
-/-- The number of declarations is the number of state variables. -/
-theorem length {vars : List (Name × Ty)} {parts : Syn (.list (.part false))}
-    (h : Faithful el roots vars parts) : (stateViews parts).length = vars.length := by
-  simpa using congrArg List.length h.names
-
 /-- **The collected declaration** of the state variable the model reads under
 `x`: its table type and its transient flag. -/
 theorem find (x : Name) (p : PrimTy) : {vars : List (Name × Ty)} →
@@ -318,23 +279,19 @@ theorem find (x : Name) (p : PrimTy) : {vars : List (Name × Ty)} →
 
 end Faithful
 
-/-! ## The contract-level component -/
-
-/-- The represented type of a state variable in the marked decoder: what the
-width and marker rows say the model cell `x` of primitive `p` is. -/
+/-- The represented type of the model cell `x` of primitive `p`: `bool` at the
+full word; `uintN`/`intN` at its width row (256 without one); `address`, a
+`uint` with the address marker and no width row; `bytesN`, a `uint` of `8N`
+bits with the bytes marker `N`. -/
 inductive Represents (widths : List (Name × Nat)) (x : Name) : PrimTy → Source.Elem → Prop
-  /-- `bool`, at the full word. -/
   | bool : Semantics.lookupBy (x ++ "#bytes") widths = none → Decode.isAddress widths x = false →
       Decode.stateBits widths x = 256 → Represents widths x .bool .bool
-  /-- `uintN`/`intN` at the state variable's own width row (256 without one). -/
   | int {signed : Bool} {h} : Semantics.lookupBy (x ++ "#bytes") widths = none →
       Decode.isAddress widths x = false →
       Represents widths x (if signed then .int else .uint)
         (.int signed (Decode.stateBits widths x) h)
-  /-- `address`: a `uint` with the address marker and no width row. -/
   | address : Semantics.lookupBy (x ++ "#bytes") widths = none → Decode.isAddress widths x = true →
       Semantics.lookupBy x widths = none → Represents widths x .uint .address
-  /-- `bytesN`: a `uint` of `8N` bits with the bytes marker `N`, not an address. -/
   | fixedBytes {n : Nat} {h} : Semantics.lookupBy (x ++ "#bytes") widths = some n →
       Decode.isAddress widths x = false → Decode.stateBits widths x = 8 * n →
       Represents widths x .uint (.fixedBytes n h)
@@ -365,37 +322,23 @@ theorem elemB_represents {widths : List (Name × Nat)} {x : Name} {p : PrimTy}
       · cases h
     · rename_i addr
       have addr : Decode.isAddress widths x = false := by simpa using addr
-      cases p with
-      | bool =>
-        simp only [Decode.primElem] at h
-        by_cases hb : Decode.stateBits widths x = 256
-        · simp only [hb, if_true, Option.some.injEq] at h
-          subst h; exact .bool hn addr hb
-        · simp [hb] at h
-      | uint =>
-        simp only [Decode.primElem] at h
-        split at h
-        · simp only [Option.some.injEq] at h
-          subst h; exact .int (signed := false) hn addr
-        · cases h
-      | int =>
-        simp only [Decode.primElem] at h
-        split at h
-        · simp only [Option.some.injEq] at h
-          subst h; exact .int (signed := true) hn addr
-        · cases h
+      cases p <;> simp only [Decode.primElem] at h <;> split at h <;>
+        simp only [Option.some.injEq, reduceCtorEq] at h <;> subst h
+      · exact .bool hn addr ‹_›
+      · exact .int (signed := false) hn addr
+      · exact .int (signed := true) hn addr
 
 /-- **Success is faithfulness**, for a contract. -/
 theorem decls_ok_iff {C : Contract} {parts : Syn (.list (.part false))} :
     decls C = .ok parts ↔ Faithful (elemOf C) C.transientRoots C.vars parts :=
   declsT_ok_iff _ _
 
-/-- **The declaration of a state variable**: the collected declaration of
-each state variable is at its represented type, a primitive slot, and is
-transient exactly when the variable is a transient root. -/
+/-- **The declaration of a state variable**: at its represented type, a
+primitive slot, transient exactly when it is a transient root (so a persistent
+variable is never declared `transient`). -/
 theorem decls_find {C : Contract} {parts : Syn (.list (.part false))} (h : decls C = .ok parts)
     {x : Name} {U : Ty} (mem : (x, U) ∈ C.vars) :
-    ∃ p e, U = .prim p ∧ Represents C.widths x p e ∧
+    ∃ p e, U = .prim p ∧ unreadMarker C.widths x = false ∧ Represents C.widths x p e ∧
       Prim p (e.ty .storage) ∧ (e.ty .storage).cell = e.ty .storage ∧
       (parts.collect (some Decode.contractName)).find?
         (fun d => d.kind == .stateVar && d.scope == some Decode.contractName && d.name == x) =
@@ -404,13 +347,14 @@ theorem decls_find {C : Contract} {parts : Syn (.list (.part false))} (h : decls
   have hf := decls_ok_iff.mp h
   obtain ⟨p, rfl⟩ := hf.prim x U mem
   obtain ⟨e, he, found⟩ := hf.find x p (Simulation.lookup_of_mem _ C.vars_nodup x _ mem)
-  have hc : C.transientRoots.contains x = decide (x ∈ C.transientRoots) := by
-    simp
-  rw [hc] at found
-  exact ⟨p, e, rfl, elemB_represents he, (Version.elemB_prim he).1, (Version.elemB_prim he).2, found⟩
+  rw [show C.transientRoots.contains x = decide (x ∈ C.transientRoots) by simp] at found
+  obtain ⟨hm, he⟩ := elemOf_some he
+  exact ⟨p, e, rfl, hm, elemB_represents he, (Version.elemB_prim he).1,
+    (Version.elemB_prim he).2, found⟩
 
-/-- **Transient roots stay transient**: every transient root is declared, as
-`transient`, never dropped and never read as persistent storage. -/
+/-- **Transient roots stay transient**: when the component succeeds, every
+transient root is declared, as `transient`: none is dropped and none is read as
+persistent storage. -/
 theorem decls_root {C : Contract} {parts : Syn (.list (.part false))} (h : decls C = .ok parts)
     {r : Name} (root : r ∈ C.transientRoots) :
     ∃ p e, Semantics.lookupBy r C.vars = some (.prim p) ∧ Represents C.widths r p e ∧
@@ -422,36 +366,12 @@ theorem decls_root {C : Contract} {parts : Syn (.list (.part false))} (h : decls
   have hr := ok r root
   split at hr
   · rename_i p hl
-    have mem : (r, Ty.prim p) ∈ C.vars := by
-      clear ok hr h root
-      generalize C.vars = vs at hl
-      induction vs with
-      | nil => simp [Semantics.lookupBy] at hl
-      | cons v vs ih =>
-        obtain ⟨y, V⟩ := v
-        simp only [Semantics.lookupBy] at hl
-        split at hl
-        · rename_i same; cases hl; subst same; exact List.mem_cons_self
-        · exact List.mem_cons_of_mem _ (ih hl)
-    obtain ⟨q, e, same, rep, _, _, found⟩ := decls_find h mem
+    have mem : (r, Ty.prim p) ∈ C.vars := Semantics.lookupBy_eq_some_mem hl
+    obtain ⟨q, e, same, _, rep, _, _, found⟩ := decls_find h mem
     cases same
     simp only [decide_eq_true root] at found
     exact ⟨p, e, hl, rep, found⟩
   · cases hr
-
-/-- **Persistent variables stay persistent**: a state variable that is no
-transient root is declared without `transient`. -/
-theorem decls_persistent {C : Contract} {parts : Syn (.list (.part false))}
-    (h : decls C = .ok parts) {x : Name} {U : Ty} (mem : (x, U) ∈ C.vars)
-    (persistent : x ∉ C.transientRoots) :
-    ∃ e, (parts.collect (some Decode.contractName)).find?
-        (fun d => d.kind == .stateVar && d.scope == some Decode.contractName && d.name == x) =
-        some ⟨.stateVar, x, some Decode.contractName, false, stateVarDecl e false x⟩ := by
-  obtain ⟨_, e, _, _, _, _, found⟩ := decls_find h mem
-  simp only [decide_eq_false persistent] at found
-  exact ⟨e, found⟩
-
-/-! ## Agreement with the existing decoder -/
 
 /-- With no transient roots the component is the marked decoder's state
 variables (`Decode.stateVarsOf`): the accepted domain and the declarations are
@@ -467,15 +387,8 @@ theorem declsT_nil_roots (el : Name → PrimTy → Option Source.Elem) :
       | none => simp [Except.toOption]
       | some e =>
         simp only [Option.bind_some]
-        cases hr : declsT el [] rest with
-        | ok ds =>
-          rw [hr] at ih
-          simp only [Except.toOption] at ih ⊢
-          rw [← ih]; rfl
-        | error err =>
-          rw [hr] at ih
-          simp only [Except.toOption] at ih ⊢
-          rw [← ih]; rfl
+        cases hr : declsT el [] rest <;> rw [hr] at ih <;>
+          simp only [Except.toOption] at ih ⊢ <;> rw [← ih] <;> rfl
 
 /-- The component succeeds on exactly the state-variable lists the marked
 decoder reads, whatever the roots: roots change flags, never the domain. -/
@@ -487,6 +400,6 @@ theorem declsT_roots_domain (el : Name → PrimTy → Option Source.Elem) (roots
   rcases v with ⟨x, p | _⟩
   · simp only [declT_prim_ok]
     exact ⟨fun ⟨_, e, he, _⟩ => ⟨_, e, he, rfl⟩, fun ⟨_, e, he, _⟩ => ⟨_, e, he, rfl⟩⟩
-  · exact ⟨fun ⟨_, h⟩ => absurd h declT_ref_not_ok, fun ⟨_, h⟩ => absurd h declT_ref_not_ok⟩
+  · simp [declT]
 
 end Solidity.Correctness.Lowering.Total.TransientDecode

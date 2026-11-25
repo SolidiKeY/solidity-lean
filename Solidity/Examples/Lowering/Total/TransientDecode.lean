@@ -1,9 +1,8 @@
 import Solidity.Correctness.Lowering.Total.TransientDecode
 
-/-! Checks of the transient declaration component: transient roots are
-declared `transient` at their marked type and width, persistent variables are
-not, order is kept, and a variable with no Source reading is an error naming
-it, not a dropped declaration. -/
+/-! Checks of the transient declaration component: roots are declared
+`transient` at their marked type and width, other variables are not, order is
+kept, and a variable with no Source reading is an error naming it. -/
 namespace Solidity.Examples.Lowering.Total.TransientDecode
 
 open Solidity.Correctness.Lowering.Total Solidity.Correctness.Lowering.Total.TransientDecode
@@ -32,13 +31,7 @@ example : decls mixed ≠ .ok
   have flags := (decls_ok_iff.mp h).transient
   simp [stateViews, stateView, stateVarDecl, mixed] at flags
 
-/-- The flags, in order. -/
-example : (match decls mixed with
-    | .ok parts => (stateViews parts).map (Option.map (·.2.2))
-    | .error _ => []) = [some false, some true, some true, some false] := by
-  rw [mixed_decls]; simp [stateViews, stateView, stateVarDecl]
-
-/-- A transient root of a narrow integer keeps its width. -/
+/-- `int128 transient n;` keeps its width. -/
 def narrow : Contract where
   vars := [("n", .prim .int)]
   transientRoots := ["n"]
@@ -47,21 +40,14 @@ def narrow : Contract where
 example : decls narrow = .ok (.cons (stateVarDecl (.int true 128 (by decide)) true "n") .nil) :=
   rfl
 
-/-- With no roots the component is the marked decoder's state variables. -/
-example : (declsT (elemOf mixed) [] mixed.vars).toOption =
-    Decode.stateVarsOf (Decode.elemB mixed.widths) mixed.vars :=
-  declsT_nil_roots _ _
-
-/-- A reference-typed state variable is an error naming it; the following
-transient root is not silently kept with it dropped. -/
+/-- `uint[] xs; uint transient t;`: an error naming `xs`, not `t` alone. -/
 def withArray : Contract where
   vars := [("xs", .ref (.array (.prim .uint))), ("t", .prim .uint)]
   transientRoots := ["t"]
 
 example : decls withArray = .error ⟨"xs", .reference⟩ := rfl
 
-/-- A width no integer type has is an error naming the variable, after the
-earlier declarations succeed. -/
+/-- A width no integer type has is an error naming the variable. -/
 def badWidth : Contract where
   vars := [("t", .prim .uint), ("w", .prim .uint)]
   transientRoots := ["t"]
@@ -69,16 +55,32 @@ def badWidth : Contract where
 
 example : decls badWidth = .error ⟨"w", .noElem .uint⟩ := rfl
 
-/-- An address marker on a variable with its own width row is no Source type. -/
-def badAddress : Contract where
-  vars := [("o", .prim .uint)]
-  transientRoots := ["o"]
-  widths := [("o", 160), ("o#address", 20)]
+/-- The error inversion, instantiated: `t` before `w` has a declaration. -/
+example : ∃ pre U post, badWidth.vars = pre ++ ("w", U) :: post ∧
+    ∀ v ∈ pre, ∃ d, declT (elemOf badWidth) badWidth.transientRoots v = .ok d := by
+  obtain ⟨pre, U, post, h, hpre, _⟩ := declsT_error badWidth.vars (show decls badWidth = _ from rfl)
+  exact ⟨pre, U, post, h, hpre⟩
 
-example : decls badAddress = .error ⟨"o", .noElem .uint⟩ := rfl
+/-- `State transient s;` (an enum) and a transient function-type variable are
+refused, not declared `uint256 transient`. -/
+def withEnum : Contract where
+  vars := [("s", .prim .uint), ("f", .prim .uint)]
+  transientRoots := ["s", "f"]
+  enums := [("State", ["Idle", "Busy"])]
+  widths := [("s#enum", 1), ("f#function()", 0)]
 
-/-- The general statements, instantiated: every transient root of `mixed` is
-declared `transient`. -/
+example : decls withEnum = .error ⟨"s", .noElem .uint⟩ := rfl
+example : decls { withEnum with widths := [("f#function()", 0)] } = .error ⟨"f", .noElem .uint⟩ := rfl
+
+/-- Roots change flags, never the domain; with none, the existing decoder's
+state variables. -/
+example : (∃ parts, declsT (elemOf withArray) ["t"] withArray.vars = .ok parts) ↔
+    ∃ parts, declsT (elemOf withArray) [] withArray.vars = .ok parts :=
+  declsT_roots_domain _ _ _
+example : (declsT (elemOf mixed) [] mixed.vars).toOption =
+    Decode.stateVarsOf (Decode.elemB mixed.widths) mixed.vars := declsT_nil_roots _ _
+
+/-- Every transient root of `mixed` is declared `transient`. -/
 example {parts : Source.Syn (.list (.part false))} (h : decls mixed = .ok parts) :
     ∃ p e, Semantics.lookupBy "o" mixed.vars = some (.prim p) ∧ Represents mixed.widths "o" p e ∧
       (parts.collect (some Decode.contractName)).find?
