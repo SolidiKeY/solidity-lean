@@ -1,3 +1,4 @@
+import Solidity.Correctness.Lowering.Total.Decode.Callee.Units
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Declarations
 import Solidity.Correctness.Lowering.Total.Decode.Callee.Metadata
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Resolved
@@ -687,5 +688,35 @@ example {parts : Source.Syn (.list (.part false))}
 example : Decode.Callee.functionParts Decode.tablesB CallSpellExt.registry1 "C"
     [("first", importedCallee), ("unsupported", identityCallee),
       ("second", secondImportedCallee)] = none := rfl
+
+/-! Supplied state syntax is retained before translated functions. -/
+private def statePrefix : Source.Syn (.list (.part false)) :=
+  .cons (.stateVar (.elem Decode.uintElem) none none none false "stored" .none) .nil
+private def stateReader : FunDecl :=
+  { importedCallee with
+    params := []
+    rets := [("r", .prim .uint)]
+    widths := []
+    body := [.ret (some (.name "stored"))] }
+
+#guard_msgs in
+#eval (show IO Unit from do
+  let actual := do
+    let u ← Decode.Callee.withFunctions Decode.tablesB CallSpellExt.registry1 "C"
+      statePrefix [("modelReader", stateReader)]
+    let res := Source.resolveUnit { pipeline := .legacy } u
+    let bound ← Version.CalleeBinding.fromResolutionAt res 2
+    pure (res.env.decls.map (fun d => d.name), bound.body.ps.length, bound.body.rs.length)
+  unless actual == some (["C", "stored", "sourceIdentity"], 0, 1) do
+    throw (IO.userError "unit assembly lost state prefix or state-reading function"))
+
+/-- The declaration-table suffix is exactly the original function list's
+translation; the offset counts the contract and all supplied declarations. -/
+example {u : Source.Syn .unit}
+    (h : Decode.Callee.withFunctions Decode.tablesB CallSpellExt.registry1 "C"
+      statePrefix [("modelReader", stateReader)] = some u) :
+    (u.decls.drop (1 + (statePrefix.collect (some "C")).length)).map some =
+      [Decode.Callee.fromMetadata Decode.tablesB CallSpellExt.registry1 "C" stateReader] :=
+  Decode.Callee.withFunctions_tail h
 
 end Solidity.Examples.Goals.LoopsDecode
