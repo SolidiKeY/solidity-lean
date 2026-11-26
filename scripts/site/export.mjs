@@ -184,7 +184,7 @@ function git(...args) {
   try { return execFileSync('git', args, { cwd: repo, encoding: 'utf8' }).trim(); } catch { return null; }
 }
 
-export const playgroundAssets = ['index.html','app.js','style.css','examples.json','playground.mjs','runtime-client.mjs','sw.js','runtime.txt'];
+export const playgroundAssets = ['index.html','app.js','style.css','examples.json','playground.mjs','runtime-client.mjs','runtime.txt'];
 export function exportPlayground(out) {
   mkdirSync(out, {recursive:true});
   for (const file of playgroundAssets) copyFileSync(resolve(repo,'site',file),resolve(out,file));

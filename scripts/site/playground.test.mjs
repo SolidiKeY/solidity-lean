@@ -24,3 +24,5 @@ test('highlighting preserves escaped source and marks source lines',()=>{
 });
 
 test('block comments remain colored and LSP end lines are exclusive',()=>{const html=highlight('/* hi\nbye */\ncontract X {}',{start:{line:0,character:0},end:{line:2,character:0}});assert.match(html,/<span class="comment">bye \*\//);assert.equal((html.match(/line marked/g)||[]).length,2);});
+
+test('Pages four-file failure fallback has no module or service worker dependencies',()=>{const app=readFileSync(new URL('../../site/app.js',import.meta.url),'utf8');assert.doesNotMatch(app,/^import\s/m);assert.match(app,/serviceWorker\.register\('\.\/app\.js',\{type:'module'\}\)/);assert.match(app,/const ASSETS=\['\.\/','index.html','app.js','style.css','examples.json'\]/);});
