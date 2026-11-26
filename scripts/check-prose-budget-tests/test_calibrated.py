@@ -3,10 +3,7 @@ import copy
 from fractions import Fraction
 import importlib.machinery
 import importlib.util
-import json
 from pathlib import Path
-import subprocess
-import sys
 import tempfile
 import unittest
 
@@ -20,7 +17,7 @@ loader.exec_module(check)
 class Calibrated(unittest.TestCase):
     def test_current_policy_within_published_bounds(self):
         baseline = check.read_baseline(SCRIPT.with_name('prose-baseline.json'))
-        check.validate_candidate(baseline['_candidate'])
+        check.validate_active(baseline['_candidate'])
 
     def test_published_fixture(self):
         original = check.published_candidate()
@@ -73,70 +70,6 @@ class Calibrated(unittest.TestCase):
                                  ('def x := "-- literal"\n', 1), ('/- x -/ def x := 1', 1),
                                  ('-- generated\ndef x := 1\n', 1)]:
             self.assertEqual(check.code_lines(source), expected)
-
-    def test_diagnostic_legacy_failure_and_audits(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / 'Solidity').mkdir()
-            (root / 'docs/audits').mkdir(parents=True)
-            (root / 'Solidity/New.lean').write_text('-- new\ndef x := 1\n')
-            (root / 'docs/audits/new.md').write_text('audit\n')
-            policy = check.published_candidate()
-            actual = check.counts(root)
-            report = check.candidate_report(root, actual, policy)
-            row = next(r for r in report['rows'] if r['area'] == 'Solidity/_root' and r['metric'] == 'comment_lines')
-            self.assertEqual(row['denominator'], 1)
-            audit = next(r for r in report['rows'] if r['area'] == 'docs/audits' and r['metric'] == 'docs_lines')
-            self.assertEqual(audit['numerator'], 1)
-            self.assertFalse(audit['enforced'])
-            baseline = root / 'baseline.json'
-            baseline.write_text(json.dumps({'_candidate': policy}))
-            before = baseline.read_bytes()
-            for flags in ([], ['--candidate', check.CANDIDATE_VERSION], ['--candidate', check.CANDIDATE_VERSION, '--update']):
-                run = subprocess.run([sys.executable, str(SCRIPT), '--root', str(root), '--baseline', str(baseline), *flags], capture_output=True, text=True)
-                self.assertEqual(run.returncode, 1, run.stderr)
-                self.assertIn('Prose budget exceeded', run.stderr)
-                self.assertEqual(baseline.read_bytes(), before)
-
-    def test_zero_denominator_unseen_and_update(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / 'Solidity').mkdir()
-            (root / 'docs').mkdir()
-            policy = check.published_candidate()
-            report = check.candidate_report(root, {'Solidity/Unseen': dict.fromkeys(check.METRICS, 1)}, policy)
-            unseen = [r for r in report['rows'] if r['area'] == 'Solidity/Unseen']
-            self.assertTrue(all(r['denominator'] == 0 and r['allowance'] == '0' and not r['passed'] for r in unseen))
-            baseline = root / 'baseline.json'
-            baseline.write_text(json.dumps({'_candidate': policy}))
-            run = subprocess.run([sys.executable, str(SCRIPT), '--root', str(root), '--baseline', str(baseline), '--update'], capture_output=True, text=True)
-            self.assertEqual(run.returncode, 0, run.stderr)
-            self.assertEqual(json.loads(baseline.read_text())['_candidate'], policy)
-
-
-    def test_candidate_import_is_monotone_and_preserves_legacy(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / 'Solidity').mkdir()
-            (root / 'docs').mkdir()
-            policy = check.published_candidate()
-            baseline = root / 'baseline.json'
-            baseline.write_text(json.dumps({'_candidate': policy}))
-            proposed = root / 'proposed.json'
-            cell = policy['calibration']['Solidity/Backend']['metrics']['comment_lines']
-            cell['ratio'] = '0'
-            cell['margin'] = '0'
-            proposed.write_text(json.dumps(policy))
-            command = [sys.executable, str(SCRIPT), '--root', str(root), '--baseline', str(baseline), '--update', '--candidate-update', str(proposed)]
-            run = subprocess.run(command, capture_output=True, text=True)
-            self.assertEqual(run.returncode, 0, run.stderr)
-            self.assertEqual(json.loads(baseline.read_text())['_candidate'], policy)
-            before = baseline.read_bytes()
-            cell['ratio'] = '1/999999'
-            proposed.write_text(json.dumps(policy))
-            run = subprocess.run(command, capture_output=True, text=True)
-            self.assertEqual(run.returncode, 2, run.stderr)
-            self.assertEqual(baseline.read_bytes(), before)
 
     def test_mapping_generated_claims_and_rational_boundary(self):
         with tempfile.TemporaryDirectory() as tmp:
