@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict');
 const {EventEmitter} = require('node:events');
 const {createHash} = require('node:crypto');
 const {evidence} = require('./witness.cjs');
-const {activate, modelTree, declarationValues} = require('../src/features/counterexample-view.cjs');
+const {activate, modelTree, declarationValues, storageDeclarations} = require('../src/features/counterexample-view.cjs');
 const point = (line,character=0) => ({line,character});
 const range = (a,b) => ({start:point(a),end:point(b)});
 const row = (name='f', overrides={}) => ({source:'C.sol',contract:'C',function:name,status:'refuted',range:range(1,3),counterexample:evidence(),...overrides});
@@ -119,4 +119,54 @@ test('empty live arrays retain shadow slots as past-the-end values',()=>{
   assert.deepEqual(storage[1].children,[]);
   assert.equal(storage[2].children[0].children[0].label,'Past the end');
   assert.equal(storage[2].children[0].children[0].children[0].value,'3');
+});
+
+// Pinned compiler ownership/locations plus recorded wire-format model fields;
+// the values are transport fixtures, not kernel/EVM or visual UI evidence.
+async function compilerDocuments(sources, main, run) {
+  const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{pathToFileURL}=require('node:url'),lang=require('../src/language-services.cjs');
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'counterexample-inheritance-'));
+  try {
+    for (const [name,text] of Object.entries(sources)) fs.writeFileSync(path.join(directory,name),text);
+    const {compileFixture}=await import('../../scripts/solc-ast.mjs');
+    const compiled=compileFixture({args:['--source',path.join(directory,main),'--out',path.join(directory,'out.json'),'--no-wrapper'],sourceBytes:Buffer.from(sources[main]),analysisOnly:true,quiet:true});
+    const files=compiled.project?.files || Object.fromEntries(Object.keys(compiled.rawAsts).map(name=>[name,{path:path.join(directory,name),text:sources[name]}])),documents=new Map(),indices=new Map();
+    for (const [name,ast] of Object.entries(compiled.rawAsts)) {
+      const file=files[name],text=file.text,uri=pathToFileURL(file.path),doc={uri,version:1,isClosed:false,getText:()=>text,offsetAt:p=>lang.offset(text,p),positionAt:n=>lang.position(text,n)};
+      documents.set(uri.toString(),doc);indices.set(uri.toString(),lang.index(text,ast,{asts:compiled.rawAsts,files,uri:uri.toString()}));
+    }
+    const doc=documents.get(pathToFileURL(path.join(directory,main)).toString()),requests=[];
+    const service={async request(method,document,params) {
+      requests.push({method,uri:document.uri.toString()});const index=indices.get(document.uri.toString());
+      if (method==='textDocument/documentSymbol') return index.symbols;
+      assert.equal(method,'textDocument/definition');const target=index.target(params.position);return target?index.location(target):null;
+    }};
+    await run({doc,symbols:indices.get(doc.uri.toString()).symbols,service,open:async uri=>documents.get(uri),requests,compiled,documents});
+  } finally {fs.rmSync(directory,{recursive:true,force:true});}
+}
+test('compiler-owned same-buffer inheritance annotates B.x for C.f (land F2)',async()=>{
+  await compilerDocuments({'Main.sol':'pragma solidity ^0.8.34; contract B { uint x; } contract C is B { function f() public {} }'},'Main.sol',async({doc,symbols,service,open})=>{
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9'})});
+    const storage=await storageDeclarations(doc,r,symbols,service,open),values=declarationValues(doc,r,symbols,storage.roots);
+    assert.equal(storage.current(),true);assert.deepEqual(values,[{position:symbols.find(s=>s.name==='B').children[0].selectionRange.start,name:'x',value:'9'}]);
+  });
+});
+test('compiler-owned diamond and private root collisions follow importer ordering',async()=>{
+  const text='pragma solidity ^0.8.34; contract A { uint private x; uint private x_A; } contract L is A { uint private x; } contract R is A { uint r; } contract C is L, R { uint c; function f() public {} }';
+  await compilerDocuments({'Main.sol':text},'Main.sol',async({doc,symbols,service,open})=>{
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x_A_ = 9; x_A = 10; x = 11; r = 12; c = 13'})});
+    const storage=await storageDeclarations(doc,r,symbols,service,open),values=declarationValues(doc,r,symbols,storage.roots);
+    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x_A_','9'],['x_A','10'],['x','11'],['r','12'],['c','13']]);
+    assert.equal(values[0].position.character,text.indexOf('x;'));assert.equal(values[1].position.character,text.indexOf('x_A;'));assert.equal(values[2].position.character,text.indexOf('x;',text.indexOf('contract L')));
+  });
+});
+test('compiler-owned imported aliases affect root renaming but foreign fields are not decorated',async()=>{
+  const sources={'Base.sol':'pragma solidity ^0.8.34; contract Imported { uint private x; uint z; }','Main.sol':'pragma solidity ^0.8.34; import {Imported as Alias} from "./Base.sol"; contract A is Alias { uint private x; uint a; } contract C is A { function f() public {} }'};
+  await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,requests,documents})=>{
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x_Imported = 9; z = 12; x = 10; a = 11'})});
+    const storage=await storageDeclarations(doc,r,symbols,service,open),values=declarationValues(doc,r,symbols,storage.roots);
+    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x','10'],['a','11']]);
+    assert.ok(requests.some(r=>r.method==='textDocument/documentSymbol'&&r.uri.endsWith('/Base.sol')));
+    [...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol')).version++;assert.equal(storage.current(),false);
+  });
 });

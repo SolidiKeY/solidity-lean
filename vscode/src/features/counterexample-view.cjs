@@ -49,11 +49,99 @@ function modelTree(row) {
     node('Initial storage', storage.length ? undefined : m.initialStorage, storage.map(([k,v]) => valueNode(k,v)))];
 }
 const samePoint = (a,b) => a.line === b.line && a.character === b.character;
-function declarationValues(doc, row, symbols) {
-  if (row.diagnosticSource && (!doc.uri?.fsPath || resolve(row.diagnosticSource) !== resolve(doc.uri.fsPath))) return [];
+// Tokenize only the inheritance header; declaration ownership comes from the
+// compiler's existing definition service, never from matching a base's spelling.
+function baseReferences(doc, symbol) {
+  if (!symbol.range || !symbol.selectionRange) return null;
+  const start = doc.offsetAt(symbol.range.start);
+  const ts = tokens(doc.getText().slice(start, doc.offsetAt(symbol.range.end))).filter(t => t.kind !== 'comment');
+  let depth = 0, end = ts.length;
+  for (let i = 0; i < ts.length; i++) {
+    if (ts[i].text === '{' && !depth) {end = i; break;}
+    if (ts[i].text === '(') depth++; if (ts[i].text === ')') depth--;
+  }
+  const header = ts.slice(0,end), is = header.findIndex(t => t.text === 'is');
+  if (is < 0) return [];
+  const refs = []; let i = is + 1;
+  while (i < header.length) {
+    if (header[i].kind !== 'word') return null;
+    let name = header[i++];
+    while (header[i]?.text === '.' && header[i+1]?.kind === 'word') {name = header[i+1]; i += 2;}
+    refs.push(doc.positionAt(start + name.start));
+    if (header[i]?.text === '(') {
+      let nested = 1; i++;
+      while (i < header.length && nested) {if (header[i].text === '(') nested++; if (header[i].text === ')') nested--; i++;}
+      if (nested) return null;
+    }
+    if (i === header.length || header[i]?.text === 'layout') break;
+    if (header[i++]?.text !== ',') return null;
+  }
+  return refs;
+}
+// Mirror the importer's checked right-to-left C3 ordering and stateRenames.
+// This is location metadata only: values always come from initialStorage.
+async function storageDeclarations(doc, row, symbols, service, openDocument, isCurrent = () => true) {
+  const own = symbols.find(s => s.name === row.contract);
+  const direct = new Map((own?.children || []).filter(s => s.kind === 13).map(s => [s.name,s]));
+  if (!own) return {roots:direct, current:isCurrent};
+  const documents = new Map([[doc.uri.toString(), {doc, symbols, version:doc.version, text:doc.getText()}]]), graph = new Map();
+  const current = () => isCurrent() && [...documents.values()].every(s => !s.doc.isClosed && s.doc.version === s.version && s.doc.getText() === s.text);
+  async function visit(record, symbol) {
+    if (!current()) throw new Error('Counterexample declaration lookup became stale');
+    const key = `${record.doc.uri}:${JSON.stringify(symbol.selectionRange?.start)}`;
+    if (graph.has(key)) return graph.get(key);
+    const entry = {record, symbol, parents:[], complete:false}; graph.set(key,entry);
+    const refs = baseReferences(record.doc,symbol); if (!refs) return entry;
+    for (const position of refs) {
+      const result = await service.request('textDocument/definition',record.doc,{position});
+      const location = Array.isArray(result) ? result.length === 1 ? result[0] : null : result;
+      if (!location?.uri || !location.range || !current()) return entry;
+      let target = documents.get(location.uri);
+      if (!target) {
+        if (!openDocument) return entry;
+        const other = await openDocument(location.uri), version = other.version, text = other.getText();
+        const otherSymbols = await service.request('textDocument/documentSymbol',other,{});
+        if (other.version !== version || other.getText() !== text || other.isClosed) return entry;
+        target = {doc:other,symbols:otherSymbols,version,text}; documents.set(location.uri,target);
+      }
+      const matches = target.symbols.filter(s => s.selectionRange && samePoint(s.selectionRange.start,location.range.start) && samePoint(s.selectionRange.end,location.range.end));
+      if (matches.length !== 1) return entry;
+      entry.parents.push(await visit(target,matches[0]));
+    }
+    entry.complete = true; return entry;
+  }
+  const root = await visit(documents.get(doc.uri.toString()),own), cache = new Map(), visiting = new Set();
+  function linearize(entry) {
+    if (!entry.complete || visiting.has(entry)) return null;
+    if (cache.has(entry)) return cache.get(entry);
+    visiting.add(entry);
+    const parents = [...entry.parents].reverse(), orders = parents.map(linearize);
+    if (orders.some(o => !o)) return null;
+    const queues = [...orders.map(o => [...o]), [...parents]], order = [entry];
+    while (queues.some(q => q.length)) {
+      const head = queues.find(q => q.length && !queues.some(other => other.slice(1).includes(q[0])))?.[0];
+      if (!head) return null;
+      order.push(head); for (const q of queues) if (q[0] === head) q.shift();
+    }
+    visiting.delete(entry); cache.set(entry,order); return order;
+  }
+  const lineage = linearize(root);
+  if (!lineage || !current()) return {roots:direct,current};
+  const fields = [...lineage].reverse().flatMap(owner => (owner.symbol.children || []).filter(s => s.kind === 13).map(symbol => ({owner,symbol}))), taken = new Set(fields.map(f => f.symbol.name)), roots = new Map();
+  fields.forEach(({owner,symbol},i) => {
+    let name = symbol.name;
+    if (fields.slice(i+1).some(f => f.symbol.name === name)) {
+      name = `${name}_${owner.symbol.name}`; while (taken.has(name)) name += '_'; taken.add(name);
+    }
+    if (owner.record.doc.uri.toString() === doc.uri.toString()) roots.set(name,symbol);
+  });
+  return {roots,current};
+}
+function declarationValues(doc, row, symbols, storage) {
+  const foreign = row.diagnosticSource && (!doc.uri?.fsPath || resolve(row.diagnosticSource) !== resolve(doc.uri.fsPath));
   const contract = symbols.find(s => s.name === row.contract);
   if (!contract) return [];
-  const functions = symbols.flatMap(s => s.children || []).filter(s => s.name === row.function && (!row.range || samePoint(s.range.start, row.range.start)));
+  const functions = (foreign ? [] : symbols).flatMap(s => s.children || []).filter(s => s.name === row.function && (!row.range || samePoint(s.range.start, row.range.start)));
   const fn = functions.length === 1 ? functions[0] : undefined, text = doc.getText();
   const offset = p => doc.offsetAt(p);
   const ts = tokens(fn ? text.slice(offset(fn.range.start), offset(fn.range.end)) : '').filter(t => t.kind !== 'comment');
@@ -72,7 +160,7 @@ function declarationValues(doc, row, symbols) {
     else if (last?.kind === 'word' && last.text === a.sourceName) result.push({position:doc.positionAt(offset(fn.range.start) + last.start), name:a.sourceName, value:String(a.value)});
   }
   for (const [name,value] of storageEntries(row.counterexample.initialStorage)) {
-    const matches = (contract.children || []).filter(s => s.name === name && [7,8,13,14].includes(s.kind));
+    const matches = storage ? [storage.get(name)].filter(Boolean) : (contract.children || []).filter(s => s.name === name && s.kind === 13);
     if (matches.length === 1) result.push({position:matches[0].selectionRange.start, name, value});
   }
   return result;
@@ -118,7 +206,9 @@ function activate(context, {vscode, service, output}) {
     try {
       const symbols = await service.request('textDocument/documentSymbol', doc, {});
       if (stopped || epoch !== generation || doc.version !== snapshot.version || hash(doc.getText()) !== snapshot.sourceHash) return;
-      const values = declarationValues(doc, row, symbols), lines = new Map();
+      const storage = await storageDeclarations(doc,row,symbols,service,uri => vscode.workspace.openTextDocument(vscode.Uri.parse(uri)),() => !stopped && epoch === generation && doc.version === snapshot.version && hash(doc.getText()) === snapshot.sourceHash);
+      if (!storage.current()) return;
+      const values = declarationValues(doc, row, symbols,storage.roots), lines = new Map();
       for (const value of values) {const list = lines.get(value.position.line) || []; list.push(`${value.name} = ${escapedText(value.value)}`); lines.set(value.position.line,list);}
       const decorations = [...lines].map(([line,values]) => ({range:doc.lineAt(line).range, renderOptions:{after:{contentText:values.join('; ')}}}));
       for (const target of vscode.window.visibleTextEditors) if (target.document === doc) target.setDecorations(decoration, decorations);
@@ -135,4 +225,4 @@ function activate(context, {vscode, service, output}) {
     vscode.window.onDidChangeActiveTextEditor(() => clear()),
     {dispose() {stopped = true; clear(); snapshots.clear(); service.removeListener('report',receive); service.removeListener('invalidated',invalidate); service.removeListener('serverError',failed);}});
 }
-module.exports = {activate, split, valueNode, storageEntries, modelTree, declarationValues};
+module.exports = {activate, split, valueNode, storageEntries, modelTree, declarationValues, baseReferences, storageDeclarations};
