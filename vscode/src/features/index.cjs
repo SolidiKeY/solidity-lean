@@ -11,7 +11,7 @@ function create(context, services, directory = __dirname) {
   const slots = new Map(), owned = [];
   let stopped = false, pending, finished;
   const log = message => services.output.appendLine(message);
-  const disposeItems = items => {for (const item of [...new Set(items)].reverse()) try {item?.dispose?.();} catch (error) {log(`Feature disposal failed: ${error?.message || error}`);}};
+  const disposeItems = async items => {for (const item of [...new Set(items)].reverse()) try {await item?.dispose?.();} catch (error) {log(`Feature disposal failed: ${error?.message || error}`);}};
   for (const name of contributed) {
     const slot = {handler:null}; slots.set(name, slot);
     owned.push(services.vscode.commands.registerCommand(name, (...args) => slot.handler ? slot.handler(...args) : services.vscode.window.showInformationMessage(`${name} is not available in this build`)));
@@ -41,9 +41,9 @@ function create(context, services, directory = __dirname) {
         if (typeof feature.activate !== 'function') throw new Error('missing activate(context, services)');
         const result = await feature.activate(featureContext, {...services, vscode, registerCommand, identity});
         if (result) subscriptions.push(result);
-        if (stopped) disposeItems(subscriptions); else owned.push({dispose:()=>disposeItems(subscriptions)});
+        if (stopped) await disposeItems(subscriptions); else owned.push({dispose:()=>disposeItems(subscriptions)});
       } catch (error) {
-        disposeItems(subscriptions);
+        await disposeItems(subscriptions);
         if (!stopped) log(`Feature ${file} failed: ${error?.message || error}`);
       }
     }

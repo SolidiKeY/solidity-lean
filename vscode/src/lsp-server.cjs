@@ -534,7 +534,7 @@ function startServer(input=process.stdin,output=process.stdout){
     service=new SolidityService(peer,params.initializationOptions?.backendPath||fileURLToPath(params.rootUri),params.initializationOptions?.settings);
     featureStart=require('./server-features/index.cjs').register(peer,service);
     features=await featureStart;
-    if(shuttingDown||peer.closed){features.dispose();throw failure('Server stopped during initialization',-32002);}
+    if(shuttingDown||peer.closed){await features.dispose();throw failure('Server stopped during initialization',-32002);}
     return {serverInfo:identity(),capabilities:{...(features.codeLens?{codeLensProvider:{resolveProvider:false}}:{}),experimental:{solidityLeanRequests:features.requests},textDocumentSync:{openClose:true,change:2,save:{includeText:true}},hoverProvider:true,
       completionProvider:{triggerCharacters:['.']},definitionProvider:true,referencesProvider:true,documentSymbolProvider:true,documentHighlightProvider:true,
       workspaceSymbolProvider:true,documentFormattingProvider:true,codeActionProvider:{codeActionKinds:['quickfix'],resolveProvider:true},renameProvider:{prepareProvider:true},signatureHelpProvider:{triggerCharacters:['(',',']}}};
@@ -562,7 +562,7 @@ function startServer(input=process.stdin,output=process.stdout){
   peer.onRequest('codeAction/resolve',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return s.resolveCodeAction(params,controller.signal);}finally{s.requests.delete(id);}});
   peer.onRequest('workspace/symbol',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return await s.workspaceSymbols(params.query,controller.signal);}finally{s.requests.delete(id);}});
   peer.onNotification('workspace/didChangeWatchedFiles',params=>{for(const change of params.changes)ready().invalidatePath(fileURLToPath(change.uri));});
-  const stop=async()=>{shuttingDown=true;try{const registry=await featureStart;registry?.dispose();}finally{await service?.dispose();}};
+  const stop=async()=>{shuttingDown=true;try{const registry=await featureStart;await registry?.dispose();}finally{await service?.dispose();}};
   peer.onRequest('shutdown',async()=>{await stop();return null;});
   const exit=code=>{stop().then(()=>{if(input===process.stdin)process.exit(code);},error=>{process.stderr.write('Server cleanup failed: '+error.message+'\n');if(input===process.stdin)process.exit(1);});};
   peer.onNotification('exit',()=>exit(shuttingDown?0:1));

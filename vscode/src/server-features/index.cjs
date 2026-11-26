@@ -7,13 +7,13 @@ const path = require('node:path');
 async function register(peer, service, directory = __dirname) {
   const requests = new Map(), lenses = [], disposables = [];
   const log = message => {if (!peer.closed) peer.notify('window/logMessage', {type: 1, message});};
-  const cleanup = items => {for (const item of items.reverse()) try {item?.dispose?.();} catch (error) {log(`Server feature disposal failed: ${error.message}`);}};
+  const cleanup = async items => {for (const item of items.reverse()) try {await item?.dispose?.();} catch (error) {log(`Server feature disposal failed: ${error.message}`);}};
   for (const file of fs.readdirSync(directory).filter(name => name.endsWith('.cjs') && name !== 'index.cjs').sort()) {
     const pending = new Map(), pendingLenses = [], owned = [];
     const server = {
       service,
       onRequest(method, handler) {
-        if (!/^solidityLean\/[A-Za-z][A-Za-z0-9_]*$/.test(method) || typeof handler !== 'function') throw new Error('Invalid custom request');
+        if (!(typeof method === 'string' && method.startsWith('solidityLean/') && method.length > 'solidityLean/'.length) || typeof handler !== 'function') throw new Error('Invalid custom request');
         if (requests.has(method) || pending.has(method) || peer.requests.has(method)) throw new Error(`Request already registered: ${method}`);
         pending.set(method, handler);
       },
@@ -29,7 +29,7 @@ async function register(peer, service, directory = __dirname) {
       if (result) owned.push(result);
       for (const [method, handler] of pending) {requests.set(method, handler); peer.onRequest(method, handler);}
       lenses.push(...pendingLenses); disposables.push(owned);
-    } catch (error) {cleanup(owned); log(`Server feature ${file} failed: ${error?.message || error}`);}
+    } catch (error) {await cleanup(owned); log(`Server feature ${file} failed: ${error?.message || error}`);}
   }
   if (lenses.length) peer.onRequest('textDocument/codeLens', async (params, id) => {
     const results = await Promise.all(lenses.map(async ({file, handler}) => {
@@ -37,12 +37,13 @@ async function register(peer, service, directory = __dirname) {
     }));
     return results.flatMap(result => result || []);
   });
-  let disposed = false;
+  let disposal;
   return {requests: [...requests.keys()], codeLens: lenses.length > 0, dispose() {
-    if (disposed) return; disposed = true;
+    if (disposal) return disposal;
     for (const [method, handler] of requests) if (peer.requests.get(method) === handler) peer.requests.delete(method);
     if (lenses.length) peer.requests.delete('textDocument/codeLens');
-    for (const items of disposables.reverse()) cleanup(items);
+    disposal=(async()=>{for (const items of disposables.reverse()) await cleanup(items);})();
+    return disposal;
   }};
 }
 module.exports = {register};

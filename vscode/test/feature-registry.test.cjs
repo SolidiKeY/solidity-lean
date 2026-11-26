@@ -58,7 +58,7 @@ test('server commits features in order, advertises requests and lenses, and roll
   assert.equal(peer.requests.has('solidityLean/bad'),false);
   assert.deepEqual(await peer.requests.get('textDocument/codeLens')({},1),[{title:'a'},{title:'z'}]);
   assert.match(logs.at(-1), /z\.cjs.*lens broken/);
-  registry.dispose();registry.dispose();
+  await registry.dispose();await registry.dispose();
   assert.equal(peer.requests.size,0);
   assert.deepEqual(events.slice(-2),['dispose z','dispose a']);
 });
@@ -82,16 +82,49 @@ test('disposal waits for in-flight activation and prevents late feature registra
 test('server initialize advertises and serves registered feature requests and lenses', async t => {
   const {PassThrough}=require('node:stream'),{pathToFileURL}=require('node:url');
   const {RpcPeer}=require('../src/rpc.cjs'),{startServer}=require('../src/lsp-server.cjs');
-  const dir=fixture(t,{'feature.cjs':`exports.register=s=>{s.onRequest('solidityLean/example',p=>p);s.registerCodeLensProvider(()=>[{range:{start:{line:0,character:0},end:{line:0,character:1}},command:{title:'Example',command:'example'}}])}`});
+  const dir=fixture(t,{'feature.cjs':`exports.register=s=>{s.onRequest('solidityLean/show-example',p=>p);s.registerCodeLensProvider(()=>[{range:{start:{line:0,character:0},end:{line:0,character:1}},command:{title:'Example',command:'example'}}])}`});
   const original=server.register;server.register=(peer,service)=>original(peer,service,dir);
   const toServer=new PassThrough(),toClient=new PassThrough(),client=new RpcPeer(toClient,toServer),instance=startServer(toServer,toClient);
   try {
     const root=path.resolve(__dirname,'../..');
     const result=await client.request('initialize',{rootUri:pathToFileURL(root).href,capabilities:{},initializationOptions:{backendPath:root}});
-    assert.deepEqual(result.capabilities.experimental.solidityLeanRequests,['solidityLean/example']);
+    assert.deepEqual(result.capabilities.experimental.solidityLeanRequests,['solidityLean/show-example']);
     assert.equal(result.capabilities.codeLensProvider.resolveProvider,false);
-    assert.deepEqual(await client.request('solidityLean/example',{value:7}),{value:7});
+    assert.deepEqual(await client.request('solidityLean/show-example',{value:7}),{value:7});
     assert.equal((await client.request('textDocument/codeLens',{}))[0].command.title,'Example');
     await client.request('shutdown');
   } finally {server.register=original;client.close();toServer.destroy();toClient.destroy();await instance.service?.dispose();}
+});
+
+test('extension activates features once after client identity and dispatches commands', async t => {
+  const {fixture:editorFixture}=require('./controller-fixture.cjs'),{EventEmitter}=require('node:events');
+  const Module=require('node:module'),load=Module._load,clients=require('../src/lsp-client.cjs'),originalClass=clients.LanguageServers,originalCreate=editor.create;
+  const e=editorFixture();await e.api.dispose();const context={subscriptions:[]},notices=[],events=[];
+  e.vscode.window.showInformationMessage=message=>notices.push(message);
+  const dir=fixture(t,{'a.cjs':`exports.activate=(c,s)=>{s.events.push(s.identity.serverInfo.version);s.registerCommand('solidityLean.runFunction',()=>99)}`});
+  let instance;
+  class Servers extends EventEmitter {constructor(){super();instance=this;} async open(){return {};} cancel(){} save(){} close(){} async restart(){} async dispose(){} }
+  clients.LanguageServers=Servers;
+  editor.create=(ctx,services)=>originalCreate(ctx,{...services,events},dir);
+  Module._load=function(name,...args){return name==='vscode'?e.vscode:load.call(this,name,...args);};
+  let api;
+  try {
+    api=require('../src/extension.cjs').activate(context);
+    assert.deepEqual(events,[]);
+    e.commands.get('solidityLean.runFunction')();assert.match(notices.pop(),/not available in this build/);
+    instance.emit('identity',{serverInfo:{version:'ready'}});instance.emit('identity',{serverInfo:{version:'again'}});
+    await new Promise(resolve=>setImmediate(resolve));
+    assert.deepEqual(events,['ready']);assert.equal(e.commands.get('solidityLean.runFunction')(),99);
+  } finally {Module._load=load;clients.LanguageServers=originalClass;editor.create=originalCreate;await api?.dispose();}
+  assert.equal(e.commands.has('solidityLean.runFunction'),false);
+});
+
+test('registry disposal awaits asynchronous feature cleanup', async t => {
+  const commands=new Map(),events=[];let release;
+  const wait=new Promise(resolve=>{release=resolve;});
+  const vscode={commands:{registerCommand(n,f){commands.set(n,f);return{dispose(){commands.delete(n);}};}},window:{showInformationMessage(){}}};
+  const dir=fixture(t,{'a.cjs':`exports.activate=(c,s)=>({async dispose(){s.events.push('disposing');await s.wait;s.events.push('disposed')}})`});
+  const registry=editor.create({subscriptions:[]},{vscode,output:{appendLine(){}},events,wait},dir);await registry.start({});
+  let done=false;const closing=registry.dispose().then(()=>{done=true;});await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(done,false);assert.deepEqual(events,['disposing']);release();await closing;assert.deepEqual(events,['disposing','disposed']);assert.equal(commands.size,0);
 });
