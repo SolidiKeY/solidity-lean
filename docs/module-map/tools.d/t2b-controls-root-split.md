@@ -1,0 +1,2 @@
+
+| `SolidityControls.lean` | Generated default-target root for unreachable Controls (t2b-controls-root-split). CI and the axiom audit cover this library; root readers retain library classification and heartbeat baselines. `register.sh --check` and `controls-classify.py --check` verify generated membership. |
