@@ -116,6 +116,48 @@ example {ps rs qs : Parts Ann} (e₁ e₂ : Bool) (a b : Ann)
 example (ext : Bool) (a : Ann) :
     readSig (fnTyStr [] [] ext) = some (.fn ext () .nil .nil) :=
   readSig_fnTyStr ext a (ps := .nil) (rs := .nil) trivial trivial
+example : readSig "function()" = some (.fn false () .nil .nil) :=
+  back false .nil .nil (by decide) (by decide)
+example : readSig "function()external" = some (.fn true () .nil .nil) :=
+  back true .nil .nil (by decide) (by decide)
+/-- No parameters, one return; and parameters without returns. -/
+example : readSig "function()returns(bool)" = some (.fn false () .nil (one (.elem .bool))) :=
+  back false .nil (one (.elem .bool)) (by decide +kernel) (by decide +kernel)
+example : readSig "function(bool,address)external"
+    = some (.fn true () (two (.elem .bool) (.elem .address)) .nil) :=
+  back true (two (.elem .bool) (.elem .address)) .nil (by decide +kernel) (by decide +kernel)
+
+/-! ## Widths -/
+
+/-- Every integer width and sign as a parameter, every `bytesN` as a return
+(the conditions are the same in both positions). -/
+example (s : Bool) (bits n : Nat) (h h') (ext : Bool) (a : Ann) :
+    readSig (Part.fn ext a (one (.elem (.int s bits h))) (one (.elem (.fixedBytes n h')))).spell
+      = some (.fn ext () (one (.elem (.int s bits h))) (one (.elem (.fixedBytes n h')))) :=
+  readSig_roundtrip ⟨⟨trivial, trivial⟩, trivial, trivial⟩
+example : readSig "function(uint8,int128)returns(bytes32,uint)" =
+    some (.fn false () (two (.elem u8) (.elem (.int true 128 (by decide))))
+      (two (.elem (.fixedBytes 32 (by decide))) (.elem u256))) :=
+  back false (two (.elem u8) (.elem (.int true 128 (by decide))))
+    (two (.elem (.fixedBytes 32 (by decide))) (.elem u256)) (by decide +kernel) (by decide +kernel)
+
+/-! ## Locations -/
+
+/-- Any located component whose spelling is a `Well` non-function component. -/
+example (b : String) (l : Source.DataLoc) (ok : LocatedOk b l) (ext : Bool) :
+    readSig (Part.fn ext () (one (.located b l)) .nil).spell
+      = some (.fn ext () (one (.located b l)) .nil) :=
+  readSig_roundtrip ⟨⟨ok, trivial⟩, trivial⟩
+example : readSig "function(uint[]memory,S[2]storage)returns(bytescalldata)" =
+    some (.fn false () (two (.located "uint[]" .memory) (.located "S[2]" .storage))
+      (one (.located "bytes" .calldata))) :=
+  back false (two (.located "uint[]" .memory) (.located "S[2]" .storage))
+    (one (.located "bytes" .calldata)) (by decide +kernel) (by decide +kernel)
+/-- A named component with no location: a struct, a mapping. -/
+example : readSig "function(S,mapping(uint=>bool))" =
+    some (.fn false () (two (.named "S") (.named "mapping(uint=>bool)")) .nil) :=
+  back false (two (.named "S") (.named "mapping(uint=>bool)")) .nil (by decide +kernel)
+    (by decide +kernel)
 
 /-! ## Declarations and marker rows -/
 
@@ -129,6 +171,53 @@ example (rows : List (String × Nat)) :
 /-- The rows `valueRows?` keeps for a local of the type. -/
 example : ∃ rows, valueRows? nested.spell = some (.uint, rows) ∧
     ofRows rows "" = some nested.erase := ofRows_valueRows (by decide +kernel)
+
+/-! ## What does not come back -/
+
+/-- `address payable` has no spelling: alone, it is read back as no parameter. -/
+example : ¬ (Part.fn false () (one (.elem .addressPayable)) .nil).Canon ∧
+    readSig (Part.fn false () (one (.elem .addressPayable)) .nil).spell
+      = some (.fn false () .nil .nil) :=
+  ⟨by decide +kernel, back false .nil .nil (by decide) (by decide +kernel)⟩
+
+/-- A name ending in a location word is read as a located component. -/
+example : ¬ NamedOk "Tmemory" ∧
+    readSig (Part.fn false () (one (.named "Tmemory")) .nil).spell
+      = some (.fn false () (one (.located "T" .memory)) .nil) :=
+  ⟨by decide +kernel,
+    back false (one (.located "T" .memory)) .nil (by decide +kernel) (by decide +kernel)⟩
+
+/-- An elementary name is read as the elementary type (`uint256` as `uint`):
+the spelling is not the canonical one, the reading is by the fuel laws. -/
+example : ¬ NamedOk "uint256" ∧
+    readSig "function(uint256)" = some (.fn false () (one (.elem u256)) .nil) :=
+  ⟨by decide +kernel,
+    readSig_of_splits (t := Part.fn false () (one (.elem u256)) .nil)
+      ⟨["uint256"], [], (fnParts?_mk _).trans (by decide +kernel),
+        ⟨"uint256", [], rfl,
+          ⟨(notFn_iff _).2 (by decide), (leaf_mk _).trans (by decide +kernel)⟩, rfl⟩, rfl⟩
+      ((fnTy?_mk _).trans (by decide)) (by decide)⟩
+
+/-- A comma at a component's own depth: one name is read as two. -/
+example : ¬ NamedOk "a,b" ∧
+    readSig (Part.fn true () (one (.named "a,b")) .nil).spell
+      = some (.fn true () (two (.named "a") (.named "b")) .nil) :=
+  ⟨by decide +kernel,
+    back true (two (.named "a") (.named "b")) .nil (by decide +kernel) (by decide +kernel)⟩
+
+/-- An empty name and an unbalanced bracket are not `Well`, so not `NamedOk`. -/
+example : ¬ Well "" ∧ ¬ Well "T)" ∧ ¬ Well "T[" ∧
+    ¬ NamedOk "" ∧ ¬ NamedOk "T)" ∧ ¬ NamedOk "T[" := by decide +kernel
+
+/-- A function-type suffix: the component starts as a function type, so it is
+no named or located leaf, and `fnParts?` refuses it at every fuel. -/
+example : ¬ NamedOk "function(uint)[]" ∧ ¬ LocatedOk "function(uint)[]" .memory ∧
+    readSig (Part.fn false () (one (.located "function(uint)[]" .memory)) .nil).spell = none :=
+  ⟨by decide +kernel, by decide +kernel,
+    readSig_refused (.param (c := "function(uint)[]memory") (ps := ["function(uint)[]memory"])
+      (rs := []) (ext := false)
+      ((fnParts?_mk _).trans (by decide +kernel)) (List.mem_singleton.2 rfl)
+      (.malformed ((fnTy?_mk _).trans (by decide)) ((fnParts?_mk _).trans (by decide +kernel))))⟩
 
 /-- One erasure, one spelling, one reading, whatever the mutabilities. -/
 example (a b : Ann) (ext : Bool) {ps rs : Parts Ann} (h : (Part.fn ext a ps rs).Canon) :
