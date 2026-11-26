@@ -1,4 +1,5 @@
-import Solidity.Goals.Shrink
+import Solidity.Yul.Layout.Shared.Contracts
+import Solidity.Yul.Views.ByteObjects
 
 /-!
 # The geometry of the one layout view
