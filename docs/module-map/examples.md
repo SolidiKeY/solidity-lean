@@ -153,6 +153,18 @@ At the root, the notation's own tests:
 | `Examples/DecisionHashesChecks.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Examples/Tactics/StaticStorageCompatibility.lean` | Inhabited conditional frame, changed balance, reentry refusal and malformed decoder controls; no opaque static preservation assertion. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/Algorithms/BinarySearch.lean` | Sorted-array half-open binary search; hit or absence specification. |
+| `Examples/Benchmark/Algorithms/FastExponentiation.lean` | Repeated squaring; exact natural power target retained pending specification lowering. |
+| `Examples/Benchmark/Algorithms/Fibonacci.lean` | Two-accumulator Fibonacci; exact recurrence target retained pending specification lowering. |
+| `Examples/Benchmark/Algorithms/FindIndex.lean` | First negative element; predicate-search bounds and minimality. |
+| `Examples/Benchmark/Algorithms/Gcd.lean` | Euclid remainder loop; zero case and exact common-divisor characterization. |
+| `Examples/Benchmark/Algorithms/InsertionSort.lean` | Small memory-array insertion sort; sortedness clauses and full permutation target. |
+| `Examples/Benchmark/Algorithms/LinearSearch.lean` | First matching index; successful, absent, and minimality cases. |
+| `Examples/Benchmark/Algorithms/Maximum.lean` | Nonempty-array maximum; upper bound and attained-element specification. |
+| `Examples/Benchmark/Algorithms/Reverse.lean` | In-place storage-array reversal; entry-state element and length specification. |
+| `Examples/Benchmark/Algorithms/Sum.lean` | Array prefix sum; exact fold target retained pending specification lowering. |
 | `Examples/Benchmark/Governance/Ownable.lean` | OpenZeppelin owner state machine; all four function specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Governance/Pausable.lean` | OpenZeppelin pause state machine; all four function specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Governance/Voting.lean` | Direct-vote Ballot variant: one vote and tally/frame effects; all three function specifications proved by `sol_prove`. |
@@ -172,4 +184,6 @@ At the root, the notation's own tests:
 |---|---|
 | `Examples/Tactics/OpenLoops/RowsNine.lean` | Existing `binomialRowsNine` obligation, checked with chunk 128 and preserved in the non-default H109 slow library and CI/full/lane-end/axiom-audit closure. Scoped CI acceptance uses 600 s; the 300 s default/VM STOP remains. |
 | `Examples/Tactics/OpenLoops/RowsNine/{Checkpoint,Stage1,Stage2,Stage3,Finish}.lean` | Kernel-checked continuation checkpoints for the unchanged nine-row binomial walk; 128-step chunks, the original aggregate iteration allowance, and one slow-library time cap per module. |
+| `Examples/RedTeam/Trust/ExternBoundary.lean` | Controlled kernel/native disagreement exposing the source trust lint's missing external-implementation inventory; no false theorem. Companion Node test pins the weak lint and stronger census boundaries. |
+| `Examples/RedTeam/Trust/HeadlineAxioms.lean` | Exact registered headline/endpoint type checks and transitive axiom queries; intrinsic model and instruction-list boundary only. |
 | `Examples/Panic/Origins.lean` | Typed panic-origin regressions V1 erases the cause of a panic. |
