@@ -1,6 +1,6 @@
 # Dafny VS Code comparison harness
 
-Restore commands take `--manifest` from a checkout of the evidence directory: evidence: 50634bd673185362edc079d6852f3f1a76efc52e evidence/plan-g3a-evidence-manifests-1126/g3a-evidence-manifests/; each manifest supplies its own `scripts/coord-tools/dafny-parity-bulk.py` restore command.
+Restore commands take `--manifest` from a checkout of the evidence directory: evidence: fef41fb6bb886a1b4188b2c36746763777021fc3 evidence/plan-g3a-evidence-manifests-1126/g3a-evidence-manifests/; each manifest supplies its own `scripts/coord-tools/dafny-parity-bulk.py` restore command.
 
 This audit compares the official Dafny extension with `vscode/`, the Solidity
 Lean verification extension. Full parity is not established. The
