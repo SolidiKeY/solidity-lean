@@ -67,6 +67,25 @@ private theorem elem_cells (P : Shrink.Params) (base n i : Nat) (m : Shrink.Phys
     simp only [Shrink.Geometry.elemCells, Shrink.Geometry.cells, el, sc, ih]
     cases c <;> simp only [Shrink.objectCells, or_self] <;> omega
 
+/-- Shared memory scalar read equation, including every offset mark. -/
+theorem memory_read_word_shared : type_of% (@read_word) := @read_word
+
+/-- Shared memory word-run read equation, starting at any index. -/
+theorem memory_read_words_shared : type_of% (@read_words) := @read_words
+
+/-- Shared conversion from serialized word reads to their leaf values. -/
+theorem memory_words_eq_shared : type_of% (@words_eq) := @words_eq
+
+/-- Shared exact byte footprint of a memory word run. -/
+theorem memory_elem_cells_shared : type_of% (@elem_cells) := @elem_cells
+
+/-- A fixed word array reads the existing memory words, without a serialization premise. -/
+theorem memory_read_fixed_words (P : Shrink.Params) (base n : Nat) (m : Shrink.Phys) :
+    geometry.read P (.fixedArray (.scalar 32) n) ⟨.memory, base, 0⟩ m =
+      some (.node ((List.range' 0 n).map fun j =>
+        .leaf (mloadNat m.memory (base + 32 * j)))) := by
+  simp only [Shrink.Geometry.read, memory_read_words_shared, Option.map_some]
+
 /-- **`wordListView`**: a fixed array of words, and exactly its bytes. -/
 theorem wordList (P : Shrink.Params) (ws : List Roadmap.Word) (r : ByteView) (base : Nat)
     (m : Shrink.Phys) :
