@@ -1,8 +1,6 @@
 import Solidity.Tools.Goal
 import Solidity.Backend.CompilerOptimized
 
-/-! The optimizing endpoint and accepted-fragment totality, including the static
-non-refusal clause. The selected code is related to the original source run. -/
 namespace Solidity.Goals
 
 open Solidity.Goal
