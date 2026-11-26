@@ -385,7 +385,8 @@ example (r : ByteView) (base : Nat) :
 example (P : Shrink.Params) (m : Shrink.Phys) :
     ¬ geometry.elemCells P (.scalar 32) ⟨.memory, 128, 0⟩ 2 3 m (.mem 288) := by
   rw [memory_elem_cells_shared]
-  decide
+  simp only [Shrink.objectCells]
+  omega
 
 example (P : Shrink.Params) (base : Nat) (m : Shrink.Phys) :
     geometry.read P (.fixedArray (.scalar 32) 0) ⟨.memory, base, 0⟩ m = some (.node []) :=
