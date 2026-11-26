@@ -99,11 +99,14 @@ test('server initialize advertises and serves registered feature requests and le
 test('extension activates features once after client identity and dispatches commands', async t => {
   const {fixture:editorFixture}=require('./controller-fixture.cjs'),{EventEmitter}=require('node:events');
   const Module=require('node:module'),load=Module._load,clients=require('../src/lsp-client.cjs'),originalClass=clients.LanguageServers,originalCreate=editor.create;
-  const e=editorFixture();await e.api.dispose();const context={subscriptions:[]},notices=[],events=[];
+  const e=editorFixture();await e.api.dispose();const context={subscriptions:[]},notices=[],events=[];let lensProvider,refreshes=0,requests=0;
   e.vscode.window.showInformationMessage=message=>notices.push(message);
+  e.vscode.EventEmitter=class {constructor(){this.event=()=>{};}fire(){refreshes++;}dispose(){}};
+  e.vscode.CodeLens=class {constructor(range,command){this.range=range;this.command=command;}};
+  e.vscode.languages.registerCodeLensProvider=(_selector,provider)=>{lensProvider=provider;return {dispose(){}};};
   const dir=fixture(t,{'a.cjs':`exports.activate=(c,s)=>{s.events.push(s.identity.serverInfo.version);s.registerCommand('solidityLean.runFunction',()=>99)}`});
   let instance;
-  class Servers extends EventEmitter {constructor(){super();instance=this;} async open(){return {};} cancel(){} save(){} close(){} async restart(){} async dispose(){} }
+  class Servers extends EventEmitter {constructor(){super();instance=this;} async open(){return {capabilities:{codeLensProvider:true}};} async request(){requests++;return [{range:{start:{line:0,character:0},end:{line:0,character:1}},command:{title:'lens',command:'x'}}];} cancel(){} save(){} close(){} async restart(){} async dispose(){} }
   clients.LanguageServers=Servers;
   editor.create=(ctx,services)=>originalCreate(ctx,{...services,events},dir);
   Module._load=function(name,...args){return name==='vscode'?e.vscode:load.call(this,name,...args);};
@@ -115,6 +118,9 @@ test('extension activates features once after client identity and dispatches com
     instance.emit('identity',{serverInfo:{version:'ready'}});instance.emit('identity',{serverInfo:{version:'again'}});
     await new Promise(resolve=>setImmediate(resolve));
     assert.deepEqual(events,['ready']);assert.equal(e.commands.get('solidityLean.runFunction')(),99);
+    assert.equal((await lensProvider.provideCodeLenses(e.doc)).length,1);assert.equal(requests,1);
+    e.config.codeLens=false;e.events.configuration({affectsConfiguration:key=>key==='solidityLean.codeLens'});
+    assert.equal(refreshes,1);assert.deepEqual(await lensProvider.provideCodeLenses(e.doc),[]);assert.equal(requests,1);
   } finally {Module._load=load;clients.LanguageServers=originalClass;editor.create=originalCreate;await api?.dispose();}
   assert.equal(e.commands.has('solidityLean.runFunction'),false);
 });

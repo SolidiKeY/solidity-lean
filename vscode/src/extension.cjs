@@ -364,7 +364,9 @@ function activate(context) {
   const startFeatures=identity=>{if(!api.disposed){service.removeListener('identity',startFeatures);featureRegistry.start(identity);}};
   service.on('identity',startFeatures);
   context.subscriptions.push({dispose(){service.removeListener('identity',startFeatures);return featureRegistry.dispose();}});
+  const lensChanged=vscode.EventEmitter?new vscode.EventEmitter():null;
   const lensProvider=vscode.languages.registerCodeLensProvider?.(require('./editor-document.cjs').selector, {
+    onDidChangeCodeLenses:lensChanged?.event,
     async provideCodeLenses(doc,token) {
       if (!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('codeLens',true) || token?.isCancellationRequested) return [];
       const abort=new AbortController(), registration=token?.onCancellationRequested(()=>abort.abort());
@@ -375,12 +377,13 @@ function activate(context) {
         if (abort.signal.aborted) return [];
         return (lenses||[]).map(lens=>new vscode.CodeLens(new vscode.Range(lens.range.start.line,lens.range.start.character,lens.range.end.line,lens.range.end.character),lens.command));
       } catch(error) {
-        if (!abort.signal.aborted && ![-32800,-32801].includes(error.code)) api.output.appendLine('Code lenses unavailable: '+error.message);
+        if (!api.disposed && !abort.signal.aborted && ![-32800,-32801].includes(error.code)) api.output.appendLine('Code lenses unavailable: '+error.message);
         return [];
       } finally {registration?.dispose();}
     }
   });
   if(lensProvider)context.subscriptions.push(lensProvider);
+  if(lensChanged)context.subscriptions.push(lensChanged,vscode.workspace.onDidChangeConfiguration(event=>{if(event.affectsConfiguration('solidityLean.codeLens'))lensChanged.fire();}));
   context.subscriptions.push({dispose:()=>service.dispose()});return api;
 }
 function deactivate(){return runtime?.dispose();}
