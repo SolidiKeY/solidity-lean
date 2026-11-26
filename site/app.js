@@ -68,6 +68,7 @@ export class RuntimeClient {
 }
 
 if (typeof document !== 'undefined') {
+void (async () => {
 const $=id=>document.getElementById(id), source=$('source'); let report=null, generation=0,client,selectedRange;
 const draw=()=>{$('highlight').innerHTML=highlight(source.value,selectedRange);$('highlight').scrollTop=source.scrollTop;$('highlight').scrollLeft=source.scrollLeft;};
 source.addEventListener('input',()=>{generation++;selectedRange=null;client?.close();client=null;report=null;$('results').textContent='Source changed; verify to refresh results.';draw();});
@@ -85,6 +86,7 @@ async function fromHash(){try{const text=await decodeSource(location.hash);if(te
 window.addEventListener('hashchange',fromHash);
 try { const config=await (await fetch('examples.json')).json();for(const [i,e] of config.playground.entries()){const o=document.createElement('option');o.value=i;o.textContent=e.title;$('example').append(o);} $('example').onchange=()=>{source.value=config.playground[$('example').value].source;source.dispatchEvent(new Event('input'));};source.value=config.playground[0].source;draw();$('status').textContent='Ready to edit. Verification requires the existing browser runtime deployment.';await fromHash(); }catch(error){$('status').textContent='Unable to load examples: '+error.message;}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./app.js',{type:'module'}).catch(()=>{});
+})();
 }
 if (typeof document === 'undefined' && typeof self !== 'undefined' && 'registration' in self) {
 const CACHE='solidity-playground-v2';
