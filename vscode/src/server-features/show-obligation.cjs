@@ -39,6 +39,7 @@ function createHandler(service,backend=inspect) {
       const node=index?.nodes.find(n=>n.nodeType==='FunctionDefinition'&&n.name&&language.contains(index.nameRange(n),params.position));
       if(!node)return null;
       const range=index.nameRange(node);
+      if(params.position.line===range.end.line&&params.position.character===range.end.character)return null;
       // Older solc metadata can fall back to the whole declaration. Never
       // attach an obligation hover to its body or parameters.
       if(text.slice(language.offset(text,range.start),language.offset(text,range.end))!==node.name)return null;
