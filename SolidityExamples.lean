@@ -12,6 +12,7 @@ import Solidity.Examples.Benchmark.Algorithms.LinearSearch
 import Solidity.Examples.Benchmark.Algorithms.Maximum
 import Solidity.Examples.Benchmark.Algorithms.Reverse
 import Solidity.Examples.Benchmark.Algorithms.Sum
+import Solidity.Examples.Backend.BytesFullMachine.FixedLayout
 import Solidity.Examples.Benchmark.Coin
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.Defi.ConstantProduct
