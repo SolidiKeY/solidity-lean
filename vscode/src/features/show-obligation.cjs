@@ -35,9 +35,9 @@ function activate(context,{vscode,client,registerCommand,output}) {
     const {doc,version,text}=record;check(doc,version,text,new AbortController().signal);
     const {uri}=store(record),virtual=await vscode.workspace.openTextDocument(uri);
     check(doc,version,text,new AbortController().signal);
-    await vscode.languages.setTextDocumentLanguage(virtual,'lean');
+    const colored=await vscode.languages.setTextDocumentLanguage(virtual,'lean4');
     check(doc,version,text,new AbortController().signal);
-    return vscode.window.showTextDocument(virtual,{preview:true});
+    return vscode.window.showTextDocument(colored,{preview:true});
   }
   own(vscode.workspace.registerTextDocumentContentProvider(SCHEME,{provideTextDocumentContent(uri){return documents.get(uri.toString())||'';}}));
   own((registerCommand||vscode.commands.registerCommand)(COMMAND,async key=>{

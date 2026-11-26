@@ -22,6 +22,7 @@ test('server uses exact declaration ID and contract, returning printer output',a
 test('server ignores function bodies and rejects stale versions',async t=>{
   const {service,params}=backendFixture(t);const handler=createHandler(service,()=>assert.fail('backend called'));
   assert.equal(await handler({...params,position:{line:0,character:13}},1),null);
+  assert.equal(await handler({...params,position:range.end},3),null);
   await assert.rejects(handler({...params,textDocument:{...params.textDocument,version:0}},2),{code:-32801});
 });
 test('server cancellation reaches injected backend and cannot publish',async t=>{
@@ -44,17 +45,17 @@ function clientFixture(t,request=async()=>({text:'dl{ true }',range,languageId:'
   class MarkdownString{constructor(){this.value='';}appendCodeblock(text,lang){this.code=text;this.language=lang;}appendMarkdown(text){this.value+=text;}}
   const vscode={Uri:{parse:s=>({toString:()=>s})},MarkdownString,Range:class{constructor(...args){this.args=args;}},Hover:class{constructor(contents,range){this.contents=contents;this.range=range;}},
     workspace:{registerTextDocumentContentProvider(s,p){provider=p;return disposable();},async openTextDocument(uri){return {uri,getText:()=>provider.provideTextDocumentContent(uri)};}},
-    languages:{registerHoverProvider(s,p){hover=p;return disposable();},async setTextDocumentLanguage(d,l){language=l;return d;}},
-    window:{activeTextEditor:{document:doc,selection:{active:position}},async showTextDocument(d){shown=d;},showErrorMessage:e=>errors.push(e)}};
+    languages:{registerHoverProvider(s,p){hover=p;return disposable();},async setTextDocumentLanguage(d,l){assert.equal(l,'lean4');language=l;const colored={...d};d.isClosed=true;return colored;}},
+    window:{activeTextEditor:{document:doc,selection:{active:position}},async showTextDocument(d){assert.notEqual(d.isClosed,true);shown=d;},showErrorMessage:e=>errors.push(e)}};
   const feature=activate({}, {vscode,client:{request},registerCommand(name,handler){assert.equal(name,COMMAND);command=handler;return disposable();}});t.after(()=>feature.dispose());
   return {doc,errors,get hover(){return hover;},get command(){return command;},get shown(){return shown;},get language(){return language;}};
 }
 test('hover truncates safely and links to complete read-only Lean document',async t=>{
   const text='dl{ '+ 'x'.repeat(6000)+' }',f=clientFixture(t,async()=>({text,range,languageId:'lean',label:'C.f()'}));
   const hover=await f.hover.provideHover(f.doc,position);assert.match(hover.contents.code,/truncated/);assert.equal(hover.contents.language,'lean');assert.deepEqual(hover.contents.isTrusted,{enabledCommands:[COMMAND]});
-  const args=JSON.parse(decodeURIComponent(hover.contents.value.match(/\?([^)]*)/)[1]));await f.command(...args);assert.equal(f.shown.getText(),text);assert.equal(f.language,'lean');
+  const args=JSON.parse(decodeURIComponent(hover.contents.value.match(/\?([^)]*)/)[1]));await f.command(...args);assert.equal(f.shown.getText(),text);assert.equal(f.language,'lean4');
 });
-test('command requests the active function',async t=>{const f=clientFixture(t);await f.command();assert.equal(f.shown.getText(),'dl{ true }');assert.equal(f.language,'lean');});
+test('command requests the active function',async t=>{const f=clientFixture(t);await f.command();assert.equal(f.shown.getText(),'dl{ true }');assert.equal(f.language,'lean4');});
 test('client cancellation discards late output',async t=>{
   let cancel;const token={onCancellationRequested(fn){cancel=fn;return {dispose(){}};}};
   const f=clientFixture(t,async(m,d,p,o)=>{cancel();assert.equal(o.signal.aborted,true);return {text:'dl{ true }',range,languageId:'lean',label:'f'};});
