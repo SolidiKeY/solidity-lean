@@ -181,116 +181,152 @@ class ScannerTests(unittest.TestCase):
 
 class AcceptanceTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.root = Path(self.tmp.name)
-        (self.root / 'docs/guide').mkdir(parents=True)
-        (self.root / 'Solidity/Area').mkdir(parents=True)
-        (self.root / 'docs/guide/a.md').write_text('one\ntwo')
-        (self.root / 'Solidity/Area/A.lean').write_text('/-- H13 G2 H14 -/\ndef x := "H99" -- GH1 XH2 H3x\n')
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        (self.root / 'Solidity/Automation').mkdir(parents=True)
+        (self.root / 'docs').mkdir()
+        self.lean = self.root / 'Solidity/Automation/A.lean'
         self.baseline = self.root / 'baseline.json'
-        self.initial = MODULE['counts'](self.root)
-        self.baseline.write_text(json.dumps(self.initial))
+        self.policy = MODULE['activation_policy']()
+        self.baseline.write_text(json.dumps({'_candidate': self.policy}))
 
     def run_script(self, *args):
-        return subprocess.run([sys.executable, str(SCRIPT), '--root', str(self.root),
+        return subprocess.run([sys.executable, '-B', str(SCRIPT), '--root', str(self.root),
                                '--baseline', str(self.baseline), *args], capture_output=True, text=True)
 
-    def test_counts_and_check(self):
-        self.assertEqual(self.initial['docs/guide']['docs_lines'], 2)
-        self.assertEqual(self.initial['Solidity/Area'], dict(docs_lines=0, comment_lines=2, docstring_lines=1, process_ids=4))
+    def source(self, code, comments):
+        self.lean.write_text('def x := 1\n' * code + '-- comment\n' * comments)
+
+    def test_growth_with_code_at_frozen_ratio(self):
+        self.source(19, 14)
+        self.assertEqual(self.run_script().returncode, 0)
+        self.source(38, 28)
         self.assertEqual(self.run_script().returncode, 0)
 
-    def test_interpolated_comment_growth(self):
-        lean = self.root / 'Solidity/Area/A.lean'
-        for prefix in ('s', 'm', 'f'):
-            for trivia in (' ', '/- gap -/ ', '-- gap\n'):
-                with self.subTest(prefix=prefix, trivia=trivia):
-                    start = 'def x := ' + prefix + '!' + trivia + '"{1}"\n'
-                    lean.write_text(start)
-                    self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
-                    before = self.baseline.read_bytes()
-                    lean.write_text(start.replace('{1}', '{ /-- new\nsecond\n-/ 1 }'))
-                    for args in ((), ('--update',)):
-                        self.assertEqual(self.run_script(*args).returncode, 1)
-                        self.assertEqual(self.baseline.read_bytes(), before)
-
-    def test_primed_identifier_comment_growth(self):
-        lean = self.root / 'Solidity/Area/A.lean'
-        start = "#check f x' '\"'\n"
-        lean.write_text(start)
-        self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
+    def test_prose_only_growth_fails_without_partial_write(self):
+        self.source(19, 15)
         before = self.baseline.read_bytes()
-        lean.write_text(start.rstrip('\n') + ' -- real\n')
-        for args in ((), ('--update',)):
-            self.assertEqual(self.run_script(*args).returncode, 1)
+        for flags in ((), ('--update',), ('--candidate', MODULE['CANDIDATE_VERSION'])):
+            run = self.run_script(*flags)
+            self.assertEqual(run.returncode, 1, run.stderr)
+            self.assertIn('Prose budget exceeded', run.stderr)
             self.assertEqual(self.baseline.read_bytes(), before)
 
-    def test_builtin_interpolated_comment_growth(self):
-        lean = self.root / 'Solidity/Area/A.lean'
-        for name, introducer in BUILTIN_CASES.items():
-            with self.subTest(name=name):
-                start = introducer + '"{1}"\n'
-                lean.write_text(start)
-                self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
-                before = self.baseline.read_bytes()
-                lean.write_text(start.replace('{1}', '{ /-- first\nsecond\n-/ 1 }'))
-                for args in ((), ('--update',)):
-                    self.assertEqual(self.run_script(*args).returncode, 1)
-                    self.assertEqual(self.baseline.read_bytes(), before)
+    def test_scanned_interpolation_growth(self):
+        for introducer in BUILTIN_CASES.values():
+            with self.subTest(introducer=introducer):
+                self.lean.write_text('def x := 1\n' * 18 + introducer + '"{1}"\n' + '-- comment\n' * 14)
+                self.assertEqual(self.run_script().returncode, 0)
+                self.lean.write_text(self.lean.read_text().replace('{1}', '{ /-- new\nsecond\n-/ 1 }'))
+                self.assertEqual(self.run_script('--update').returncode, 1)
 
-    def test_reference_atom_comment_growth(self):
-        lean = self.root / 'Solidity/Area/A.lean'
-        for reference in ('.missing', '‹Syntax›', '⟨stx⟩', 'no_index stx',
-                          'no_implicit_lambda% stx', 'default_or_ofNonempty%'):
-            for marker in ('/-', '/--'):
-                with self.subTest(reference=reference, marker=marker):
-                    start = 'throwErrorAt ' + reference + ' "{1}"\n'
-                    lean.write_text(start)
-                    self.baseline.write_text(json.dumps(MODULE['counts'](self.root)))
-                    before = self.baseline.read_bytes()
-                    lean.write_text(start.replace('{1}', '{ ' + marker + ' first\nsecond\n-/ 1 }'))
-                    for args in ((), ('--update',)):
-                        self.assertEqual(self.run_script(*args).returncode, 1)
-                        self.assertEqual(self.baseline.read_bytes(), before)
-
-    def test_never_raise_and_no_partial_write(self):
-        for update in ((), ('--update',)):
-            with self.subTest(update=update):
-                before = self.baseline.read_bytes()
-                (self.root / 'docs/guide/a.md').write_text('one\ntwo\nthree\n')
-                self.assertEqual(self.run_script(*update).returncode, 1)
-                self.assertEqual(self.baseline.read_bytes(), before)
-        (self.root / 'docs/guide/a.md').write_text('one')
-        (self.root / 'Solidity/Area/A.lean').write_text('-- H13 H14 G2 H99 H100')
+    def test_unseen_area_allows_nothing(self):
+        self.source(100, 0)
+        (self.root / 'Solidity/Unseen').mkdir()
+        (self.root / 'Solidity/Unseen/A.lean').write_text('-- prose\ndef x := 1\n' * 100)
         self.assertEqual(self.run_script('--update').returncode, 1)
+
+    def test_residual_shrink_and_no_regrowth(self):
+        original = MODULE['activation_policy']()
+        smaller = MODULE['activation_policy']()
+        area = next(iter(smaller['activation']['residuals']))
+        metric = next(iter(smaller['activation']['residuals'][area]))
+        smaller['activation']['residuals'][area][metric] = '0'
+        MODULE['validate_active'](smaller, original)
+        with self.assertRaisesRegex(ValueError, 'residual increase'):
+            MODULE['validate_active'](original, smaller)
+        proposed = self.root / 'proposed.json'
+        proposed.write_text(json.dumps(smaller))
+        self.source(19, 14)
+        self.assertEqual(self.run_script('--update', '--candidate-update', str(proposed)).returncode, 0)
+        proposed.write_text(json.dumps(original))
+        before = self.baseline.read_bytes()
+        self.assertEqual(self.run_script('--update', '--candidate-update', str(proposed)).returncode, 2)
         self.assertEqual(self.baseline.read_bytes(), before)
 
-    def test_lower_and_deleted_areas(self):
-        (self.root / 'docs/guide/a.md').unlink()
+    def test_update_does_not_train_ratios(self):
+        self.source(19, 0)
         self.assertEqual(self.run_script('--update').returncode, 0)
-        self.assertEqual(json.loads(self.baseline.read_text())['docs/guide']['docs_lines'], 0)
-        (self.root / 'docs/guide/a.md').write_text('back')
-        self.assertEqual(self.run_script().returncode, 1)
+        updated = json.loads(self.baseline.read_text())['_candidate']
+        self.assertEqual(updated['calibration'], self.policy['calibration'])
+        self.assertTrue(all(value == '0' for row in updated['activation']['residuals'].values() for value in row.values()))
 
-    def test_new_area_zero_budget(self):
-        (self.root / 'docs/new').mkdir()
-        (self.root / 'docs/new/a.md').write_text('new')
-        self.assertEqual(self.run_script('--update').returncode, 1)
+    def test_git_history_and_committed_regrowth(self):
+        def git(*args):
+            return subprocess.check_output(['git', '-C', str(self.root), *args], text=True).strip()
+        git('init', '-q')
+        git('config', 'user.email', 'test@example.invalid')
+        git('config', 'user.name', 'test')
+        repository = SCRIPT.parents[1]
+        objects = subprocess.check_output(['git', '-C', str(repository), 'rev-parse',
+                                           '--path-format=absolute', '--git-path', 'objects'], text=True).strip()
+        (self.root / '.git/objects/info/alternates').write_text(objects + '\n')
+        activation = self.policy['activation']['commit']
+        git('update-ref', 'HEAD', activation)
+        git('read-tree', activation)
+        path = self.root / 'scripts/prose-baseline.json'
+        path.parent.mkdir()
+        # An unchanged inactive descendant is a valid integration predecessor.
+        git('commit', '--allow-empty', '-qm', 'master advanced')
+        MODULE['previous_policy'](self.root, 'HEAD')
+        path.write_bytes(self.baseline.read_bytes())
+        git('add', 'scripts/prose-baseline.json')
+        git('commit', '-qm', 'activate')
+        original = MODULE['previous_policy'](self.root, 'HEAD')
+        active_head = git('rev-parse', 'HEAD')
+        smaller = MODULE['activation_policy']()
+        smaller['activation']['residuals']['Solidity/Finish']['comment_lines'] = '0'
+        path.write_text(json.dumps({'_candidate': smaller}))
+        git('add', 'scripts/prose-baseline.json')
+        git('commit', '-qm', 'shrink')
+        MODULE['validate_history'](self.root)
+        # A side branch forked before activation does not create a new ceiling.
+        old_parent = git('rev-parse', activation + '^')
+        merged = git('commit-tree', 'HEAD^{tree}', '-p', 'HEAD', '-p', old_parent, '-m', 'merge old branch')
+        git('update-ref', 'HEAD', merged)
+        MODULE['validate_history'](self.root)
+        with self.assertRaises(ValueError):
+            MODULE['validate_active'](original, MODULE['previous_policy'](self.root, 'HEAD'))
+        with self.assertRaisesRegex(ValueError, 'cannot read previous baseline'):
+            MODULE['previous_policy'](self.root, 'missing-ref')
+        valid_head = git('rev-parse', 'HEAD')
+        path.write_text(json.dumps({'_candidate': original}))
+        git('add', 'scripts/prose-baseline.json')
+        git('commit', '-qm', 'regrow')
+        with self.assertRaisesRegex(ValueError, 'residual increase'):
+            MODULE['validate_history'](self.root)
+        # A merge identical to one parent must retain the other parent's shrink.
+        other = MODULE['activation_policy']()
+        other['activation']['residuals']['Solidity/Finish']['docstring_lines'] = '0'
+        path.write_text(json.dumps({'_candidate': other}))
+        git('add', 'scripts/prose-baseline.json')
+        other_tree = git('write-tree')
+        other_head = git('commit-tree', other_tree, '-p', active_head, '-m', 'other shrink')
+        merged = git('commit-tree', valid_head + '^{tree}', '-p', valid_head,
+                     '-p', other_head, '-m', 'discard other shrink')
+        git('update-ref', 'HEAD', merged)
+        with self.assertRaisesRegex(ValueError, 'residual increase'):
+            MODULE['validate_history'](self.root)
 
-    def test_missing_source_tree(self):
-        before = self.baseline.read_bytes()
-        (self.root / 'docs/guide/a.md').unlink()
-        (self.root / 'docs/guide').rmdir()
+    def test_frozen_active_fields(self):
+        import copy
+        for field, value in [('active', False), ('excluded_until_r1', []), ('activation', {})]:
+            p = copy.deepcopy(self.policy)
+            p[field] = value
+            with self.assertRaises(ValueError):
+                MODULE['validate_active'](p)
+        for field in ('ratio', 'margin'):
+            p = copy.deepcopy(self.policy)
+            p['calibration']['Solidity/Automation']['metrics']['comment_lines'][field] = '1'
+            with self.assertRaises(ValueError):
+                MODULE['validate_active'](p)
+
+    def test_missing_source_and_bad_baseline(self):
         (self.root / 'docs').rmdir()
         self.assertEqual(self.run_script('--update').returncode, 2)
-        self.assertEqual(self.baseline.read_bytes(), before)
-
-    def test_invalid_and_missing_baseline(self):
-        self.baseline.write_text('{"area": {"docs_lines": true}}')
-        self.assertEqual(self.run_script('--update').returncode, 2)
-        self.baseline.unlink()
-        self.assertEqual(self.run_script('--update').returncode, 2)
+        self.baseline.write_text('{"legacy": {}}')
+        self.assertEqual(self.run_script().returncode, 2)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,117 @@
+{
+  "kind": "u01-suite-budget-proposal",
+  "version": 1,
+  "approval": {
+    "status": "pending",
+    "request": "H1620",
+    "implementationAuthorized": false
+  },
+  "sourceBase": "a5b253bbf50c78d74fefbe5ba192b56f602647ea",
+  "reviewCommand": "python3 -B scripts/bench/check-u01-proposal.py",
+  "selectionRule": "All source-declared functions, constructors, fallback and receive declarations in every selected contract, including internal/private functions; preserve refusal, skip, unsupported and failed rows. Compiler-generated getters are listed separately, never silently substituted for source functions. Overloads use source hash, contract, source declaration id and signature, not name alone.",
+  "groups": [
+    {
+      "id": "testsuite",
+      "path": "tests/migration/solkey/keyext.solidity.examples/TestSuite.sol",
+      "sha256": "12de663ea2bbe38e6be7254589e6e43d6c39be16716940da072279ae385db792",
+      "contracts": "all",
+      "declarations": "all"
+    },
+    {
+      "id": "upstream-semantic",
+      "archive": "tests/upstream/solidity-0.8.38.tar.gz",
+      "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+      "snapshot": "tests/upstream/snapshot.json",
+      "snapshotSha256": "8aa1a5fb5fc7c3527a7328f0dca786e52dd3bb8360e3f1dfbb9fb8d754041095",
+      "upstreamCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+      "memberPrefix": "test/libsolidity/semanticTests/",
+      "memberSuffix": ".sol",
+      "memberCount": 1701,
+      "contracts": "all",
+      "declarations": "all",
+      "sourceHandling": "Use existing upstream fixture parser for multi-source cases and compiler directives; preserve every source unit and oracle. No regex rewriting, reduced corpus or new benchmark-only semantics."
+    },
+    {
+      "id": "velvet",
+      "path": "Bridge/SolidityVelvet/TestSuite.lean",
+      "sha256": "a4c66b77ffbdc4337be20a8822f176a4b22d50a91247b159acd8024969c11f43",
+      "adapter": "scripts/testsuite-performance.mjs",
+      "adapterSha256": "704ea0504eacff6672908c1ef4903b602ab6f9f9528167f5655bd24f5a751129",
+      "adapterExport": "suiteSources",
+      "contracts": "all generated TestSuite contracts",
+      "declarations": "all returned workloads; retain generated source hashes and original function names"
+    },
+    {
+      "id": "typical-token",
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/ERC20.sol",
+      "sha256": "4c4ec559d94bbe6bc02900964a074496f37e2c0b8f5bb49a4f632140658cba0c",
+      "contracts": [
+        "ERC20"
+      ],
+      "declarations": "all",
+      "admission": "not established; constructor has existing skip annotation; retain it as an unmet admission obligation, not an approved exclusion"
+    },
+    {
+      "id": "typical-vault",
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/EtherStore.sol",
+      "sha256": "2a6c0f924a35113a8fdfdefa300e656dfbca3b6a310cea6ae41018b7e4eb721a",
+      "contracts": [
+        "EtherStore"
+      ],
+      "declarations": "all",
+      "admission": "not established",
+      "rationale": "Existing-owner deposit/withdraw custody example. Propose explicitly as the vault representative; not an ERC4626 vault. Preserve its reentrancy-sensitive call and documented default transfer semantics."
+    },
+    {
+      "id": "typical-multisig",
+      "archive": "tests/upstream/solidity-0.8.38.tar.gz",
+      "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+      "member": "test/compilationTests/MultiSigWallet/MultiSigWallet.sol",
+      "sha256": "d5ce08a676d880516be2462389134d9d8606dd56712790964ebbdd27275539f0",
+      "contracts": [
+        "MultiSigWallet"
+      ],
+      "declarations": "all",
+      "admission": "not established; legacy Solidity syntax and external calls may require owner fixes. Do not port, trim or replace the original without approval."
+    }
+  ],
+  "modes": [
+    "fast verdict (native marker, never a theorem)",
+    "certified (kernel and transitive axiom audit retained)"
+  ],
+  "measurement": {
+    "unit": "one source declaration and mode per fresh worker process, serial; three measured repetitions",
+    "cache": "warm immutable library/compiler artifacts; fresh compiler/frontend/verifier worker for each repetition; source compilation and import/elaboration included, setup build excluded and reported separately",
+    "wall": "monotonic elapsed source-to-verdict, including parse, elaboration, walk, closing, all kernel submissions, audit and process overhead; report disjoint phase boundaries and explicit nesting",
+    "memory": "peak simultaneous RSS of the entire worker process tree in KiB, including compiler and verifier; record sampling interval and limitations; never label RUSAGE_CHILDREN individual-process maximum as aggregate tree peak",
+    "phaseMemory": "record observed tree peak for each disjoint phase; unavailable or incomplete telemetry blocks acceptance, never becomes zero",
+    "identity": "record merged measurement head, manifest Git blob, source/adaptor/compiler/toolchain hashes, platform and resource limits; baseline.command reproduces the run",
+    "outcomes": "admission must establish exact expected verdict and trust marker for every declaration in both modes before baseline acceptance; upstream EVM vectors, frontend verdicts and Lean proofs remain separate claims; crashes/timeouts/skips/unsupported/missing or ambiguous observations fail completeness",
+    "aggregation": "retain all repetitions; per-function wall and RSS budget checks use maximum of three; fast p50/p95 use nearest-rank over per-function maxima, denominator every selected declaration"
+  },
+  "proposedBudgets": {
+    "units": {
+      "wall": "milliseconds",
+      "rss": "KiB"
+    },
+    "certified": {
+      "eachFunctionWallMax": 60000,
+      "eachFunctionTreeRssMax": 4194304
+    },
+    "fast": {
+      "eachFunctionWallMax": 10000,
+      "eachFunctionTreeRssMax": 4194304,
+      "suiteP50WallMax": 1000,
+      "suiteP95WallMax": 10000
+    },
+    "regressionRule": "After the first complete approved baseline, fail any declaration/mode when wall exceeds min(absolute mode wall cap, baseline maximum wall * 1.20 + 100 ms), or aggregate tree RSS exceeds min(4194304 KiB, baseline maximum RSS * 1.10 + 16384 KiB). Equality passes. Missing/invalid/nonfinite observations fail. Baseline changes require explicit review; never update it automatically in CI.",
+    "sizeRule": "Report AST statement count and dynamic walk count separately; report time versus size without claiming linearity from static size alone. A numeric linear-growth gate needs calibration and separate approval; this proposal does not assert that property."
+  },
+  "releaseDecisionNeeded": "Approve these exact groups and budget rules, or return concrete replacements. Record the human decision in the step release note outside this lane lease before freezing an accepted manifest.",
+  "implementationDependencies": [
+    "H148 suite/budget approval remains required; H1620 authorizes proposal only.",
+    "Admission for every selected declaration remains unproved; no fixture provenance or compatibility claim is made.",
+    "Existing tools have missing disjoint phases, complete kernel coverage and aggregate/phase RSS; implementation requires exact producer interfaces and write-scope authorization outside scripts/bench if those remain unavailable.",
+    "CI must run approved suite on merged head and pass; local proposal validation is not CI or U01 acceptance."
+  ]
+}
