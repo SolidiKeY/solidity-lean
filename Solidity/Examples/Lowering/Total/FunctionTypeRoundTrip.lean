@@ -48,6 +48,19 @@ example (b : String) (d : Source.DataLoc) : leaf (b ++ locName d) = .located b d
 example : leaf "Tmemory" = .located "T" .memory := leaf_located "T" .memory
 example : leaf "Tmemorystorage" = .located "Tmemory" .storage := leaf_located "Tmemory" .storage
 
+/-! ## The leaf conditions are exact -/
+
+/-- A component reads as a name only as itself, and exactly when it reads as
+no elementary type and ends in no location word. -/
+example {c n : String} (h : leaf c = .named n) : n = c ∧ ElemFree c ∧ locSuffix c = none := by
+  cases leaf_named h
+  exact ⟨rfl, (leaf_eq_named_iff c).1 h⟩
+/-- An elementary spelling reads back exactly when `Spelled`: not `string`. -/
+example (e : Source.Elem) (h : leaf (elemName e) = .elem e) : Spelled e ∧ ¬ Spelled .string :=
+  ⟨(elem_reads_iff e).1 h, id⟩
+/-- The conditions are the erased tree's: annotations play no part. -/
+example (t : Part Ann) : t.erase.Canon ↔ t.Canon := Part.canon_erase t
+
 /-! ## Whole signatures: nesting, both flags, ordered lists -/
 
 def u8 : Source.Elem := .int false 8 (by decide)
