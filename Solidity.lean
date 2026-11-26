@@ -3487,6 +3487,7 @@ import Solidity.Hash.CollisionBridgeControls
 import Solidity.Hash.CompilerCorrect
 import Solidity.Hash.CompilerCorrect.Prefix
 import Solidity.Hashes
+import Solidity.Interfaces.FrontendExecution
 import Solidity.Keccak
 import Solidity.KeySort
 import Solidity.Language.FeatureInfo
