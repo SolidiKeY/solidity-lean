@@ -329,7 +329,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       {dispose(){service.removeListener('invalidated',invalidated);service.removeListener('status',receiveStatus);service.removeListener('report',receive);service.removeListener('diagnostics',receiveDiagnostics);service.removeListener('serverError',serverError);service.removeListener('log',log);}});
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
-  return { verify, cancel, controller, diagnostics, reports, service,
+  return { verify, cancel, controller, diagnostics, reports, service, output,
     dispose(){
       if(disposal)return disposal;disposed=true;
       let resolveDisposal,rejectDisposal;disposal=new Promise((resolve,reject)=>{resolveDisposal=resolve;rejectDisposal=reject;});
@@ -359,6 +359,7 @@ function activate(context) {
   };
   const service=new (require('./lsp-client.cjs').LanguageServers)(configuration);
   const api=createExtension(vscode,context,args=>service.verify(args),service);
+  context.subscriptions.push(require('./features/index.cjs').activate(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')}));
   context.subscriptions.push({dispose:()=>service.dispose()});runtime=api;return api;
 }
 function deactivate(){return runtime?.dispose();}
