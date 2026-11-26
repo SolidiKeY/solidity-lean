@@ -42,7 +42,7 @@ test('editor loads in sorted order, isolates failures, supplies fallbacks and di
 test('server commits features in order, advertises requests and lenses, and rolls back failures', async t => {
   const events = [], logs = [], peer = {requests:new Map(), onRequest(name,fn){this.requests.set(name,fn);}, notify(_method, params){logs.push(params.message);}};
   const dir = fixture(t, {
-    'z.cjs': `exports.register=s=>{s.service.events.push('z');s.registerCodeLensProvider(()=>[{title:'z'}]);return {dispose(){s.service.events.push('dispose z')}}}`,
+    'z.cjs': `exports.register=s=>{s.service.events.push('z');s.registerCodeLensProvider(()=>{throw Error('lens broken')});s.registerCodeLensProvider(()=>[{title:'z'}]);return {dispose(){s.service.events.push('dispose z')}}}`,
     'b.cjs': `exports.register=async s=>{s.service.events.push('b');s.onRequest('solidityLean/bad',()=>1);s.registerCodeLensProvider(()=>[{title:'bad'}]);throw Error('broken')}`,
     'a.cjs': `exports.register=s=>{s.service.events.push('a');s.onRequest('solidityLean/good',()=>42);s.registerCodeLensProvider(()=>[{title:'a'}]);return {dispose(){s.service.events.push('dispose a')}}}`
   });
@@ -54,6 +54,7 @@ test('server commits features in order, advertises requests and lenses, and roll
   assert.equal(peer.requests.get('solidityLean/good')(),42);
   assert.equal(peer.requests.has('solidityLean/bad'),false);
   assert.deepEqual(await peer.requests.get('textDocument/codeLens')({},1),[{title:'a'},{title:'z'}]);
+  assert.match(logs.at(-1), /z\.cjs.*lens broken/);
   registry.dispose();registry.dispose();
   assert.equal(peer.requests.size,0);
   assert.deepEqual(events.slice(-2),['dispose z','dispose a']);

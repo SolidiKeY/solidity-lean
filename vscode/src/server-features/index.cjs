@@ -19,7 +19,7 @@ async function register(peer, service, directory = __dirname) {
       },
       registerCodeLensProvider(handler) {
         if (typeof handler !== 'function') throw new Error('Invalid code lens provider');
-        pendingLenses.push(handler);
+        pendingLenses.push({file, handler});
       }
     };
     try {
@@ -32,7 +32,9 @@ async function register(peer, service, directory = __dirname) {
     } catch (error) {cleanup(owned); log(`Server feature ${file} failed: ${error?.message || error}`);}
   }
   if (lenses.length) peer.onRequest('textDocument/codeLens', async (params, id) => {
-    const results = await Promise.all(lenses.map(provider => provider(params, id)));
+    const results = await Promise.all(lenses.map(async ({file, handler}) => {
+      try {return await handler(params, id);} catch (error) {log(`Server feature ${file} code lens failed: ${error?.message || error}`);return [];}
+    }));
     return results.flatMap(result => result || []);
   });
   let disposed = false;
