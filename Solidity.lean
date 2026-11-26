@@ -3450,6 +3450,7 @@ import Solidity.Goals.ElabTotal
 import Solidity.Goals.Endpoint
 import Solidity.Goals.FastModeAgrees
 import Solidity.Goals.Finish
+import Solidity.Goals.FrontendValidation
 import Solidity.Goals.GenericYulViewsPreserve
 import Solidity.Goals.GoalPinSpecBase
 import Solidity.Goals.GoalPinsSpec
