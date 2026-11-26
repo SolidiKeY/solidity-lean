@@ -1,60 +1,25 @@
 'use strict';
-const {execFile}=require('node:child_process');
 const {readFileSync}=require('node:fs');
-const {join}=require('node:path');
 const {failure,cancellable}=require('../rpc.cjs');
-const {terminateTree}=require('../backend.cjs');
-const {processState}=require('../process-state.cjs');
 const language=require('../language-services.cjs');
 const projects=require('../project.cjs');
 
 // Wire request: solidityLean/showObligation
 // {textDocument:{uri,version},position:{line,character}} -> null or
-// {text,languageId:'lean',range,label}. text is the existing CLI printer's output,
-// never a formula reconstructed in JavaScript. Tests can inject inspect(request).
-// Inspect.lean's #wp prints a transformed formula; Testing lists/proves rows.
-// Cli.lean inspectRequest calls testFormula and body.show/sourceProblemText.
-function inspect({root,source,contract,declarationId,settings={},signal}) {
-  // The CLI flag parser does not admit editor project options. Invoke its
-  // existing Testing API in an owned subprocess instead; action:'inspect'
-  // selects exactly the same #solidity_cli printer, without adding Lean code.
-  const bridge=`
-    const {runSolidityTests}=await import(process.argv[1]);
-    const {source,contract,declarationId,settings}=JSON.parse(process.argv[2]);
-    const options={...settings,contract};
-    const listing=runSolidityTests([source],{...options,list:true});
-    if(listing.errors.length)throw new Error(listing.errors.map(e=>e.reason).join('\\n'));
-    const rows=listing.results.filter(r=>r.sourceId===declarationId&&r.contract===contract);
-    if(rows.length!==1||typeof rows[0].signature!=='string')throw new Error('No independent obligation for this declaration');
-    const signature=rows[0].signature;
-    const report=runSolidityTests([source],{...options,function:signature,action:'inspect',show:'obligation'});
-    const results=report.results.filter(r=>r.contract===contract&&r.signature===signature);
-    console.log(JSON.stringify({...report,results}));
-  `;
-  const api=require('node:url').pathToFileURL(join(root,'scripts/test-solidity.mjs')).href;
-  const args=['--input-type=module','-e',bridge,api,JSON.stringify({source,contract,declarationId,settings:{timeoutMs:settings.timeoutMs,projectRoot:settings.projectRoot,includePaths:settings.includePaths,remappings:settings.remappings}})];
-  return new Promise((resolve,reject)=>{
-    if(signal?.aborted)return reject(failure('Request cancelled',-32800));
-    const child=execFile(process.execPath,args,{cwd:root,detached:process.platform!=='win32',maxBuffer:32*1024*1024},(error,stdout)=>{
-      clearTimeout(timer);signal?.removeEventListener('abort',abort);
-      if(error)terminateTree(child);
-      if(timedOut)return reject(new Error('Obligation inspection timed out'));
-      if(signal?.aborted)return reject(failure('Request cancelled',-32800));
-      try {
-        const report=JSON.parse(stdout);
-        if(error||report.errors?.length)throw new Error(report.errors?.map(e=>e.reason).join('\n')||error?.message||'Inspection failed');
-        const rows=report.results?.filter(r=>r.contract===contract);
-        if(rows?.length!==1||rows[0].status!=='inspected'||typeof rows[0].text!=='string'||!rows[0].text.trim())throw new Error(rows?.[0]?.reason||'No printed obligation for this function');
-        resolve(rows[0].text);
-      }catch(e){reject(e);}
-    });
-    child.ownedGroup=process.platform!=='win32';child.processBirth=processState(child.pid)?.birth;
-    const abort=()=>terminateTree(child);
-    let timedOut=false;
-    const timer=setTimeout(()=>{timedOut=true;abort();},settings.timeoutMs||60000);
-    signal?.addEventListener('abort',abort,{once:true});
-    if(signal?.aborted)abort();
-  });
+// {text,languageId:'lean',range,label}. text must be the complete spec!{f}
+// sequent in the existing Lean printer's dl{…} notation, never reconstructed JS.
+// Inject with createHandler(service, printObligation), or register(server) with
+// service.testing.printObligation. The async backend receives
+// {root,source,contract,declarationId,settings,signal} and returns that string.
+// It must select the exact declaration (including overloads), honor cancellation,
+// and use the existing service's owned-process lifecycle if it launches work.
+// Missing production entry point: an Inspect/CLI/Testing API that prints the
+// original spec!{f} sequent with the Lean dl printer. Inspect.lean #wp/#step
+// transform formulas; Cli.inspectRequest returns bare body.show or KeY
+// sourceProblemText; Testing lists/proves rows. CLI trees refuse recursive and
+// callback obligations. None is the required general original-sequent endpoint.
+async function inspect() {
+  throw failure('Obligation display unavailable: the backend has no entry point that prints the original spec!{f} sequent in dl{…} notation',-32004);
 }
 function createHandler(service,backend=inspect) {
   return async (params,id)=>{
@@ -63,10 +28,10 @@ function createHandler(service,backend=inspect) {
     try {
       const ref=params?.textDocument,doc=service.docs.get(ref?.uri);
       if(!doc||!Number.isSafeInteger(ref.version)||ref.version!==doc.version)throw failure('Document content changed',-32801);
-      const version=doc.version,text=doc.text,generation=service.generation;
+      const version=doc.version,text=doc.text,generation=service.generation,settings=service.settings;
       const current=()=>{
         if(signal.aborted)throw failure('Request cancelled',-32800);
-        if(!service.current(doc,version,generation)||doc.text!==text)throw failure('Document content changed',-32801);
+        if(!service.current(doc,version,generation)||doc.text!==text||service.settings!==settings)throw failure('Document content changed',-32801);
       };
       current();
       await cancellable(service.analyze(doc),signal);current();
@@ -94,5 +59,5 @@ function createHandler(service,backend=inspect) {
     } finally {service.requests.delete(id);}
   };
 }
-function register(server){server.onRequest('solidityLean/showObligation',createHandler(server.service));}
+function register(server){server.onRequest('solidityLean/showObligation',createHandler(server.service,server.service.testing?.printObligation));}
 module.exports={register,createHandler,inspect};

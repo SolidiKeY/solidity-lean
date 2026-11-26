@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {mkdtempSync,mkdirSync,writeFileSync,rmSync}=require('node:fs');
+const {mkdtempSync,writeFileSync,rmSync}=require('node:fs');
 const {tmpdir}=require('node:os');
 const {join}=require('node:path');
 const {createHandler,inspect}=require('../src/server-features/show-obligation.cjs');
@@ -66,23 +66,22 @@ test('client stale buffer and stale hover link cannot open output',async t=>{
 });
 test('client backend errors are visible',async t=>{const f=clientFixture(t,async()=>{throw new Error('backend unavailable');});await f.command();assert.match(f.errors[0],/backend unavailable/);});
 
-test('production transport forwards project options and selects an overload by declaration ID',async t=>{
-  const root=mkdtempSync(join(tmpdir(),'obligation-transport-'));t.after(()=>rmSync(root,{recursive:true,force:true}));mkdirSync(join(root,'scripts'));
-  writeFileSync(join(root,'scripts/test-solidity.mjs'),`export function runSolidityTests(paths,o){
-    if(o.projectRoot!=='/project'||o.includePaths[0]!=='lib'||o.remappings[0]!=='a=b')throw new Error('project settings lost');
-    if(o.list)return {results:[{sourceId:2,contract:'C',signature:'f(bool)'},{sourceId:7,contract:'C',signature:'f(uint256)'}],errors:[]};
-    if(o.function!=='f(uint256)'||o.action!=='inspect'||o.show!=='obligation')throw new Error('wrong printer selection');
-    return {results:[{contract:'C',signature:o.function,status:'inspected',text:'dl{ exact overload }'}],errors:[]};
-  }`);
-  const result=await inspect({root,source:'/project/C.sol',contract:'C',declarationId:7,settings:{projectRoot:'/project',includePaths:['lib'],remappings:['a=b'],timeoutMs:5000}});
-  assert.equal(result,'dl{ exact overload }');
+test('production reports the missing exact sequent printer honestly',async()=>{
+  await assert.rejects(inspect(),{code:-32004,message:/no entry point.*spec!.*dl/});
 });
-test('production transport cancellation and timeout stop its owned process',async t=>{
-  const root=mkdtempSync(join(tmpdir(),'obligation-cancel-'));t.after(()=>rmSync(root,{recursive:true,force:true}));mkdirSync(join(root,'scripts'));
-  writeFileSync(join(root,'scripts/test-solidity.mjs'),`await new Promise(r=>setTimeout(r,10000)); export function runSolidityTests(){}`);
-  const controller=new AbortController();const pending=inspect({root,source:'C.sol',contract:'C',declarationId:7,signal:controller.signal});controller.abort();
-  await assert.rejects(pending,{code:-32800});
-  await assert.rejects(inspect({root,source:'C.sol',contract:'C',declarationId:7,settings:{timeoutMs:30}}),/timed out/);
+test('full-document links requery after dependency or backend changes',async t=>{
+  for(const change of ['dependency','configuration']){
+    let text='dl{ old }',calls=0;
+    const f=clientFixture(t,async()=>{calls++;return {text,range,languageId:'lean',label:'C.f'};});
+    const hover=await f.hover.provideHover(f.doc,position);
+    const args=JSON.parse(decodeURIComponent(hover.contents.value.match(/\?([^)]*)/)[1]));
+    text='dl{ '+change+' }';await f.command(...args);
+    assert.equal(calls,2);assert.equal(f.shown.getText(),text);
+  }
+});
+test('server rejects configuration replacement during printing',async t=>{
+  const {service,params}=backendFixture(t);
+  await assert.rejects(createHandler(service,async()=>{service.settings={};return 'dl{ true }';})(params,1),{code:-32801});
 });
 test('hover inspection leaves verification state alone',async t=>{
   const {service,params,doc}=backendFixture(t);service.verify=()=>assert.fail('inspection must not publish a listing over verification');

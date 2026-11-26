@@ -21,7 +21,7 @@ function activate(context,{vscode,client,registerCommand,output}) {
       check(doc,version,text,abort.signal);
       if(!result)return null;
       if(typeof result.text!=='string'||!result.text.trim()||!validRange(result.range)||result.languageId!=='lean'||typeof result.label!=='string')throw new Error('Invalid obligation response');
-      return {result,doc,version,text};
+      return {result,doc,version,text,position};
     }finally{pending.delete(abort);subscription?.dispose();}
   }
   function store(record){
@@ -42,7 +42,7 @@ function activate(context,{vscode,client,registerCommand,output}) {
   own(vscode.workspace.registerTextDocumentContentProvider(SCHEME,{provideTextDocumentContent(uri){return documents.get(uri.toString())||'';}}));
   own((registerCommand||vscode.commands.registerCommand)(COMMAND,async key=>{
     try{
-      if(typeof key==='string'){const record=links.get(key);if(!record)throw new Error('Obligation link expired; hover again');return await show(record);}
+      if(typeof key==='string'){const record=links.get(key);if(!record)throw new Error('Obligation link expired; hover again');check(record.doc,record.version,record.text,new AbortController().signal);const fresh=await query(record.doc,record.position);if(fresh)return await show(fresh);return;}
       const editor=vscode.window.activeTextEditor;if(!editor)return;
       const record=await query(editor.document,editor.selection.active);if(record)return await show(record);
     }catch(error){report(error);}
