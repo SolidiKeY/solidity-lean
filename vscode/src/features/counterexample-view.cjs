@@ -83,11 +83,11 @@ function baseReferences(doc, symbol) {
 async function storageDeclarations(doc, row, symbols, service, openDocument, isCurrent = () => true) {
   const own = symbols.find(s => s.name === row.contract);
   const direct = new Map((own?.children || []).filter(s => s.kind === 13).map(s => [s.name,s]));
-  if (!own) return {roots:direct, current:isCurrent};
-  const documents = new Map([[doc.uri.toString(), {doc, symbols, version:doc.version, text:doc.getText()}]]), graph = new Map();
-  const current = () => isCurrent() && [...documents.values()].every(s => !s.doc.isClosed && s.doc.version === s.version && s.doc.getText() === s.text);
+  if (!own) return {roots:direct, current:isCurrent, dependencies:new Set([doc.uri.toString()])};
+  const documents = new Map([[doc.uri.toString(), {doc, symbols, version:doc.version, text:doc.getText()}]]), graph = new Map(); let stale = false;
+  const current = () => !stale && isCurrent() && [...documents.values()].every(s => !s.doc.isClosed && s.doc.version === s.version && s.doc.getText() === s.text);
   async function visit(record, symbol) {
-    if (!current()) throw new Error('Counterexample declaration lookup became stale');
+    if (!current()) throw Object.assign(new Error('Counterexample declaration lookup became stale'),{code:'STALE_DECLARATIONS'});
     const key = `${record.doc.uri}:${JSON.stringify(symbol.selectionRange?.start)}`;
     if (graph.has(key)) return graph.get(key);
     const entry = {record, symbol, parents:[], complete:false}; graph.set(key,entry);
@@ -101,7 +101,7 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
         if (!openDocument) return entry;
         const other = await openDocument(location.uri), version = other.version, text = other.getText();
         const otherSymbols = await service.request('textDocument/documentSymbol',other,{});
-        if (other.version !== version || other.getText() !== text || other.isClosed) return entry;
+        if (other.version !== version || other.getText() !== text || other.isClosed) {stale = true; return entry;}
         target = {doc:other,symbols:otherSymbols,version,text}; documents.set(location.uri,target);
       }
       const matches = target.symbols.filter(s => s.selectionRange && samePoint(s.selectionRange.start,location.range.start) && samePoint(s.selectionRange.end,location.range.end));
@@ -126,7 +126,7 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
     visiting.delete(entry); cache.set(entry,order); return order;
   }
   const lineage = linearize(root);
-  if (!lineage || !current()) return {roots:direct,current};
+  if (!lineage || !current()) return {roots:direct,current,dependencies:new Set(documents.keys())};
   const fields = [...lineage].reverse().flatMap(owner => (owner.symbol.children || []).filter(s => s.kind === 13).map(symbol => ({owner,symbol}))), taken = new Set(fields.map(f => f.symbol.name)), roots = new Map();
   fields.forEach(({owner,symbol},i) => {
     let name = symbol.name;
@@ -135,7 +135,7 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
     }
     if (owner.record.doc.uri.toString() === doc.uri.toString()) roots.set(name,symbol);
   });
-  return {roots,current};
+  return {roots,current,dependencies:new Set(documents.keys())};
 }
 function declarationValues(doc, row, symbols, storage) {
   const foreign = row.diagnosticSource && (!doc.uri?.fsPath || resolve(row.diagnosticSource) !== resolve(doc.uri.fsPath));
@@ -207,15 +207,19 @@ function activate(context, {vscode, service, output}) {
       const symbols = await service.request('textDocument/documentSymbol', doc, {});
       if (stopped || epoch !== generation || doc.version !== snapshot.version || hash(doc.getText()) !== snapshot.sourceHash) return;
       const storage = await storageDeclarations(doc,row,symbols,service,uri => vscode.workspace.openTextDocument(vscode.Uri.parse(uri)),() => !stopped && epoch === generation && doc.version === snapshot.version && hash(doc.getText()) === snapshot.sourceHash);
-      if (!storage.current()) return;
+      if (stopped || epoch !== generation) return;
+      snapshot.dependencies = new Set([...(snapshot.dependencies || []), ...storage.dependencies]);
+      if (!storage.current()) {snapshots.delete(uri); clear(); return;}
       const values = declarationValues(doc, row, symbols,storage.roots), lines = new Map();
       for (const value of values) {const list = lines.get(value.position.line) || []; list.push(`${value.name} = ${escapedText(value.value)}`); lines.set(value.position.line,list);}
       const decorations = [...lines].map(([line,values]) => ({range:doc.lineAt(line).range, renderOptions:{after:{contentText:values.join('; ')}}}));
       for (const target of vscode.window.visibleTextEditors) if (target.document === doc) target.setDecorations(decoration, decorations);
-    } catch (error) {if (epoch === generation) output.appendLine(`Counterexample declarations: ${error.message}`);}
+    } catch (error) {if (epoch === generation) {if (error.code === 'STALE_DECLARATIONS') {snapshots.delete(uri); clear();} output.appendLine(`Counterexample declarations: ${error.message}`);}}
   }
   service.on('report', receive);
-  const invalidate = params => {snapshots.delete(params.uri); if (selected?.uri === params.uri) clear();};
+  const invalidate = params => {
+    for (const [uri,snapshot] of snapshots) if (uri === params.uri || snapshot.dependencies?.has(params.uri)) {snapshots.delete(uri); if (selected?.uri === uri) clear();}
+  };
   service.on('invalidated', invalidate);
   const failed = () => {snapshots.clear(); clear();}; service.on('serverError', failed);
   context.subscriptions.push(changed, decoration, view,

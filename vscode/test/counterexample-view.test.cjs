@@ -7,9 +7,8 @@ const {activate, modelTree, declarationValues, storageDeclarations} = require('.
 const point = (line,character=0) => ({line,character});
 const range = (a,b) => ({start:point(a),end:point(b)});
 const row = (name='f', overrides={}) => ({source:'C.sol',contract:'C',function:name,status:'refuted',range:range(1,3),counterexample:evidence(),...overrides});
-function harness() {
+function harness(text = 'contract C {\nfunction f(uint x) public {\n}\n}') {
   const service = new EventEmitter(), subscriptions = [], handlers = {}, calls = [], events = {};
-  const text = 'contract C {\nfunction f(uint x) public {\n}\n}';
   const doc = {uri:{toString:()=> 'file:///C.sol'},version:1,getText:()=>text,isClosed:false,
     offsetAt:p=>text.split('\n').slice(0,p.line).reduce((n,line)=>n+line.length+1,0)+p.character,
     positionAt:n=>{const lines=text.slice(0,n).split('\n');return point(lines.length-1,lines.at(-1).length);},
@@ -168,5 +167,36 @@ test('compiler-owned imported aliases affect root renaming but foreign fields ar
     assert.deepEqual(values.map(v=>[v.name,v.value]),[['x','10'],['a','11']]);
     assert.ok(requests.some(r=>r.method==='textDocument/documentSymbol'&&r.uri.endsWith('/Base.sol')));
     [...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol')).version++;assert.equal(storage.current(),false);
+  });
+});
+
+test('editing or closing imported ancestry immediately clears dependent inline values and tree',async()=>{
+  const sources={'Base.sol':'pragma solidity ^0.8.34; contract B { uint x; }','Main.sol':'pragma solidity ^0.8.34; import "./Base.sol"; contract C is B { uint y; function f() public {} }'};
+  await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,documents})=>{
+    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.service.request=service.request;h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=open;
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9; y = 17'})}),base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol'));
+    h.report([r]);await h.show();assert.equal(h.calls.at(-1)[0].renderOptions.after.contentText,'y = 17');
+    base.version++;h.events.edit({document:base});assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);
+    await h.show();assert.deepEqual(h.provider.getChildren(),[]);
+    h.report([r]);await h.show();assert.equal(h.provider.getChildren().length,5);
+    h.events.close(base);assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);h.dispose();
+  });
+});
+
+test('an imported edit during declaration lookup cannot restore stale values',async()=>{
+  const sources={'Base.sol':'pragma solidity ^0.8.34; contract B { uint x; }','Main.sol':'pragma solidity ^0.8.34; import "./Base.sol"; contract C is B { uint y; function f() public {} }'};
+  await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,documents})=>{
+    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=open;
+    let release,entered;const started=new Promise(resolve=>{entered=resolve;});
+    h.service.request=async(method,document,params)=>{
+      const result=await service.request(method,document,params);
+      if (method==='textDocument/documentSymbol'&&document.uri.toString().endsWith('/Base.sol')) {await new Promise(resolve=>{release=resolve;entered();});}
+      return result;
+    };
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f');
+    h.report([row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9; y = 17'})})]);
+    const pending=h.show();await started;
+    const base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol'));base.version++;h.events.edit({document:base});release();await pending;
+    assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);await h.show();assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
   });
 });
