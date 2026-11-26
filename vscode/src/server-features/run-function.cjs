@@ -14,6 +14,7 @@ const fail = (message, code = -32602) => Object.assign(new Error(message), {code
 // Run adds {sourceHash,functionId,args:[ABI JSON values]}; integers are decimal
 // strings (never JS numbers). Reply: {status,returns,code,logs,storageWrites,
 // text?,limitations?}. null means unavailable, [] means observed empty.
+// Internal backend requests also carry compilerCode when source identities affect code observations.
 // A replacement injected runBackend(request,{signal}) must preserve this shape.
 // This is concrete typed-model execution, not kernel proof or bytecode replay.
 function argument(type, text) {
@@ -84,7 +85,7 @@ function materialize(project, directory) {
   const names=Object.keys(project.sources),aliases=new Map(names.map(name=>[name,`units/${projects.hash(name)}.sol`]));
   const rules=(project.remappings || []).map((rule,index)=>{
     const at=rule.indexOf('='),head=rule.slice(0,at),colon=head.indexOf(':');
-    return {context:colon<0?'':head.slice(0,colon),prefix:colon<0?head:head.slice(colon+1),target:rule.slice(at+1),index};
+    return {context:colon<0?'':head.slice(0,colon),prefix:colon<0?head:head.slice(colon+1),target:rule.slice(at+1).replaceAll('\\','/'),index};
   });
   const remappings=[];
   for(const name of names){
@@ -109,6 +110,7 @@ function materialize(project, directory) {
 // Reuse the existing runSolidityTests action=run entry point in a bounded child.
 // Mirror the existing project snapshot so dirty buffers and imports stay exact.
 async function runBackend(request, {signal, service}) {
+  if(request.compilerCode)throw fail('Compiler-code observations require a source-identity-preserving backend snapshot entry point; renamed execution is unavailable');
   if(request.args.some((_,i)=>! /^(bool|u?int\d*|address(?: payable)?)$/.test(request.function.parameters[i].type)))throw fail('Solidity.Frontend.Cli/runRequest currently accepts only bool and integer-valued arguments; this ABI type needs a backend extension');
   const directory = fs.mkdtempSync(path.join(service.directory,'run-'));
   let child, closed, timer, registration;
@@ -172,7 +174,7 @@ function register(server, injected = runBackend) {
       const fn=rows.find(f=>f.id===params.functionId);
       if(!fn || !Array.isArray(params.args) || params.args.length!==fn.parameters.length)throw fail('Invalid function or argument count');
       const args=fn.parameters.map((p,i)=>argument(p.type,params.args[i]));
-      const result=await injected({version:1,sourceHash,project,function:fn,args},{signal:controller.signal,service});
+      const result=await injected({version:1,sourceHash,project,function:fn,args,compilerCode:doc.compiled.fixture?.compilerCode != null},{signal:controller.signal,service});
       current(); if(!projects.current(project,service.projectDocuments(),true))throw fail('Project changed',-32801);
       return result;
     } finally {if(ownsRun)running=false;active.delete(controller);service.requests.delete(id);}

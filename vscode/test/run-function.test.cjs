@@ -121,3 +121,13 @@ test('relative imports in absolute dependencies honor absolute-prefix redirects 
   assert.deepEqual(Object.values(resolved.sources).map(s=>s.content).sort(),Object.values(original.sources).map(s=>s.content).sort());
   assert.equal(fs.readdirSync(path.join(directory,'units')).length,4);
 });
+
+test('materialize normalizes remapping target separators like project.snapshot',t=>{
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'run-remap-slashes-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+  const project={mainSource:'C.sol',sources:{'C.sol':{content:'import "@dep/Lib.sol"; contract C {}'},'vendor/Lib.sol':{content:'library Lib {}'}},remappings:['@dep/=vendor\\']};
+  const moved=server.materialize(project,directory),projects=require('../src/project.cjs');
+  assert.equal(Object.keys(projects.snapshot(moved.source,project.sources['C.sol'].content,{projectRoot:moved.projectRoot,remappings:moved.remappings}).sources).length,2);
+});
+test('native adapter refuses identity-sensitive compiler-code observations before execution',async()=>{
+  await assert.rejects(server.runBackend({compilerCode:true},{signal:new AbortController().signal,service:{}}),/source-identity-preserving/);
+});
