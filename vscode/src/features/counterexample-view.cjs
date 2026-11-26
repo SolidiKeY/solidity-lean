@@ -44,7 +44,7 @@ function modelTree(row) {
   if (row.status !== 'refuted') return [];
   const m = row.counterexample, storage = storageEntries(m.initialStorage);
   return [node('Arguments', undefined, m.arguments.map(a => valueNode(a.sourceName || a.modelName, a.value))),
-    node('Transaction', undefined, ['msgSender','selfAddress','msgValue','timestamp'].map(k => valueNode(k,m.transaction[k]))),
+    node('Transaction', undefined, [...['msgSender','selfAddress','msgValue','timestamp'].map(k => valueNode(k,m.transaction[k])),valueNode('ext',JSON.stringify(m.transaction.ext))]),
     valueNode('Initial balance', m.initialBalance),
     node('Initial ledger', undefined, m.initialLedger.map(e => valueNode(e.address, e.amount))),
     node('Initial storage', storage.length ? undefined : m.initialStorage, storage.map(([k,v]) => valueNode(k,v)))];

@@ -40,7 +40,7 @@ test('empty model stays empty and extra transaction fields are not displayed',()
   const m=evidence({arguments:[],initialStorage:'',initialLedger:[]});m.transaction.fake='invented';
   const tree=modelTree(row('f',{counterexample:m}));
   assert.equal(tree[0].children.length,0);assert.equal(tree.at(-1).children.length,0);
-  assert.equal(tree[1].children.length,4);
+  assert.deepEqual(tree[1].children.map(n=>n.label),['msgSender','selfAddress','msgValue','timestamp','ext']);assert.equal(tree[1].children.at(-1).value,'[]');
 });
 test('current version only; edit clears tree and decorations; disposal detaches listeners',async()=>{
   const h=harness();h.report([row()]);await h.show();assert.equal(h.provider.getChildren().length,5);
