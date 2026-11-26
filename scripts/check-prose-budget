@@ -633,12 +633,19 @@ def validate_history(root):
     revisions = subprocess.check_output(
         ["git", "-C", str(root), "rev-list", "--full-history", activation + "..HEAD",
          "--", "scripts/prose-baseline.json"], text=True).splitlines()
+    def descended(revision):
+        return subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
+                               activation, revision]).returncode == 0
+
     for revision in revisions:
+        if not descended(revision):
+            continue
         policy = previous_policy(root, revision)
         parents = subprocess.check_output(
             ["git", "-C", str(root), "show", "-s", "--format=%P", revision], text=True).split()
         for parent in parents:
-            validate_active(policy, previous_policy(root, parent))
+            if descended(parent):
+                validate_active(policy, previous_policy(root, parent))
 
 
 def measure_lines(source, scanner=None):
