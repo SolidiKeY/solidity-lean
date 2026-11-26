@@ -200,3 +200,20 @@ test('an imported edit during declaration lookup cannot restore stale values',as
     assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);await h.show();assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
   });
 });
+
+test('real client content-change rejection during inherited lookup clears cached model',async()=>{
+  const sources={'Base.sol':'pragma solidity ^0.8.34; contract B { uint x; }','Main.sol':'pragma solidity ^0.8.34; import "./Base.sol"; contract C is B { uint y; function f() public {} }'};
+  await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,documents})=>{
+    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=open;
+    let reject,entered;const started=new Promise(resolve=>{entered=resolve;});
+    h.service.request=async(method,document,params)=>{
+      if (method==='textDocument/documentSymbol'&&document.uri.toString().endsWith('/Base.sol')) return new Promise((_,fail)=>{reject=fail;entered();});
+      return service.request(method,document,params);
+    };
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f');
+    h.report([row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9; y = 17'})})]);
+    const pending=h.show();await started;
+    const base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol'));base.version++;h.events.edit({document:base});reject(Object.assign(new Error('Document content changed'),{code:-32801}));await pending;
+    assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);await h.show();assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
+  });
+});

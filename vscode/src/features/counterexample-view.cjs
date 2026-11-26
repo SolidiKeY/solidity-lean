@@ -214,7 +214,7 @@ function activate(context, {vscode, service, output}) {
       for (const value of values) {const list = lines.get(value.position.line) || []; list.push(`${value.name} = ${escapedText(value.value)}`); lines.set(value.position.line,list);}
       const decorations = [...lines].map(([line,values]) => ({range:doc.lineAt(line).range, renderOptions:{after:{contentText:values.join('; ')}}}));
       for (const target of vscode.window.visibleTextEditors) if (target.document === doc) target.setDecorations(decoration, decorations);
-    } catch (error) {if (epoch === generation) {if (error.code === 'STALE_DECLARATIONS') {snapshots.delete(uri); clear();} output.appendLine(`Counterexample declarations: ${error.message}`);}}
+    } catch (error) {if (epoch === generation) {if (['STALE_DECLARATIONS','CANCELLED',-32800,-32801].includes(error.code)) {snapshots.delete(uri); clear();} output.appendLine(`Counterexample declarations: ${error.message}`);}}
   }
   service.on('report', receive);
   const invalidate = params => {
