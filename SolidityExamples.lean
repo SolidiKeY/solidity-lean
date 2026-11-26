@@ -171,6 +171,7 @@ import Solidity.Examples.Goals.LoweringDiagramV2
 import Solidity.Examples.Goals.LoweringSim
 import Solidity.Examples.Goals.OffCriticalPath
 import Solidity.Examples.Goals.OpcodeEval
+import Solidity.Examples.Goals.Optimized
 import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.PanicProvenance
 import Solidity.Examples.Goals.PanicRun
