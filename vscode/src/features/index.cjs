@@ -6,21 +6,19 @@ const path = require('node:path');
 function activate(context, services, directory = __dirname) {
   const owned = [], commands = new Set();
   const log = message => services.output.appendLine(message);
-  const dispose = items => { for (const item of items.reverse()) try { item?.dispose?.(); } catch (error) { log(`Feature disposal failed: ${error.message}`); } };
+  const dispose = items => { for (const item of [...new Set(items)].reverse()) try { item?.dispose?.(); } catch (error) { log(`Feature disposal failed: ${error.message}`); } };
   for (const file of fs.readdirSync(directory).filter(name => name.endsWith('.cjs') && name !== 'index.cjs').sort()) {
     const subscriptions = [], registered = [];
     const featureContext = Object.create(context);
-    featureContext.subscriptions = subscriptions;
+    Object.defineProperty(featureContext, 'subscriptions', {value: subscriptions});
     const registerCommand = (name, handler, ...rest) => {
       if (commands.has(name)) throw new Error(`Command already registered: ${name}`);
       const registration = services.vscode.commands.registerCommand(name, handler, ...rest);
       commands.add(name); registered.push(name); subscriptions.push(registration);
       return registration;
     };
-    const commandsApi = Object.create(services.vscode.commands);
-    commandsApi.registerCommand = registerCommand;
-    const vscode = Object.create(services.vscode);
-    vscode.commands = commandsApi;
+    const commandsApi = new Proxy(services.vscode.commands, {get(target, key) {return key === 'registerCommand' ? registerCommand : target[key];}});
+    const vscode = new Proxy(services.vscode, {get(target, key) {return key === 'commands' ? commandsApi : target[key];}});
     try {
       const feature = require(path.join(directory, file));
       if (typeof feature.activate !== 'function') throw new Error('missing activate(context, services)');
