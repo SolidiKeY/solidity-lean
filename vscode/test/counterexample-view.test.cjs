@@ -109,3 +109,14 @@ test('edit while focusing the tree prevents an obsolete declaration request',asy
   h.report([row()]);const pending=h.show();h.doc.version++;h.events.edit({document:h.doc});focus();await pending;
   assert.equal(requests,0);assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);h.dispose();
 });
+
+test('empty live arrays retain shadow slots as past-the-end values',()=>{
+  const tree=modelTree(row('f',{counterexample:evidence({initialStorage:'items = [ | past the end: 7, {amount: 9}]; empty = []; nested = {_: [ | past the end: 3]}'})}));
+  const storage=tree.at(-1).children,items=storage[0].children;
+  assert.equal(items.length,1);assert.equal(items[0].label,'Past the end');
+  assert.deepEqual(items[0].children.map(n=>n.label),['[0]','[1]']);
+  assert.equal(items[0].children[0].value,'7');assert.equal(items[0].children[1].children[0].value,'9');
+  assert.deepEqual(storage[1].children,[]);
+  assert.equal(storage[2].children[0].children[0].label,'Past the end');
+  assert.equal(storage[2].children[0].children[0].children[0].value,'3');
+});

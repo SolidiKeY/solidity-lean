@@ -5,7 +5,7 @@ const {validateCounterexample, escapedText} = require('../counterexample.cjs');
 const {tokens} = require('../solidity-text.cjs');
 const hash = text => createHash('sha256').update(text).digest('hex');
 // Split only at the current nesting level of the backend's fmtFoldShadow text.
-function split(text, delimiter) {
+function split(text, delimiter, keepEmpty = false) {
   const result = []; let depth = 0, start = 0;
   for (let i = 0; i < text.length; i++) {
     if ('[{'.includes(text[i])) depth++;
@@ -14,13 +14,13 @@ function split(text, delimiter) {
     if (!depth && text[i] === delimiter) {result.push(text.slice(start, i).trim()); start = i + 1;}
   }
   if (depth) return [text];
-  result.push(text.slice(start).trim()); return result.filter(Boolean);
+  result.push(text.slice(start).trim()); return keepEmpty ? result : result.filter(Boolean);
 }
 const node = (label, value, children = []) => ({label: escapedText(label), value: value === undefined ? undefined : escapedText(value), children});
 function valueNode(label, value) {
   const text = String(value).trim(); let children = [];
   if (text.startsWith('[') && text.endsWith(']')) {
-    const parts = split(text.slice(1, -1), '|');
+    const parts = split(text.slice(1, -1), '|', true);
     children = split(parts[0] || '', ',').map((v, i) => valueNode(`[${i}]`, v));
     if (parts.length === 2 && parts[1].startsWith('past the end:')) children.push(node('Past the end', undefined,
       split(parts[1].slice(13), ',').map((v, i) => valueNode(`[${children.length + i}]`, v))));
