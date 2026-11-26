@@ -62,3 +62,36 @@ test('server commits features in order, advertises requests and lenses, and roll
   assert.equal(peer.requests.size,0);
   assert.deepEqual(events.slice(-2),['dispose z','dispose a']);
 });
+
+test('disposal waits for in-flight activation and prevents late feature registration', async t => {
+  const commands=new Map(),events=[];let release;
+  const wait=new Promise(resolve=>{release=resolve;});
+  const vscode={commands:{registerCommand(name,handler){commands.set(name,handler);return{dispose(){commands.delete(name);}};}},window:{showInformationMessage(){}}};
+  const dir=fixture(t,{
+    'a.cjs':`exports.activate=async(c,s)=>{s.events.push('start');await s.wait;c.subscriptions.push({dispose(){s.events.push('released')}});s.registerCommand('solidityLean.runFunction',()=>1)}`,
+    'z.cjs':`exports.activate=(c,s)=>s.events.push('unexpected')`
+  });
+  const registry=editor.create({subscriptions:[]},{vscode,output:{appendLine(){}},events,wait},dir);
+  const started=registry.start({});let done=false;
+  const disposing=registry.dispose().then(()=>{done=true;});
+  await Promise.resolve();assert.equal(done,false);
+  release();await started;await disposing;
+  assert.deepEqual(events,['start','released']);assert.equal(commands.size,0);
+});
+
+test('server initialize advertises and serves registered feature requests and lenses', async t => {
+  const {PassThrough}=require('node:stream'),{pathToFileURL}=require('node:url');
+  const {RpcPeer}=require('../src/rpc.cjs'),{startServer}=require('../src/lsp-server.cjs');
+  const dir=fixture(t,{'feature.cjs':`exports.register=s=>{s.onRequest('solidityLean/example',p=>p);s.registerCodeLensProvider(()=>[{range:{start:{line:0,character:0},end:{line:0,character:1}},command:{title:'Example',command:'example'}}])}`});
+  const original=server.register;server.register=(peer,service)=>original(peer,service,dir);
+  const toServer=new PassThrough(),toClient=new PassThrough(),client=new RpcPeer(toClient,toServer),instance=startServer(toServer,toClient);
+  try {
+    const root=path.resolve(__dirname,'../..');
+    const result=await client.request('initialize',{rootUri:pathToFileURL(root).href,capabilities:{},initializationOptions:{backendPath:root}});
+    assert.deepEqual(result.capabilities.experimental.solidityLeanRequests,['solidityLean/example']);
+    assert.equal(result.capabilities.codeLensProvider.resolveProvider,false);
+    assert.deepEqual(await client.request('solidityLean/example',{value:7}),{value:7});
+    assert.equal((await client.request('textDocument/codeLens',{}))[0].command.title,'Example');
+    await client.request('shutdown');
+  } finally {server.register=original;client.close();toServer.destroy();toClient.destroy();await instance.service?.dispose();}
+});

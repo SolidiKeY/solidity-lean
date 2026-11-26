@@ -562,7 +562,7 @@ function startServer(input=process.stdin,output=process.stdout){
   peer.onRequest('codeAction/resolve',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return s.resolveCodeAction(params,controller.signal);}finally{s.requests.delete(id);}});
   peer.onRequest('workspace/symbol',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return await s.workspaceSymbols(params.query,controller.signal);}finally{s.requests.delete(id);}});
   peer.onNotification('workspace/didChangeWatchedFiles',params=>{for(const change of params.changes)ready().invalidatePath(fileURLToPath(change.uri));});
-  const stop=async()=>{shuttingDown=true;const registry=await featureStart;registry?.dispose();await service?.dispose();};
+  const stop=async()=>{shuttingDown=true;try{const registry=await featureStart;registry?.dispose();}finally{await service?.dispose();}};
   peer.onRequest('shutdown',async()=>{await stop();return null;});
   const exit=code=>{stop().then(()=>{if(input===process.stdin)process.exit(code);},error=>{process.stderr.write('Server cleanup failed: '+error.message+'\n');if(input===process.stdin)process.exit(1);});};
   peer.onNotification('exit',()=>exit(shuttingDown?0:1));
