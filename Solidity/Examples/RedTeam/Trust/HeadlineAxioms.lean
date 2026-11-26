@@ -31,6 +31,6 @@ run_elab do
     let dependencies ← collectAxioms target
     unless dependencies.all (fun name =>
         [``propext, ``Classical.choice, ``Quot.sound].contains name) do
-      throwError "unexpected axiom dependencies for {target}: {dependencies}"
+      throwError "unexpected logical dependencies for {target}: {dependencies}"
 
 end Solidity.Examples.RedTeam.Trust.HeadlineAxioms
