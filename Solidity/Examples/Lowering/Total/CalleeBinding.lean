@@ -35,6 +35,25 @@ example : Prop :=
   Publishes fun σ r => fromFunctions σ.tables σ.registry σ.settings σ.scope σ.leadingParts
     r.contract.funs σ.index
 
+/-! First-match alias resolution: with alias `f` twice, only position 0 is the
+first match; the shadowed duplicate at position 1 is not. -/
+def dupFuns : List (Name × FunDecl) := [("f", decl), ("f", { decl with params := [] })]
+
+#guard CalleeAliases.firstIndex "f" dupFuns == some 0
+
+example : ∃ i, CalleeAliases.firstIndex "f" dupFuns = some i ∧ dupFuns[i]? = some ("f", decl) :=
+  index_of_lookup rfl
+
+example {σ : Site} {r : Request} {s : Output} (b : AliasBound σ r callee s "f") :
+    Semantics.lookupBy "f" r.contract.funs = some decl := b.lookup
+
+example : Prop :=
+  PublishesAlias fun σ r => fromFunctions σ.tables σ.registry σ.settings σ.scope
+    σ.leadingParts r.contract.funs σ.index
+
+example {produce : Site → Request → Option Output} (h : Publishes produce) :
+    PublishesAlias produce := publishesAlias h
+
 /-! A recursive callee scope is never the ordinary one, and starts an empty memo. -/
 example {r : Request} {o : ProductionOutput} {rf : RecFrame} (h : r.callee = some callee) :
     recursiveScope r o rf ≠ r.elabScope o := recursiveScope_ne h

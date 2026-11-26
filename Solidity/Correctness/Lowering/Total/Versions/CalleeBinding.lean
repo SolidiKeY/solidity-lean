@@ -1,6 +1,7 @@
 import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Source.Elaborate
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
+import Solidity.Correctness.Lowering.Total.CalleeAliases.Lookup
 
 /-!
 # Structural callee binding obligations
@@ -208,6 +209,46 @@ theorem slots : slotsStatement := by
   intro p hp
   have hm : (p.1, p.2) ∈ c.names := List.mem_reverse.mp hp
   simp [lookupBy_of_mem hn hm]
+
+/-! ### First-match alias resolution (H1595, option C)
+
+`Bound` identifies the entry by its index only. `AliasBound` also requires that
+index to be the first match of the model alias in the contract's function table
+(`CalleeAliases.firstIndex`), so `Semantics.lookupBy` selects exactly the bound
+declaration and a shadowed duplicate entry is never bound. That the call site
+selected the same entry (its caller scope is a prefix of, or for a recursive
+callee a filtered sublist of, the function table) is a call-site obligation,
+not a decoder fact. -/
+
+/-- `Bound` at the first-match position of alias `a`. -/
+structure AliasBound (σ : Site) (r : Request) (c : CalleeRequest) (s : Output) (a : Name) : Prop
+    extends Bound σ r c s where
+  first : CalleeAliases.firstIndex a r.contract.funs = some σ.index
+  firstEntry : r.contract.funs[σ.index]? = some (a, c.declaration)
+
+/-- The bound declaration is the alias lookup's answer. -/
+theorem AliasBound.lookup {σ : Site} {r : Request} {c : CalleeRequest} {s : Output} {a : Name}
+    (b : AliasBound σ r c s a) : Semantics.lookupBy a r.contract.funs = some c.declaration :=
+  CalleeAliases.lookupBy_eq_some_iff.mpr ⟨_, b.first, b.firstEntry⟩
+
+/-- A successful alias lookup names the site index: its first-match position. -/
+theorem index_of_lookup {fs : List (Name × FunDecl)} {a : Name} {d : FunDecl}
+    (h : Semantics.lookupBy a fs = some d) :
+    ∃ i, CalleeAliases.firstIndex a fs = some i ∧ fs[i]? = some (a, d) :=
+  CalleeAliases.lookupBy_eq_some_iff.mp h
+
+/-- Statement to prove (v2 of `Publishes`): a producer's output at the
+first-match position of an alias is `AliasBound`. -/
+def PublishesAlias (produce : Site → Request → Option Output) : Prop :=
+  ∀ σ r c s a, r.callee = some c → c.constructor = false →
+    CalleeAliases.firstIndex a r.contract.funs = some σ.index →
+    r.contract.funs[σ.index]? = some (a, c.declaration) →
+    produce σ r = some s → AliasBound σ r c s a
+
+/-- `Publishes` gives its alias version: the first-match premises are kept. -/
+theorem publishesAlias {produce : Site → Request → Option Output} (h : Publishes produce) :
+    PublishesAlias produce :=
+  fun σ r c s a hc hk hf he hp => ⟨h σ r c s hc hk ⟨a, he⟩ hp, hf, he⟩
 
 /-! ### Ordinary callee endpoint: trivial bridges -/
 
