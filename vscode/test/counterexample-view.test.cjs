@@ -75,3 +75,14 @@ test('function-specific replies preserve another failure and remove a newly prov
   const g=row('g',{status:'proved'});delete g.counterexample;h.report([g],{function:'g'});
   await h.show();assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
 });
+
+test('two failures on one line use character positions', async()=>{
+  const h=harness();h.report([row('f',{range:{start:point(0,0),end:point(0,10)}}),row('g',{range:{start:point(0,12),end:point(0,30)},counterexample:evidence({initialBalance:'22'})})]);
+  h.editor.selection.active=point(0,18);await h.show();assert.equal(h.provider.getChildren()[2].value,'22');h.dispose();
+});
+test('switching editors during Quick Pick cancels old document selection', async()=>{
+  const h=harness();h.report([row('f',{range:range(5,6)}),row('g',{range:range(8,9)})]);
+  let pick;h.vscode.window.showQuickPick=items=>new Promise(resolve=>{pick=()=>resolve(items[0]);});
+  const pending=h.show();h.vscode.window.activeTextEditor=undefined;h.events.active();pick();await pending;
+  assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
+});

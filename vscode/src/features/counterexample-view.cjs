@@ -99,12 +99,16 @@ function activate(context, {vscode, service, output}) {
   async function show() {
     const editor = vscode.window.activeTextEditor, doc = editor?.document;
     if (!doc) return;
+    const initialGeneration = generation;
     const uri = doc.uri.toString(), snapshot = snapshots.get(uri);
     if (!snapshot || snapshot.version !== doc.version || snapshot.sourceHash !== hash(doc.getText())) {clear(); return;}
-    let row = snapshot.rows.find(r => r.range && editor.selection.active.line >= r.range.start.line && editor.selection.active.line <= r.range.end.line);
+    const position = editor.selection.active;
+    const before = (a,b) => a.line < b.line || a.line === b.line && a.character <= b.character;
+    const containing = snapshot.rows.filter(r => r.range && before(r.range.start,position) && before(position,r.range.end));
+    let row = containing.length === 1 ? containing[0] : undefined;
     if (!row && snapshot.rows.length === 1) row = snapshot.rows[0];
     if (!row && snapshot.rows.length > 1) row = (await vscode.window.showQuickPick(snapshot.rows.map(r => ({label:`${r.contract}.${r.signature || r.function}`, row:r}))))?.row;
-    if (!row || stopped || snapshots.get(uri) !== snapshot || doc.version !== snapshot.version) return;
+    if (!row || stopped || generation !== initialGeneration || vscode.window.activeTextEditor !== editor || snapshots.get(uri) !== snapshot || doc.version !== snapshot.version) return;
     const toggle = selected?.row === row; enabled = toggle ? !enabled : true;
     clear(); selected = {uri, row, tree:modelTree(row)}; view.title = `${row.contract}.${row.signature || row.function}`; changed.fire();
     const epoch = generation;
