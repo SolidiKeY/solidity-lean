@@ -27,6 +27,8 @@ The concrete boundary built on this reduction is in `Total.Decode` (the
 raw-to-Source decoder), `Total.Spells` (the spelling relation) and
 `Total.Boundary` (policies, simulation, allocation trace, state relation and
 what is left). `Solidity.Goals.lowerLoopsCorrect` stays unstated.
+* `Residual.fails_of_undecoded`: with `FullDomain`, the residual says that
+  every request outside the decoder's domain fails in production.
 -/
 namespace Solidity.Correctness.Lowering.Total
 
@@ -204,5 +206,16 @@ theorem Residual.of_empty (b : SemanticBoundary) (decode : Request → Option So
   ⟨fun r e => absurd e (empty r), fun r _ e => absurd e (empty r),
     fun r _ _ _ _ e => absurd e (empty r), fun r _ _ _ _ _ e => absurd e (empty r),
     normal, returns⟩
+
+/-- **The price of a decoder gap.** With the residual and `FullDomain`, a
+request the decoder does not read has no successful pipeline. So a boundary
+whose decoder has a gap can carry the goal only if production refuses every
+request in the gap. -/
+theorem Residual.fails_of_undecoded {b : SemanticBoundary}
+    {decode : Request → Option SourceProgram} (h : Residual b decode) (full : FullDomain b)
+    {r : Request} (gap : decode r = none) : ¬ r.Succeeds := fun run => by
+  obtain ⟨s, d⟩ := h.total r (full r run)
+  rw [gap] at d
+  cases d
 
 end Solidity.Correctness.Lowering.Total

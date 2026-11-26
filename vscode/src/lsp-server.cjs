@@ -525,14 +525,17 @@ class SolidityService {
 }
 
 function startServer(input=process.stdin,output=process.stdout){
-  const peer=new RpcPeer(input,output);let service,shuttingDown=false,versionSent=false;
+  const peer=new RpcPeer(input,output);let service,features,featureStart,shuttingDown=false,versionSent=false;
   const identity=()=>({name:'Solidity Lean Language Server',version:require('../package.json').version});
   peer.on('handlerError',error=>{if(!peer.closed)peer.notify('window/logMessage',{type:1,message:error.message});});
-  peer.onRequest('initialize',params=>{
+  peer.onRequest('initialize',async params=>{
     if(service)throw failure('Already initialized',-32600);
     peer.ownedProcessRegistration=params.capabilities?.experimental?.solidityLeanOwnedProcess===true;
     service=new SolidityService(peer,params.initializationOptions?.backendPath||fileURLToPath(params.rootUri),params.initializationOptions?.settings);
-    return {serverInfo:identity(),capabilities:{textDocumentSync:{openClose:true,change:2,save:{includeText:true}},hoverProvider:true,
+    featureStart=require('./server-features/index.cjs').register(peer,service);
+    features=await featureStart;
+    if(shuttingDown||peer.closed){await features.dispose();throw failure('Server stopped during initialization',-32002);}
+    return {serverInfo:identity(),capabilities:{...(features.codeLens?{codeLensProvider:{resolveProvider:false}}:{}),experimental:{solidityLeanRequests:features.requests},textDocumentSync:{openClose:true,change:2,save:{includeText:true}},hoverProvider:true,
       completionProvider:{triggerCharacters:['.']},definitionProvider:true,referencesProvider:true,documentSymbolProvider:true,documentHighlightProvider:true,
       workspaceSymbolProvider:true,documentFormattingProvider:true,codeActionProvider:{codeActionKinds:['quickfix'],resolveProvider:true},renameProvider:{prepareProvider:true},signatureHelpProvider:{triggerCharacters:['(',',']}}};
   });
@@ -559,8 +562,9 @@ function startServer(input=process.stdin,output=process.stdout){
   peer.onRequest('codeAction/resolve',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return s.resolveCodeAction(params,controller.signal);}finally{s.requests.delete(id);}});
   peer.onRequest('workspace/symbol',async(params,id)=>{const s=ready(),controller=new AbortController();s.requests.set(id,controller);try{return await s.workspaceSymbols(params.query,controller.signal);}finally{s.requests.delete(id);}});
   peer.onNotification('workspace/didChangeWatchedFiles',params=>{for(const change of params.changes)ready().invalidatePath(fileURLToPath(change.uri));});
-  peer.onRequest('shutdown',async()=>{shuttingDown=true;await service?.dispose();return null;});
-  const exit=code=>Promise.resolve(service?.dispose()).then(()=>{if(input===process.stdin)process.exit(code);},error=>{process.stderr.write('Server cleanup failed: '+error.message+'\n');if(input===process.stdin)process.exit(1);});
+  const stop=async()=>{shuttingDown=true;try{const registry=await featureStart;await registry?.dispose();}finally{await service?.dispose();}};
+  peer.onRequest('shutdown',async()=>{await stop();return null;});
+  const exit=code=>{stop().then(()=>{if(input===process.stdin)process.exit(code);},error=>{process.stderr.write('Server cleanup failed: '+error.message+'\n');if(input===process.stdin)process.exit(1);});};
   peer.onNotification('exit',()=>exit(shuttingDown?0:1));
   peer.on('close',()=>exit(shuttingDown?0:1));
   for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>exit(0));
