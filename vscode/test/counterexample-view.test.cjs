@@ -229,10 +229,10 @@ test('returned parameter indices locate inherited arguments even without source 
   });
 });
 
-test('imported storage decorates both visible owners and toggles from either editor',async()=>{
+test('imported storage decorates both owners and toggles across equivalent compiler URIs',async()=>{
   const sources={'Base.sol':'pragma solidity ^0.8.34; contract B { uint x; }','Main.sol':'pragma solidity ^0.8.34; import "./Base.sol"; contract C is B { uint y; function f() public {} }'};
   await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,documents})=>{
-    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.service.request=service.request;h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=open;
+    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.service.request=async(method,document,params)=>{const result=await service.request(method,document,params);return method==='textDocument/definition'&&result?.uri.endsWith('/Base.sol')?{...result,uri:result.uri.replace('/Base.sol','/%42ase.sol')}:result;};h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=uri=>open(uri.replace('/%42ase.sol','/Base.sol'));
     const base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol')),baseCalls=[],baseEditor={document:base,selection:{active:point(0)},setDecorations:(_,values)=>baseCalls.push(values)};
     h.vscode.window.visibleTextEditors=[h.editor,baseEditor];
     const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f');h.report([row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9; y = 17'})})]);

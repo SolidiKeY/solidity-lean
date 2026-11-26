@@ -87,7 +87,8 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
   const own = symbols.find(s => s.name === row.contract);
   const direct = new Map((own?.children || []).filter(s => s.kind === 13).map(s => [s.name,{...s,document:doc}]));
   const documents = new Map([[doc.uri.toString(), {doc, symbols, version:doc.version, text:doc.getText()}]]), graph = new Map(); let stale = false;
-  if (!own) return {roots:direct, current:isCurrent, dependencies:new Set(documents.keys()), documents};
+  const dependencies = () => new Set([...documents.values()].map(record => record.doc.uri.toString()));
+  if (!own) return {roots:direct, current:isCurrent, dependencies:dependencies(), documents};
   const current = () => !stale && isCurrent() && [...documents.values()].every(s => !s.doc.isClosed && s.doc.version === s.version && s.doc.getText() === s.text);
   async function visit(record, symbol) {
     if (!current()) throw Object.assign(new Error('Counterexample declaration lookup became stale'),{code:'STALE_DECLARATIONS'});
@@ -129,7 +130,7 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
     visiting.delete(entry); cache.set(entry,order); return order;
   }
   const lineage = linearize(root);
-  if (!lineage || !current()) return {roots:direct,current,dependencies:new Set(documents.keys()),documents};
+  if (!lineage || !current()) return {roots:direct,current,dependencies:dependencies(),documents};
   const fields = [...lineage].reverse().flatMap(owner => (owner.symbol.children || []).filter(s => s.kind === 13).map(symbol => ({owner,symbol}))), taken = new Set(fields.map(f => f.symbol.name)), roots = new Map();
   fields.forEach(({owner,symbol},i) => {
     let name = symbol.name;
@@ -138,7 +139,7 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
     }
     roots.set(name,{...symbol,document:owner.record.doc});
   });
-  return {roots,current,dependencies:new Set(documents.keys()),documents};
+  return {roots,current,dependencies:dependencies(),documents};
 }
 function declarationValues(doc, row, symbols, storage, documents) {
   const context = row.diagnosticSource ? [...(documents?.values() || [{doc,symbols}])].find(r => sameSource(r.doc,row.diagnosticSource)) : {doc,symbols};
