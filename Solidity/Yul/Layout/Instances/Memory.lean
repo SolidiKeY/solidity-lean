@@ -67,6 +67,25 @@ private theorem elem_cells (P : Shrink.Params) (base n i : Nat) (m : Shrink.Phys
     simp only [Shrink.Geometry.elemCells, Shrink.Geometry.cells, el, sc, ih]
     cases c <;> simp only [Shrink.objectCells, or_self] <;> omega
 
+/-- Shared memory scalar read equation, including every offset mark. -/
+theorem memory_read_word_shared : type_of% (@read_word) := @read_word
+
+/-- Shared memory word-run read equation, starting at any index. -/
+theorem memory_read_words_shared : type_of% (@read_words) := @read_words
+
+/-- Shared conversion from serialized word reads to their leaf values. -/
+theorem memory_words_eq_shared : type_of% (@words_eq) := @words_eq
+
+/-- Shared exact byte footprint of a memory word run. -/
+theorem memory_elem_cells_shared : type_of% (@elem_cells) := @elem_cells
+
+/-- A fixed word array reads the existing memory words, without a serialization premise. -/
+theorem memory_read_fixed_words (P : Shrink.Params) (base n : Nat) (m : Shrink.Phys) :
+    geometry.read P (.fixedArray (.scalar 32) n) ⟨.memory, base, 0⟩ m =
+      some (.node ((List.range' 0 n).map fun j =>
+        .leaf (mloadNat m.memory (base + 32 * j)))) := by
+  simp only [Shrink.Geometry.read, memory_read_words_shared, Option.map_some]
+
 /-- **`wordListView`**: a fixed array of words, and exactly its bytes. -/
 theorem wordList (P : Shrink.Params) (ws : List Roadmap.Word) (r : ByteView) (base : Nat)
     (m : Shrink.Phys) :
@@ -344,5 +363,33 @@ theorem enumerated (P : Shrink.Params) {D : Source.Layout} {h : Source.Heap D} (
       have apart := p.separate a b la lb ne
       simp only [Shrink.objectCells] at ca cb
       omega
+
+/-! Public API controls: offset marks, nonzero run indices, serialization,
+empty arrays and the first byte outside a word run. -/
+
+example (P : Shrink.Params) (base : Nat) (m : Shrink.Phys) :
+    geometry.read P (.scalar 32) ⟨.memory, base, 7⟩ m =
+      some (.leaf (mloadNat m.memory base)) :=
+  memory_read_word_shared P base 7 m
+
+example (P : Shrink.Params) (base : Nat) (m : Shrink.Phys) :
+    geometry.readElems P (.scalar 32) ⟨.memory, base, 0⟩ 2 3 m =
+      some ((List.range' 3 2).map fun j => .leaf (mloadNat m.memory (base + 32 * j))) :=
+  memory_read_words_shared P base 2 3 m
+
+example (r : ByteView) (base : Nat) :
+    ((List.range' 0 2).map fun j => Shrink.Tree.leaf
+      (mloadNat (wordListView [7, 9] r base) (base + 32 * j))) = [.leaf 7, .leaf 9] :=
+  memory_words_eq_shared _ base [7, 9] (wordList_read [7, 9] r base)
+
+example (P : Shrink.Params) (m : Shrink.Phys) :
+    ¬ geometry.elemCells P (.scalar 32) ⟨.memory, 128, 0⟩ 2 3 m (.mem 288) := by
+  rw [memory_elem_cells_shared]
+  simp only [Shrink.objectCells]
+  omega
+
+example (P : Shrink.Params) (base : Nat) (m : Shrink.Phys) :
+    geometry.read P (.fixedArray (.scalar 32) 0) ⟨.memory, base, 0⟩ m = some (.node []) :=
+  memory_read_fixed_words P base 0 m
 
 end Solidity.Yul.Layout.Instances

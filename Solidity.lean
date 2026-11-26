@@ -4534,6 +4534,9 @@ import Solidity.Yul.Layout.Main
 import Solidity.Yul.Layout.Pilot
 import Solidity.Yul.Layout.ReadSequence
 import Solidity.Yul.Layout.ScalarPilot
+import Solidity.Yul.Layout.Shared.Contracts
+import Solidity.Yul.Layout.Shared.Recursive
+import Solidity.Yul.Layout.Shared.Vocabulary
 import Solidity.Yul.Layout.View
 import Solidity.Yul.LocalBlock
 import Solidity.Yul.LocalBlockLogic
