@@ -274,6 +274,7 @@ class AcceptanceTests(unittest.TestCase):
         git('add', 'scripts/prose-baseline.json')
         git('commit', '-qm', 'activate')
         original = MODULE['previous_policy'](self.root, 'HEAD')
+        active_head = git('rev-parse', 'HEAD')
         smaller = MODULE['activation_policy']()
         smaller['activation']['residuals']['Solidity/Finish']['comment_lines'] = '0'
         path.write_text(json.dumps({'_candidate': smaller}))
@@ -289,9 +290,22 @@ class AcceptanceTests(unittest.TestCase):
             MODULE['validate_active'](original, MODULE['previous_policy'](self.root, 'HEAD'))
         with self.assertRaisesRegex(ValueError, 'cannot read previous baseline'):
             MODULE['previous_policy'](self.root, 'missing-ref')
+        valid_head = git('rev-parse', 'HEAD')
         path.write_text(json.dumps({'_candidate': original}))
         git('add', 'scripts/prose-baseline.json')
         git('commit', '-qm', 'regrow')
+        with self.assertRaisesRegex(ValueError, 'residual increase'):
+            MODULE['validate_history'](self.root)
+        # A merge identical to one parent must retain the other parent's shrink.
+        other = MODULE['activation_policy']()
+        other['activation']['residuals']['Solidity/Finish']['docstring_lines'] = '0'
+        path.write_text(json.dumps({'_candidate': other}))
+        git('add', 'scripts/prose-baseline.json')
+        other_tree = git('write-tree')
+        other_head = git('commit-tree', other_tree, '-p', active_head, '-m', 'other shrink')
+        merged = git('commit-tree', valid_head + '^{tree}', '-p', valid_head,
+                     '-p', other_head, '-m', 'discard other shrink')
+        git('update-ref', 'HEAD', merged)
         with self.assertRaisesRegex(ValueError, 'residual increase'):
             MODULE['validate_history'](self.root)
 

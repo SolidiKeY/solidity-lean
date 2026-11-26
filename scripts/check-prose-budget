@@ -631,7 +631,7 @@ def validate_history(root):
     """Check every baseline-changing commit, including intermediate pushes/merges."""
     activation = activation_policy()["activation"]["commit"]
     revisions = subprocess.check_output(
-        ["git", "-C", str(root), "rev-list", "--full-history", activation + "..HEAD",
+        ["git", "-C", str(root), "rev-list", "--full-history", "--sparse", activation + "..HEAD",
          "--", "scripts/prose-baseline.json"], text=True).splitlines()
     def descended(revision):
         return subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor",
