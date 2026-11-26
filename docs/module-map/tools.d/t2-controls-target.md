@@ -1,2 +1,1 @@
-
 | `**/*Controls.lean` | Library membership (H627): unreachable Controls belong to the generated default-target `SolidityControls` library; reachable Controls stay in `Solidity`. `controls-classify.py --check` verifies the partition. |
