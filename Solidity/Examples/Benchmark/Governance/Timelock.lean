@@ -44,6 +44,7 @@ def Timelock : Contract := contract!{
     queued[id] = false;
   }
   ensures \old(queued[id]) && !queued[id] && done[id] && !\old(done[id]) && block.timestamp >= readyAt[id];
+  ensures block.timestamp >= \old(readyAt[id]);
   function execute(uint256 id) public {
     require(queued[id] && !done[id]);
     require(block.timestamp >= readyAt[id]);
