@@ -50,6 +50,8 @@ function modelTree(row) {
     node('Initial storage', storage.length ? undefined : m.initialStorage, storage.map(([k,v]) => valueNode(k,v)))];
 }
 const samePoint = (a,b) => a.line === b.line && a.character === b.character;
+const documentPath = doc => doc.uri?.fsPath || (doc.uri?.toString().startsWith('file:') ? fileURLToPath(doc.uri.toString()) : undefined);
+const sameSource = (doc, source) => !source || !!documentPath(doc) && resolve(documentPath(doc)) === resolve(source);
 // Tokenize only the inheritance header; declaration ownership comes from the
 // compiler's existing definition service, never from matching a base's spelling.
 function baseReferences(doc, symbol) {
@@ -139,8 +141,7 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
   return {roots,current,dependencies:new Set(documents.keys()),documents};
 }
 function declarationValues(doc, row, symbols, storage, documents) {
-  const sourcePath = document => document.uri?.fsPath || (document.uri?.toString().startsWith('file:') ? fileURLToPath(document.uri.toString()) : undefined);
-  const context = row.diagnosticSource ? [...(documents?.values() || [{doc,symbols}])].find(r => sourcePath(r.doc) && resolve(sourcePath(r.doc)) === resolve(row.diagnosticSource)) : {doc,symbols};
+  const context = row.diagnosticSource ? [...(documents?.values() || [{doc,symbols}])].find(r => sameSource(r.doc,row.diagnosticSource)) : {doc,symbols};
   const parameterDoc = context?.doc || doc;
   const contract = symbols.find(s => s.name === row.contract);
   if (!contract) return [];
@@ -206,7 +207,7 @@ function activate(context, {vscode, service, output}) {
     if (!snapshot || snapshot.version !== doc.version || snapshot.sourceHash !== hash(doc.getText())) {clear(); return;}
     const position = editor.selection.active;
     const before = (a,b) => a.line < b.line || a.line === b.line && a.character <= b.character;
-    const containing = snapshot.rows.filter(r => r.range && before(r.range.start,position) && before(position,r.range.end));
+    const containing = snapshot.rows.filter(r => r.range && sameSource(doc,r.diagnosticSource) && before(r.range.start,position) && before(position,r.range.end));
     let row = fromDependency ? selected.row : containing.length === 1 ? containing[0] : undefined;
     if (!row && snapshot.rows.length === 1) row = snapshot.rows[0];
     if (!row && snapshot.rows.length > 1) row = (await vscode.window.showQuickPick(snapshot.rows.map(r => ({label:`${r.contract}.${r.signature || r.function}`, row:r}))))?.row;

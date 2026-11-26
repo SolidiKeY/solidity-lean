@@ -269,3 +269,8 @@ test('newly visible imported editors receive current values and cannot revive in
 test('file-buffer edits before dependency discovery invalidate cached project models',async()=>{
   const h=harness();h.report([row()]);h.events.edit({document:{uri:{toString:()=> 'file:///Base.sol'}}});await h.show();assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
 });
+
+test('imported failure ranges cannot masquerade as cursor positions in the main file',async()=>{
+  const h=harness();h.report([row('f',{diagnosticSource:'/Base.sol'}),row('g',{diagnosticSource:'/Other.sol',range:range(5,8),counterexample:evidence({initialBalance:'19'})})]);
+  h.editor.selection.active=point(2);h.setPick(1);await h.show();assert.equal(h.provider.getChildren()[2].value,'19');h.dispose();
+});
