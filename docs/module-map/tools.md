@@ -28,6 +28,12 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Automation/H28/Prove.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
 | `Tools/ExecutableGoalBinding.lean` | Exact executable-goal failure at a proved same candidate; retains distinct source-values equality obligations and makes no importer transport or source-authentication claim. |
+| Module | Role |
+| --- | --- |
+| `Solidity.Docs.ProseRatio.Allowance` | Floor rounding, value equivalence and minimum bounds. |
+| `Solidity.Docs.ProseRatio.Classification` | Acceptance over all areas and inert or code-free padding. |
+| `Solidity.Docs.ProseRatio.Policy` | Missing entries, shrink-only policy updates and ratio-preserving growth. |
+| `Solidity.Docs.ProseRatio` | Assembles the exact `proseRatioRuleSound` laws for every decidable area type. |
 | `Docs/ProseCalibrated/Allowance.lean` | Exact allowance arithmetic: rational order, componentwise minimum, numerator antitonicity, floor/boundary evaluation, equivalence invariance, and zero calibration laws over `Goals.ProseCalibrated`. |
 | `Examples/Docs/ProseCalibrated/Allowance.lean` | Checks the complete public types of the seven allowance arithmetic laws and four helpers against their proved constants. |
 | `Solidity/Docs/ProseCalibrated/Classification.lean` | Calibrated prose classification, exclusion, locality and lexical padding laws over the frozen model. |

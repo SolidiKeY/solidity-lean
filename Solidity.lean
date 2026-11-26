@@ -2637,6 +2637,10 @@ import Solidity.Docs.ProseCalibrated
 import Solidity.Docs.ProseCalibrated.Allowance
 import Solidity.Docs.ProseCalibrated.Classification
 import Solidity.Docs.ProseCalibrated.Policy
+import Solidity.Docs.ProseRatio
+import Solidity.Docs.ProseRatio.Allowance
+import Solidity.Docs.ProseRatio.Classification
+import Solidity.Docs.ProseRatio.Policy
 import Solidity.ERC7201
 import Solidity.Eqns
 import Solidity.Evm.Compile
