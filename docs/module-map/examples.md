@@ -153,12 +153,6 @@ At the root, the notation's own tests:
 | `Examples/DecisionHashesChecks.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Examples/Tactics/StaticStorageCompatibility.lean` | Inhabited conditional frame, changed balance, reentry refusal and malformed decoder controls; no opaque static preservation assertion. |
-| `Examples/Benchmark/Governance/Ownable.lean` | OpenZeppelin owner state machine; all four function specifications proved by `sol_prove`. |
-| `Examples/Benchmark/Governance/Pausable.lean` | OpenZeppelin pause state machine; all four function specifications proved by `sol_prove`. |
-| `Examples/Benchmark/Governance/Voting.lean` | Direct-vote Ballot variant: one vote and tally/frame effects; all three function specifications proved by `sol_prove`. |
-| `Examples/Benchmark/Governance/Timelock.lean` | Bound Ether-operation timelock: delay, cancellation and permanent completion; all four function specifications proved by `sol_prove`. |
-| `Examples/Benchmark/Governance/EnglishAuction.lean` | Solidity SimpleAuction: constructor proved; bid, refund and final payout obligations retained as unknown, with snapshot/payment closer gaps documented in the module. |
-| `Examples/Benchmark/Governance/Multisig.lean` | Two-owner Ether multisig: constructor, revocation and threshold execution proved; fresh submission and no-double-confirmation specifications retained as unknown with snapshot/Boolean closer gaps. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/Algorithms/BinarySearch.lean` | Sorted-array half-open binary search; hit or absence specification. |
@@ -171,6 +165,12 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Algorithms/Maximum.lean` | Nonempty-array maximum; upper bound and attained-element specification. |
 | `Examples/Benchmark/Algorithms/Reverse.lean` | In-place storage-array reversal; entry-state element and length specification. |
 | `Examples/Benchmark/Algorithms/Sum.lean` | Array prefix sum; exact fold target retained pending specification lowering. |
+| `Examples/Benchmark/Governance/Ownable.lean` | OpenZeppelin owner state machine; all four function specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Governance/Pausable.lean` | OpenZeppelin pause state machine; all four function specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Governance/Voting.lean` | Direct-vote Ballot variant: one vote and tally/frame effects; all three function specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Governance/Timelock.lean` | Bound Ether-operation timelock: delay, cancellation and permanent completion; all four function specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Governance/EnglishAuction.lean` | Solidity SimpleAuction: constructor proved; bid, refund and final payout obligations retained as unknown, with snapshot/payment closer gaps documented in the module. |
+| `Examples/Benchmark/Governance/Multisig.lean` | Two-owner Ether multisig: constructor, revocation and threshold execution proved; fresh submission and no-double-confirmation specifications retained as unknown with snapshot/Boolean closer gaps. |
 | `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `scripts/trust/executable-goal-replay.lean` in Lean CI. |
 | `Examples/ExecutableRequestData.lean` | Shared synthetic request and nondefault raw contract data for quotation and retained-candidate examples; not source admission. |
 | `Examples/DecisionResidue.lean` | M7-next: residue members (halting `||` APF guard valid and false; VA1 mapping-field and normalization-budget labels; a leaf every hash try refuses), witness controls (in-target non-residue feature fixtures of earlier milestones answered through `DecisionTheorem'`; the answering route is not pinned) and the negative control (a valid and a false residue leaf, neither claimed). |
