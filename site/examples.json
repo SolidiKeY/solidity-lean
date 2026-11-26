@@ -87,4 +87,11 @@
       ]
     }
   ]
+,
+  "playground": [
+  {
+    "title": "Identity",
+    "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\n\ncontract Identity {\n    /// @custom:key ensures \\result == value\n    function identity(uint256 value) public pure returns (uint256 result) {\n        return value;\n    }\n\n    function caller() public pure returns (uint256) {\n        return identity(1);\n    }\n}\n"
+  }
+]
 }
