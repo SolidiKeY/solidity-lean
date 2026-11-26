@@ -75,6 +75,37 @@ function outcome(report) {
     limitations:['Numeric panic/revert codes are unavailable from the typed-model report.', 'Emitted logs and written EVM slots are unavailable from Solidity.Frontend.Cli/runReport; storage text is final typed storage, not a write trace.', 'Fresh model state; constructor not executed.']};
 }
 
+// Keep source bytes and lexical source identities distinct, even for absolute
+// aliases or embedded ../ segments. The snapshot is already a closed import
+// graph: give each source a safe filename, then encode its resolved edges as
+// exact, source-contextual solc remappings. Nothing reads the original disk.
+function materialize(project, directory) {
+  const {imports}=require('../solidity-text.cjs'),{posix}=path;
+  const names=Object.keys(project.sources),aliases=new Map(names.map(name=>[name,`units/${projects.hash(name)}.sol`]));
+  const rules=(project.remappings || []).map((rule,index)=>{
+    const at=rule.indexOf('='),head=rule.slice(0,at),colon=head.indexOf(':');
+    return {context:colon<0?'':head.slice(0,colon),prefix:colon<0?head:head.slice(colon+1),target:rule.slice(at+1),index};
+  });
+  const remappings=[];
+  for(const name of names){
+    const alias=aliases.get(name),file=path.join(directory,alias);
+    fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,project.sources[name].content);
+    for(const spelling of imports(project.sources[name].content)){
+      // Match project.snapshot's precedence on ORIGINAL logical identities.
+      let key=spelling.startsWith('.')?posix.normalize(posix.join(posix.dirname(name),spelling)):spelling;
+      const rule=rules.filter(r=>key.startsWith(r.prefix)&&name.startsWith(r.context)).sort((a,b)=>b.context.length-a.context.length||b.prefix.length-a.prefix.length||b.index-a.index)[0];
+      if(rule)key=rule.target+key.slice(rule.prefix.length);
+      const dependency=aliases.get(key);
+      if(!dependency)throw fail(`Snapshot dependency is missing: ${key}`);
+      const imported=spelling.startsWith('.')?posix.normalize(posix.join(posix.dirname(alias),spelling)):spelling;
+      remappings.push(`${alias}:${imported}=${dependency}`);
+    }
+  }
+  const main=aliases.get(project.mainSource);
+  if(!main)throw fail('Snapshot main source is missing');
+  return {source:path.join(directory,main),projectRoot:directory,includePaths:[],remappings};
+}
+
 // Reuse the existing runSolidityTests action=run entry point in a bounded child.
 // Mirror the existing project snapshot so dirty buffers and imports stay exact.
 async function runBackend(request, {signal, service}) {
@@ -83,11 +114,7 @@ async function runBackend(request, {signal, service}) {
   let child, closed, timer, registration;
   const cancel = () => {if(child)terminateTree(child);};
   try {
-    for (const [name,source] of Object.entries(request.project.sources)) {
-      const target = path.resolve(directory,name);
-      if (path.relative(directory,target).startsWith('..') || path.isAbsolute(name)) throw fail('Snapshot source outside execution directory');
-      fs.mkdirSync(path.dirname(target),{recursive:true}); fs.writeFileSync(target,source.content);
-    }
+    const snapshot=materialize(request.project,directory);
     if (signal.aborted) throw fail('Run cancelled',-32800);
     child = spawn(process.execPath,[__filename,'--runner'],{cwd:service.root,detached:process.platform !== 'win32',stdio:['pipe','pipe','pipe'],windowsHide:true,env:{...process.env,LEAN_NUM_THREADS:'1'}});
     child.ownedGroup = process.platform !== 'win32';
@@ -111,9 +138,9 @@ async function runBackend(request, {signal, service}) {
     timer=setTimeout(()=>{expired=true;cancel();},service.settings.timeoutMs || 60000);
     registration=true; await service.registerOwned('proof',child);
     if(signal.aborted)throw fail('Run cancelled',-32800);
-    child.stdin.end(JSON.stringify({root:service.root,source:path.join(directory,request.project.mainSource),
+    child.stdin.end(JSON.stringify({root:service.root,source:snapshot.source,
       options:{action:'run',contract:request.function.contract,function:request.function.signature,args:request.args,state:{},
-        projectRoot:directory,remappings:request.project.remappings,timeoutMs:service.settings.timeoutMs || 60000}}));
+        projectRoot:snapshot.projectRoot,includePaths:snapshot.includePaths,remappings:snapshot.remappings,timeoutMs:service.settings.timeoutMs || 60000}}));
     return await result;
   } finally {
     clearTimeout(timer); signal.removeEventListener('abort',cancel);
@@ -155,7 +182,7 @@ function register(server, injected = runBackend) {
   server.onRequest('solidityLean/runFunction',handler(true));
   return {async dispose(){disposed=true;for(const controller of active)controller.abort();await Promise.allSettled([...pending]);}};
 }
-module.exports={register,argument,supported,functions,outcome,runBackend};
+module.exports={register,argument,supported,functions,outcome,runBackend,materialize};
 if(require.main===module && process.argv[2]==='--runner') {
   let input='';process.stdin.setEncoding('utf8');process.stdin.on('data',chunk=>{input+=chunk;});
   process.stdin.on('end',async()=>{try{const request=JSON.parse(input);

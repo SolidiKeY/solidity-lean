@@ -84,3 +84,40 @@ test('native adapter registers accepted ownership and reuses existing runner API
 });
 
 test('payable address retains numeric ABI validation',()=>{assert.equal(server.argument('address payable','42'),'42');assert.equal(server.supported('address payable'),true);});
+
+test('absolute imports, contextual absolute remappings and relative parents relocate consistently',t=>{
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'run-remapping-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+  const root=path.join(directory,'original'),vendor=path.join(root,'vendor'),nested=path.join(root,'nested');
+  fs.mkdirSync(vendor,{recursive:true});fs.mkdirSync(nested,{recursive:true});
+  const dependency=path.join(vendor,'Lib.sol'),leaf=path.join(nested,'N.sol');
+  fs.writeFileSync(dependency,'import "@nested/N.sol"; library Lib {}');fs.writeFileSync(leaf,'library N {}');
+  const text=`import "@dep/Lib.sol"; import "${leaf}"; contract C {}`;
+  const source=path.join(root,'C.sol');fs.writeFileSync(source,text);
+  const projects=require('../src/project.cjs');
+  const project=projects.snapshot(source,text,{projectRoot:root,remappings:[`@dep/=${vendor}/`,`${vendor}/:@nested/=${nested}/`]});
+  assert.ok(project.sources[dependency]);assert.ok(project.sources[leaf]);
+  const execution=path.join(directory,'execution');fs.mkdirSync(execution);
+  const snapshot=server.materialize(project,execution);
+  const mirrored=projects.snapshot(snapshot.source,text,{projectRoot:snapshot.projectRoot,includePaths:snapshot.includePaths,remappings:snapshot.remappings});
+  assert.deepEqual(Object.values(mirrored.sources).map(s=>s.content).sort(),Object.values(project.sources).map(s=>s.content).sort());
+  for(const file of Object.values(mirrored.files))assert.ok(!path.relative(execution,file.path).startsWith('..'));
+  assert.equal(fs.readFileSync(dependency,'utf8'),project.sources[dependency].content);
+  const relative={mainSource:'C.sol',sources:{'C.sol':{content:'import "../D.sol"; contract C {}'},'../D.sol':{content:'library D {}'}},remappings:[]};
+  const nestedExecution=path.join(directory,'relative');fs.mkdirSync(nestedExecution);
+  const moved=server.materialize(relative,nestedExecution);
+  const resolved=projects.snapshot(moved.source,relative.sources['C.sol'].content,{projectRoot:moved.projectRoot,includePaths:[nestedExecution],remappings:moved.remappings});
+  assert.equal(Object.keys(resolved.sources).length,2);
+});
+
+test('relative imports in absolute dependencies honor absolute-prefix redirects and lexical aliases',t=>{
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'run-prefix-remapping-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+  const vendor='/virtual/vendor/',override='/virtual/override/Leaf.sol';
+  const original={mainSource:'C.sol',sources:{'C.sol':{content:'import "@dep/Lib.sol"; import "@alias/Lib.sol"; contract C {}'},
+    [vendor+'Lib.sol']:{content:'import "./Leaf.sol"; library Lib {}'},
+    [vendor+'sub/../Lib.sol']:{content:'import "./Leaf.sol"; library Alias {}'},
+    [override]:{content:'library Leaf {}'}},remappings:[`@dep/=${vendor}`,`@alias/=${vendor}sub/../`,`${vendor}Leaf.sol=${override}`]};
+  const moved=server.materialize(original,directory),projects=require('../src/project.cjs');
+  const resolved=projects.snapshot(moved.source,original.sources['C.sol'].content,{projectRoot:moved.projectRoot,remappings:moved.remappings});
+  assert.deepEqual(Object.values(resolved.sources).map(s=>s.content).sort(),Object.values(original.sources).map(s=>s.content).sort());
+  assert.equal(fs.readdirSync(path.join(directory,'units')).length,4);
+});
