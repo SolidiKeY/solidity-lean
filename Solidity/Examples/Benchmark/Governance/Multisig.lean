@@ -13,7 +13,9 @@ transfers (empty calldata); arbitrary calldata and callbacks are not modeled.
 The threshold, distinct-owner membership, confirmation and revocation guards
 are retained. No theorem claims execution of arbitrary external calldata.
 Natural @custom:key clauses state no double confirmation and threshold checks.
-Verdicts: constructor, revoke, execute proved; submit and confirm unknown.
+The verdicts below concern this model only. Complete-original executable
+modeling remains an obligation; no full-source verification credit is claimed.
+Model verdicts: constructor, revoke, execute proved; submit and confirm unknown.
 -/
 namespace Solidity.Examples.Benchmark.Governance.Multisig
 def Multisig : Contract := contract!{
