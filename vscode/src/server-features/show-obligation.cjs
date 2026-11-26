@@ -52,7 +52,7 @@ function createHandler(service,backend=inspect) {
         if(project&&!projects.current(project,service.projectDocuments()))throw failure('Project changed during inspection',-32801);
       };
       saved();
-      const output=await backend({root:service.root,source:doc.path,contract:parent.name,declarationId:node.id,settings:service.settings,signal});
+      const output=await cancellable(backend({root:service.root,source:doc.path,contract:parent.name,declarationId:node.id,settings:service.settings,signal}),signal);
       saved();
       if(typeof output!=='string'||!output.trim())throw new Error('Backend returned no obligation');
       return {text:output,languageId:'lean',range,label:parent.name+'.'+node.name};

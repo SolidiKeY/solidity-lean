@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const {mkdtempSync,writeFileSync,rmSync}=require('node:fs');
 const {tmpdir}=require('node:os');
 const {join}=require('node:path');
-const {createHandler,inspect}=require('../src/server-features/show-obligation.cjs');
+const {createHandler,inspect,register}=require('../src/server-features/show-obligation.cjs');
 const {activate,COMMAND}=require('../src/features/show-obligation.cjs');
 const range={start:{line:0,character:9},end:{line:0,character:10}},position=range.start;
 function backendFixture(t){
@@ -14,7 +14,7 @@ function backendFixture(t){
   const service={root:dir,docs:new Map([[doc.uri,doc]]),requests:new Map(),generation:1,settings:{},current:(d,v,g)=>d===doc&&d.version===v&&g===1,analyze:async()=>{},verify:async()=>({results:[{sourceId:7,contract:'C',signature:'f()'}]})};
   return {service,doc,params:{textDocument:{uri:doc.uri,version:1},position}};
 }
-test('server uses declaration ID and signature, returning printer output',async t=>{
+test('server uses exact declaration ID and contract, returning printer output',async t=>{
   const {service,params}=backendFixture(t);let request;
   const result=await createHandler(service,async r=>(request=r,'dl{ ⊢ true }'))(params,1);
   assert.equal(result.text,'dl{ ⊢ true }');assert.equal(request.declarationId,7);assert.equal(request.contract,'C');assert.equal(service.requests.size,0);
@@ -88,4 +88,26 @@ test('hover inspection leaves verification state alone',async t=>{
   doc.report={results:['proved']};const report=doc.report;const abort=new AbortController();doc.verifyAbort=abort;
   await createHandler(service,async()=> 'dl{ true }')(params,1);
   assert.equal(doc.report,report);assert.equal(abort.signal.aborted,false);
+});
+
+test('registry uses the documented injected printer',async t=>{
+  const {service,params}=backendFixture(t);let handler;
+  service.testing={printObligation:async()=> 'dl{ ⊢ true }'};
+  register({service,onRequest(method,h){assert.equal(method,'solidityLean/showObligation');handler=h;}});
+  assert.equal((await handler(params,1)).text,'dl{ ⊢ true }');
+});
+test('server cancellation settles without waiting for an uncooperative injected printer',async t=>{
+  const {service,params}=backendFixture(t);let started;
+  const ready=new Promise(resolve=>{started=resolve;});
+  const pending=createHandler(service,()=>{started();return new Promise(()=>{});})(params,1);
+  await ready;service.requests.get(1).abort();
+  await assert.rejects(pending,{code:-32800});assert.equal(service.requests.size,0);
+});
+test('real project snapshot rejects imported buffer changes during printing',async t=>{
+  const {service,params,doc}=backendFixture(t),projects=require('../src/project.cjs');
+  const imported={path:join(service.root,'D.sol'),text:'contract D {}',version:1};writeFileSync(imported.path,imported.text);
+  const project=projects.snapshot(doc.path,doc.text,{},[doc]);
+  project.files['D.sol']={...imported,hash:projects.hash(imported.text)};
+  doc.compiled={project};service.projectDocuments=()=>[doc,imported];
+  await assert.rejects(createHandler(service,async()=>{imported.text+=' ';return 'dl{ true }';})(params,1),{code:-32801});
 });
