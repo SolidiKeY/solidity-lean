@@ -47,10 +47,12 @@ def Timelock : Contract := contract!{
   function execute(uint256 id) public {
     require(queued[id] && !done[id]);
     require(block.timestamp >= readyAt[id]);
-    queued[id] = false;
-    done[id] = true;
     (bool success, ) = recipient[id].call{value: amount[id]}("");
     require(success);
+    require(queued[id] && !done[id]);
+    require(block.timestamp >= readyAt[id]);
+    queued[id] = false;
+    done[id] = true;
   }
 }
 local instance : InContract := ⟨Timelock⟩
