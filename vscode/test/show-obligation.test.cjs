@@ -1,10 +1,10 @@
 'use strict';
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {mkdtempSync,writeFileSync,rmSync}=require('node:fs');
+const {mkdtempSync,mkdirSync,writeFileSync,rmSync}=require('node:fs');
 const {tmpdir}=require('node:os');
 const {join}=require('node:path');
-const {createHandler}=require('../src/server-features/show-obligation.cjs');
+const {createHandler,inspect}=require('../src/server-features/show-obligation.cjs');
 const {activate,COMMAND}=require('../src/features/show-obligation.cjs');
 const range={start:{line:0,character:9},end:{line:0,character:10}},position=range.start;
 function backendFixture(t){
@@ -17,7 +17,7 @@ function backendFixture(t){
 test('server uses declaration ID and signature, returning printer output',async t=>{
   const {service,params}=backendFixture(t);let request;
   const result=await createHandler(service,async r=>(request=r,'dl{ ⊢ true }'))(params,1);
-  assert.equal(result.text,'dl{ ⊢ true }');assert.equal(request.signature,'f()');assert.equal(request.contract,'C');assert.equal(service.requests.size,0);
+  assert.equal(result.text,'dl{ ⊢ true }');assert.equal(request.declarationId,7);assert.equal(request.contract,'C');assert.equal(service.requests.size,0);
 });
 test('server ignores function bodies and rejects stale versions',async t=>{
   const {service,params}=backendFixture(t);const handler=createHandler(service,()=>assert.fail('backend called'));
@@ -31,7 +31,7 @@ test('server cancellation reaches injected backend and cannot publish',async t=>
 test('server rejects edits while backend runs and refuses unsaved source',async t=>{
   const {service,doc,params}=backendFixture(t);
   await assert.rejects(createHandler(service,async()=>{doc.text+=' ';return 'dl{ true }';})(params,1),{code:-32801});
-  await assert.rejects(createHandler(service,()=>assert.fail('unsaved backend called'))(params,2),{code:-32801});
+  await assert.rejects(createHandler(service,()=>assert.fail('unsaved backend called'))(params,2),{code:-32010});
 });
 test('server backend errors propagate and release request',async t=>{
   const {service,params}=backendFixture(t);
@@ -65,3 +65,28 @@ test('client stale buffer and stale hover link cannot open output',async t=>{
   const g=clientFixture(t,async()=>{g.doc.version++;return {text:'dl{ true }',range,languageId:'lean',label:'f'};});assert.equal(await g.hover.provideHover(g.doc,position),null);
 });
 test('client backend errors are visible',async t=>{const f=clientFixture(t,async()=>{throw new Error('backend unavailable');});await f.command();assert.match(f.errors[0],/backend unavailable/);});
+
+test('production transport forwards project options and selects an overload by declaration ID',async t=>{
+  const root=mkdtempSync(join(tmpdir(),'obligation-transport-'));t.after(()=>rmSync(root,{recursive:true,force:true}));mkdirSync(join(root,'scripts'));
+  writeFileSync(join(root,'scripts/test-solidity.mjs'),`export function runSolidityTests(paths,o){
+    if(o.projectRoot!=='/project'||o.includePaths[0]!=='lib'||o.remappings[0]!=='a=b')throw new Error('project settings lost');
+    if(o.list)return {results:[{sourceId:2,contract:'C',signature:'f(bool)'},{sourceId:7,contract:'C',signature:'f(uint256)'}],errors:[]};
+    if(o.function!=='f(uint256)'||o.action!=='inspect'||o.show!=='obligation')throw new Error('wrong printer selection');
+    return {results:[{contract:'C',signature:o.function,status:'inspected',text:'dl{ exact overload }'}],errors:[]};
+  }`);
+  const result=await inspect({root,source:'/project/C.sol',contract:'C',declarationId:7,settings:{projectRoot:'/project',includePaths:['lib'],remappings:['a=b'],timeoutMs:5000}});
+  assert.equal(result,'dl{ exact overload }');
+});
+test('production transport cancellation and timeout stop its owned process',async t=>{
+  const root=mkdtempSync(join(tmpdir(),'obligation-cancel-'));t.after(()=>rmSync(root,{recursive:true,force:true}));mkdirSync(join(root,'scripts'));
+  writeFileSync(join(root,'scripts/test-solidity.mjs'),`await new Promise(r=>setTimeout(r,10000)); export function runSolidityTests(){}`);
+  const controller=new AbortController();const pending=inspect({root,source:'C.sol',contract:'C',declarationId:7,signal:controller.signal});controller.abort();
+  await assert.rejects(pending,{code:-32800});
+  await assert.rejects(inspect({root,source:'C.sol',contract:'C',declarationId:7,settings:{timeoutMs:30}}),/timed out/);
+});
+test('hover inspection leaves verification state alone',async t=>{
+  const {service,params,doc}=backendFixture(t);service.verify=()=>assert.fail('inspection must not publish a listing over verification');
+  doc.report={results:['proved']};const report=doc.report;const abort=new AbortController();doc.verifyAbort=abort;
+  await createHandler(service,async()=> 'dl{ true }')(params,1);
+  assert.equal(doc.report,report);assert.equal(abort.signal.aborted,false);
+});
