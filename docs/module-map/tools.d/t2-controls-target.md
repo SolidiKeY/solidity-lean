@@ -1,2 +1,2 @@
 
-| `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
+| `**/*Controls.lean` | Library membership (H627): unreachable Controls belong to the generated default-target `SolidityControls` library; reachable Controls stay in `Solidity`. `controls-classify.py --check` verifies the partition. |
