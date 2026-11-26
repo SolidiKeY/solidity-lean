@@ -1,0 +1,3 @@
+| `Yul/Layout/Shared/Vocabulary.lean` | Shared `Solidity.Goals.Shrink` region, layout, location, physical state, tree, cell, parameter and geometry types; physical accessors, object footprint and slot placement. Independent of the per-shape instance relation in `Goals/Shrink.lean`. |
+| `Yul/Layout/Shared/Recursive.lean` | Unchanged `Solidity.Goals.Shrink` recursive layout readers, writers, footprints, separation, fitting predicates, layout view and general laws. |
+| `Yul/Layout/Shared/Contracts.lean` | Unchanged `Solidity.Goals.Shrink` memory-shape layout, slot-region predicate, geometry and scalar-pilot contracts; reexports the shared recursive interface without importing the per-shape instance relation. |
