@@ -14,6 +14,13 @@ import Solidity.Examples.Benchmark.Algorithms.Reverse
 import Solidity.Examples.Benchmark.Algorithms.Sum
 import Solidity.Examples.Benchmark.Coin
 import Solidity.Examples.Benchmark.Counter
+import Solidity.Examples.Benchmark.Defi.ConstantProduct
+import Solidity.Examples.Benchmark.Defi.Escrow
+import Solidity.Examples.Benchmark.Defi.FixedRateVault
+import Solidity.Examples.Benchmark.Defi.RefundEscrow
+import Solidity.Examples.Benchmark.Defi.StakingPool
+import Solidity.Examples.Benchmark.Defi.StakingRewards
+import Solidity.Examples.Benchmark.Defi.WrappedEther
 import Solidity.Examples.Benchmark.ERC20
 import Solidity.Examples.Benchmark.EtherWallet
 import Solidity.Examples.Benchmark.Governance.EnglishAuction
@@ -26,6 +33,9 @@ import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.Syntax
+import Solidity.Examples.Benchmark.Tokens.ERC1155
+import Solidity.Examples.Benchmark.Tokens.ERC20
+import Solidity.Examples.Benchmark.Tokens.ERC721
 import Solidity.Examples.BooleanLinear
 import Solidity.Examples.CallReduction
 import Solidity.Examples.ChainExpand

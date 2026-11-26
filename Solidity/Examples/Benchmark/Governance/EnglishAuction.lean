@@ -11,7 +11,9 @@ The English-auction example's revert-with-error branches become require,
 events are omitted. The refund uses send and restores the credit on failure,
 as in the source; its result distinguishes a successful refund from failure.
 Natural @custom:key clauses state highest bid, accumulated refunds, and payout.
-Verdicts: constructor proved; bid, withdraw, auctionEnd unknown (see obligations).
+The verdicts below concern this model only. Complete-original executable
+modeling remains an obligation; no full-source verification credit is claimed.
+Model verdicts: constructor proved; bid, withdraw, auctionEnd unknown (see obligations).
 -/
 namespace Solidity.Examples.Benchmark.Governance.EnglishAuction
 def EnglishAuction : Contract := contract!{

@@ -13,7 +13,9 @@ Its queue/cancel/execute lifecycle keeps the source's ready-time check and
 one-shot execution. It does not model hashing, batches, roles or predecessors.
 Natural @custom:key clauses state the successful lifecycle effects; no early
 execution and no replay are required by execute's postcondition.
-Verdicts: constructor, schedule, cancel, execute: proved.
+The verdicts below concern this model only. Complete-original executable
+modeling remains an obligation; no full-source verification credit is claimed.
+Model verdicts: constructor, schedule, cancel, execute: proved.
 -/
 namespace Solidity.Examples.Benchmark.Governance.Timelock
 def Timelock : Contract := contract!{
@@ -44,6 +46,7 @@ def Timelock : Contract := contract!{
     queued[id] = false;
   }
   ensures \old(queued[id]) && !queued[id] && done[id] && !\old(done[id]) && block.timestamp >= readyAt[id];
+  ensures block.timestamp >= \old(readyAt[id]);
   function execute(uint256 id) public {
     require(queued[id] && !done[id]);
     require(block.timestamp >= readyAt[id]);
