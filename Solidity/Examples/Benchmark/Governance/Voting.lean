@@ -8,11 +8,13 @@ import Solidity.Calculus.Closers
 Source: Solidity documentation v0.8.26, voting example (Ballot):
 <https://github.com/ethereum/solidity/blob/v0.8.26/docs/examples/voting.rst>.
 This direct-vote benchmark retains the chairperson, voting weights, one-vote
-flag and per-proposal tally. Delegation and proposal-name storage are excluded;
+flag and per-proposal tally. Delegation and proposal-name storage remain unmodeled;
 the proposal count is explicit instead of a string-array constructor argument.
 It is a direct-vote variant, not a verification of the full delegated Ballot.
 Natural @custom:key clauses cover authorization, one vote, and tally effects.
-Verdicts: constructor, giveRightToVote, vote: proved.
+The verdicts below concern this model only. Complete-original executable
+modeling remains an obligation; no full-source verification credit is claimed.
+Model verdicts: constructor, giveRightToVote, vote: proved.
 -/
 namespace Solidity.Examples.Benchmark.Governance.Voting
 def Voting : Contract := contract!{
