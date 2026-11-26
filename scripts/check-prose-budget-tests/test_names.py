@@ -217,13 +217,13 @@ class RegisteredNamesTests(unittest.TestCase):
             counts = M['counts'](root);self.assertEqual(counts['Solidity/Area']['process_ids'], 4)
             self.assertEqual(counts['Solidity/Area']['comment_lines'], 1)
             self.assertEqual(counts['Solidity/Area']['docstring_lines'], 0)
-            baseline.write_text(json.dumps(counts));before = baseline.read_bytes()
+            baseline.write_text(json.dumps({'_candidate': M['activation_policy']()}));before = baseline.read_bytes()
             lean.write_text(source + '-- G18\n')
             for flag in [[], ['--update']]:
                 result = subprocess.run([sys.executable, '-B', str(SCRIPT), '--root', str(root), *flag],
                                         text=True, capture_output=True)
                 self.assertEqual(result.returncode, 1)
-                self.assertIn('process_ids: 5 > 4', result.stderr)
+                self.assertIn('process_ids: 5 > 0', result.stderr)
                 self.assertEqual(baseline.read_bytes(), before)
 
 
