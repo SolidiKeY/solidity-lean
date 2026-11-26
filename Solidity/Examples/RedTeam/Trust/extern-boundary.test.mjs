@@ -8,7 +8,10 @@ import {findings} from '../../../../scripts/check-trust.mjs';
 import {sourceAttributes, requireLinks} from '../../../../scripts/trust/trust-implemented-by.mjs';
 
 const module = readFileSync(new URL('./ExternBoundary.lean', import.meta.url), 'utf8');
-const fixture = module.split('r###"')[1].split('"###')[0];
+const marker = '-- NATIVE_IMPLEMENTATION_FIXTURE';
+assert.equal(module.split(marker).length, 2, 'exactly one implementation marker');
+const fixture = module.replace(marker, '@[extern "lean_nat_add"]') +
+  '\ndef main : IO Unit := IO.println (Solidity.Examples.RedTeam.Trust.ExternBoundary.first 0 1)\n';
 
 test('isolated external implementation passes source lint despite native disagreement', () => {
   assert.deepEqual(findings(fixture), []);
