@@ -198,7 +198,7 @@ function activate(context, {vscode, service, output}) {
   }
   async function show() {
     const activeEditor = vscode.window.activeTextEditor;
-    const fromDependency = selected?.ready && activeEditor && selected.uri !== activeEditor.document.uri.toString() && selected.dependencies.has(activeEditor.document.uri.toString()) && !snapshots.has(activeEditor.document.uri.toString());
+    const fromDependency = selected?.ready && activeEditor && selected.uri !== activeEditor.document.uri.toString() && selected.dependencies.has(activeEditor.document.uri.toString()) && !snapshots.get(activeEditor.document.uri.toString())?.rows.length;
     const editor = fromDependency ? selected.editor : activeEditor, doc = editor?.document;
     if (!doc) return;
     const initialGeneration = generation;

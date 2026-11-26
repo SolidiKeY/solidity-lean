@@ -237,6 +237,8 @@ test('imported storage decorates both visible owners and toggles from either edi
     h.vscode.window.visibleTextEditors=[h.editor,baseEditor];
     const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f');h.report([row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9; y = 17'})})]);
     await h.show();assert.equal(h.calls.at(-1)[0].renderOptions.after.contentText,'y = 17');assert.equal(baseCalls.at(-1)[0].renderOptions.after.contentText,'x = 9');assert.deepEqual(baseCalls.at(-1)[0].range,base.lineAt(0).range);
+    h.vscode.workspace.textDocuments.push(base);
+    h.service.emit('report',{uri:base.uri.toString(),version:base.version,sourceHash:createHash('sha256').update(base.getText()).digest('hex'),report:{results:[],errors:[]}});
     h.vscode.window.activeTextEditor=baseEditor;h.events.active(baseEditor);assert.equal(h.provider.getChildren().length,5);
     await h.show();assert.deepEqual(h.calls.at(-1),[]);assert.deepEqual(baseCalls.at(-1),[]);
     await h.show();assert.equal(h.calls.at(-1)[0].renderOptions.after.contentText,'y = 17');assert.equal(baseCalls.at(-1)[0].renderOptions.after.contentText,'x = 9');
