@@ -1,0 +1,181 @@
+import Solidity.Frontend.SolcJson
+import Solidity.Frontend.SolcJson.Admission
+import Solidity.Frontend.SolcJson.Body
+import Solidity.Frontend.SolcJson.CallMetadata
+import Solidity.Frontend.SolcJson.CallMetadataControls
+import Solidity.Frontend.SolcJson.CallMetadataPath
+import Solidity.Frontend.SolcJson.Contract
+import Solidity.Frontend.SolcJson.Getters
+import Solidity.Frontend.SolcJson.IrImport
+import Solidity.Frontend.SolcJson.IrImportControls
+import Solidity.Frontend.SolcJson.TryPanicSourceCaller
+import Solidity.Frontend.SolcJson.TryPanicSourcePlan
+import Solidity.Frontend.SolcJson.Yul
+import Solidity.Frontend.SolcJson.YulAttachedUse
+import Solidity.Frontend.SolcJson.YulBuiltinUse
+import Solidity.Frontend.SolcJson.YulForwardJson
+import Solidity.Frontend.SolcJson.YulMetadata
+import Solidity.Frontend.SolcJson.YulMetadataWords
+import Solidity.Frontend.SolcJson.YulNames
+import Solidity.Frontend.SolcJson.YulOccurrenceCollect
+import Solidity.Frontend.SolcJson.YulOccurrenceSchema
+import Solidity.Frontend.SolcJson.YulReferenceAttachment
+import Solidity.Frontend.SolcJson.YulReferenceCover
+import Solidity.Frontend.SolcJson.YulSafety
+import Solidity.Frontend.SolcJson.YulScopedJson
+import Solidity.Frontend.SolcJson.YulScopedParse
+import Solidity.Frontend.SolcJson.YulWords
+import Solidity.SolcValidation.DataLayout
+import Solidity.SolcValidation.IrCensusParse
+import Solidity.SolcValidation.IrCensusUnique
+import Solidity.SolcValidation.IrParse
+import Solidity.SolcValidation.IrRename
+import Solidity.SolcValidation.IrSyntax
+import Solidity.Tools.Goal
+
+/-! The public accepting/rejecting entry points of the solc JSON and IR readers.
+Private checks are represented by their public caller. Execution evaluators and
+total rendering/collection helpers are not acceptance checks. -/
+
+namespace Solidity.Goals.FrontendValidation
+
+/-- Frozen validator inventory for the frontend validation and connection goals. -/
+def validators : List Lean.Name :=
+  [
+    ``Solidity.Frontend.Source.ScopeScan.ensure, ``Solidity.Frontend.J.get,
+    ``Solidity.Frontend.J.opt, ``Solidity.Frontend.J.str,
+    ``Solidity.Frontend.J.arr, ``Solidity.Frontend.J.str?,
+    ``Solidity.Frontend.J.arr?, ``Solidity.Frontend.J.ref?,
+    ``Solidity.Frontend.J.id?, ``Solidity.Frontend.J.hasOperatorFunction,
+    ``Solidity.Frontend.J.operatorFunction?, ``Solidity.Frontend.J.typeRef?,
+    ``Solidity.Frontend.builtinNamed, ``Solidity.Frontend.nativeMember,
+    ``Solidity.Frontend.storedFunctionMemberType?, ``Solidity.Frontend.solcArrayLength?,
+    ``Solidity.Frontend.tyText, ``Solidity.Frontend.abiTyText,
+    ``Solidity.Frontend.tyOf, ``Solidity.Frontend.mentionsStruct,
+    ``Solidity.Frontend.mentionsThroughMapping, ``Solidity.Frontend.ownStructMembers,
+    ``Solidity.Frontend.specBuiltinHead, ``Solidity.Frontend.specReadsName,
+    ``Solidity.Frontend.specHasFilteredMembership, ``Solidity.Frontend.valueTypeSupported,
+    ``Solidity.Frontend.valueTypeExpr, ``Solidity.Frontend.operatorAlias?,
+    ``Solidity.Frontend.Q.make, ``Solidity.Frontend.Q.add,
+    ``Solidity.Frontend.Q.sub, ``Solidity.Frontend.Q.mul,
+    ``Solidity.Frontend.Q.div, ``Solidity.Frontend.Q.int?,
+    ``Solidity.Frontend.Q.pow, ``Solidity.Frontend.parseRational,
+    ``Solidity.Frontend.constTy, ``Solidity.Frontend.constVal,
+    ``Solidity.Frontend.compound, ``Solidity.Frontend.declarationSelector,
+    ``Solidity.Frontend.isPublicGetterMember, ``Solidity.Frontend.declarationMetadata,
+    ``Solidity.Frontend.typeBound?, ``Solidity.Frontend.nameOf,
+    ``Solidity.Frontend.pushedTy, ``Solidity.Frontend.storageRefTy,
+    ``Solidity.Frontend.isPushCall, ``Solidity.Frontend.isPushedMember,
+    ``Solidity.Frontend.abiEnumPositions, ``Solidity.Frontend.staticCompilerLength?,
+    ``Solidity.Frontend.staticCompilerBytes?, ``Solidity.Frontend.isBaseMember,
+    ``Solidity.Frontend.isExternalMember, ``Solidity.Frontend.isValueCallee,
+    ``Solidity.Frontend.isSuperMember, ``Solidity.Frontend.withPush,
+    ``Solidity.Frontend.pureExpr, ``Solidity.Frontend.condCalleeOk,
+    ``Solidity.Frontend.condCallee?, ``Solidity.Frontend.validHexBytes,
+    ``Solidity.Frontend.byteLiteralText, ``Solidity.Frontend.abiUnparen?,
+    ``Solidity.Frontend.abiHexDigits?, ``Solidity.Frontend.abiHexLiteral?,
+    ``Solidity.Frontend.abiCallComponents?, ``Solidity.Frontend.abiCallBytesParams?,
+    ``Solidity.Frontend.errorAggregateHasEnum, ``Solidity.Frontend.checkErrorAggregateParams,
+    ``Solidity.Frontend.expr, ``Solidity.Frontend.assignText,
+    ``Solidity.Frontend.operand, ``Solidity.Frontend.call,
+    ``Solidity.Frontend.isTuple, ``Solidity.Frontend.isNamedCall,
+    ``Solidity.Frontend.valueCall?, ``Solidity.Frontend.inertTypeExpression,
+    ``Solidity.Frontend.tuple, ``Solidity.Frontend.tupleValue,
+    ``Solidity.Frontend.tupleAssignmentLeaves, ``Solidity.Frontend.explicitTupleAssignment,
+    ``Solidity.Frontend.declText, ``Solidity.Frontend.memoryRethrow?,
+    ``Solidity.Frontend.stmt, ``Solidity.Frontend.block,
+    ``Solidity.Frontend.localStmt, ``Solidity.Frontend.stmt1,
+    ``Solidity.Frontend.loopSpec, ``Solidity.Frontend.CallMetadata.readProfile,
+    ``Solidity.Frontend.CallMetadata.outerQualifiers?, ``Solidity.Frontend.CallMetadata.staticTarget?,
+    ``Solidity.Frontend.CallMetadata.Info.isStatic, ``Solidity.Frontend.CallMetadata.inspect,
+    ``Solidity.Frontend.CallMetadata.check, ``Solidity.Frontend.CallMetadata.Controls.profile,
+    ``Solidity.Frontend.CallMetadata.Controls.summary, ``Solidity.Frontend.CallMetadata.walk,
+    ``Solidity.Frontend.CallMetadata.locate, ``Solidity.Frontend.CallMetadata.Located.descend,
+    ``Solidity.Frontend.CallMetadata.attach, ``Solidity.Frontend.CallMetadata.locateDeclarations,
+    ``Solidity.Frontend.CallMetadata.attachPaths, ``Solidity.Frontend.tagWord?,
+    ``Solidity.Frontend.keyClause, ``Solidity.Frontend.keyClauses,
+    ``Solidity.Frontend.ledgerAssignable, ``Solidity.Frontend.declarationOwner,
+    ``Solidity.Frontend.isSpecified, ``Solidity.Frontend.tagOf,
+    ``Solidity.Frontend.FiniteDispatch.parseType, ``Solidity.Frontend.FiniteDispatch.parseCallable,
+    ``Solidity.Frontend.nativePaymentCallee, ``Solidity.Frontend.nativePayment,
+    ``Solidity.Frontend.writingCall, ``Solidity.Frontend.reach,
+    ``Solidity.Frontend.checkedReach, ``Solidity.Frontend.metadataIds,
+    ``Solidity.Frontend.overrideAliases, ``Solidity.Frontend.mergeC3,
+    ``Solidity.Frontend.contractLineage, ``Solidity.Frontend.storageTuplePlan?,
+    ``Solidity.Frontend.renderInitializers, ``Solidity.Frontend.readContractWithNormalizationV1,
+    ``Solidity.Frontend.readContract, ``Solidity.Frontend.sourceAbiType,
+    ``Solidity.Frontend.sourceAbiSignature, ``Solidity.Frontend.sourceFunction,
+    ``Solidity.Frontend.publicGetterPlan, ``Solidity.Frontend.getterNominalSignature,
+    ``Solidity.Frontend.publicGetterIdentity, ``Solidity.Frontend.SolcJson.Ir.select,
+    ``Solidity.Frontend.SolcJson.Ir.selectContract, ``Solidity.Frontend.SolcJson.Ir.lookup,
+    ``Solidity.Frontend.SolcJson.Ir.Controls.extracted, ``Solidity.Frontend.TryPanicSourceCaller.argument?,
+    ``Solidity.Frontend.TryPanicSourcePlan.intField, ``Solidity.Frontend.TryPanicSourcePlan.boolField,
+    ``Solidity.Frontend.TryPanicSourcePlan.memberAt, ``Solidity.Frontend.TryPanicSourcePlan.unsignedText?,
+    ``Solidity.Frontend.TryPanicSourcePlan.literal?, ``Solidity.Frontend.YulJson.field,
+    ``Solidity.Frontend.YulJson.string, ``Solidity.Frontend.YulJson.array,
+    ``Solidity.Frontend.YulJson.requireNode, ``Solidity.Frontend.YulJson.emptyAnnotation,
+    ``Solidity.Frontend.YulJson.finishLiteral, ``Solidity.Frontend.YulJson.literal,
+    ``Solidity.Frontend.YulJson.identifierPath, ``Solidity.Frontend.YulJson.functionName,
+    ``Solidity.Frontend.YulJson.expressionAux, ``Solidity.Frontend.YulJson.expression,
+    ``Solidity.Frontend.YulJson.checkExpression, ``Solidity.Frontend.YulJson.checkExpressionText,
+    ``Solidity.Frontend.YulJson.typedName, ``Solidity.Frontend.YulJson.names,
+    ``Solidity.Frontend.YulJson.optionalNames, ``Solidity.Frontend.YulJson.switchCases,
+    ``Solidity.Frontend.YulJson.parseBlock, ``Solidity.Frontend.YulJson.parseBlockText,
+    ``Solidity.Frontend.YulJson.checkBlockShape, ``Solidity.Frontend.YulJson.checkBlockShapeText,
+    ``Solidity.Frontend.YulJson.ReferenceAttachment.checkUse, ``Solidity.Frontend.YulJson.BuiltinGuard.parse,
+    ``Solidity.Frontend.YulJson.BuiltinGuard.checkJson, ``Solidity.Frontend.YulJson.BuiltinGuard.checkJsonText,
+    ``Solidity.Frontend.YulJson.ForwardJson.check, ``Solidity.Frontend.YulJson.ForwardJson.checkText,
+    ``Solidity.Frontend.YulJson.identify, ``Solidity.Frontend.YulJson.checkDeclarationTable,
+    ``Solidity.Frontend.YulJson.decimal, ``Solidity.Frontend.YulJson.sourceSpan,
+    ``Solidity.Frontend.YulJson.natural, ``Solidity.Frontend.YulJson.boolean,
+    ``Solidity.Frontend.YulJson.reference, ``Solidity.Frontend.YulJson.references,
+    ``Solidity.Frontend.YulJson.metadata, ``Solidity.Frontend.YulJson.MetadataWords.input?,
+    ``Solidity.Frontend.YulJson.MetadataWords.check, ``Solidity.Frontend.YulJson.Names.select,
+    ``Solidity.Frontend.YulJson.Names.checkReference, ``Solidity.Frontend.YulJson.Names.entry?,
+    ``Solidity.Frontend.YulJson.Occurrences.checkChildren, ``Solidity.Frontend.YulJson.Occurrences.collect,
+    ``Solidity.Frontend.YulJson.Occurrences.isIdentifier, ``Solidity.Frontend.YulJson.Occurrences.includeField,
+    ``Solidity.Frontend.YulJson.Occurrences.fieldRole, ``Solidity.Frontend.YulJson.ReferenceAttachment.check,
+    ``Solidity.Frontend.YulJson.ReferenceCover.candidate, ``Solidity.Frontend.YulJson.ReferenceCover.check,
+    ``Solidity.Frontend.YulJson.ReferenceCover.checkAll, ``Solidity.Frontend.YulJson.spaceTab,
+    ``Solidity.Frontend.YulJson.docWhitespace, ``Solidity.Frontend.YulJson.tagSeparator,
+    ``Solidity.Frontend.YulJson.docTagsAux, ``Solidity.Frontend.YulJson.documentationTags,
+    ``Solidity.Frontend.YulJson.checkMetadataSafety, ``Solidity.Frontend.YulJson.ScopedJson.check,
+    ``Solidity.Frontend.YulJson.ScopedJson.checkText, ``Solidity.Frontend.YulJson.ScopedParse.check,
+    ``Solidity.Frontend.YulJson.Words.check, ``Solidity.Frontend.YulJson.Words.checkText,
+    ``Solidity.Frontend.Admission.scan, ``Solidity.SolcValidation.selectData,
+    ``Solidity.SolcValidation.DataTable.select, ``Solidity.SolcValidation.IrSyntax.hexDigit?,
+    ``Solidity.SolcValidation.IrSyntax.toByte?, ``Solidity.SolcValidation.IrSyntax.escapeByte,
+    ``Solidity.SolcValidation.IrSyntax.decodeString, ``Solidity.SolcValidation.IrSyntax.stringWord,
+    ``Solidity.SolcValidation.IrSyntax.LitTok.decode, ``Solidity.SolcValidation.IrSyntax.isIdStart,
+    ``Solidity.SolcValidation.IrSyntax.isIdChar, ``Solidity.SolcValidation.IrSyntax.lexString,
+    ``Solidity.SolcValidation.IrSyntax.lexHex, ``Solidity.SolcValidation.IrSyntax.dropBlock,
+    ``Solidity.SolcValidation.IrSyntax.hexValue, ``Solidity.SolcValidation.IrSyntax.lexNumber,
+    ``Solidity.SolcValidation.IrSyntax.lexGo, ``Solidity.SolcValidation.IrSyntax.lex,
+    ``Solidity.SolcValidation.IrSyntax.findVar, ``Solidity.SolcValidation.IrSyntax.findFn,
+    ``Solidity.SolcValidation.IrSyntax.mkLit, ``Solidity.SolcValidation.IrSyntax.litTok?,
+    ``Solidity.SolcValidation.IrSyntax.reserved, ``Solidity.SolcValidation.IrSyntax.freshNames,
+    ``Solidity.SolcValidation.IrSyntax.single, ``Solidity.SolcValidation.IrSyntax.parseExpr,
+    ``Solidity.SolcValidation.IrSyntax.parseArgs, ``Solidity.SolcValidation.IrSyntax.parseArgs1,
+    ``Solidity.SolcValidation.IrSyntax.parseCall, ``Solidity.SolcValidation.IrSyntax.parseHeader,
+    ``Solidity.SolcValidation.IrSyntax.scanSigs, ``Solidity.SolcValidation.IrSyntax.assemble,
+    ``Solidity.SolcValidation.IrSyntax.resolveTargets, ``Solidity.SolcValidation.IrSyntax.parseInit,
+    ``Solidity.SolcValidation.IrSyntax.parseBlock, ``Solidity.SolcValidation.IrSyntax.parseItems,
+    ``Solidity.SolcValidation.IrSyntax.parseStmt, ``Solidity.SolcValidation.IrSyntax.parseCases,
+    ``Solidity.SolcValidation.IrSyntax.parseLoop, ``Solidity.SolcValidation.IrSyntax.parseObject,
+    ``Solidity.SolcValidation.IrSyntax.parseChildren, ``Solidity.SolcValidation.IrSyntax.nodupNames,
+    ``Solidity.SolcValidation.IrSyntax.declOk, ``Solidity.SolcValidation.IrSyntax.nodupWords,
+    ``Solidity.SolcValidation.IrSyntax.Expr.wf, ``Solidity.SolcValidation.IrSyntax.Args.wf,
+    ``Solidity.SolcValidation.IrSyntax.initWf, ``Solidity.SolcValidation.IrSyntax.Stmt.wf,
+    ``Solidity.SolcValidation.IrSyntax.Cases.wf, ``Solidity.SolcValidation.IrSyntax.Cases.nonempty,
+    ``Solidity.SolcValidation.IrSyntax.Loop.wf, ``Solidity.SolcValidation.IrSyntax.Items.wf,
+    ``Solidity.SolcValidation.IrSyntax.Block.wf, ``Solidity.SolcValidation.IrSyntax.Bodies.wf,
+    ``Solidity.SolcValidation.IrSyntax.objectWf, ``Solidity.SolcValidation.IrSyntax.objectsWf,
+    ``Solidity.SolcValidation.IrSyntax.parse, ``Solidity.SolcValidation.IrSyntax.Expr.ren,
+    ``Solidity.SolcValidation.IrSyntax.Args.ren, ``Solidity.SolcValidation.IrSyntax.initRen,
+    ``Solidity.SolcValidation.IrSyntax.Stmt.ren, ``Solidity.SolcValidation.IrSyntax.Cases.ren,
+    ``Solidity.SolcValidation.IrSyntax.Loop.ren, ``Solidity.SolcValidation.IrSyntax.Items.ren,
+    ``Solidity.SolcValidation.IrSyntax.Block.ren, ``Solidity.SolcValidation.IrSyntax.Bodies.ren,
+    ``Solidity.SolcValidation.IrSyntax.parsesTo, ``Solidity.SolcValidation.IrSyntax.namesNodup
+  ]
+
+end Solidity.Goals.FrontendValidation
