@@ -1,0 +1,45 @@
+{
+  "commit": "170c3675738e9740f3280edb45d5bab672ca8e84",
+  "decision": "pb3-prose-activate release 2026-11-26; assumed residual policy",
+  "residuals": {
+    "Solidity/Calculus": {
+      "docstring_lines": "884356/65411"
+    },
+    "Solidity/Docs": {
+      "comment_lines": "8",
+      "docstring_lines": "8"
+    },
+    "Solidity/Evm": {
+      "process_ids": "81/1798"
+    },
+    "Solidity/Examples": {
+      "process_ids": "164349/12767"
+    },
+    "Solidity/Finish": {
+      "comment_lines": "6",
+      "docstring_lines": "6",
+      "process_ids": "1"
+    },
+    "Solidity/Goals": {
+      "comment_lines": "72136/97",
+      "docstring_lines": "68935/97"
+    },
+    "Solidity/Lowering": {
+      "process_ids": "431911/7168"
+    },
+    "Solidity/Theory": {
+      "comment_lines": "20734/6473",
+      "docstring_lines": "20734/6473"
+    },
+    "Solidity/Yul": {
+      "comment_lines": "17797521/41024",
+      "docstring_lines": "4225613/10256"
+    },
+    "docs/module-map": {
+      "docs_lines": "17712683/74127"
+    },
+    "docs/testing": {
+      "docs_lines": "690"
+    }
+  }
+}

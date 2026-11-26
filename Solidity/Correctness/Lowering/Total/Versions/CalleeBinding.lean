@@ -1,5 +1,7 @@
 import Solidity.Correctness.Lowering.Total.Contract
 import Solidity.Source.Elaborate
+import Solidity.Correctness.Lowering.Total.Decode.WithExpr
+import Solidity.Correctness.Lowering.Total.CalleeAliases.Lookup
 
 /-!
 # Structural callee binding obligations
@@ -105,5 +107,233 @@ structure Contract
       inlined := List.cons (c.start, o.after.locals.2) r.input.scope.inlined }
   state : ∀ (r : Request) (c : CalleeRequest) (o : ProductionOutput), r.callee = some c →
     r.elabState o = { o.after with locals := (c.locals, o.after.locals.2) }
+
+/-! ## Request-level binding of the e2b callee output (P2, statement level)
+
+Additive; nothing above changes. `Site` collects the inputs of the e2b callee
+producer (`fromFunctions` in `CalleeBinding/Functions.lean`, which imports this
+module, so its instance is stated downstream). `Bound` is the proposed relation
+between a callee request and one producer output: the request's callee, an
+ordinary (non-constructor) entry at the site index, the additive spelling of
+the declared body as the bound frame body, the Source-resolved body and the
+frame's parameter and return names. `Renaming` is the call site's exact frame
+renaming, a request-side premise, not a decoder fact. Ordinary threading
+(`Request.elabScope`, `Request.elabState`) and the recursive endpoint
+(`Recursive`: pushed recursive frame, empty memo) are told apart by the bridges
+below. `slotsStatement` is proved (`slots`); `Publishes` remains a `Prop`
+definition to prove downstream. No semantic preservation or coverage is claimed.
+-/
+
+/-- Inputs of the e2b callee producer at one call site. -/
+structure Site where
+  tables : Decode.Tables
+  registry : CallSpellExt.Registry
+  settings : Source.Settings
+  scope : String
+  leadingParts : Source.Syn (.list (.part false))
+  index : Nat
+
+/-- Renamed parameter slots in declaration order, as `returnSlots`. -/
+def paramSlots (c : CalleeRequest) : List String :=
+  c.declaration.params.map fun (n, _) => (Semantics.lookupBy n c.names).getD n
+
+/-- Exact frame renaming of `elabCallRetCore`: `ρ` lists the returns, then the
+parameters, each newest first; the frame `Γf = Γr ++ Γp` binds the renamed
+names in the same order; renamed names are distinct. -/
+def Renaming (c : CalleeRequest) : Prop :=
+  c.names.map Prod.fst = ((c.declaration.params ++ c.declaration.rets).map Prod.fst).reverse ∧
+  c.names.map Prod.snd = c.locals.map Prod.fst ∧ (c.names.map Prod.snd).Nodup
+
+/-- **Proposed request-level binding** of one producer output `s` at site `σ`.
+The frame body is the additive (registered-call) spelling of the declared
+model body; the resolved body is Source elaboration of the selected
+declaration, modifiers included. -/
+structure Bound (σ : Site) (r : Request) (c : CalleeRequest) (s : Output) : Prop where
+  callee : r.callee = some c
+  ordinaryEntry : c.constructor = false
+  entry : ∃ a, r.contract.funs[σ.index]? = some (a, c.declaration)
+  spelledBody : Decode.Tables.WithExpr.items σ.tables (Decode.Calls.expr σ.tables σ.registry)
+    .body c.declaration.body = some s.frame.body
+  member : s.declaration ∈ s.source.res.env.decls
+  frame : s.declaration.frame? s.source.res.env = some s.frame
+  programBody : s.source.prog.body s.declaration = some s.body
+  resolvedBody : (Source.elabBody s.source.res.env s.declaration).map Subtype.val = some s.body
+  paramNames : s.frame.names = c.declaration.params.map (fun p => some p.1)
+  returnNames : s.frame.rnames = c.declaration.rets.map (fun p => some p.1)
+
+/-- Statement to prove: a producer's output at a selected ordinary entry is
+`Bound`. Its instance is the e2b producer
+`fun σ r => fromFunctions σ.tables σ.registry σ.settings σ.scope σ.leadingParts
+r.contract.funs σ.index`. -/
+def Publishes (produce : Site → Request → Option Output) : Prop :=
+  ∀ σ r c s, r.callee = some c → c.constructor = false →
+    (∃ a, r.contract.funs[σ.index]? = some (a, c.declaration)) →
+    produce σ r = some s → Bound σ r c s
+
+/-- Statement (proved by `slots`): under the exact renaming with distinct original names,
+parameter and return slots are the frame's locals, oldest first. -/
+def slotsStatement : Prop :=
+  ∀ c, Renaming c → ((c.declaration.params ++ c.declaration.rets).map Prod.fst).Nodup →
+    paramSlots c ++ returnSlots c = (c.locals.map Prod.fst).reverse
+
+/-- With distinct keys, a member pair is the first match of its key. -/
+private theorem lookupBy_of_mem {k v : String} :
+    ∀ {L : List (String × String)}, (L.map Prod.fst).Nodup → (k, v) ∈ L →
+      Semantics.lookupBy k L = some v
+  | [], _, hm => nomatch hm
+  | (k', v') :: rest, hn, hm => by
+    simp only [List.map_cons, List.nodup_cons] at hn
+    simp only [Semantics.lookupBy]
+    cases List.mem_cons.mp hm with
+    | inl he => cases he; simp
+    | inr hr =>
+      have hk : k ≠ k' := fun he => hn.1 (he ▸ List.mem_map_of_mem (f := Prod.fst) hr)
+      simp only [hk, if_false]
+      exact lookupBy_of_mem hn.2 hr
+
+/-- Under the exact renaming with distinct original names, the parameter and
+return slots are the frame's locals, oldest first. -/
+theorem slots : slotsStatement := by
+  intro c ⟨hf, hs, _⟩ hk
+  have hn : (c.names.map Prod.fst).Nodup :=
+    hf ▸ List.pairwise_reverse.mpr (List.Pairwise.imp (fun h e => h e.symm) hk)
+  have hks : (c.declaration.params ++ c.declaration.rets).map Prod.fst =
+      c.names.reverse.map Prod.fst := by
+    rw [List.map_reverse, hf, List.reverse_reverse]
+  have hl : paramSlots c ++ returnSlots c =
+      ((c.declaration.params ++ c.declaration.rets).map Prod.fst).map
+        fun n => (Semantics.lookupBy n c.names).getD n := by
+    simp only [paramSlots, returnSlots, List.map_append, List.map_map]; rfl
+  rw [hl, hks, ← hs, ← List.map_reverse, List.map_map]
+  apply List.map_congr_left
+  intro p hp
+  have hm : (p.1, p.2) ∈ c.names := List.mem_reverse.mp hp
+  simp [lookupBy_of_mem hn hm]
+
+/-! ### First-match alias resolution (H1595, option C)
+
+`Bound` identifies the entry by its index only. `AliasBound` also requires that
+index to be the first match of the model alias in the contract's function table
+(`CalleeAliases.firstIndex`), so `Semantics.lookupBy` selects exactly the bound
+declaration and a shadowed duplicate entry is never bound. That the call site
+selected the same entry (its caller scope is a prefix of, or for a recursive
+callee a filtered sublist of, the function table) is a call-site obligation,
+not a decoder fact. -/
+
+/-- `Bound` at the first-match position of alias `a`. -/
+structure AliasBound (σ : Site) (r : Request) (c : CalleeRequest) (s : Output) (a : Name) : Prop
+    extends Bound σ r c s where
+  first : CalleeAliases.firstIndex a r.contract.funs = some σ.index
+  firstEntry : r.contract.funs[σ.index]? = some (a, c.declaration)
+
+/-- The bound declaration is the alias lookup's answer. -/
+theorem AliasBound.lookup {σ : Site} {r : Request} {c : CalleeRequest} {s : Output} {a : Name}
+    (b : AliasBound σ r c s a) : Semantics.lookupBy a r.contract.funs = some c.declaration :=
+  CalleeAliases.lookupBy_eq_some_iff.mpr ⟨_, b.first, b.firstEntry⟩
+
+/-- A successful alias lookup names the site index: its first-match position. -/
+theorem index_of_lookup {fs : List (Name × FunDecl)} {a : Name} {d : FunDecl}
+    (h : Semantics.lookupBy a fs = some d) :
+    ∃ i, CalleeAliases.firstIndex a fs = some i ∧ fs[i]? = some (a, d) :=
+  CalleeAliases.lookupBy_eq_some_iff.mp h
+
+/-- Statement to prove (v2 of `Publishes`): a producer's output at the
+first-match position of an alias is `AliasBound`. -/
+def PublishesAlias (produce : Site → Request → Option Output) : Prop :=
+  ∀ σ r c s a, r.callee = some c → c.constructor = false →
+    CalleeAliases.firstIndex a r.contract.funs = some σ.index →
+    r.contract.funs[σ.index]? = some (a, c.declaration) →
+    produce σ r = some s → AliasBound σ r c s a
+
+/-- `Publishes` gives its alias version: the first-match premises are kept. -/
+theorem publishesAlias {produce : Site → Request → Option Output} (h : Publishes produce) :
+    PublishesAlias produce :=
+  fun σ r c s a hc hk hf he hp => ⟨h σ r c s hc hk ⟨a, he⟩ hp, hf, he⟩
+
+/-! ### Ordinary callee endpoint: trivial bridges -/
+
+section
+variable {r : Request} {c : CalleeRequest} {o : ProductionOutput}
+
+theorem success_callee (h : r.callee = some c) :
+    r.success o ↔ r.input.raw = c.declaration.body ∧
+      SuccessfulCalleeBodyRun r.input.names r.contract c.declaration c.names
+        c.constructor c.selfFrame c.locals r.input.scope r.input.before o := by
+  simp only [Request.success, h]
+
+theorem context_callee (h : r.callee = some c) :
+    r.context = @ECtx.toNCtx r.input.names c.locals := by
+  simp only [Request.context, h, Option.map_some, Option.getD_some]
+
+theorem elabScope_callee (h : r.callee = some c) :
+    r.elabScope o = { r.input.scope with
+      funs := c.scope, top := false, selfFrame := c.selfFrame, unchecked := false,
+      inlined := List.cons (c.start, o.after.locals.2) r.input.scope.inlined } := by
+  simp only [Request.elabScope, h]
+
+theorem elabState_callee (h : r.callee = some c) :
+    r.elabState o = { o.after with locals := (c.locals, o.after.locals.2) } := by
+  simp only [Request.elabState, h, Option.map_some, Option.getD_some]
+
+/-- Ordinary threading keeps the caller's recursive frames. -/
+theorem elabScope_recs (h : r.callee = some c) : (r.elabScope o).recs = r.input.scope.recs := by
+  rw [elabScope_callee h]
+
+/-- Ordinary threading keeps the producer's memo. -/
+theorem elabState_memo : (r.elabState o).memo = o.after.memo := rfl
+
+/-- The bound frame body is the spelling of the request's raw input. -/
+theorem Bound.spelledInput {σ : Site} {s : Output} (b : Bound σ r c s) (hs : r.success o) :
+    Decode.Tables.WithExpr.items σ.tables (Decode.Calls.expr σ.tables σ.registry) .body
+      r.input.raw = some s.frame.body := by
+  rw [((success_callee b.callee).mp hs).1]
+  exact b.spelledBody
+
+/-- `Bound` with a successful run gives the earlier `Declared` interface at the
+producer's own declaration. -/
+theorem Bound.declared {σ : Site} {s : Output} (b : Bound σ r c s) (hs : r.success o) :
+    Declared (fun _ => some s.declaration) r c s :=
+  ⟨b.callee, ((success_callee b.callee).mp hs).1, b.member, b.frame, b.programBody,
+    b.resolvedBody, b.paramNames, b.returnNames, rfl⟩
+
+end
+
+/-! ### Recursive endpoint: separate scope and empty memo -/
+
+/-- The recursive elaboration scope: the ordinary one with the supplied frame
+pushed on the caller's recursive frames. -/
+def recursiveScope (r : Request) (o : ProductionOutput) (rf : RecFrame) : ElabScope :=
+  { r.elabScope o with recs := rf :: r.input.scope.recs }
+
+/-- The recursive elaboration state: the callee frame and an empty memo. -/
+def recursiveState (c : CalleeRequest) (o : ProductionOutput) : Checker.Snapshot :=
+  { locals := (c.locals, o.after.locals.2), memo := {} }
+
+section
+variable {r : Request} {c : CalleeRequest} {o : ProductionOutput} {rf : RecFrame}
+
+theorem recursive_iff {after : Checker.Snapshot} {parts : SProg r.contract}
+    {names : List Var} {F : Ctx} {p : Blk r.contract F} :
+    Recursive r c o rf after parts names F p ↔ r.callee = some c ∧ r.success o ∧
+      SuccessfulElaboration r.input.names r.contract F (recursiveScope r o rf)
+        (recursiveState c o) after o.raw parts names p := Iff.rfl
+
+/-- The recursive scope differs from ordinary threading exactly in `recs`. -/
+theorem recursiveScope_eq (h : r.callee = some c) :
+    recursiveScope r o rf = { r.elabScope o with recs := rf :: (r.elabScope o).recs } := by
+  rw [elabScope_recs h]; rfl
+
+theorem recursiveScope_ne (h : r.callee = some c) : recursiveScope r o rf ≠ r.elabScope o :=
+  fun he => List.cons_ne_self rf r.input.scope.recs
+    ((congrArg ElabScope.recs he).trans (elabScope_recs h))
+
+theorem recursiveState_memo : (recursiveState c o).memo = {} := rfl
+
+/-- Both endpoints bind the same callee frame locals. -/
+theorem recursiveState_locals (h : r.callee = some c) :
+    (recursiveState c o).locals = (r.elabState o).locals := by
+  rw [elabState_callee h]; rfl
+
+end
 
 end Solidity.Correctness.Lowering.Total.Version.CalleeBinding

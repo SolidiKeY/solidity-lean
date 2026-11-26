@@ -171,6 +171,7 @@ import Solidity.Examples.Goals.LoweringDiagramV2
 import Solidity.Examples.Goals.LoweringSim
 import Solidity.Examples.Goals.OffCriticalPath
 import Solidity.Examples.Goals.OpcodeEval
+import Solidity.Examples.Goals.Optimized
 import Solidity.Examples.Goals.Panic
 import Solidity.Examples.Goals.PanicProvenance
 import Solidity.Examples.Goals.PanicRun
@@ -220,6 +221,7 @@ import Solidity.Examples.Lowering.Total.ArgumentInference
 import Solidity.Examples.Lowering.Total.ArithmeticInference
 import Solidity.Examples.Lowering.Total.CallSpellExt
 import Solidity.Examples.Lowering.Total.CalleeAliases
+import Solidity.Examples.Lowering.Total.CalleeBinding
 import Solidity.Examples.Lowering.Total.CalleeInference
 import Solidity.Examples.Lowering.Total.CalleeResolution
 import Solidity.Examples.Lowering.Total.CalleeSelection
