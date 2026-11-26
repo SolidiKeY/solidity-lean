@@ -329,7 +329,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       {dispose(){service.removeListener('invalidated',invalidated);service.removeListener('status',receiveStatus);service.removeListener('report',receive);service.removeListener('diagnostics',receiveDiagnostics);service.removeListener('serverError',serverError);service.removeListener('log',log);}});
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
-  return { verify, cancel, controller, diagnostics, reports, service, output,
+  return { verify, cancel, controller, diagnostics, reports, service, output, get disposed(){return disposed;},
     dispose(){
       if(disposal)return disposal;disposed=true;
       let resolveDisposal,rejectDisposal;disposal=new Promise((resolve,reject)=>{resolveDisposal=resolve;rejectDisposal=reject;});
@@ -346,7 +346,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     } };
 }
 let runtime;
-async function activate(context) {
+function activate(context) {
   const vscode=require('vscode');
   const configuration=doc=>{
     if(!vscode.workspace.isTrusted)throw new Error('Language services require a trusted workspace');
@@ -360,9 +360,8 @@ async function activate(context) {
   const service=new (require('./lsp-client.cjs').LanguageServers)(configuration);
   const api=createExtension(vscode,context,args=>service.verify(args),service);
   runtime=api;
-  const featureRegistry=await require('./features/index.cjs').activate(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')});
-  context.subscriptions.push(featureRegistry);
-  context.subscriptions.push(vscode.languages.registerCodeLensProvider(require('./editor-document.cjs').selector, {
+  require('./features/index.cjs').activate(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')}).then(registry=>{if(api.disposed)registry.dispose();else context.subscriptions.push(registry);},error=>{if(!api.disposed)api.output.appendLine('Feature registry failed: '+error.message);});
+  const lensProvider=vscode.languages.registerCodeLensProvider?.(require('./editor-document.cjs').selector, {
     async provideCodeLenses(doc,token) {
       if (!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('codeLens',true) || token?.isCancellationRequested) return [];
       const abort=new AbortController(), registration=token?.onCancellationRequested(()=>abort.abort());
@@ -377,7 +376,8 @@ async function activate(context) {
         return [];
       } finally {registration?.dispose();}
     }
-  }));
+  });
+  if(lensProvider)context.subscriptions.push(lensProvider);
   context.subscriptions.push({dispose:()=>service.dispose()});return api;
 }
 function deactivate(){return runtime?.dispose();}
