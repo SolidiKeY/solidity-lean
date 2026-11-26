@@ -1,0 +1,1 @@
+| `Yul/Layout/Shared/Vocabulary.lean` | Shared `Solidity.Goals.Shrink` region, layout, location, physical state, tree, cell, parameter and geometry types; physical accessors, object footprint and slot placement. Independent of the per-shape instance relation in `Goals/Shrink.lean`. |
