@@ -59,7 +59,9 @@ are `partial`, so opaque to the kernel: the hypothesis says nothing about the
 elaborated program, and no request's `Request.Succeeds` can be derived (it can
 be refuted where top-level lowering, which is total, fails). So the decoder's
 coverage obligation cannot be proved today; once the elaborator is total it
-fails on the first successful request in a listed gap. Also not proved:
+fails on the first successful request in a listed gap
+(`loopContractStage1_not_plain`: the contract here says every callee request
+fails). Also not proved:
 `InferComplete`, and that `loopRel` has any related pair. `Solidity.Goals.lowerLoopsCorrect`
 stays unstated until the boundary is complete.
 -/
@@ -968,6 +970,22 @@ theorem loopResidualStage1_iff :
           Nonempty (PassCorrect (Observe.source s).behaviour
             (Observe.target program).behaviour)) :=
   loopResidualAt_iff loopRel_reflect loopRel_false
+
+/-- The stage-1 decoder reads plain requests only. -/
+theorem Decode.decode_of_not_plain {r : Request} (h : Decode.plain r = false) :
+    Decode.decode r = none := by
+  simp [Decode.decode, h]
+
+/-- **Why the goal is not stated at the stage-1 boundary.** The frozen contract
+there would say that production fails on every request that is not plain: every
+callee body, every request with return slots and every request inside an
+`unchecked` or `checked` scope. Nothing proves that (the elaborator is
+`partial`), and it is not what production does. -/
+theorem loopContractStage1_not_plain
+    (h : LowerLoopsCorrectContract loopBoundaryStage1 loopBoundaryStage1.reference Decode.decode)
+    {r : Request} (gap : Decode.plain r = false) : ¬ r.Succeeds :=
+  ((contract_reference_iff _ _).mp h).fails_of_undecoded loopBoundary_fullDomain
+    (Decode.decode_of_not_plain gap)
 
 /-! ## The contract, version 2 (H1035, additive)
 
