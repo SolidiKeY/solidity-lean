@@ -156,7 +156,7 @@ function declarationValues(doc, row, symbols, storage) {
   for (const a of row.counterexample.arguments) {
     if (!fn || !Number.isSafeInteger(a.paramIndex)) continue;
     const param = params[a.paramIndex], last = param?.at(-1);
-    if (a.sourceName === '' && param?.length) result.push({position:doc.positionAt(offset(fn.range.start) + param[0].start), name:a.modelName, value:String(a.value)});
+    if ((a.sourceName === undefined || a.sourceName === '') && param?.length) result.push({position:doc.positionAt(offset(fn.range.start) + param[0].start), name:a.modelName, value:String(a.value)});
     else if (last?.kind === 'word' && last.text === a.sourceName) result.push({position:doc.positionAt(offset(fn.range.start) + last.start), name:a.sourceName, value:String(a.value)});
   }
   for (const [name,value] of storageEntries(row.counterexample.initialStorage)) {

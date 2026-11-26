@@ -151,12 +151,12 @@ test('compiler-owned same-buffer inheritance annotates B.x for C.f (land F2)',as
   });
 });
 test('compiler-owned diamond and private root collisions follow importer ordering',async()=>{
-  const text='pragma solidity ^0.8.34; contract A { uint private x; uint private x_A; } contract L is A { uint private x; } contract R is A { uint r; } contract C is L, R { uint c; function f() public {} }';
+  const text='pragma solidity ^0.8.34; contract A { uint private x; uint private x_A; } contract L is A { uint private x; } contract R is A { uint private x; uint r; } contract C is L, R { uint c; function f() public {} }';
   await compilerDocuments({'Main.sol':text},'Main.sol',async({doc,symbols,service,open})=>{
-    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x_A_ = 9; x_A = 10; x = 11; r = 12; c = 13'})});
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x_A_ = 9; x_A = 10; x_L = 11; x = 14; r = 12; c = 13'})});
     const storage=await storageDeclarations(doc,r,symbols,service,open),values=declarationValues(doc,r,symbols,storage.roots);
-    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x_A_','9'],['x_A','10'],['x','11'],['r','12'],['c','13']]);
-    assert.equal(values[0].position.character,text.indexOf('x;'));assert.equal(values[1].position.character,text.indexOf('x_A;'));assert.equal(values[2].position.character,text.indexOf('x;',text.indexOf('contract L')));
+    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x_A_','9'],['x_A','10'],['x_L','11'],['x','14'],['r','12'],['c','13]]);
+    assert.equal(values[0].position.character,text.indexOf('x;'));assert.equal(values[1].position.character,text.indexOf('x_A;'));assert.equal(values[2].position.character,text.indexOf('x;',text.indexOf('contract L')));assert.equal(values[3].position.character,text.indexOf('x;',text.indexOf('contract R')));
   });
 });
 test('compiler-owned imported aliases affect root renaming but foreign fields are not decorated',async()=>{
@@ -215,5 +215,15 @@ test('real client content-change rejection during inherited lookup clears cached
     const pending=h.show();await started;
     const base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol'));base.version++;h.events.edit({document:base});reject(Object.assign(new Error('Document content changed'),{code:-32801}));await pending;
     assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);await h.show();assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
+  });
+});
+
+test('returned parameter indices locate inherited arguments even without source names',async()=>{
+  const text='pragma solidity ^0.8.34; contract B { uint x; function f(uint arg) public {} } contract C is B { uint y; }';
+  await compilerDocuments({'Main.sol':text},'Main.sol',async({doc,symbols,service,open})=>{
+    const fn=symbols.find(s=>s.name==='B').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[{paramIndex:0,modelName:'p0',type:'uint',value:'7'}],initialStorage:'x = 9; y = 10'})});
+    const storage=await storageDeclarations(doc,r,symbols,service,open),values=declarationValues(doc,r,symbols,storage.roots);
+    assert.deepEqual(values.map(v=>[v.name,v.value]),[['p0','7'],['x','9'],['y','10']]);
+    assert.equal(values[0].position.character,text.indexOf('uint arg'));
   });
 });
