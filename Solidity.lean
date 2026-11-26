@@ -2569,6 +2569,8 @@ import Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip.Leaves
 import Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip.Nat
 import Solidity.Correctness.Lowering.Total.Main
 import Solidity.Correctness.Lowering.Total.Production
+import Solidity.Correctness.Lowering.Total.RawTypeAgreement.Leaf
+import Solidity.Correctness.Lowering.Total.RawTypeAgreement.Rows
 import Solidity.Correctness.Lowering.Total.ReferenceDecode
 import Solidity.Correctness.Lowering.Total.ReferenceStateDecode
 import Solidity.Correctness.Lowering.Total.ReferenceStatePlacement
