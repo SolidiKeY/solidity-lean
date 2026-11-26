@@ -1,6 +1,10 @@
-import Solidity.Frontend.SolcJson.Body
+import Solidity.Frontend.SolcJson.Contract
+import Solidity.Frontend.SolcJson.CallMetadataPath
+import Solidity.Frontend.SolcJson.YulBuiltinUse
+import Solidity.Frontend.SolcJson.YulAttachedUse
+import Solidity.SolcValidation.DataLayout
 import Solidity.SolcValidation.IrCensusUnique
-import Solidity.SolcValidation.IrParse
+import Solidity.SolcValidation.IrRename
 
 /-! Fixed structural postconditions, separated from external compiler execution.
 These are specification propositions, not proofs or execution assumptions. -/
@@ -48,5 +52,70 @@ def RationalChecks : Prop :=
   (∀ a b q, Q.div a b = some q → Canonical q ∧
     q.num * (a.den * b.num) = (a.num * b.den) * q.den) ∧
   (∀ a n, Q.int? a = some n → a.den = 1 ∧ a.num = n)
+
+/-- Whole-reader preservation of recorded refusals and declaration identities. -/
+def ReaderRetainsChecks (c : SolcContract) : Prop :=
+  (∀ f ∈ c.funs, ∀ body, f.body = .ok body →
+    f.sourceScope.diagnostic? = none ∧ ∃ info, f.sourceDecl = some info ∧ (f.name, info) ∈ c.sourceDecls) ∧
+  (∀ f ∈ c.funs ++ c.ctor.toList, ∀ info, f.sourceDecl = some info → (f.name, info) ∈ c.sourceDecls) ∧
+  (∀ gap, c.initGap = some gap → c.initMembers = c.members ∧
+    ∃ ctor, c.ctor = some ctor ∧ ∃ refusal, ctor.body = .error refusal)
+
+def ReaderChecks : Prop :=
+  ∀ ast name ren testing rewriteSpec rewriteLoop scanSource scanLoop readsSpec entrypoints viaIR
+    compilerCode namedErrorSourceOrder compilationUnits result,
+    readContract ast name ren testing rewriteSpec rewriteLoop scanSource scanLoop readsSpec
+      entrypoints viaIR compilerCode namedErrorSourceOrder compilationUnits = .ok result →
+    result.name = name ∧ ReaderRetainsChecks result
+
+/-- Metadata is tied to the supplied declaration table and, when provided, AST paths. -/
+def CallChecks : Prop :=
+  (∀ profile declarations call result, CallMetadata.inspect profile declarations call = .ok result →
+    result.call = call ∧ result.declaration ∈ declarations ∧
+    (result.isStatic = true → CallMetadata.staticTarget? result.profile = some true ∧
+      ((result.declaration.getObjValAs? String "stateMutability").toOption = some "pure" ∨
+       (result.declaration.getObjValAs? String "stateMutability").toOption = some "view"))) ∧
+  (∀ profile declarations call result, CallMetadata.attachPaths profile declarations call = .ok result →
+    CallMetadata.walk profile.ast call = some result.checked.info.call ∧
+    result.declarations.map CallMetadata.Located.path = declarations)
+
+/-- Independent checked roots retain their distinct static/safety boundaries.
+Only PROVIDED references receive forward accounting; completeness is separate. -/
+def YulChecks : Prop :=
+  (∀ X table original input outside localNames bound node result,
+    @YulJson.ScopedJson.check X table original input outside localNames bound node = .ok result →
+    YulJson.metadata table node = .ok result.imported ∧
+    YulJson.field node "AST" = .ok result.ast ∧ result.shaped.tree.prec = true ∧
+    YulJson.MetadataSafetyD result.imported.flags result.imported.documentation ∧
+    Nonempty (Solidity.Yul.ScopedSyntax.Prepared input.scope .A outside localNames result.shaped.tree)) ∧
+  (∀ X table original input outside localNames bound node result,
+    @YulJson.ForwardJson.check X table original input outside localNames bound node = .ok result →
+    Nonempty (YulJson.ReferenceCover.All table original result.imported.ast result.imported.imported.references.entries)) ∧
+  (∀ F X n E bound node (r : @YulJson.CheckedExpression F X n E bound node),
+    YulJson.expression bound node = .ok r.tree ∧ Nonempty (Solidity.Yul.ExprD E r.tree r.arity)) ∧
+  (∀ outside bound node (r : YulJson.Words.Checked outside bound node),
+    r.imported.references.entries = [] ∧ YulJson.blockAux bound r.ast = .ok r.shaped.tree ∧
+    r.shaped.tree.prec = true ∧ YulJson.MetadataSafetyD r.imported.flags r.imported.documentation ∧
+    Nonempty (Solidity.Yul.WordSyntax.Prepared outside r.shaped.tree)) ∧
+  (∀ X scope tier outside localNames doc src (r : @YulJson.ScopedParse.Checked X scope tier outside localNames doc src),
+    (r.parsed.flags.filter (· == "memory-safe")).length ≤ 1 ∧
+    YulJson.MetadataSafetyD r.parsed.flags doc ∧
+    Nonempty (Solidity.Yul.ScopedSyntax.Prepared scope tier outside localNames r.parsed.body)) ∧
+  (∀ X scope tier outside locals doc src (r : @YulJson.BuiltinGuard.Parsed X scope tier outside locals doc src),
+    Nonempty (Solidity.Yul.BuiltinUse.Checked r.original.parsed.body)) ∧
+  (∀ X table names input outside locals bound node (r : @YulJson.BuiltinGuard.JsonChecked X table names input outside locals bound node),
+    Nonempty (Solidity.Yul.BuiltinUse.Checked r.original.imported.shaped.tree)) ∧
+  (∀ root current table original write node reference attached scope n locals
+    (r : @YulJson.ReferenceAttachment.Use root current table original write node reference attached scope n locals),
+    Nonempty (Solidity.Yul.ScopeIndexD scope reference.declaration.index r.index) ∧
+    (attached.suffix ≠ [] ∨ Solidity.Yul.NoBinding locals attached.visible))
+
+/-- Full IR admission checks exact tokens/well-formedness; partial renaming
+preserves tokens. Data lookup retains its actual bounded artifact interval. -/
+def IrChecks (text : String) : Prop :=
+  (∀ p, parse text = .ok p → lex text = some (objectToks p.parts.root) ∧ objectWf p.parts.root = true) ∧
+  (∀ F G c L (ρ : Ren F G) (b : Block F c L) b', b.ren ρ = some b' → b.toks = b'.toks) ∧
+  (∀ artifact entries label selected, @Solidity.SolcValidation.selectData artifact label entries = some selected →
+    (label, selected.ref) ∈ entries ∧ selected.ref.bytes.length = selected.ref.size.val)
 
 end Solidity.Interfaces.FrontendValidation

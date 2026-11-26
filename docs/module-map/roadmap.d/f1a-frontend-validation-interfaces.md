@@ -1,2 +1,2 @@
-| `Interfaces/FrontendExecution.lean` | External compiler artifact, invocation, JSON decoding and exact IR-selection boundary; no compiler semantic correctness assumption. |
-| `Interfaces/FrontendValidation.lean` | Fixed structural specification propositions for JSON fields, IR scalar/binder checks and rational arithmetic; aggregate contract work in progress. |
+| `Interfaces/FrontendExecution.lean` | External exact compiler artifact, successful invocation, faithful JSON and selected IR boundary; no compiler semantic correctness assumption. |
+| `Interfaces/FrontendValidation.lean` | Fixed structural contracts for reader refusals and identities, JSON/arithmetic, call attachment, Yul static/safety/reference checks, and IR/data admission. |

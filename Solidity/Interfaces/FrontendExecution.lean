@@ -14,6 +14,8 @@ version, and the successfully completed standard-JSON invocation and returned te
 includes all source resolution (including callbacks), with no unrecorded inputs.
 These fields specify the trusted boundary; they assert no compiler semantics. -/
 structure Environment where
+  /-- Independently established exact release bytes, not untrusted hash metadata. -/
+  pinnedArtifact : Compiler → ByteArray
   sha256 : ByteArray → String
   version : ByteArray → String
   completed : ByteArray → String → String → Prop
@@ -22,6 +24,7 @@ structure Environment where
 JSON, since process success alone does not imply successful compilation. -/
 def Faithful (env : Environment) (compiler : Compiler) (artifact : ByteArray)
     (inputText outputText : String) (input output : Json) : Prop :=
+  artifact = env.pinnedArtifact compiler ∧
   env.sha256 artifact = compiler.sha256 ∧ env.version artifact = compiler.version ∧
   env.completed artifact inputText outputText ∧
   Json.parse inputText = .ok input ∧ Json.parse outputText = .ok output ∧
