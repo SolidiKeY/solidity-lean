@@ -364,4 +364,31 @@ theorem enumerated (P : Shrink.Params) {D : Source.Layout} {h : Source.Heap D} (
       simp only [Shrink.objectCells] at ca cb
       omega
 
+/-! Public API controls: offset marks, nonzero run indices, serialization,
+empty arrays and the first byte outside a word run. -/
+
+example (P : Shrink.Params) (base : Nat) (m : Shrink.Phys) :
+    geometry.read P (.scalar 32) ⟨.memory, base, 7⟩ m =
+      some (.leaf (mloadNat m.memory base)) :=
+  memory_read_word_shared P base 7 m
+
+example (P : Shrink.Params) (base : Nat) (m : Shrink.Phys) :
+    geometry.readElems P (.scalar 32) ⟨.memory, base, 0⟩ 2 3 m =
+      some ((List.range' 3 2).map fun j => .leaf (mloadNat m.memory (base + 32 * j))) :=
+  memory_read_words_shared P base 2 3 m
+
+example (r : ByteView) (base : Nat) :
+    ((List.range' 0 2).map fun j => Shrink.Tree.leaf
+      (mloadNat (wordListView [7, 9] r base) (base + 32 * j))) = [.leaf 7, .leaf 9] :=
+  memory_words_eq_shared _ base [7, 9] (wordList_read [7, 9] r base)
+
+example (P : Shrink.Params) (m : Shrink.Phys) :
+    ¬ geometry.elemCells P (.scalar 32) ⟨.memory, 128, 0⟩ 2 3 m (.mem 288) := by
+  rw [memory_elem_cells_shared]
+  decide
+
+example (P : Shrink.Params) (base : Nat) (m : Shrink.Phys) :
+    geometry.read P (.fixedArray (.scalar 32) 0) ⟨.memory, base, 0⟩ m = some (.node []) :=
+  memory_read_fixed_words P base 0 m
+
 end Solidity.Yul.Layout.Instances
