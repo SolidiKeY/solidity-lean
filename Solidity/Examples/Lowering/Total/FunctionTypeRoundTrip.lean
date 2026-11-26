@@ -10,6 +10,7 @@ open Solidity Solidity.Correctness.Lowering.Total
 open Solidity.Correctness.Lowering.Total.FunctionTypeDecode
 open Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip
 open Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws (fnParts?_mk fnTy?_mk partsL Well)
+open Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.Str (startsWith_mk)
 
 def u256 : Source.Elem := .int false 256 (by decide)
 
@@ -115,7 +116,8 @@ example : readSig "function(bool,address)external"
 
 /-! ## Widths -/
 
-/-- Every integer width and sign and every `bytesN`, as parameter and return. -/
+/-- Every integer width and sign as a parameter, every `bytesN` as a return
+(the conditions are the same in both positions). -/
 example (s : Bool) (bits n : Nat) (h h') (ext : Bool) (a : Ann) :
     readSig (Part.fn ext a (one (.elem (.int s bits h))) (one (.elem (.fixedBytes n h')))).spell
       = some (.fn ext () (one (.elem (.int s bits h))) (one (.elem (.fixedBytes n h')))) :=
@@ -190,8 +192,9 @@ example : ¬ NamedOk "a,b" ∧
   ⟨by decide +kernel,
     back true (two (.named "a") (.named "b")) .nil (by decide +kernel) (by decide +kernel)⟩
 
-/-- An empty name and an unbalanced bracket are not `Well`. -/
-example : ¬ NamedOk "" ∧ ¬ NamedOk "T)" ∧ ¬ NamedOk "T[" := by decide +kernel
+/-- An empty name and an unbalanced bracket are not `Well`, so not `NamedOk`. -/
+example : ¬ Well "" ∧ ¬ Well "T)" ∧ ¬ Well "T[" ∧
+    ¬ NamedOk "" ∧ ¬ NamedOk "T)" ∧ ¬ NamedOk "T[" := by decide +kernel
 
 /-- A function-type suffix: the component starts as a function type, so it is
 no named or located leaf, and `fnParts?` refuses it at every fuel. -/
@@ -202,6 +205,18 @@ example : ¬ NamedOk "function(uint)[]" ∧ ¬ LocatedOk "function(uint)[]" .mem
       (rs := []) (ext := false)
       ((fnParts?_mk _).trans (by decide +kernel)) (List.mem_singleton.2 rfl)
       (.malformed ((fnTy?_mk _).trans (by decide)) ((fnParts?_mk _).trans (by decide +kernel))))⟩
+
+/-- One erasure, one spelling, one reading, whatever the mutabilities. -/
+example (a b : Ann) (ext : Bool) {ps rs : Parts Ann} (h : (Part.fn ext a ps rs).Canon) :
+    (Part.fn ext a ps rs).spell = (Part.fn ext b ps rs).spell ∧
+      readSig (Part.fn ext b ps rs).spell = some (Part.fn ext a ps rs).erase :=
+  readSig_annotation_free h rfl
+
+/-- A width row before the marker row is passed over. -/
+example (rows : List (String × Nat)) :
+    ofRows (("f", 8) :: ("f" ++ "#" ++ nested.spell, 0) :: rows) "f" = some nested.erase :=
+  (ofRows_skip "f" 8 _ ((startsWith_mk _ _).trans (by decide))).trans
+    (ofRows_roundtrip (by decide +kernel) "f" 0 rows)
 
 /-- A leaf alone is no retained signature. -/
 example : readSig "uint8" = none :=

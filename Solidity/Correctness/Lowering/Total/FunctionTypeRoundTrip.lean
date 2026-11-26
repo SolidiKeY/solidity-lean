@@ -34,7 +34,8 @@ back from its own spelling, annotations erased.
   those from its depth on.
 * `ofDecl_roundtrip`, `ofRows_roundtrip`, `ofRows_valueRows`: the same for a
   declaration's marker type and for marker rows (`fnRow?` on the row
-  `k#function(…)`, `valueRows?`'s own rows), from their definitions.
+  `k#function(…)`, `valueRows?`'s own rows; `ofRows_skip` for rows before it), from their
+  definitions.
 * `canon_erase_inj`: canonical trees with one spelling have one erasure.
 
 ## What does not round-trip
@@ -207,6 +208,18 @@ theorem Parts.canon_erase {α : Type} : (ts : Parts α) → (ts.erase.Canon ↔ 
 end
 
 mutual
+/-- A spelling keeps no annotation: it is the erased tree's. -/
+theorem Part.spell_erase {α : Type} : (t : Part α) → t.erase.spell = t.spell
+  | .elem _ | .named _ | .located _ _ => rfl
+  | .fn ext _ ps rs => by
+    simp only [Part.erase, Part.spell, Parts.spells_erase ps, Parts.spells_erase rs]
+theorem Parts.spells_erase {α : Type} : (ts : Parts α) → ts.erase.spells = ts.spells
+  | .nil => rfl
+  | .cons t ts => by
+    simp only [Parts.erase, Parts.spells, Part.spell_erase t, Parts.spells_erase ts]
+end
+
+mutual
 /-- **The reading hypotheses, discharged.** A canonical tree satisfies
 `Part.Splits` at its own spelling, and that spelling is a `Well` component (so
 it may stand inside another signature). -/
@@ -279,12 +292,16 @@ theorem readSig_leaf {α : Type} {t : Part α} (h : t.Canon)
   | fn ext a ps rs => exact absurd rfl (isLeaf ext a ps rs)
 
 /-- The reading keeps no annotation: trees with one erasure, whatever their
-mutabilities and `internal` keywords, have one spelling, read as that erasure. -/
+mutabilities and `internal` keywords, have one spelling, and it is read as
+that erasure. Which of the trees was spelled is not recovered. -/
 theorem readSig_annotation_free {α β : Type} {ext : Bool} {a : α} {b : β} {ps rs : Parts α}
     {ps' rs' : Parts β} (h : (Part.fn ext a ps rs).Canon)
     (same : (Part.fn ext a ps rs).erase = (Part.fn ext b ps' rs').erase) :
-    readSig (Part.fn ext a ps rs).spell = some (Part.fn ext b ps' rs').erase :=
-  same ▸ readSig_roundtrip h
+    (Part.fn ext a ps rs).spell = (Part.fn ext b ps' rs').spell ∧
+      readSig (Part.fn ext b ps' rs').spell = some (Part.fn ext a ps rs).erase := by
+  have sp : (Part.fn ext a ps rs).spell = (Part.fn ext b ps' rs').spell := by
+    rw [← Part.spell_erase (Part.fn ext a ps rs), same, Part.spell_erase]
+  exact ⟨sp, sp ▸ readSig_roundtrip h⟩
 
 /-- **Canonical spellings determine the tree up to annotations.** -/
 theorem canon_erase_inj {α β : Type} {t : Part α} {u : Part β} (ht : t.Canon) (hu : u.Canon)
@@ -335,6 +352,14 @@ theorem fnRow?_skip (k : String) {k' : String} (w : Nat) (rows : List (String ×
     (h : k'.startsWith (k ++ "#function(") = false) :
     fnRow? ((k', w) :: rows) k = fnRow? rows k := by
   simp only [fnRow?, List.findSome?_cons, h, Bool.false_eq_true, if_false]
+
+/-- `ofRows` passes over the rows before `k`'s marker (other variables' rows,
+`k`'s own width rows). -/
+theorem ofRows_skip (k : String) {k' : String} (w : Nat) (rows : List (String × Nat))
+    (h : k'.startsWith (k ++ "#function(") = false) :
+    ofRows ((k', w) :: rows) k = ofRows rows k := by
+  unfold ofRows
+  rw [fnRow?_skip k w rows h]
 
 /-- **`ofRows`.** Marker rows whose first row is `k#` followed by a canonical
 function type's spelling are read, at the key `k`, as its erased tree. -/
