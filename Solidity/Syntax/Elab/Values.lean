@@ -1691,11 +1691,14 @@ section FnPureMeasure
 
 variable {C}
 
+/-! `fnPure` decreases the node count `RawExpr.nodes` (`Context.lean`), each
+node counted once whatever name or literal it carries: `abi.encodeCall` lowers
+the conversion `T(a)` of an argument `a`, whose `sizeOf` the name `T` makes
+arbitrary. -/
+
 omit [FreshNames] in
-/-- Every expression has a node (`RawExpr.nodes`, `Context.lean`: the measure
-`fnPure` decreases; `abi.encodeCall` lowers the conversion `T(a)` of an
-argument `a`, whose `sizeOf` the name `T` makes arbitrary). -/
-theorem RawExpr.one_le_nodes (e : RawExpr) : 1 ≤ e.nodes := by
+/-- Every expression has a node. -/
+theorem RawExpr.nodes_pos (e : RawExpr) : 0 < e.nodes := by
   cases e <;> simp only [RawExpr.nodes] <;> omega
 
 /-- The receiver `extMember?` returns is smaller than the member expression. -/
@@ -1867,7 +1870,7 @@ decreasing_by
     | (rename_i hmem hres
        have hle : RawExpr.nodes _ ≤ RawExpr.nodes _ :=
          encodeCallActual_nodes (List.of_mem_zip hmem).2
-       have hpos := RawExpr.one_le_nodes h
+       have hpos := RawExpr.nodes_pos h
        rcases hres with rfl | rfl <;>
          simp only [RawExpr.nodes, RawExpr.nodesList] at * <;> omega)
 

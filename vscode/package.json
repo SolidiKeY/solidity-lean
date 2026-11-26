@@ -81,6 +81,18 @@
       {
         "command": "solidityLean.copyVerificationTrace",
         "title": "Solidity Lean: Copy Verification Trace"
+      },
+      {
+        "command": "solidityLean.runFunction",
+        "title": "Solidity Lean: Run Function"
+      },
+      {
+        "command": "solidityLean.showObligation",
+        "title": "Solidity Lean: Show Obligation"
+      },
+      {
+        "command": "solidityLean.showCounterexample",
+        "title": "Solidity Lean: Show Counterexample"
       }
     ],
     "submenus": [
@@ -307,6 +319,12 @@
           },
           "additionalProperties": false,
           "description": "Trace annotation colors; null uses theme defaults. Positioned trace producer is currently unavailable."
+        },
+        "solidityLean.codeLens": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Show Solidity Lean code lenses."
         }
       }
     },
@@ -345,7 +363,15 @@
         "key": "f8",
         "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "solidityLeanCounterexample",
+          "name": "Solidity Lean Counterexample"
+        }
+      ]
+    }
   },
   "scripts": {
     "inventory-check": "node parity/inventory-check.cjs",
