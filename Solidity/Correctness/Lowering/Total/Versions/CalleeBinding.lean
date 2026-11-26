@@ -119,8 +119,8 @@ frame's parameter and return names. `Renaming` is the call site's exact frame
 renaming, a request-side premise, not a decoder fact. Ordinary threading
 (`Request.elabScope`, `Request.elabState`) and the recursive endpoint
 (`Recursive`: pushed recursive frame, empty memo) are told apart by the bridges
-below. Statements still to prove are `Prop` definitions, not theorems; no
-semantic preservation or coverage is claimed.
+below. `slotsStatement` is proved (`slots`); `Publishes` remains a `Prop`
+definition to prove downstream. No semantic preservation or coverage is claimed.
 -/
 
 /-- Inputs of the e2b callee producer at one call site. -/
@@ -169,11 +169,45 @@ def Publishes (produce : Site → Request → Option Output) : Prop :=
     (∃ a, r.contract.funs[σ.index]? = some (a, c.declaration)) →
     produce σ r = some s → Bound σ r c s
 
-/-- Statement to prove: under the exact renaming with distinct original names,
+/-- Statement (proved by `slots`): under the exact renaming with distinct original names,
 parameter and return slots are the frame's locals, oldest first. -/
 def slotsStatement : Prop :=
   ∀ c, Renaming c → ((c.declaration.params ++ c.declaration.rets).map Prod.fst).Nodup →
     paramSlots c ++ returnSlots c = (c.locals.map Prod.fst).reverse
+
+/-- With distinct keys, a member pair is the first match of its key. -/
+private theorem lookupBy_of_mem {k v : String} :
+    ∀ {L : List (String × String)}, (L.map Prod.fst).Nodup → (k, v) ∈ L →
+      Semantics.lookupBy k L = some v
+  | [], _, hm => nomatch hm
+  | (k', v') :: rest, hn, hm => by
+    simp only [List.map_cons, List.nodup_cons] at hn
+    simp only [Semantics.lookupBy]
+    cases List.mem_cons.mp hm with
+    | inl he => cases he; simp
+    | inr hr =>
+      have hk : k ≠ k' := fun he => hn.1 (he ▸ List.mem_map_of_mem (f := Prod.fst) hr)
+      simp only [hk, if_false]
+      exact lookupBy_of_mem hn.2 hr
+
+/-- Under the exact renaming with distinct original names, the parameter and
+return slots are the frame's locals, oldest first. -/
+theorem slots : slotsStatement := by
+  intro c ⟨hf, hs, _⟩ hk
+  have hn : (c.names.map Prod.fst).Nodup :=
+    hf ▸ List.pairwise_reverse.mpr (List.Pairwise.imp (fun h e => h e.symm) hk)
+  have hks : (c.declaration.params ++ c.declaration.rets).map Prod.fst =
+      c.names.reverse.map Prod.fst := by
+    rw [List.map_reverse, hf, List.reverse_reverse]
+  have hl : paramSlots c ++ returnSlots c =
+      ((c.declaration.params ++ c.declaration.rets).map Prod.fst).map
+        fun n => (Semantics.lookupBy n c.names).getD n := by
+    simp only [paramSlots, returnSlots, List.map_append, List.map_map]; rfl
+  rw [hl, hks, ← hs, ← List.map_reverse, List.map_map]
+  apply List.map_congr_left
+  intro p hp
+  have hm : (p.1, p.2) ∈ c.names := List.mem_reverse.mp hp
+  simp [lookupBy_of_mem hn hm]
 
 /-! ### Ordinary callee endpoint: trivial bridges -/
 

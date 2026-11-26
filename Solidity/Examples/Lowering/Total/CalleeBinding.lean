@@ -66,9 +66,8 @@ example {r : Request} {o : ProductionOutput} {rf : RecFrame} {after : Solidity.C
     (h : Recursive r callee o rf after parts names F p) : r.success o :=
   (recursive_iff.mp h).2.1
 
-/-! The slot statement is open; its instance at the sample holds by evaluation. -/
-example : slotsStatement → paramSlots callee ++ returnSlots callee =
-    (callee.locals.map Prod.fst).reverse :=
-  fun st => st callee (by unfold Renaming; decide) (by decide)
+/-! The proved slot statement at the sample. -/
+example : paramSlots callee ++ returnSlots callee = (callee.locals.map Prod.fst).reverse :=
+  slots callee (by unfold Renaming; decide) (by decide)
 
 end Solidity.Examples.Lowering.Total.CalleeBinding
