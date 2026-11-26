@@ -75,6 +75,13 @@ example (b : SemanticBoundary) (decode : Request → Option SourceProgram)
     (a : b.reference.associated r s) (a' : b.reference.associated r s') : s = s' :=
   h.associated_unique e a a'
 
+/-- Why the goal is not stated at the stage-1 boundary: the contract there
+says that every callee-body pipeline fails. -/
+example
+    (h : LowerLoopsCorrectContract loopBoundaryStage1 loopBoundaryStage1.reference Decode.decode)
+    (r : Request) (c : CalleeRequest) (callee : r.callee = some c) : ¬ r.Succeeds :=
+  loopContractStage1_not_plain h (by simp [Decode.plain, callee])
+
 end Contract
 
 /-! ### The decoder on the e1 sample
