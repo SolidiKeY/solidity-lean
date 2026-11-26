@@ -1,1 +1,1 @@
-| `Examples/Lowering/Total/CalleeBinding.lean` | Checks of the request-level callee binding contract: exact frame renaming, parameter/return slots, ordinary and recursive endpoints, e2b producer instance well typed. |
+| `Examples/Lowering/Total/CalleeBinding.lean` | Checks of the request-level callee binding contract: exact frame renaming, proved parameter/return slots, first-match alias binding, ordinary and recursive endpoints, e2b producer instances well typed. |
