@@ -396,6 +396,15 @@ theorem fnPure_field_plain (C : Contract) (Γ : ECtx) (x m : String)
     (fnPure_other C Γ).2.1]
   rfl
 
+/-- `r.g.selector`, `r.g` an external function of the contract: the literal
+selector (the member arm in its earlier spelling, `fnPure_field_old`). -/
+theorem fnPure_selector (C : Contract) (Γ : ECtx) (e r : RawExpr) (g : String) (sel : Nat)
+    (he : extMember? C Γ e = some (r, g)) (hs : fnSelector? C g = some sel) :
+    fnPure C Γ (.field e "selector") = pure (.num sel) := by
+  rw [fnPure_field_old, if_pos (by decide), he]
+  simp only [hs]
+  rfl
+
 /-- The member arm's test of an external function type is the pattern it
 replaced (`fnParts?_any_eq`): on a type that is no function's, the other branch. -/
 example (ty : String) (h : fnParts? ty = none) :

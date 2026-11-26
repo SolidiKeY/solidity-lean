@@ -2181,7 +2181,8 @@ theorem extMember?_match_eq {β : Type} (Γ : ECtx) (h : RawExpr)
   split <;> rename_i heq <;> simp only [heq]
 /-! The defining equations of `fnPure`, one per arm (the first arm's four
 branches each their own), as written before the function was total; the
-member arm (`fnPure_field`) is in the definition's present spelling. -/
+member arm is given in the definition's present spelling (`fnPure_field`) and
+in the earlier one (`fnPure_field_old`). -/
 
 /-- `abi.encodeCall(h, t)`. -/
 theorem fnPure_encodeCall (Γ : ECtx) (f : String) (h : RawExpr) (as : List RawExpr)
@@ -2286,6 +2287,42 @@ theorem fnPure_field (Γ : ECtx) (e : RawExpr) (m : String) :
         pure (.binop .add (.binop .mul (← fnPure C Γ r) (.num selShift)) (.num sel))
       | none => do pure (.field (← fnPure C Γ e) m)) := by
   rw [fnPure]
+
+/-- The member arm, as written before the function was total (`if let` on
+`extMember?` and the pattern `some (_, _, true)` on `fnParts?`). -/
+theorem fnPure_field_old (Γ : ECtx) (e : RawExpr) (m : String) :
+    fnPure C Γ (.field e m) = (do
+      if m == "selector" || m == "address" then
+        if let some (r, g) := extMember? C Γ e then
+          if m == "address" then return ← fnPure C Γ r
+          let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
+          return .num sel
+        if let some ty := fnTyOfExpr C Γ e then
+          if let some (_, _, true) := fnParts? ty then
+            let e' ← fnPure C Γ e
+            let a : RawExpr := .binop .div e' (.num selShift)
+            return if m == "selector" then .binop .sub e' (.binop .mul a (.num selShift)) else a
+      match extMember? C Γ (.field e m) with
+      | some (r, g) =>
+        let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
+        pure (.binop .add (.binop .mul (← fnPure C Γ r) (.num selShift)) (.num sel))
+      | none => do pure (.field (← fnPure C Γ e) m)) := by
+  rw [fnPure_field]
+  by_cases hm : (m == "selector" || m == "address") = true
+  · rw [if_pos hm, if_pos hm, extMember?_match_eq, extMember?_match_eq]
+    rcases extMember? C Γ e with _ | ⟨r, g⟩
+    · rcases fnTyOfExpr C Γ e with _ | ty
+      · rfl
+      · dsimp only
+        rcases fnParts? ty with _ | ⟨ps, rs, _ | _⟩ <;> rfl
+    · dsimp only
+      by_cases ha : (m == "address") = true
+      · simp only [ha, if_true]
+      · simp only [ha, Bool.false_eq_true, if_false, pure_bind]
+        rcases fnSelector? C g with _ | sel
+        · simp only [bind, Except.bind]
+        · simp only
+  · rw [if_neg hm, if_neg hm, extMember?_match_eq]
 
 /-- The call arm at no argument, evaluated. -/
 theorem fnPure_call_nil (Γ : ECtx) (f : String) :
