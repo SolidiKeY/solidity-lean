@@ -346,7 +346,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     } };
 }
 let runtime;
-function activate(context) {
+async function activate(context) {
   const vscode=require('vscode');
   const configuration=doc=>{
     if(!vscode.workspace.isTrusted)throw new Error('Language services require a trusted workspace');
@@ -359,8 +359,26 @@ function activate(context) {
   };
   const service=new (require('./lsp-client.cjs').LanguageServers)(configuration);
   const api=createExtension(vscode,context,args=>service.verify(args),service);
-  context.subscriptions.push(require('./features/index.cjs').activate(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')}));
-  context.subscriptions.push({dispose:()=>service.dispose()});runtime=api;return api;
+  runtime=api;
+  const featureRegistry=await require('./features/index.cjs').activate(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')});
+  context.subscriptions.push(featureRegistry);
+  context.subscriptions.push(vscode.languages.registerCodeLensProvider(require('./editor-document.cjs').selector, {
+    async provideCodeLenses(doc,token) {
+      if (!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('codeLens',true) || token?.isCancellationRequested) return [];
+      const abort=new AbortController(), registration=token?.onCancellationRequested(()=>abort.abort());
+      try {
+        const client=await service.open(doc);
+        if (abort.signal.aborted || !client.capabilities?.codeLensProvider) return [];
+        const lenses=await service.request('textDocument/codeLens',doc,{}, {signal:abort.signal});
+        if (abort.signal.aborted) return [];
+        return (lenses||[]).map(lens=>new vscode.CodeLens(new vscode.Range(lens.range.start.line,lens.range.start.character,lens.range.end.line,lens.range.end.character),lens.command));
+      } catch(error) {
+        if (!abort.signal.aborted && ![-32800,-32801].includes(error.code)) api.output.appendLine('Code lenses unavailable: '+error.message);
+        return [];
+      } finally {registration?.dispose();}
+    }
+  }));
+  context.subscriptions.push({dispose:()=>service.dispose()});return api;
 }
 function deactivate(){return runtime?.dispose();}
 module.exports = { activate, deactivate, createExtension };

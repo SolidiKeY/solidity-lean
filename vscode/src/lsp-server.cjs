@@ -528,11 +528,11 @@ function startServer(input=process.stdin,output=process.stdout){
   const peer=new RpcPeer(input,output);let service,features,shuttingDown=false,versionSent=false;
   const identity=()=>({name:'Solidity Lean Language Server',version:require('../package.json').version});
   peer.on('handlerError',error=>{if(!peer.closed)peer.notify('window/logMessage',{type:1,message:error.message});});
-  peer.onRequest('initialize',params=>{
+  peer.onRequest('initialize',async params=>{
     if(service)throw failure('Already initialized',-32600);
     peer.ownedProcessRegistration=params.capabilities?.experimental?.solidityLeanOwnedProcess===true;
     service=new SolidityService(peer,params.initializationOptions?.backendPath||fileURLToPath(params.rootUri),params.initializationOptions?.settings);
-    features=require('./server-features/index.cjs').register(peer,service);
+    features=await require('./server-features/index.cjs').register(peer,service);
     return {serverInfo:identity(),capabilities:{...(features.codeLens?{codeLensProvider:{resolveProvider:false}}:{}),experimental:{solidityLeanRequests:features.requests},textDocumentSync:{openClose:true,change:2,save:{includeText:true}},hoverProvider:true,
       completionProvider:{triggerCharacters:['.']},definitionProvider:true,referencesProvider:true,documentSymbolProvider:true,documentHighlightProvider:true,
       workspaceSymbolProvider:true,documentFormattingProvider:true,codeActionProvider:{codeActionKinds:['quickfix'],resolveProvider:true},renameProvider:{prepareProvider:true},signatureHelpProvider:{triggerCharacters:['(',',']}}};

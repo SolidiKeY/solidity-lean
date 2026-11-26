@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // Features own their subscriptions; a failed activation is rolled back.
-function activate(context, services, directory = __dirname) {
+async function activate(context, services, directory = __dirname) {
   const owned = [], commands = new Set();
   const log = message => services.output.appendLine(message);
   const dispose = items => { for (const item of [...new Set(items)].reverse()) try { item?.dispose?.(); } catch (error) { log(`Feature disposal failed: ${error.message}`); } };
@@ -22,8 +22,7 @@ function activate(context, services, directory = __dirname) {
     try {
       const feature = require(path.join(directory, file));
       if (typeof feature.activate !== 'function') throw new Error('missing activate(context, services)');
-      const result = feature.activate(featureContext, {...services, vscode, registerCommand});
-      if (result && typeof result.then === 'function') throw new Error('activation must be synchronous');
+      const result = await feature.activate(featureContext, {...services, vscode, registerCommand});
       if (result) subscriptions.push(result);
       owned.push(subscriptions);
     } catch (error) {

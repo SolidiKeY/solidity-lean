@@ -4,9 +4,9 @@ const path = require('node:path');
 
 // register(server) may call onRequest and registerCodeLensProvider.
 // Registrations are committed atomically after the feature returns.
-function register(peer, service, directory = __dirname) {
+async function register(peer, service, directory = __dirname) {
   const requests = new Map(), lenses = [], disposables = [];
-  const log = message => peer.notify('window/logMessage', {type: 1, message});
+  const log = message => {if (!peer.closed) peer.notify('window/logMessage', {type: 1, message});};
   const cleanup = items => {for (const item of items.reverse()) try {item?.dispose?.();} catch (error) {log(`Server feature disposal failed: ${error.message}`);}};
   for (const file of fs.readdirSync(directory).filter(name => name.endsWith('.cjs') && name !== 'index.cjs').sort()) {
     const pending = new Map(), pendingLenses = [], owned = [];
@@ -25,8 +25,7 @@ function register(peer, service, directory = __dirname) {
     try {
       const feature = require(path.join(directory, file));
       if (typeof feature.register !== 'function') throw new Error('missing register(server)');
-      const result = feature.register(server);
-      if (result && typeof result.then === 'function') throw new Error('registration must be synchronous');
+      const result = await feature.register(server);
       if (result) owned.push(result);
       for (const [method, handler] of pending) {requests.set(method, handler); peer.onRequest(method, handler);}
       lenses.push(...pendingLenses); disposables.push(owned);

@@ -14,7 +14,7 @@ function fixture(t, files) {
   return dir;
 }
 
-test('editor loads in sorted order, isolates failures, supplies fallbacks and disposes once', t => {
+test('editor loads in sorted order, isolates failures, supplies fallbacks and disposes once', async t => {
   const events = [], messages = [], commands = new Map();
   const vscode = {commands:{registerCommand(name, handler) {
     assert.ok(!commands.has(name)); commands.set(name, handler);
@@ -22,12 +22,12 @@ test('editor loads in sorted order, isolates failures, supplies fallbacks and di
   }}, window:{showInformationMessage(message) {messages.push(message);}}};
   const dir = fixture(t, {
     'z.cjs': `exports.activate=(c,s)=>{s.events.push('z');c.subscriptions.push({dispose(){s.events.push('dispose z')}})}`,
-    'b.cjs': `exports.activate=(c,s)=>{s.events.push('b');s.registerCommand('temporary',()=>{});throw Error('broken')}`,
+    'b.cjs': `exports.activate=async(c,s)=>{s.events.push('b');s.registerCommand('temporary',()=>{});throw Error('broken')}`,
     'a.cjs': `exports.activate=(c,s)=>{s.events.push('a');const d=s.vscode.commands.registerCommand('solidityLean.runFunction',()=>42);c.subscriptions.push(d)}`,
     'ignored.js': `throw Error('must not load')`,
     'index.cjs': `throw Error('must not load')`
   });
-  const registry = editor.activate({subscriptions:[]}, {vscode,output:{appendLine:x=>messages.push(x)},events}, dir);
+  const registry = await editor.activate({subscriptions:[]}, {vscode,output:{appendLine:x=>messages.push(x)},events}, dir);
   assert.deepEqual(events.slice(0,4), ['a','b','dispose temporary','z']);
   assert.match(messages[0], /b\.cjs.*broken/);
   assert.equal(commands.get('solidityLean.runFunction')(), 42);
@@ -43,10 +43,10 @@ test('server commits features in order, advertises requests and lenses, and roll
   const events = [], logs = [], peer = {requests:new Map(), onRequest(name,fn){this.requests.set(name,fn);}, notify(_method, params){logs.push(params.message);}};
   const dir = fixture(t, {
     'z.cjs': `exports.register=s=>{s.service.events.push('z');s.registerCodeLensProvider(()=>[{title:'z'}]);return {dispose(){s.service.events.push('dispose z')}}}`,
-    'b.cjs': `exports.register=s=>{s.service.events.push('b');s.onRequest('solidityLean/bad',()=>1);s.registerCodeLensProvider(()=>[{title:'bad'}]);throw Error('broken')}`,
+    'b.cjs': `exports.register=async s=>{s.service.events.push('b');s.onRequest('solidityLean/bad',()=>1);s.registerCodeLensProvider(()=>[{title:'bad'}]);throw Error('broken')}`,
     'a.cjs': `exports.register=s=>{s.service.events.push('a');s.onRequest('solidityLean/good',()=>42);s.registerCodeLensProvider(()=>[{title:'a'}]);return {dispose(){s.service.events.push('dispose a')}}}`
   });
-  const registry = server.register(peer,{events},dir);
+  const registry = await server.register(peer,{events},dir);
   assert.deepEqual(events,['a','b','z']);
   assert.match(logs[0], /b\.cjs.*broken/);
   assert.deepEqual(registry.requests,['solidityLean/good']);
