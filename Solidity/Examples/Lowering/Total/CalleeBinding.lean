@@ -41,4 +41,34 @@ example {r : Request} {o : ProductionOutput} {rf : RecFrame} (h : r.callee = som
 
 example {o : ProductionOutput} : (recursiveState callee o).memo = {} := recursiveState_memo
 
+/-! Ordinary threading: the callee's context, the producer's memo, and the
+spelled input under a binding. -/
+example {r : Request} (h : r.callee = some callee) :
+    r.context = @ECtx.toNCtx r.input.names callee.locals := context_callee h
+
+example {r : Request} {o : ProductionOutput} : (r.elabState o).memo = o.after.memo :=
+  elabState_memo
+
+example {σ : Site} {r : Request} {o : ProductionOutput} {s : Output}
+    (b : Bound σ r callee s) (hs : r.success o) :
+    Decode.Tables.WithExpr.items σ.tables (Decode.Calls.expr σ.tables σ.registry) .body
+      r.input.raw = some s.frame.body ∧ Declared (fun _ => some s.declaration) r callee s :=
+  ⟨b.spelledInput hs, b.declared hs⟩
+
+/-! The recursive endpoint is its own scope and state over the same locals. -/
+example {r : Request} {o : ProductionOutput} {rf : RecFrame} (h : r.callee = some callee) :
+    recursiveScope r o rf = { r.elabScope o with recs := rf :: (r.elabScope o).recs } ∧
+      (recursiveState callee o).locals = (r.elabState o).locals :=
+  ⟨recursiveScope_eq h, recursiveState_locals h⟩
+
+example {r : Request} {o : ProductionOutput} {rf : RecFrame} {after : Solidity.Correctness.Lowering.Checker.Snapshot}
+    {parts : SProg r.contract} {names : List Var} {F : Ctx} {p : Blk r.contract F}
+    (h : Recursive r callee o rf after parts names F p) : r.success o :=
+  (recursive_iff.mp h).2.1
+
+/-! The slot statement is open; its instance at the sample holds by evaluation. -/
+example : slotsStatement → paramSlots callee ++ returnSlots callee =
+    (callee.locals.map Prod.fst).reverse :=
+  fun st => st callee (by unfold Renaming; decide) (by decide)
+
 end Solidity.Examples.Lowering.Total.CalleeBinding
