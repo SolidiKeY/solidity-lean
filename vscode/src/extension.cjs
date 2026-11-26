@@ -329,7 +329,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       {dispose(){service.removeListener('invalidated',invalidated);service.removeListener('status',receiveStatus);service.removeListener('report',receive);service.removeListener('diagnostics',receiveDiagnostics);service.removeListener('serverError',serverError);service.removeListener('log',log);}});
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
-  return { verify, cancel, controller, diagnostics, reports, service,
+  return { verify, cancel, controller, diagnostics, reports, service, output, get disposed(){return disposed;},
     dispose(){
       if(disposal)return disposal;disposed=true;
       let resolveDisposal,rejectDisposal;disposal=new Promise((resolve,reject)=>{resolveDisposal=resolve;rejectDisposal=reject;});
@@ -359,7 +359,32 @@ function activate(context) {
   };
   const service=new (require('./lsp-client.cjs').LanguageServers)(configuration);
   const api=createExtension(vscode,context,args=>service.verify(args),service);
-  context.subscriptions.push({dispose:()=>service.dispose()});runtime=api;return api;
+  runtime=api;
+  const featureRegistry=require('./features/index.cjs').create(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')});
+  const startFeatures=identity=>{if(!api.disposed){service.removeListener('identity',startFeatures);featureRegistry.start(identity);}};
+  service.on('identity',startFeatures);
+  context.subscriptions.push({dispose(){service.removeListener('identity',startFeatures);return featureRegistry.dispose();}});
+  const lensChanged=vscode.EventEmitter?new vscode.EventEmitter():null;
+  const lensProvider=vscode.languages.registerCodeLensProvider?.(require('./editor-document.cjs').selector, {
+    onDidChangeCodeLenses:lensChanged?.event,
+    async provideCodeLenses(doc,token) {
+      if (!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('codeLens',true) || token?.isCancellationRequested) return [];
+      const abort=new AbortController(), registration=token?.onCancellationRequested(()=>abort.abort());
+      try {
+        const client=await service.open(doc);
+        if (abort.signal.aborted || !client.capabilities?.codeLensProvider) return [];
+        const lenses=await service.request('textDocument/codeLens',doc,{}, {signal:abort.signal});
+        if (abort.signal.aborted) return [];
+        return (lenses||[]).map(lens=>new vscode.CodeLens(new vscode.Range(lens.range.start.line,lens.range.start.character,lens.range.end.line,lens.range.end.character),lens.command));
+      } catch(error) {
+        if (!api.disposed && !abort.signal.aborted && ![-32800,-32801].includes(error.code)) api.output.appendLine('Code lenses unavailable: '+error.message);
+        return [];
+      } finally {registration?.dispose();}
+    }
+  });
+  if(lensProvider)context.subscriptions.push(lensProvider);
+  if(lensChanged)context.subscriptions.push(lensChanged,vscode.workspace.onDidChangeConfiguration(event=>{if(event.affectsConfiguration('solidityLean.codeLens'))lensChanged.fire();}));
+  context.subscriptions.push({dispose:()=>service.dispose()});return api;
 }
 function deactivate(){return runtime?.dispose();}
 module.exports = { activate, deactivate, createExtension };

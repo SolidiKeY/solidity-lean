@@ -1687,17 +1687,104 @@ def encodeCallArg (Γ : ECtx) (T : String) (a : RawExpr) : Except String RawExpr
   if abiTyName (exprShape C Γ a) "" ty == some T then return a
   return ← bad
 
+section FnPureMeasure
+
+variable {C}
+
+/-! `fnPure` decreases the node count `RawExpr.nodes` (`Context.lean`), each
+node counted once whatever name or literal it carries: `abi.encodeCall` lowers
+the conversion `T(a)` of an argument `a`, whose `sizeOf` the name `T` makes
+arbitrary. -/
+
+omit [FreshNames] in
+/-- Every expression has a node. -/
+theorem RawExpr.nodes_pos (e : RawExpr) : 0 < e.nodes := by
+  cases e <;> simp only [RawExpr.nodes] <;> omega
+
+/-- The receiver `extMember?` returns is smaller than the member expression. -/
+theorem extMember?_nodes {Γ : ECtx} {h r : RawExpr} {g : String}
+    (hm : extMember? C Γ h = some (r, g)) : r.nodes < h.nodes := by
+  unfold extMember? at hm
+  split at hm
+  · split at hm
+    · simp only [Option.map_eq_some_iff, Prod.mk.injEq] at hm
+      obtain ⟨r', hr, rfl, rfl⟩ := hm
+      unfold extRecv? at hr
+      split at hr
+      · cases hr; simp [RawExpr.nodes]
+      · cases hr; simp [RawExpr.nodes]
+      · split at hr
+        · cases hr; simp [RawExpr.nodes]
+        · cases hr
+    · cases hm
+  · cases hm
+
+/-- What `encodeCallArg` returns: the argument, or its conversion `T(a)`. -/
+theorem encodeCallArg_ok {Γ : ECtx} {T : String} {a a' : RawExpr}
+    (h : encodeCallArg C Γ T a = .ok a') : a' = a ∨ a' = .call T [a] := by
+  unfold encodeCallArg at h
+  simp only [bind, Except.bind, pure, Except.pure] at h
+  repeat' split at h
+  all_goals first
+    | (cases h; first | done | exact Or.inl rfl | exact Or.inr rfl)
+
+omit [FreshNames] in
+/-- A component of `abi.encodeCall`'s argument tuple is no larger than the tuple. -/
+theorem encodeCallActual_nodes {t a : RawExpr}
+    (h : a ∈ (match t with | .tuple xs => xs | a => [a])) : a.nodes ≤ t.nodes := by
+  split at h
+  · have := RawExpr.nodes_lt_of_mem h; simp only [RawExpr.nodes]; omega
+  · cases List.mem_singleton.1 h; exact Nat.le_refl _
+
+variable (C) in
+/-- `encodeCallArg` with the shape of its result (`encodeCallArg_ok`). -/
+def encodeCallArgS (Γ : ECtx) (T : String) (a : RawExpr) :
+    Except String { a' : RawExpr // a' = a ∨ a' = .call T [a] } :=
+  match h : encodeCallArg C Γ T a with
+  | .ok a' => .ok ⟨a', encodeCallArg_ok h⟩
+  | .error err => .error err
+
+
+omit [FreshNames] in
+/-- `mapM` over the attached list, pointwise a function of the value. -/
+theorem mapM_attach_of {α γ : Type} {l : List α} {F : { x // x ∈ l } → Except String γ}
+    {g : α → Except String γ} (h : ∀ x, F x = g x.1) : l.attach.mapM F = l.mapM g := by
+  rw [List.mapM_subtype (g := g) (fun x hx => h ⟨x, hx⟩), List.unattach_attach]
+
+omit [FreshNames] in
+/-- A bind's first computation rewritten. -/
+theorem bind_congr_left {α β : Type} {x y : Except String α} (h : x = y)
+    (k : α → Except String β) : x >>= k = y >>= k := h ▸ rfl
+
+/-- `encodeCallArgS` bound by its value is `encodeCallArg`. -/
+theorem encodeCallArgS_bind {β : Type} (Γ : ECtx) (T : String) (a : RawExpr)
+    (k : RawExpr → Except String β) :
+    (encodeCallArgS C Γ T a >>= fun ⟨a', _⟩ => k a') = (encodeCallArg C Γ T a >>= k) := by
+  unfold encodeCallArgS
+  split <;> rename_i h <;> simp only [h] <;> rfl
+
+omit [FreshNames] in
+/-- A list built from the matched argument's parts is attached as a whole
+(`wf_preprocess`): `(h :: as).mapM` reaches the decrease with `a ∈ h :: as`. -/
+theorem cons_wfParam {α : Type} (a : α) (l : List α) : wfParam a :: wfParam l = wfParam (a :: l) :=
+  rfl
+
+end FnPureMeasure
+
+section
+attribute [local wf_preprocess] cons_wfParam
+
 /-- External function values and their members, as `uint`s: `r.g` (`g` a
 function of `C`, `r` an address or `this`) is `r * 2^32 + selector(g)`;
 `h.selector` of an external function value `h` is `h % 2^32`, `h.address`
 `h / 2^32` (`r.g.selector` the literal, `r.g.address` `r`), the remainder
 written `h - h / 2^32 * 2^32`.  The callee of
 a call through a value (`callValueName`) is left as written. -/
-partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
+def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
   | .call f (h :: as) =>
     -- `abi.encodeCall(this.g, …)`: the function, whose selector it reads
     if f == "abi.encodeCall" then do
-      let h' ← match extMember? C Γ h with
+      let h' ← match _hm : extMember? C Γ h with
         | some (r, g) => do pure (.field (← fnPure Γ r) g)
         | none => fnPure Γ h
       let [t] := as | throw "abi.encodeCall takes a function and an argument tuple"
@@ -1706,10 +1793,12 @@ partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
         throw "abi.encodeCall: the function's ABI parameter types are unavailable"
       unless actual.length == expected.length do
         throw s!"abi.encodeCall takes {expected.length} arguments, not {actual.length}"
-      let converted ← (expected.zip actual).mapM fun (T, a) => do
-        let a ← encodeCallArg C Γ T a
-        let lowered ← fnPure Γ a
-        if ((rawFnTyOfExpr? C Γ a).bind fnParts?).any (·.2.2) then
+      -- (attached, and `encodeCallArg` with its result's shape, `a` or `T(a)`,
+      -- `encodeCallArgS`: the decrease reads both)
+      let converted ← (expected.zip actual).attach.mapM fun ⟨(T, a), _⟩ => do
+        let ⟨a', _⟩ ← encodeCallArgS C Γ T a
+        let lowered ← fnPure Γ a'
+        if ((rawFnTyOfExpr? C Γ a').bind fnParts?).any (·.2.2) then
           return RawExpr.call "bytes24" [lowered]
         return lowered
       return .call f [h', .tuple converted]
@@ -1729,25 +1818,29 @@ partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
         return lowered
       return .call f encoded
     else if f == callValueName then do
-      let h' ← match extMember? C Γ h with
+      let h' ← match _hm : extMember? C Γ h with
         | some (r, g) => do pure (.field (← fnPure Γ r) g)
         | none => fnPure Γ h
       pure (.call f (h' :: (← as.mapM (fnPure Γ))))
     else do pure (.call f ((← fnPure Γ h) :: (← as.mapM (fnPure Γ))))
   | .field e m => do
     if m == "selector" || m == "address" then
-      if let some (r, g) := extMember? C Γ e then
+      match _hm : extMember? C Γ e with
+      | some (r, g) =>
         if m == "address" then return ← fnPure Γ r
         let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
         return .num sel
+      | none => pure ()
       if let some ty := fnTyOfExpr C Γ e then
-        if let some (_, _, true) := fnParts? ty then
+        -- (`any`, not the pattern `some (_, _, true)`: a match on `fnParts? ty`
+        -- around the recursive call does not elaborate within the heartbeats)
+        if (fnParts? ty).any (·.2.2) then
           let e' ← fnPure Γ e
           -- the selector as `h - h / 2^32 * 2^32`, which the closers read as
           -- linear arithmetic over the quotient (a remainder they do not)
           let a : RawExpr := .binop .div e' (.num selShift)
           return if m == "selector" then .binop .sub e' (.binop .mul a (.num selShift)) else a
-    match extMember? C Γ (.field e m) with
+    match _hm : extMember? C Γ (.field e m) with
     | some (r, g) =>
       let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
       pure (.binop .add (.binop .mul (← fnPure Γ r) (.num selShift)) (.num sel))
@@ -1765,6 +1858,218 @@ partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
   | .assign l r => do pure (.assign l (← fnPure Γ r))
   | .opAssign op l r => do pure (.opAssign op l (← fnPure Γ r))
   | e => pure e
+termination_by e => e.nodes
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | (simp only [RawExpr.nodes, RawExpr.nodesList]; omega)
+    | (have := extMember?_nodes ‹extMember? _ _ _ = some _›
+       simp only [RawExpr.nodes, RawExpr.nodesList] at *; omega)
+    | (have := RawExpr.nodes_lt_of_mem ‹_ ∈ _›
+       simp only [RawExpr.nodes, RawExpr.nodesList] at *; omega)
+    | (rename_i hmem hres
+       have hle : RawExpr.nodes _ ≤ RawExpr.nodes _ :=
+         encodeCallActual_nodes (List.of_mem_zip hmem).2
+       have hpos := RawExpr.nodes_pos h
+       rcases hres with rfl | rfl <;>
+         simp only [RawExpr.nodes, RawExpr.nodesList] at * <;> omega)
+
+end
+
+
+/-- `encodeCallArgS` bound is `encodeCallArg` bound, pointwise in the value. -/
+theorem encodeCallArgS_bind_of {β : Type} (Γ : ECtx) (T : String) (a : RawExpr)
+    (k₁ : { a' : RawExpr // a' = a ∨ a' = .call T [a] } → Except String β)
+    (k₂ : RawExpr → Except String β) (hk : ∀ x, k₁ x = k₂ x.1) :
+    (encodeCallArgS C Γ T a >>= k₁) = (encodeCallArg C Γ T a >>= k₂) := by
+  rw [funext hk]; exact encodeCallArgS_bind Γ T a k₂
+
+omit [FreshNames] in
+/-- An external function type, as a test and as a pattern. -/
+theorem fnParts?_any_eq {β : Type} (ty : String) (A B : β) :
+    (if (fnParts? ty).any (·.2.2) then A else B) =
+      (match fnParts? ty with
+        | some (_, _, true) => A
+        | _ => B) := by
+  rcases fnParts? ty with _ | ⟨ps, rs, _ | _⟩ <;> rfl
+
+/-- A match on `extMember?` that names its equation (for the decrease) is the plain match. -/
+theorem extMember?_match_eq {β : Type} (Γ : ECtx) (h : RawExpr)
+    (k₁ : RawExpr → String → β) (k₂ : β) :
+    (match _hm : extMember? C Γ h with
+      | some (r, g) => k₁ r g
+      | none => k₂) =
+    (match extMember? C Γ h with
+      | some (r, g) => k₁ r g
+      | none => k₂) := by
+  split <;> rename_i heq <;> simp only [heq]
+/-! The defining equations of `fnPure`, one per arm (the first arm's four
+branches each their own), as written before the function was total; the
+member arm (`fnPure_field`) is in the definition's present spelling. -/
+
+/-- `abi.encodeCall(h, t)`. -/
+theorem fnPure_encodeCall (Γ : ECtx) (f : String) (h : RawExpr) (as : List RawExpr)
+    (hf : (f == "abi.encodeCall") = true) :
+    fnPure C Γ (.call f (h :: as)) = (do
+      let h' ← match extMember? C Γ h with
+        | some (r, g) => do pure (.field (← fnPure C Γ r) g)
+        | none => fnPure C Γ h
+      let [t] := as | throw "abi.encodeCall takes a function and an argument tuple"
+      let actual := match t with | .tuple xs => xs | a => [a]
+      let some expected := encodeCallTypes? C Γ h |
+        throw "abi.encodeCall: the function's ABI parameter types are unavailable"
+      unless actual.length == expected.length do
+        throw s!"abi.encodeCall takes {expected.length} arguments, not {actual.length}"
+      let converted ← (expected.zip actual).mapM fun (T, a) => do
+        let a ← encodeCallArg C Γ T a
+        let lowered ← fnPure C Γ a
+        if ((rawFnTyOfExpr? C Γ a).bind fnParts?).any (·.2.2) then
+          return RawExpr.call "bytes24" [lowered]
+        return lowered
+      return .call f [h', .tuple converted]) := by
+  rw [fnPure, if_pos hf]
+  simp only [extMember?_match_eq]
+  split <;> refine bind_congr fun x => ?_
+  all_goals try simp only [pure_bind]
+  all_goals
+    rcases as with _ | ⟨t, _ | ⟨t', as'⟩⟩ <;> try rfl
+    dsimp only
+    split
+    · refine ite_congr rfl (fun _ => ?_) (fun _ => rfl)
+      refine bind_congr_left (mapM_attach_of ?_) _
+      rintro ⟨⟨T, a⟩, _⟩
+      exact encodeCallArgS_bind_of C Γ T a _ _ fun _ => rfl
+    · rfl
+
+/-- An ABI encoding builtin: an external function value is a `bytes24`. -/
+theorem fnPure_encodeBuiltin (Γ : ECtx) (f : String) (h : RawExpr) (as : List RawExpr)
+    (hf : ¬(f == "abi.encodeCall") = true)
+    (hb : (encodeBuiltin f && (lookupBy f C.funs).isNone) = true) :
+    fnPure C Γ (.call f (h :: as)) = (do
+      let encoded ← (h :: as).mapM fun a => do
+        let lowered ← fnPure C Γ a
+        if let some ty := rawFnTyOfExpr? C Γ a then
+          if f == "bytes.concat" || f == "string.concat" then
+            throw "concat does not accept function values"
+          let some (_, _, true) := fnParts? ty |
+            throw "ABI encoding an internal function value is not allowed"
+          return RawExpr.call "bytes24" [lowered]
+        if let .name g := a then
+          if (lookupBy g Γ).isNone && (C.rootType g).isNone &&
+              fnSource C g && (lookupBy g C.funs).isSome then
+            throw "ABI encoding an internal function value is not allowed"
+        return lowered
+      return .call f encoded) := by
+  rw [fnPure, if_neg hf, if_pos hb]
+
+/-- A call through a value: the callee is left as written. -/
+theorem fnPure_callValue (Γ : ECtx) (f : String) (h : RawExpr) (as : List RawExpr)
+    (hf : ¬(f == "abi.encodeCall") = true)
+    (hb : ¬(encodeBuiltin f && (lookupBy f C.funs).isNone) = true)
+    (hv : (f == callValueName) = true) :
+    fnPure C Γ (.call f (h :: as)) = (do
+      let h' ← match extMember? C Γ h with
+        | some (r, g) => do pure (.field (← fnPure C Γ r) g)
+        | none => fnPure C Γ h
+      pure (.call f (h' :: (← as.mapM (fnPure C Γ))))) := by
+  rw [fnPure, if_neg hf, if_neg hb, if_pos hv]
+  simp only [extMember?_match_eq]
+
+/-- Any other call: its arguments, left to right. -/
+theorem fnPure_call_cons (Γ : ECtx) (f : String) (h : RawExpr) (as : List RawExpr)
+    (hf : ¬(f == "abi.encodeCall") = true)
+    (hb : ¬(encodeBuiltin f && (lookupBy f C.funs).isNone) = true)
+    (hv : ¬(f == callValueName) = true) :
+    fnPure C Γ (.call f (h :: as)) =
+      (do pure (.call f ((← fnPure C Γ h) :: (← as.mapM (fnPure C Γ))))) := by
+  rw [fnPure, if_neg hf, if_neg hb, if_neg hv]
+
+/-- The member arm, as the definition now reads. Two spellings differ from the
+text before the function was total: the matches on `extMember?` name their
+equation (`extMember?_match_eq` gives the plain match; the first, an `if let`
+before, has `| none => pure ()` and goes on), and an external
+function type is tested by `any` where the pattern `some (_, _, true)` stood
+(`fnParts?_any_eq`). -/
+theorem fnPure_field (Γ : ECtx) (e : RawExpr) (m : String) :
+    fnPure C Γ (.field e m) = (do
+      if m == "selector" || m == "address" then
+        match _hm : extMember? C Γ e with
+        | some (r, g) =>
+          if m == "address" then return ← fnPure C Γ r
+          let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
+          return .num sel
+        | none => pure ()
+        if let some ty := fnTyOfExpr C Γ e then
+          if (fnParts? ty).any (·.2.2) then
+            let e' ← fnPure C Γ e
+            let a : RawExpr := .binop .div e' (.num selShift)
+            return if m == "selector" then .binop .sub e' (.binop .mul a (.num selShift)) else a
+      match _hm : extMember? C Γ (.field e m) with
+      | some (r, g) =>
+        let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
+        pure (.binop .add (.binop .mul (← fnPure C Γ r) (.num selShift)) (.num sel))
+      | none => do pure (.field (← fnPure C Γ e) m)) := by
+  rw [fnPure]
+
+/-- The call arm at no argument, evaluated. -/
+theorem fnPure_call_nil (Γ : ECtx) (f : String) :
+    fnPure C Γ (.call f []) = pure (.call f []) := by
+  rw [fnPure] <;> first | rfl | (intro _ _ h; cases h)
+
+theorem fnPure_index (Γ : ECtx) (a b : RawExpr) :
+    fnPure C Γ (.index a b) = (do pure (.index (← fnPure C Γ a) (← fnPure C Γ b))) := by
+  rw [fnPure]
+
+theorem fnPure_binop (Γ : ECtx) (op : BinOp) (a b : RawExpr) :
+    fnPure C Γ (.binop op a b) = (do pure (.binop op (← fnPure C Γ a) (← fnPure C Γ b))) := by
+  rw [fnPure]
+
+theorem fnPure_unop (Γ : ECtx) (op : UnOp) (a : RawExpr) :
+    fnPure C Γ (.unop op a) = (do pure (.unop op (← fnPure C Γ a))) := by
+  rw [fnPure]
+
+theorem fnPure_ternary (Γ : ECtx) (c a b : RawExpr) :
+    fnPure C Γ (.ternary c a b) =
+      (do pure (.ternary (← fnPure C Γ c) (← fnPure C Γ a) (← fnPure C Γ b))) := by
+  rw [fnPure]
+
+theorem fnPure_incDec (Γ : ECtx) (op : IncDec) (e : RawExpr) :
+    fnPure C Γ (.incDec op e) = (do pure (.incDec op (← fnPure C Γ e))) := by
+  rw [fnPure]
+
+theorem fnPure_newArr (Γ : ECtx) (T : RawTy) (e : RawExpr) :
+    fnPure C Γ (.newArr T e) = (do pure (.newArr T (← fnPure C Γ e))) := by
+  rw [fnPure]
+
+theorem fnPure_modular (Γ : ECtx) (op : ModOp) (a b k : RawExpr) :
+    fnPure C Γ (.modular op a b k) =
+      (do pure (.modular op (← fnPure C Γ a) (← fnPure C Γ b) (← fnPure C Γ k))) := by
+  rw [fnPure]
+
+theorem fnPure_named (Γ : ECtx) (f : String) (ns : List String) (as : List RawExpr) :
+    fnPure C Γ (.named f ns as) = (do pure (.named f ns (← as.mapM (fnPure C Γ)))) := by
+  rw [fnPure]
+
+theorem fnPure_tuple (Γ : ECtx) (as : List RawExpr) :
+    fnPure C Γ (.tuple as) = (do pure (.tuple (← as.mapM (fnPure C Γ)))) := by
+  rw [fnPure]
+
+/-- An assignment's target is left as written. -/
+theorem fnPure_assign (Γ : ECtx) (l r : RawExpr) :
+    fnPure C Γ (.assign l r) = (do pure (.assign l (← fnPure C Γ r))) := by
+  rw [fnPure]
+
+theorem fnPure_opAssign (Γ : ECtx) (op : BinOp) (l r : RawExpr) :
+    fnPure C Γ (.opAssign op l r) = (do pure (.opAssign op l (← fnPure C Γ r))) := by
+  rw [fnPure]
+
+/-- The last arm: a leaf is left as written. -/
+theorem fnPure_other (Γ : ECtx) :
+    (∀ n, fnPure C Γ (.num n) = pure (.num n)) ∧
+    (∀ x, fnPure C Γ (.name x) = pure (.name x)) ∧
+    (∀ b, fnPure C Γ (.bool b) = pure (.bool b)) ∧
+    (∀ k, fnPure C Γ (.env k) = pure (.env k)) := by
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> intros <;> rw [fnPure] <;> intros <;> contradiction
 
 /-- The bytes `bs` as a `bytesN`: left-aligned, the rest zero. -/
 def bytesAlign (n : Nat) (bs : List Nat) : Except String Nat := do
