@@ -229,6 +229,7 @@ import Solidity.Backend.CompilerEndpoint
 import Solidity.Backend.CompilerEndpointScalarBoundary
 import Solidity.Backend.CompilerEndpointV2
 import Solidity.Backend.CompilerEndpointWitnesses
+import Solidity.Backend.CompilerOptimized
 import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control
 import Solidity.Backend.Creation.Artifact
@@ -3465,6 +3466,7 @@ import Solidity.Goals.LoweringSession
 import Solidity.Goals.LoweringSim
 import Solidity.Goals.OffCriticalPath
 import Solidity.Goals.OpcodeEvalUniversal
+import Solidity.Goals.Optimized
 import Solidity.Goals.Panic
 import Solidity.Goals.PanicProvenance
 import Solidity.Goals.PanicRun
