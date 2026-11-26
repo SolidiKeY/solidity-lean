@@ -12,7 +12,9 @@ modifiers and internal _transferOwnership are inlined, events omitted.
 Address zero is spelled 0 (addresses use the model's uint representation).
 No claim about event logs or inheritance is made.
 Every function below has a natural @custom:key clause.
-Verdicts: constructor, owner, renounceOwnership, transferOwnership: proved.
+The verdicts below concern this model only. Complete-original executable
+modeling remains an obligation; no full-source verification credit is claimed.
+Model verdicts: constructor, owner, renounceOwnership, transferOwnership: proved.
 -/
 namespace Solidity.Examples.Benchmark.Governance.Ownable
 def Ownable : Contract := contract!{

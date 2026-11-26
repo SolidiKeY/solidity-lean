@@ -11,7 +11,9 @@ Internal _pause/_unpause are exposed as functions for direct specification;
 whenNotPaused/whenPaused are inlined and event emissions omitted.
 This base class deliberately supplies no caller authorization, just as the source.
 Every function below has a natural @custom:key clause.
-Verdicts: constructor, paused, pause, unpause: proved.
+The verdicts below concern this model only. Complete-original executable
+modeling remains an obligation; no full-source verification credit is claimed.
+Model verdicts: constructor, paused, pause, unpause: proved.
 -/
 namespace Solidity.Examples.Benchmark.Governance.Pausable
 def Pausable : Contract := contract!{
