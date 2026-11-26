@@ -1,5 +1,7 @@
 # Dafny VS Code comparison harness
 
+Restore commands take `--manifest` from a checkout of the evidence directory: evidence: 50634bd673185362edc079d6852f3f1a76efc52e evidence/plan-g3a-evidence-manifests-1126/g3a-evidence-manifests/; each manifest supplies its own `scripts/coord-tools/dafny-parity-bulk.py` restore command.
+
 This audit compares the official Dafny extension with `vscode/`, the Solidity
 Lean verification extension. Full parity is not established. The
 [tracked inventory digest](dafny-editor-features.json) binds the external full inventory:93 discovered capabilities and391 mechanical obligations,
@@ -956,7 +958,7 @@ Official archive checksum passes against the saved update API. Cached Xvfb and a
 
 Final paired observations: pinned Dafny five phases partial, local open missing/first feedback partial, local verified/broken/fixed scenarios fail on genuine unsupported results (compiled verifier unavailable). Actual screenshots/DOM/accessibility/LSP/status traffic retained; no owned survivors. No substitution of unsupported for proved. Shared source fragment is semantically paired across languages, not identical syntax. Native proof/rendered equivalence is still unfinished.334 Node passes/2 original skips precede two additional passing visual regressions.
 
-Bulk, prior failed attempts, ordered logs and review findings remain on this VM. Committed `docs/dafny-decisions-evidence-manifest.json` binds the external archive and official provisioning assets by absolute path, size and SHA256; no screenshots/log dumps committed (H44). Final exact-head receipts follow outside git in the same artifact root. All484 rows and frozen270 retained; no row newly complete.
+Bulk, prior failed attempts, ordered logs and review findings remain on this VM. The evidence manifest binds the external archive and official provisioning assets by absolute path, size and SHA256; no screenshots/log dumps committed (H44). Final exact-head receipts follow outside git in the same artifact root. All484 rows and frozen270 retained; no row newly complete.
 
 Whole original remaining scope: real failed-postcondition producer/source provenance/certification and decorations; actual concrete CLI kernel/native validation; outstanding contribution/API/protocol/lifecycle implementations; local proof-phase screenshots and visual differences; full native proof/solver/adversarial/retention/scheduler/large-project/cold-warm/median-p95/scaling matrices; both independent fresh-process judgments per complete row; mandatory full build/TestSuite/timed strict/trust/KeySort and unchanged parity-gate exit0. Incoming H80 scoped answers are recorded in `docs/dafny-human-decisions.json`; the earlier H49 exclusion claim is superseded and no row is waived. No goal mutation or push/merge/PR.
 
@@ -1115,7 +1117,7 @@ Finder/skeptic caught a real argv escape: a flag-looking include value activated
 compiler flags. Native failing regression retained; absolute include arguments
 now match project resolution and four flag-shaped names leave compiler settings
 unchanged. Source and review evidence is checksum-bound by
-[dafny-custom-build-evidence-manifest.json](dafny-custom-build-evidence-manifest.json),
+the custom build evidence manifest,
 including its explicit REVIEWS.md member hash.
 
 Native first-row observation retains failures and diagnostic pixels: the menu
@@ -1162,7 +1164,7 @@ Local model-prestate data has no corresponding positioned verifier trace; no
 fake decoration or copy action was added. Menu branding/grouping/actions and
 finite JSON versus arbitrary CLI inputs differ; native macOS remains pending.
 
-[The small evidence manifest](dafny-native-f6-evidence-manifest.json) binds the
+The small evidence manifest binds the
 VM-only archive and its COMPARISON.md/REVIEWS.md members. Read-only finder and
 skeptic found terminal-execution mixing, omitted trace-scenario validation and
 a post-terminal source-stability gap. Repairs bind exact command arguments and
@@ -1199,7 +1201,7 @@ than waiting for success output. Cancellation/edit/config/close/reopen/disposal
 and registered restart regressions reject stale failures; injected boundaries
 are labeled. No specification admission was bypassed or fixture stripped.
 
-[The checksum manifest](dafny-sdk-failure-evidence-manifest.json) binds VM-only
+The checksum manifest binds VM-only
 provenance, native traffic/artifacts, failures and source review receipts. Finder
 identified weak SDK substring attribution, repaired with exact canonical identity.
 Finder/skeptic final reviews found no further concrete defect. Retained attempts
@@ -1233,7 +1235,7 @@ distinct fresh Show under selected light theme passes, without replacing that
 failed obligation. Local positioned trace, full lifecycle/disposal and native
 macOS remain missing. No upstream patch or model-prestate reinterpretation.
 
-[Checksum-bound VM evidence](dafny-trace-presentation-evidence-manifest.json)
+Checksum-bound VM evidence
 retains raw phases/protocol, failures, comparison and source reviews. Reviews
 found an errorful-success ACK and a close-race authority conflation; both were
 reproduced and repaired. Final finder/skeptic found no further concrete defect.
@@ -1278,7 +1280,7 @@ pipe-close fixture remain explicitly classified. The hardened source supervisor
 checks resource admission/terminal state, prevents receipt overwrites, retains
 root identity for unsampled private-session readback and fails on retirement or
 survivors. Native process fixtures are not proof or rendered-editor evidence.
-[The small H80 manifest](dafny-h80-provision-evidence-manifest.json) binds VM-only
+The small H80 manifest binds VM-only
 logs, reviews and immutable installed artifact copies; bulk remains offgit.
 
 
@@ -1288,7 +1290,7 @@ At `d1ec2a900024f5b0a74d4deb87a66464ce5698b5`, the unchanged full gate
 passed build-touched, then stopped in `Solidity.Source.Horizon` at the original
 12GiB available-memory reserve. Command exit -9 (shell247), sampled aggregate
 RSS4,875,681,792bytes, available12,880,228,352bytes, swap0, owned survivors none.
-The [H80 manifest](dafny-h80-provision-evidence-manifest.json) binds the complete
+The H80 manifest binds the complete
 failed receipt. No unchanged heavy retry, source/budget change or runtime pass.
 Full build/TestSuite/timed strict remain unpassed. The source is Claude-owned;
 its resource-compatible proof check is an external dependency.
@@ -1309,7 +1311,7 @@ source check, not a full runtime gate. No integration or completion claim.
 
 ### OT-CI-PARITY: portable offline checks, full gates remain strict
 
-The [CI evidence manifest](dafny-ci-evidence-manifest.json) retains fresh-checkout
+The CI evidence manifest retains fresh-checkout
 failures, partial-input/symlink counterexamples, repaired regressions and required
 finder/skeptic reviews. Offline discover/audit `--check` may report digest-only
 when the H44 payload is wholly absent: they verify the committed transport
@@ -1340,11 +1342,11 @@ offline digest checks passed and strict missing-input inventory/parity both
 exited1. The remaining `/workspace/other` expectation is now derived from the
 checkout's sibling directory, preserving relative backend semantics. Focused
 fresh extension tests pass; independent finder/skeptic found no defect. The
-[CI followup receipt](dafny-ci-evidence-manifest.json) preserves that failure;
+CI followup receipt preserves that failure;
 a new clean committed full run and hosted GitHub observation remain required.
 
 H70's exact `3efa0a3832de30e514ca9d2fd286f129c0ca9984` object was fetched read-only,
-without integration. The [startup inspection manifest](dafny-startup-owner-evidence-manifest.json)
+without integration. The startup inspection manifest
 binds source inspection: the measured offline browser startup includes HTML,
 Monaco, compiler worker and compiled-WASM readiness. Shared editor JS modules
 are imported, but desktop extension startup is not this offline boot path.
@@ -1362,11 +1364,11 @@ tests with2original skips, inventory/pins/audit/statictrust/classification exit0
 The unchanged mandatory parity gate exits1 with0/486. A new clean checkout at
 that exact commit passes392Node tests with9explicit unavailable-input skips;
 digest-only offline checks exit0 and strict missing-input inventory/parity both
-exit1. [Receipts](dafny-ci-evidence-manifest.json) distinguish localLinux/Node24.19
+exit1. Receipts distinguish localLinux/Node24.19
 from an unobserved hostedGitHub runner. Timedstrict remains separate; CI is not
 claimed ready to become blocking. Frozen270 hash is unchanged.
 
-[Certified CLI observations](dafny-kernel-cli-evidence-manifest.json) use the
+Certified CLI observations use the
 original `constant.sol`: f0() exits0/proved; f1() withcounterexamples exits1/refuted,
 certified=true, theorem `SolTests.Parity.f1.refuted`, only standardaxioms. Actual
 AST, generatedLean input, command/output and resource receipts are retained.
@@ -1382,7 +1384,7 @@ rendered/proof/performance/scaling/adversarial and rowjudgment obligations remai
 
 ### Native certified proof-help observation and strict retirement guards (partial)
 
-The [H44 evidence bundle](dafny-proof-help-evidence-manifest.json) restores
+The H44 evidence bundle restores
 repo-relative raw LSP, PNG/DOM/AX, source snapshots, reports and original failed
 receipts. A real local certified refutation drives the registered status menu;
 CDP selects each native QuickPick action, and actual source-bound `calculus.md`
@@ -1431,7 +1433,7 @@ observation passes, including a deliberately rejected source-hash task followed
 by exact descendant readback. Its first missing-SOLKEY_ROOT failure is retained.
 These samples do not establish forced/crash/direct/mixed or solver retention.
 
-The small [evidence manifest](dafny-retention-evidence-manifest.json) binds
+The small evidence manifest binds
 off-git development receipts, exact270 native proof-help observations and
 the executable KeySort check:377 parsed taclets,131 read-bearing,131 covered,
 annotations match. Lean4.24.0/Lake5.0.0-src+797c613 are observed; this is not an
@@ -1470,7 +1472,7 @@ Original resource samples omitted child argv. Derived21's setup is the latest
 prepared input, an inference only; active module attribution is unknown. Future
 samples read argv only for already-owned PID births and reject identity reuse,
 without environment readback or changed caps. The small
-[evidence manifest](dafny-command-identity-evidence-manifest.json) binds the
+evidence manifest binds the
 retained failing/passing controls, proof source hashes and failed target receipts.
 H16/full-root resource work, kernel clause/span and positioned-trace producers,
 H70 raw packet, hosted CI, native macOS, paired rendered/performance/scaling
@@ -1506,7 +1508,7 @@ proof-cost repair or bounded artifact. Independent CLI/frontend closures are
 unchanged and validate successfully (347jobs, exit0, peak110821376); current
 serial TOML preserves master defaults and old configurations remain immutable.
 
-The [checksum manifest](dafny-direct-retention-evidence-manifest.json) binds
+The checksum manifest binds
 raw before/after controls, failed replay and merge receipts outside git. Only
 assessment/evidence fields of two existing partial retention rows change; all489
 IDs/order/expectations/frozen270 are unchanged. Full roots/trust/TestSuite/timed
@@ -1523,7 +1525,7 @@ It records a genuine kernel-certified refutation, native QuickPick selection
 and both actual project documents. Peak sampledRSS3775954944 bytes; no resource
 STOP. All sampled normal Lean/Lake PID births disappear; remaining Electron
 zombies stay visible, so complete process/solver retention is not established.
-The [native receipt manifest](dafny-native-retirement-evidence-manifest.json)
+The native receipt manifest
 binds screenshots, DOM/AX, source/protocol/OS observations and failed checks.
 
 The full65fcNode suite found one new observer timestamp assertion error
@@ -1562,7 +1564,7 @@ request is a partial corresponding observation, not that entire fixture or
 auto-on-open/rendered-hover/pairedDafny/macOS/lifecycle equivalence. Existing
 row behavior:hover-before-verification-completes remains partial; all489 IDs,
 order, expected fields/frozen270 and judge/gate/budget contracts are unchanged.
-[Checksum-bound evidence](dafny-hover-proof-evidence-manifest.json) stays off git.
+Checksum-bound evidence stays off git.
 Exact committed-head native/full lightweight checks remain required. Full
 build/TestSuite/timedstrict/trust, metadata/trace producers, hostedCI and the
 entire original performance/paired judgment queue remain unfinished.
@@ -1597,7 +1599,7 @@ Owned editor-parity.yml now provisions/checksums the existing compiler before
 native tests and exports SOLKEY_ROOT. OT-CI-PARITY still needs the lean.yml
 owner to supply the same prerequisite and serial test runner, then an actual
 hosted Node22 fresh-checkout run. Local Node24 is not that result.
-[Native/failed CI receipts and review](dafny-hover-ci-evidence-manifest.json)
+Native/failed CI receipts and review
 remain off git. No complete row or paired judge claim. Exact follow-up-head
 checks remain required. Fullbuild/TestSuite/timedstrict/trust, source-bound
 failed-postcondition/positioned-trace producers, paired rendered phases,
@@ -1638,7 +1640,7 @@ Finder/skeptic source reviews for lifecycle and Lean foundation found no
 concrete defect. Initial unsolved proof/MCP-retirement failures are retained;
 the off-git wrapper now forwards EOF and confirms owned MCP retirement within
 the existing5s shutdown bound. No resource gate is weakened. Exact follow-up
-head checks remain required. [H44 evidence](dafny-child-closure-evidence-manifest.json)
+head checks remain required. H44 evidence
 is off git. Only two existing assessments change and remain partial; all489
 ordered obligations, frozen270, expected observations, pairedjudge contracts
 and budgets remain. Firstfailed submenus:dafny.context still needs actual
@@ -1675,7 +1677,7 @@ that supplied list to source ensures, originalcandidate/obligation/entrypremises
 and exact locations remains a producer task; no JSON metadata or decoration is
 emitted. One existing related-diagnostics assessment changes and stayspartial.
 All489 IDs/order/expected observations, frozen270 and gate/judge/budgets remain.
-[Checksum-bound proof/rebase evidence](dafny-canonical-slot-evidence-manifest.json)
+Checksum-bound proof/rebase evidence
 stays off git. Exact committed-head checks remain required.
 
 Read-only upstream comparison found all334TestSuite sources/closure and24fresh
@@ -1693,7 +1695,7 @@ Fetched and fast-forwarded the lane to actual master95d1e9cb29dc5a34d1db68af3ca4
 
 The optional proof-hover suite preserves the existing single actual certified failure and both project documentation actions. It adds a second actual provider request, exact rendered documentation/signature and authentic compiler-ready decoration rows, current URI/source/session/version/hash ownership, before/after screenshot checks, and observed disappearance after Escape. The original one-hover proof-help assertion is unchanged. No fake verifier, proof delay, new proof job, changed deadline or inferred per-function progress.
 
-Retained native failures include the old unrecognized phase/dispatcher, a parent-limit launch without a host receipt, and the genuine successful host observations rejected by an incorrectly nested generic envelope reader. The corrected reader revalidates the untouched native receipt; its original exit1 is not rewritten. Targeted injected controls cover wrong nonempty content, stale/duplicate RPC, post-capture disappearance, missing observations and both documentation actions. Finder found the screenshot race; repaired and independently re-reviewed with no further source findings. Skeptic found no further defect after envelope/omission repairs. See checksum-bound [native evidence and review receipts](dafny-native-hover-evidence-manifest.json).
+Retained native failures include the old unrecognized phase/dispatcher, a parent-limit launch without a host receipt, and the genuine successful host observations rejected by an incorrectly nested generic envelope reader. The corrected reader revalidates the untouched native receipt; its original exit1 is not rewritten. Targeted injected controls cover wrong nonempty content, stale/duplicate RPC, post-capture disappearance, missing observations and both documentation actions. Finder found the screenshot race; repaired and independently re-reviewed with no further source findings. Skeptic found no further defect after envelope/omission repairs. See checksum-bound native evidence and review receipts.
 
 Only the existing hover assessment is extended and stays partial. All489 IDs/order/expected observations, frozen270, prompts, judges and budgets remain. This is one Linux local observation, not pinned NeverVerifies, paired Dafny/macOS or full lifecycle correspondence. Positioned trace and same-candidate source-span metadata producer hook Q-REL-HOOK-01 remain pending. Full library/build/TestSuite/timed strict/kernel trust, full performance/adversarial/scaling matrices and both judgments per row remain mandatory; parity is not complete.
 
@@ -1706,7 +1708,7 @@ New interfaces in Tools/SourceCounterexample are `Cand.sourceValuesV1`, `SourceC
 
 Finder/skeptic identified an inferType-only public Expr trust gap. A real counterexample plus deliberately malformed nested id proof reproduced acceptance; mandatory kernel validation repairs it. Finder also found an assigned-metavariable return gap, reproduced then repaired by raw proof closure checks. The existing100000 kernel ceiling is never increased and caller-smaller limits are honored. A failed literal-name reduction hit the original200000-heartbeat diagnostic budget; no limit was raised or unchanged STOP rerun. Direct source-user equality avoids that name-parser computation without modifying it.
 
-Per-file MCP0 for producer and real-model controls;215job targeted build0; actual wrong goal/domain/arguments/candidate, forged proof and assigned-MVar controls pass. Retained exact-goal refutation axioms are propext/Classical.choice/Quot.sound; argument equality uses propext. Reviews after repairs have no new source finding. [H44 checksum-bound receipts](dafny-candidate-hook-evidence-manifest.json) retain all failures. These are model/tool controls, not imported Solidity/rendered or EVM-equivalence evidence.
+Per-file MCP0 for producer and real-model controls;215job targeted build0; actual wrong goal/domain/arguments/candidate, forged proof and assigned-MVar controls pass. Retained exact-goal refutation axioms are propext/Classical.choice/Quot.sound; argument equality uses propext. Reviews after repairs have no new source finding. H44 checksum-bound receipts retain all failures. These are model/tool controls, not imported Solidity/rendered or EVM-equivalence evidence.
 
 The newly authorized frontend span companions/forget lemmas, admitted-source/canonical-clause/source-span link, real imported counterexample/wrong ordinal/span controls and decoration consumer remain open implementation, not blocked on permission. No span is emitted and no row completes. All489 ordered rows/frozen270, judge contracts and budgets remain. Full original proof/runtime gates, paired rendering/macOS, full performance/adversarial/scaling matrices and both judgments per row remain mandatory.
 
@@ -1717,16 +1719,16 @@ Incoming answers #75/#76 authorize the refreshed exact-head cache and two isolat
 
 New interfaces: `specOriginsV1`, `admittedSpecOriginsV1?`, `SpecOriginsV1.accepts`, their ownership carriers/forget lemmas, `solc_import_origins_v1`, `importRowOriginsV1?`, and `retainedCounterexampleMetadataV1?`. Origins derive triple-slash raw directive extents from admitted SHA-matched bytes and unique compiler declaration IDs, retaining parser ordinals, source ownership and a kernel-typed equality of all legacy clause fields. Unsupported block layouts return no origin. The opt-in command invokes the unchanged testing importer and retains the parsed fixture digest; the new consumer reads the actual report row and already-retained theorem, checks `Fml.Valid` at the exact goal and standard axioms, and extracts the same candidate without searching. Stable owned fixtures under the caller's writer lock are required; before/after readback alone is not atomic attestation against A-to-B-to-A replacement.
 
-A real compiler/native imported counterexample initially exposed a formula-versus-proposition rejection. After that repair, a deliberately substituted AST with unchanged provenance reproduced wrong-owner acceptance. Both original exit1 receipts remain; exact fixture binding repairs the latter. Final native controls pass for CRLF/non-BMP byte extents, duplicate ordinals, multiline clauses, non-key tag termination, unsupported block refusal, stale/hash/owner/source/ordinal/span/certificate refusals, and the same-provenance adversarial mutation. Finder/skeptic findings, fixes and final read-only reviews are retained in the [source-origin evidence manifest](dafny-spec-origins-evidence-manifest.json). These reviews are not the two independent gate judgments.
+A real compiler/native imported counterexample initially exposed a formula-versus-proposition rejection. After that repair, a deliberately substituted AST with unchanged provenance reproduced wrong-owner acceptance. Both original exit1 receipts remain; exact fixture binding repairs the latter. Final native controls pass for CRLF/non-BMP byte extents, duplicate ordinals, multiline clauses, non-key tag termination, unsupported block refusal, stale/hash/owner/source/ordinal/span/certificate refusals, and the same-provenance adversarial mutation. Finder/skeptic findings, fixes and final read-only reviews are retained in the source-origin evidence manifest. These reviews are not the two independent gate judgments.
 
 This foundation emits no failed-postcondition diagnostic. Raw source clauses still need their certified correspondence to the actual transformed canonical postcondition and failed execution slot; block layouts and related decoration/rendering also remain unfinished. The real model refutation remains a kernel theorem; source-metadata computation is not compiler correctness, EVM equivalence or rendered parity. All489 ordered obligations/frozen270 and every judge/prompt/budget remain; no row is complete.
 
-The official4f0 lake-cache packet was checksum-verified. Installation preserved older mappings, five of which conflicted with this packet's outputs. Both original no-build exit3 attempts are retained. An isolated cache uses the exact published index and content-verified hard links, preserving every older cache entry; the requested `lake --no-build build Solidity.TestSuite.Derived20 Solidity.TestSuite.Derived21` now exits0 and fetches both within281 targets. See the [cache receipts and absolute packet manifest](dafny-lake-cache-evidence-manifest.json). The canceled earlier cold checkpoint remains -15, not a pass. No cold Derived20/21 rerun occurred. Full build/TestSuite/timed strict/kernel trust and final runtime gates still require their own successful observations; no RUNTIME_GATE_PASS follows from this artifact check. The original full rendered/lifecycle/performance/adversarial/scaling matrices, native macOS, positioned trace producer and paired judgments remain in the queue.
+The official4f0 lake-cache packet was checksum-verified. Installation preserved older mappings, five of which conflicted with this packet's outputs. Both original no-build exit3 attempts are retained. An isolated cache uses the exact published index and content-verified hard links, preserving every older cache entry; the requested `lake --no-build build Solidity.TestSuite.Derived20 Solidity.TestSuite.Derived21` now exits0 and fetches both within281 targets. See the cache receipts and absolute packet manifest. The canceled earlier cold checkpoint remains -15, not a pass. No cold Derived20/21 rerun occurred. Full build/TestSuite/timed strict/kernel trust and final runtime gates still require their own successful observations; no RUNTIME_GATE_PASS follows from this artifact check. The original full rendered/lifecycle/performance/adversarial/scaling matrices, native macOS, positioned trace producer and paired judgments remain in the queue.
 
 
 ### Handoffs — coherent cache resolves full build prerequisite (2026-11-07)
 
-At committed head `d7f153f3e9c096f7deaf86b0240fcdf28838b0e0`, unchanged `gate.sh checkpoint` passes all nine gates (library6199 targets, peak observed aggregate RSS4,147,331,072bytes). Unchanged `run-lean.sh` passes all6611 library/examples/CLI/TestSuite targets with the coherent published cache (peak401,776,640bytes). Actual Lean4.24.0/Lake5.0.0-src+797c613 and executable KeySort377 parsed/131 read-bearing/131 covered, MATCHED/OK are observed. `check-testsuite.sh --complete` passes:564 functions =552 derived +11 refuted +0 pending +0 divergent +1 existing exclusion;2 existing skip. No exclusion changed. [Exact-head receipts](dafny-spec-origin-gates-evidence-manifest.json) preserve actual commands, exits, resource samples and no surviving owned processes. HardAS12GiB, aggregate guard, no-swap and12GiB headroom remain; systemd scope is unavailable, so the authorized fallback is recorded.
+At committed head `d7f153f3e9c096f7deaf86b0240fcdf28838b0e0`, unchanged `gate.sh checkpoint` passes all nine gates (library6199 targets, peak observed aggregate RSS4,147,331,072bytes). Unchanged `run-lean.sh` passes all6611 library/examples/CLI/TestSuite targets with the coherent published cache (peak401,776,640bytes). Actual Lean4.24.0/Lake5.0.0-src+797c613 and executable KeySort377 parsed/131 read-bearing/131 covered, MATCHED/OK are observed. `check-testsuite.sh --complete` passes:564 functions =552 derived +11 refuted +0 pending +0 divergent +1 existing exclusion;2 existing skip. No exclusion changed. Exact-head receipts preserve actual commands, exits, resource samples and no surviving owned processes. HardAS12GiB, aggregate guard, no-swap and12GiB headroom remain; systemd scope is unavailable, so the authorized fallback is recorded.
 
 The former artifact wait is resolved. The old fresh24-module300s timeout124 remains a real timed-strict failure: its first eight recorded proof source hashes are unchanged, and it was not rerun or relabeled as a pass. `Q-TIMING-REPAIR-01` requests owner proof-cost repair or same-VM CPU provision before retrying the original workload/budget. Full `gate.sh full`, timed strict and overall runtime completion remain open despite the independently passing full build and standalone KeySort.
 
@@ -1739,7 +1741,7 @@ Clean start93c4864eb on the assigned branch; writer lock checked and used. No fe
 
 A separately named compiler-only `custom-import-actions` scenario extends the same runner. Actual local F6 accepts resource-scoped includePaths (`vendor with spaces`) and remapping defaults, cancels a first prompt and records its save/completion without admitting a source process, then edits the current source before the accepted action. Both accepted native callbacks start dirty/trusted at version4. URI, version, source-object session, controller command/session IDs and exact primary/dependency hashes bind the two-unit solc AST. The paired pinned Dafny action retains `build --output:bin/commands`, the existing SDK/executable identity and actual terminal output/exit/compiler files. DOM/AX/PNG and raw enabled attributes are retained; an initially clipped upstream menu was recaptured with the terminal panel hidden. Visible menus contain10 local versus6 upstream entries, differing labels/grouping/placement and native trace entries. These are F6 observations; menu-click/untrusted/untitled, upstream cancellation, macOS and the complete matrix remain unfinished. Compiler artifacts and foreign verification do not establish kernel/EVM or runtime/test equivalence.
 
-A regression reproduced an owned child continuing after a new command invalidated its result and cancelled its replacement prompt. Production now awaits the existing retirement barrier before saving/prompting; all original process-birth/group/closure checks and deadlines remain. Injected CLI uses a real child and is labeled separately from rendered/compiler evidence. Source-command tests pass30; focused harness/phase controls pass78. Finder/skeptic repaired new observer shape, read/publication races, primitive-error preservation, source availability and cancellation launch identity issues. Both request and reply directions reuse the existing atomic phase writer; partial reads are retained and replayed IDs are suppressed. See [checksum-bound native/review/failure evidence](dafny-custom-import-evidence-manifest.json). These reviews are not paired row judgments.
+A regression reproduced an owned child continuing after a new command invalidated its result and cancelled its replacement prompt. Production now awaits the existing retirement barrier before saving/prompting; all original process-birth/group/closure checks and deadlines remain. Injected CLI uses a real child and is labeled separately from rendered/compiler evidence. Source-command tests pass30; focused harness/phase controls pass78. Finder/skeptic repaired new observer shape, read/publication races, primitive-error preservation, source availability and cancellation launch identity issues. Both request and reply directions reuse the existing atomic phase writer; partial reads are retained and replayed IDs are suppressed. See checksum-bound native/review/failure evidence. These reviews are not paired row judgments.
 
 No local positioned trace producer exists: current counterexample validation carries certified model prestate data; raw directive origins are not execution trace positions. No trace action or location is fabricated. Canonical-clause correspondence remains held for Q-REL-NORMALIZER-01, and original300s timed strict timeout124/validator1 remains held for Q-TIMING-REPAIR-01. H70 browser-startup STOP remains unresolved; no unchanged startup/heavy replay is run or repair claimed. Previous full build/checkpoint/TestSuite/KeySort receipts remain separate passing observations; original concurrent closure failure remains undiagnosed. All489 ordered obligations/frozen270, source expectations, judges, invariants and budgets are preserved. Full rendering/lifecycle/performance/adversarial/scaling, both fresh-process judgments and mandatory full/timed gates remain required.
 
@@ -1784,7 +1786,7 @@ The next increment reuses acknowledged phase capture for the actual output panel
 
 Rendered follow-up review additionally found generic-first readiness could choose another URI, now refused by exact target selection in host and guard. Monaco DOM may retain clipped/overscan lines: this increment records geometry and certifies only the visible panel/channel plus the full owned readiness line's DOM residence, explicitly not visibility of every source-path character. Before/after exact channel/content checks cannot rule out adversarial A-to-B-to-A changes between reads. The visual row remains incomplete; no expected original aspect or exclusion is waived.
 
-Both actual native panel captures at385d01e6e65a96c88004c5b09e224fb40cb02d1f succeeded with partial scenarios, before/after DOM, selected SELECT labels and owned cleanup empty. Raw view lines contain NBSP and wrap; raw segments and geometry are retained, with display-NBSP normalization only for DOM line matching. Neither full glyph visibility nor screenshot atomicity is certified. First API-only Dafny run includes a normal-exit Error line; rendered run does not, so the observation is not generalized. [H44 output evidence](dafny-output-lifecycle-evidence-manifest.json) binds the immutable off-git archive/index. The exact createOutputChannel row moves only from unexamined to partial; all489IDs/order/expected details and frozen270 remain. No row completes or judge verdict is fabricated.
+Both actual native panel captures at385d01e6e65a96c88004c5b09e224fb40cb02d1f succeeded with partial scenarios, before/after DOM, selected SELECT labels and owned cleanup empty. Raw view lines contain NBSP and wrap; raw segments and geometry are retained, with display-NBSP normalization only for DOM line matching. Neither full glyph visibility nor screenshot atomicity is certified. First API-only Dafny run includes a normal-exit Error line; rendered run does not, so the observation is not generalized. H44 output evidence binds the immutable off-git archive/index. The exact createOutputChannel row moves only from unexamined to partial; all489IDs/order/expected details and frozen270 remain. No row completes or judge verdict is fabricated.
 
 
 ### Handoffs — shutdown retains output and shared failure result (2026-11-07)
@@ -1798,13 +1800,13 @@ Finder/skeptic caught exception-path abandonment and synchronous reentry in the 
 
 Independent source inspection found the existing repository-derived status-summary.issueURL contract, documented in vscode/README.md and used by the status action. Successful restart now reuses it with the actual ready client's server/runtime metadata, prints the draft after readiness-again, and attaches no source or external submission. Unknown metadata stays unknown. No new public destination, runtime/profile or support-policy choice is made. Branding, per-document/global scope and draft field differences from Dafny remain explicit. New native observation binds this printed URL to the actual resource owner, and guards reject absent/foreign URL or version metadata.52 focused controller/guard tests pass before the final refusal additions; both read-only reviewers find no concrete concern. Rendered URL glyph visibility and complete native failure/config/overlap/shutdown matrices remain unproved.
 
-Native local shutdown at77c989b77 and combined feedback/panel/shutdown at03298fb938f2052379a274af286b7534b7f30e21 both exit0 with partial scenarios. The latter records actual server0.5.5/runtime24.19.0, repository-derived draft without source, physical close before channel disposal, registered worker readbacks and no owned survivors. It is not a browser-startup performance repair or paired upstream shutdown proof. [H44 shutdown/feedback evidence](dafny-output-shutdown-evidence-manifest.json) preserves failed-before/observer/setup receipts, source identities and raw observations. The original179-file output archive is unchanged; this additional102-file snapshot is separate. One packaging-only SyntaxError exit1 occurred before execution/mutations; retained explicitly and corrected without repeating workloads. All489 IDs/order remain; the examined row stays partial.
+Native local shutdown at77c989b77 and combined feedback/panel/shutdown at03298fb938f2052379a274af286b7534b7f30e21 both exit0 with partial scenarios. The latter records actual server0.5.5/runtime24.19.0, repository-derived draft without source, physical close before channel disposal, registered worker readbacks and no owned survivors. It is not a browser-startup performance repair or paired upstream shutdown proof. H44 shutdown/feedback evidence preserves failed-before/observer/setup receipts, source identities and raw observations. The original179-file output archive is unchanged; this additional102-file snapshot is separate. One packaging-only SyntaxError exit1 occurred before execution/mutations; retained explicitly and corrected without repeating workloads. All489 IDs/order remain; the examined row stays partial.
 
 The native harness's next bounded local case exercises supported runtime configuration failure and recovery: select an actually nonexistent runtime path, retain the real startup failure with no readiness, restore the same effective runtime and original configuration slot, then close the exact source tabs and reopen identical URI/version/text with a fresh document object and actual didClose/didOpen wire boundary. These operations reuse original public configuration/tab/wire helpers and deadlines; no runtime/profile replacement, fake protocol, source edit or proof work is admitted. Their native result remains pending until executed at the committed harness head. Broader multi-folder/native failure permutations remain incomplete.
 
 The first native runtime-recovery attempt at132f1c0ea retains a real60000ms source-close timeout (runner exit1); its ordered raw output shows actual runtime failure/correction before timeout. The shipped checksum-verified Code bundle's tryOpenDocument path creates a retained model reference with default3minutes. The harness had opened the source through that API; tab closure alone therefore did not establish document closure. The next driver uses the real vscode.open editor command, preserves original fixture/deadline and both document/wire-close assertions, and saves intermediate phase receipts. No backend close notification or document state is fabricated, and the failed attempt remains.
 
-The corrected native editor-lifetime case at e31c419c5 passes with partial scope: actual missing-runtime failure and same reported runtime restoration, actual document/wire close, identical URI/version/text reopen with synchronization1to2, then root close/registered-worker readbacks before one output disposal. The earlier132f close timeout stays failed. [H44 lifetime evidence](dafny-output-lifetime-evidence-manifest.json) binds both attempts and official-bundle hash comparison. No source, metadata, logical predicate or deadline is rewritten to obtain closure. Remaining native paired failures/overlap/multifolder, glyph visibility, complete rendering/performance/scaling and both independent judgments remain open. All489IDs/frozen270 unchanged; row remains partial.
+The corrected native editor-lifetime case at e31c419c5 passes with partial scope: actual missing-runtime failure and same reported runtime restoration, actual document/wire close, identical URI/version/text reopen with synchronization1to2, then root close/registered-worker readbacks before one output disposal. The earlier132f close timeout stays failed. H44 lifetime evidence binds both attempts and official-bundle hash comparison. No source, metadata, logical predicate or deadline is rewritten to obtain closure. Remaining native paired failures/overlap/multifolder, glyph visibility, complete rendering/performance/scaling and both independent judgments remain open. All489IDs/frozen270 unchanged; row remains partial.
 
 
 ### Handoffs — retained serial PID-fixture failure (2026-11-07)
@@ -1817,7 +1819,7 @@ The earlier paired panel receipts establish DOM-resident readiness, not glyph vi
 
 Fresh paired native attempts at2872d00ec remain failed: first local startup timed out because the launch omitted the existing SOLKEY_ROOT fixture; the provisioned retry reached both panels. Actual records exposed an observer label bug (absolute output index used for readiness-relative characters), fixed with a real probe/nonzero-prefix regression. Before repair, local176 ranges had174 covered, upstream21 had21 covered, but labels were absent; observed mutation epochs also differed, so neither capture passed. Original configuration failure and both native refusals remain. Review confirms relative indexing and bounded mutation summaries preserve every mutation as a refusal. No rendered or raster criterion is weakened; additional lifecycle/matrix evidence stays missing.
 
-The repaired paired native attempt atbf22b5e10 exits1: local171/173 character ranges covered at the before endpoint; upstream21/21. Both reject document-mutation epochs during capture. Raw before/after geometry, bounded mutation details, API/DOM/AX/PNG, source/session and owned cleanup remain under the checksum-bound [geometry evidence manifest](dafny-output-geometry-evidence-manifest.json). Serial465pass/4skip, inventory/pins/audit/static trust/classification pass; parity remains exit1 zero489. No failed attempt is reclassified and no raster or complete-row claim follows.
+The repaired paired native attempt atbf22b5e10 exits1: local171/173 character ranges covered at the before endpoint; upstream21/21. Both reject document-mutation epochs during capture. Raw before/after geometry, bounded mutation details, API/DOM/AX/PNG, source/session and owned cleanup remain under the checksum-bound geometry evidence manifest. Serial465pass/4skip, inventory/pins/audit/static trust/classification pass; parity remains exit1 zero489. No failed attempt is reclassified and no raster or complete-row claim follows.
 
 ### Handoffs — bounded output preparation and failed-hit diagnosis (2026-11-07)
 
@@ -1830,7 +1832,7 @@ Finder/skeptic found an unbounded cleanup path and an expired read dropped befor
 
 The pinned compileCommands.ts withOutputPath uses compilerOutputDir default bin for Build, with a filename stem; it leaves Run/Test arguments unchanged. Local Build previously ignored configured output roots and always wrote backend .lake/editor-source-artifacts: the real compiler before regression fails that path assertion. The new resource-scoped solidityLean.compilerOutputDir defaults to bin, resolves relative to the admitted project/workspace or accepts an absolute path, and creates immutable source-named child directories containing actual AST/manifest artifacts. The report binds the output directory and current source/project hashes. Runtime/test artifact storage, all proof behavior and compiler admission remain unchanged. Matching resource configuration invalidates a pending prompt; an unrelated resource preserves native compilation.37 focused source/contribution tests pass, including actual compiler default/relative/absolute/repeated builds. Finder/skeptic find no concrete defect, and retain the material difference: local AST directories are not Dafny executable output stems, runtime equivalence or complete setting parity. Rendered configuration/lifecycle/per-platform matrices and both row judgments remain missing.
 
-The fresh preparation run at9ed9fd239 exits1: local84 preparation samples retain sibling detected-link hit ownership refusals and original15s timeout; cleanup confirmation expires, so the observer connection is retired and failure recorded. Upstream preparation settles, but its only bracket mutates epoch307to771 and remains failed. Both owned process cleanup records remaining[]. [H44 preparation/compiler evidence](dafny-output-preparation-evidence-manifest.json) preserves all raw samples/API/DOM/AX/PNG, before/after deadline failure and authentic compiler observations; no raster or complete-row claim. The compiler-output setting moves unexamined to partial; all489 IDs/order/frozen270 remain unchanged. A packaging-only Python type error was retained and corrected without repeating tests/native workloads.
+The fresh preparation run at9ed9fd239 exits1: local84 preparation samples retain sibling detected-link hit ownership refusals and original15s timeout; cleanup confirmation expires, so the observer connection is retired and failure recorded. Upstream preparation settles, but its only bracket mutates epoch307to771 and remains failed. Both owned process cleanup records remaining[]. H44 preparation/compiler evidence preserves all raw samples/API/DOM/AX/PNG, before/after deadline failure and authentic compiler observations; no raster or complete-row claim. The compiler-output setting moves unexamined to partial; all489 IDs/order/frozen270 remain unchanged. A packaging-only Python type error was retained and corrected without repeating tests/native workloads.
 
 ### Handoffs — original F6 custom Build keybinding (2026-11-07)
 
@@ -1838,7 +1840,7 @@ The inventory missing assessment is stale: package.json contributes F6/macF6 wit
 
 Finder found that an unrelated matching failure notice could pass and that substituted inputs were not frozen; a deterministic before regression fails. Exact cases now require source-derived JSON.parse/buildArguments error name/message/code. Production failure receipts add only actual error.name. Both read-only reviewers confirm repaired semantics.81 provisioned source/contribution/observer regressions pass. One targeted launch omitted SOLKEY_ROOT and its compiler configuration failures are retained; the corrected environment uses the existing compiler fixture. Fresh native observations remain pending execution at the committed source. Missing native trust/untitled/config/lifecycle/macOS coverage and both independent row judgments keep the original row partial, never complete from manifest tests.
 
-Fresh paired native F6 replay at262f8bf8e exits0 for scoped assertions. Local syntax and options cases show actual input/Enter/disappearance, source/session-owned pre-admission errors (SyntaxError and Error respectively), no started/compiler receipt and unchanged artifact snapshots. Cancellation and final dirty-save import compilation remain; actual primary/dependency hashes and compilerOutputDir artifact are bound. Upstream retains its original CLI defaults and build profile. Both owned cleanup records remaining[]; one upstream dotnet descendant was retired by its observed birth. [H44 F6 evidence](dafny-f6-refusals-evidence-manifest.json) preserves all raw observations/negative before tests and prior native source identity. The original keybinding row moves missing to partial; all489 IDs/order/frozen270 unchanged. Native macOS, full trust/untitled/config/lifecycle matrix, runtime/executable semantics and both independent judges remain open. No unchanged output/timing/browser STOP replay or goal/integration action.
+Fresh paired native F6 replay at262f8bf8e exits0 for scoped assertions. Local syntax and options cases show actual input/Enter/disappearance, source/session-owned pre-admission errors (SyntaxError and Error respectively), no started/compiler receipt and unchanged artifact snapshots. Cancellation and final dirty-save import compilation remain; actual primary/dependency hashes and compilerOutputDir artifact are bound. Upstream retains its original CLI defaults and build profile. Both owned cleanup records remaining[]; one upstream dotnet descendant was retired by its observed birth. H44 F6 evidence preserves all raw observations/negative before tests and prior native source identity. The original keybinding row moves missing to partial; all489 IDs/order/frozen270 unchanged. Native macOS, full trust/untitled/config/lifecycle matrix, runtime/executable semantics and both independent judges remain open. No unchanged output/timing/browser STOP replay or goal/integration action.
 
 ### Handoffs — native compiler output configuration matrix (2026-11-07)
 
@@ -1846,7 +1848,7 @@ The original compilerOutputDir row remains partial: existing native F6 used one 
 
 Read-only finder/skeptic found missing/nonfinite pending timing data could pass and foreign completion lacked a current-root check; both before regressions fail and repairs require finite held/change/Enter ordering, exact current resource roots/source/session and continuous artifact history.56 targeted tests (`node --test vscode/test/compiler-output.test.cjs vscode/test/parity.test.cjs vscode/test/phase-capture.test.cjs`) pass, with wrong-resource/path/source/session, missing config/rendered evidence, stale completion, prior-artifact mutation, unrelated error and restoration refusal controls. Fresh native execution remains pending at the source commit. Output-visibility acceptance/epochs and all producer/proof/timing STOPs remain untouched. The row cannot complete without full original aspects and both independent judges.
 
-Native local matrix at2452f1e51 exits0 with partial scope: Settings UI shows defaultbin; actual resource JSON shows relative-with-spaces/absolute values; six ordinary/custom builds bind primary/dependency/content hashes in correct immutable roots. Held-F6 owning configuration changes finish before Enter and admit no job/artifact; foreign-folder changes do not affect the owning resource and allow its current build. All four owned setting slots restore/readback; owned process cleanup remaining[]. [H44 settings evidence](dafny-output-settings-evidence-manifest.json) retains raw API/DOM/AX/PNG, timing/identity/snapshot chains and before-failing controls. The original row stays partial; no paired upstream configuration, macOS, raster, complete lifecycle/performance or fresh row judgments are inferred. All489 IDs/order/frozen270 and earlier failures remain.
+Native local matrix at2452f1e51 exits0 with partial scope: Settings UI shows defaultbin; actual resource JSON shows relative-with-spaces/absolute values; six ordinary/custom builds bind primary/dependency/content hashes in correct immutable roots. Held-F6 owning configuration changes finish before Enter and admit no job/artifact; foreign-folder changes do not affect the owning resource and allow its current build. All four owned setting slots restore/readback; owned process cleanup remaining[]. H44 settings evidence retains raw API/DOM/AX/PNG, timing/identity/snapshot chains and before-failing controls. The original row stays partial; no paired upstream configuration, macOS, raster, complete lifecycle/performance or fresh row judgments are inferred. All489 IDs/order/frozen270 and earlier failures remain.
 
 ### Handoffs — pinned upstream compiler-output observations (2026-11-07)
 
@@ -1858,7 +1860,7 @@ The native upstream matrix at475f363bb collected all8 cases and exits1. Seven CL
 
 A separate minor resource/tooling guard now confirms recursive fs.readdirSync behavior in both runner and editor-host code before artifact scans. It rejects an ignored recursive option and cleans only its own sentinel; it does not invent a new Node minimum or change production Node18+ support.65 targeted tests (`node --test vscode/test/dafny-output.test.cjs vscode/test/compiler-output.test.cjs vscode/test/parity.test.cjs vscode/test/phase-capture.test.cjs vscode/test/filesystem.test.cjs`) pass; both read-only reviews find no further concern. Native matrix provenance remains475f363bb, before this guard-only increment; no repeat of its failed configurations is made.
 
-[H44 pinned upstream evidence](dafny-upstream-output-evidence-manifest.json) retains all8native cases at475f363bb, source/control failures, raw command/SDK/cwd/artifact metadata, settings rendering and restored global/folder slots. The matrix remains exit1 for genuine relative-custom CLI failure and folder-scope refusal;7other CLI exits0 are scoped external observations. Actual global-change-during-F6 behavior retains old captured output stem. No production contract is changed to manufacture equality. A separate bare pinned Code Node filesystem probe at e0ae18e3c confirms recursive enumeration only, not UI/proof. All489 ordered IDs/frozen270 and earlier failure receipts remain; row partial, original proof/raster/lifecycle/performance/judgment queues open.
+H44 pinned upstream evidence retains all8native cases at475f363bb, source/control failures, raw command/SDK/cwd/artifact metadata, settings rendering and restored global/folder slots. The matrix remains exit1 for genuine relative-custom CLI failure and folder-scope refusal;7other CLI exits0 are scoped external observations. Actual global-change-during-F6 behavior retains old captured output stem. No production contract is changed to manufacture equality. A separate bare pinned Code Node filesystem probe at e0ae18e3c confirms recursive enumeration only, not UI/proof. All489 ordered IDs/frozen270 and earlier failure receipts remain; row partial, original proof/raster/lifecycle/performance/judgment queues open.
 
 ### Handoffs — upstream configured precedence and ordinary Run/Test (2026-11-07)
 
@@ -1866,7 +1868,7 @@ The separate `dafny-command-output` scenario observes configured Build output pr
 
 Read-only finder/skeptic reviews exposed ghost-artifact acceptance and a terminal outcome preceding command activation; their failing controls are retained in `/workspace/dafny-command-output-before-20261107.log`. Repairs require actual snapshot membership and ordered command/terminal ownership. Both reviews then found JSON object identity could reject persisted receipts; stable execution identity and a positive JSON round-trip control repair that defect. The targeted command (`node --test vscode/test/dafny-command-output.test.cjs vscode/test/dafny-output.test.cjs vscode/test/compiler-output.test.cjs vscode/test/parity.test.cjs vscode/test/phase-capture.test.cjs`) passes71 tests in `/workspace/dafny-command-output-json-repaired-20261107.log`. Native observations are pending at this source checkpoint; no row is complete and all original obligations remain.
 
-The separate native run at26010a9ce records actual Build `build --output:explicit-output/commands`, Run `run --no-verify`, and Test `test --no-verify`, each CLI exit0. The unchanged no-Main/no-test fixture remains unchanged; no runtime/test coverage or local equivalence is inferred. Both slots restore with raw/API readback. Overall runner exit1 is preserved: Test changes nine prior Run artifact hashes, correctly refusing the artifact-history obligation. Because the scenario throws, aggregate host validation also reports missing cases; complete raw three-case observations remain in the checksum-bound [H44 evidence manifest](dafny-command-output-evidence-manifest.json). Prior eight-case files/failures are untouched. Both final read-only reviews confirm stable serialized terminal identity and no remaining concrete validator finding; these reviews do not replace paired row judges. Only the existing output-directory row receives additive partial evidence; all489 ordered rows/frozen270 persist.
+The separate native run at26010a9ce records actual Build `build --output:explicit-output/commands`, Run `run --no-verify`, and Test `test --no-verify`, each CLI exit0. The unchanged no-Main/no-test fixture remains unchanged; no runtime/test coverage or local equivalence is inferred. Both slots restore with raw/API readback. Overall runner exit1 is preserved: Test changes nine prior Run artifact hashes, correctly refusing the artifact-history obligation. Because the scenario throws, aggregate host validation also reports missing cases; complete raw three-case observations remain in the checksum-bound H44 evidence manifest. Prior eight-case files/failures are untouched. Both final read-only reviews confirm stable serialized terminal identity and no remaining concrete validator finding; these reviews do not replace paired row judges. Only the existing output-directory row receives additive partial evidence; all489 ordered rows/frozen270 persist.
 
 
 ### Handoffs — failed-observation retention and trace consumer (2026-11-07)
@@ -1875,7 +1877,7 @@ The separate upstream command-output scenario now attaches its complete observat
 
 The new source-bound trace presentation consumer and contributed Show/Hide/Copy plus F7/F8 use exact pinned normalization, double-newline original assumption copy, themed margin/colors and1000ms debounce. Production has no positioned producer and explicitly reports unavailable; it does not call an invented protocol, infer positions from model reports or start verification. Injected tests exercise URI/version/hash/document-session binding, invalid positions, edits, cancellation/reset, close/reopen identical bytes, switching/multi-file, configuration, disposal, errors and copy ownership. The original harness trace tests are preserved byte-for-byte; new consumer tests live separately. Finder/skeptic found unavailable-copy stale decoration and chained-equality normalization differences; both repaired with controls. These are consumer/source evidence, not native producer/kernel/rendered parity, and every row remains incomplete without all aspects and both fresh-process judges. The existing CRLF, canonical-normalizer and timed-workload questions and all original final obligations remain.
 
-At734c65786 the immutable native receipt is reprocessed offline through the production failure helpers. The resulting rejected aggregate retains the exact three cases, actual0/0/0 CLI exits, all nine mutations and `previous artifact mutated`; status remains broken/exit1, not missing cases or accepted evidence. No native workload was repeated. The [H44 consumer/failure manifest](dafny-trace-consumer-evidence-manifest.json) binds that replay, original failed receipts and source/injected controls;95 targeted tests pass. Original harness trace tests are byte-identical. Final finder/skeptic confirm no remaining concrete finding after fixes; production still has no positioned trace producer. Seventeen existing trace rows now carry partial consumer evidence, not completion; all489 IDs/order and frozen270 remain unchanged.
+At734c65786 the immutable native receipt is reprocessed offline through the production failure helpers. The resulting rejected aggregate retains the exact three cases, actual0/0/0 CLI exits, all nine mutations and `previous artifact mutated`; status remains broken/exit1, not missing cases or accepted evidence. No native workload was repeated. The H44 consumer/failure manifest binds that replay, original failed receipts and source/injected controls;95 targeted tests pass. Original harness trace tests are byte-identical. Final finder/skeptic confirm no remaining concrete finding after fixes; production still has no positioned trace producer. Seventeen existing trace rows now carry partial consumer evidence, not completion; all489 IDs/order and frozen270 remain unchanged.
 
 The first full serial integration run at eb111164c exits1 (511pass/1fail/4skip): the startup-action test counted legitimate new trace `setContext` calls as configuration actions. Its log is retained at `/workspace/dafny-trace-consumer-gates-20261107/0.log`. The repair validates those calls by exact arity, the three allowed trace keys and boolean type, while preserving the original count/path/stale suppression for every other command and external link. Both read-only reviews found no weakening or concrete defect;46 targeted editor-state/consumer tests pass. Final serial validation remains separately recorded, not inferred from these targeted results.
 
@@ -1893,7 +1895,7 @@ At62abafbad the visible native Testing capture succeeds with the exact nested de
 
 The final native Testing matrix at5291aec40 exits0 with partial scope: visible and restored rows are Hierarchy.sol/Base/f/f/Derived/g; hidden state is the actual same-pane no-tests welcome. Raw action attributes show More Filters available in visible phases and no declaration Run control; no proof outcome or request is fabricated. All settings restore and owned survivors remaining[]. Earlier three failed native attempts remain immutable. A separate ignored-abort cancellation regression then reproduced late compiler-only tree publication (exit1); cancellation now aborts/removes only compiler-only snapshots, leaving accepted-report snapshots unchanged. Both final reviews confirm that repair and the no-proof boundary. Original full parity, both row judgments and pending producer/timing questions remain unfinished.
 
-The [H44 native trace/Testing manifest](dafny-native-trace-testing-evidence-manifest.json) binds all five native runs: trace09cb exit0, Testing3fc/0b39/62ab exits1, Testing5291 exit0. Every raw ordered phase/protocol/API/DOM/AX/PNG, settings readback and owned cleanup remains attributed to its actual source head. Source99d adds the separate cancellation repair; successful native matrices are not silently attributed to that later head. Original489 ordered IDs/frozen270 are unchanged; menus and trace keys now cite actual unavailable-path evidence, Testing rows cite compiler-only rendered evidence. No row is complete, paired macOS/full lifecycle/performance and both original row judges remain pending. Original CRLF/normalizer/timing questions, certified producer and browser STOP dependencies remain unchanged.
+The H44 native trace/Testing manifest binds all five native runs: trace09cb exit0, Testing3fc/0b39/62ab exits1, Testing5291 exit0. Every raw ordered phase/protocol/API/DOM/AX/PNG, settings readback and owned cleanup remains attributed to its actual source head. Source99d adds the separate cancellation repair; successful native matrices are not silently attributed to that later head. Original489 ordered IDs/frozen270 are unchanged; menus and trace keys now cite actual unavailable-path evidence, Testing rows cite compiler-only rendered evidence. No row is complete, paired macOS/full lifecycle/performance and both original row judges remain pending. Original CRLF/normalizer/timing questions, certified producer and browser STOP dependencies remain unchanged.
 
 
 ### Handoffs — H126 scoped answers and exact adapters (2026-11-07)
@@ -1918,7 +1920,7 @@ At ee6681e6247c6f31e59e6eeb19233648739a5544, `CounterexampleMetadataV1` gains ad
 
 The isolated module build exits0 under the existing12GiB/no-swap/12GiB-headroom/serial-j1 supervisor with no survivors. Real compiler fixture controls invoke the original opt-in importer and capture the pre-import environment; actual f0/sourceId11 yields `(ensures, \result == 1)`. Wrong source ID/name/signature, unadmitted/synthetic rows and missing function/clause ordinals refuse; reader errors remain exact. Initial wrong contract-name and hygienic quoted-name control failures are retained, as is the successful post-import-environment intermediate control. Per-file diagnostics report0errors but supervisor1 retains two retired helpers. No shutdown/full-gate success is inferred.
 
-Independent read-only finder/skeptic reviews find no concrete defect; skeptic's environment caveat prompted the stronger pre-import control. Constructor/duplicate-clause/normalization-sensitive coverage and actual retained failed candidate/span correspondence remain open. The [checksum-bound manifest](dafny-canonical-ledger-evidence-manifest.json) keeps bulk/control/log bytes off Git. No inventory status, row, judge prompt or budget changes:490 obligations and frozen270 remain unchanged. Final full/TestSuite/timed strict, positioned metadata, paired native lifecycle/performance/scaling/macOS and both original per-row judgments remain unfinished. H126 questions are answered; module-times OT-PERF-SLOW, unmatched Shared.Translate cache prerequisite and official solc0.8.38 HTTP403 remain waits, not waivers.
+Independent read-only finder/skeptic reviews find no concrete defect; skeptic's environment caveat prompted the stronger pre-import control. Constructor/duplicate-clause/normalization-sensitive coverage and actual retained failed candidate/span correspondence remain open. The checksum-bound manifest keeps bulk/control/log bytes off Git. No inventory status, row, judge prompt or budget changes:490 obligations and frozen270 remain unchanged. Final full/TestSuite/timed strict, positioned metadata, paired native lifecycle/performance/scaling/macOS and both original per-row judgments remain unfinished. H126 questions are answered; module-times OT-PERF-SLOW, unmatched Shared.Translate cache prerequisite and official solc0.8.38 HTTP403 remain waits, not waivers.
 
 
 ### Handoffs — captured importer and retained candidate join (2026-11-07)
@@ -1931,7 +1933,7 @@ Q-REL-CANONICAL-LEDGER-01 asks whether the producer may factor the local Contrac
 
 The separate owned MCP launcher translates the bridge's TERM to the pinned package's existing interrupt/finally path; shared bridge/package bytes are unchanged. Finder caught repeated TERM interrupting cleanup; skeptic/finder caught unbounded fixture close waits. The genuine before-repair control retains3pass1fail; final4controls pass with idempotent TERM,1000ms accepted closure, confirmed forced cleanup after deadline and exact Linux birth checks. Changed actual per-file diagnostics0errors/supervisor0/retired[] are distinct from injected tests and do not establish the old failure's historical cause. Previous diagnostic supervisor1 and all STOP/failure receipts are untouched. Module build and real controls pass under the unchanged12GiB/no-swap/12GiB-headroom/serial-j1 guard.
 
-The [H44 manifest](dafny-ingress-link-evidence-manifest.json) binds source/control/raw logs off Git. Read-only existing cache/index inspection finds no matching current Shared.Translate trace outputs in the verified pack; it does not resolve the source-matched dependency wait and repeats no failed --no-build or unrelated cold build. Remaining full proof/timed gates, OT-PERF-SLOW, browser+32.20percent STOP, positioned metadata, paired rendered/lifecycle/performance/scaling/macOS and both original per-row judges remain unfinished. All490 ordered rows/frozen270 are unchanged; no row or goal completed, no integration or goal mutation.
+The H44 manifest binds source/control/raw logs off Git. Read-only existing cache/index inspection finds no matching current Shared.Translate trace outputs in the verified pack; it does not resolve the source-matched dependency wait and repeats no failed --no-build or unrelated cold build. Remaining full proof/timed gates, OT-PERF-SLOW, browser+32.20percent STOP, positioned metadata, paired rendered/lifecycle/performance/scaling/macOS and both original per-row judges remain unfinished. All490 ordered rows/frozen270 are unchanged; no row or goal completed, no integration or goal mutation.
 
 
 ### Handoffs — authorized shared normalization and ordinal companion (2026-11-07)
@@ -1940,7 +1942,7 @@ Q-REL-CANONICAL-LEDGER-01 is answered by the incoming user authorization and rec
 
 Per-file diagnostics0errors/supervisor0 and targeted Contract→CounterexampleMetadataV1 rebuild0 use the unchanged12GiB/no-swap/12GiB-headroom/serial-j1 guard with no survivors. The legacy compiled-reader capture confirms helper-loaded=false; after rebuilding helper-loaded=true, all computational fields for Parity, Origins and BindingControls are byte-identical. ScopeScan's proposition field is omitted by proof irrelevance while every feature/diagnostic is retained. This is three-fixture regression evidence, not a whole-importer/compiler correctness theorem. Generic callback controls retain full ordinals, duplicate clauses, original rewrite errors, lexical fields and constant normalization. The initial missing-Repr serializer failure and ambiguous Except-pattern failure remain archived; neither was forced/admitted into a passing proof.
 
-Unchanged admitted retained-candidate/source-negative controls and constructor/shadowing/module-boundary controls pass again in new output directories; original receipts remain untouched. Raw amount versus canonical amount_ remains explicit. Independent read-only finder/skeptic find no equivalence defect and distinguish normalization ordinals from source spans or typed failed-postcondition indices. The [H44 manifest](dafny-normalization-helper-evidence-manifest.json) binds all raw controls/logs off Git.
+Unchanged admitted retained-candidate/source-negative controls and constructor/shadowing/module-boundary controls pass again in new output directories; original receipts remain untouched. Raw amount versus canonical amount_ remains explicit. Independent read-only finder/skeptic find no equivalence defect and distinguish normalization ordinals from source spans or typed failed-postcondition indices. The H44 manifest binds all raw controls/logs off Git.
 
 The local record is currently discarded by the old reader and is not yet transported through the private Import computation. Q-REL-LEDGER-TRANSPORT-01 asks whether those reader/forwarding bodies may be factored into shared internals and versioned ledger-returning companions with forget/equality preservation; H126's Import wrapper-only constraint is not silently expanded. No private Import body change, guessed source mapping, selected-clause failure claim or span publication occurred. All490 ordered rows/frozen270 are unchanged; full metadata/positioned traces, paired rendered/lifecycle/performance/scaling/macOS evidence, original paired row judges and final proof/timing gates remain unfinished. Existing timing/browser STOPs and resource/cache/compiler dependencies are retained; no unchanged stopped workload retried, integration or goal mutation.
 
@@ -1951,7 +1953,7 @@ The new focused existing-runner suite removes only its own inherited fixed overr
 
 Three bounded paired Linux captures retain every attempt. First source19fe708c1 run fails after VSCode MarkdownString getters become{} across JSON; sourcee7cafdb8c snapshots actual getters (never wire substitutes), and source9dd5b7dec adds actual live image hashes. Local then passes the partial observation validator; Dafny remains a nonpass: settings API2/3 but cached initial serverOptions launch --verification-time-limit:20 on every restart, and strict close-before-next-spawn fails. Pinned extension startClientAndWaitForVersion reuses this.client; no upstream patch or expectation rewrite was made. Close timing alone is not proof of old-process liveness. Both targets retire with remaining[] under original4GiB native/12GiB reserve/60s operation/300s process guards. No local proof, unlimited run, stopped browser benchmark or timed strict replay occurred.
 
-Finder/skeptic caught false acceptance of empty hover/wrong versions/foreign opens, missing or unenforced deadlines, late success, incomplete image coverage and trusted-reference wiring. Ten injected controls now pass, including actual aggregate wiring and overdue-clock/held-provider cases; first review failure remains. Final strict validator812016dcd revalidates already captured complete12Dafny/2local image facts against unchanged pinned source files, preserving the same four Dafny nonpasses. This supplemental offline context is not a new native run; original receipts remain untouched. The [H44 manifest](dafny-time-limit-evidence-manifest.json) restores raw API/LSP/DOM/AX/PNG/process/config/failure evidence at ignored repo-relative paths. Source/artifact, API/rendered, foreign verifier/kernel/EVM and unlimited/timed enforcement boundaries remain explicit.
+Finder/skeptic caught false acceptance of empty hover/wrong versions/foreign opens, missing or unenforced deadlines, late success, incomplete image coverage and trusted-reference wiring. Ten injected controls now pass, including actual aggregate wiring and overdue-clock/held-provider cases; first review failure remains. Final strict validator812016dcd revalidates already captured complete12Dafny/2local image facts against unchanged pinned source files, preserving the same four Dafny nonpasses. This supplemental offline context is not a new native run; original receipts remain untouched. The H44 manifest restores raw API/LSP/DOM/AX/PNG/process/config/failure evidence at ignored repo-relative paths. Source/artifact, API/rendered, foreign verifier/kernel/EVM and unlimited/timed enforcement boundaries remain explicit.
 
 The original time-limit row becomes partial and one additive original lifecycle/adversarial scenario is appended; all prior490 IDs/order and frozen270 persist. No row completed or paired judge invented. Missing rendered-settings/macOS/full cancellation/stale/resource/proof-time enforcement/performance/scaling matrices and both original per-row judges remain. Q-REL-LEDGER-TRANSPORT-01 is now answered and recorded: shared reader/private forwarding and versioned ledger companions are authorized under exact preservation/no-copy/no-budget-change terms; further refactors on those terms are pre-approved and this family must not be re-filed. Implementation remains queued, with no Import body edit in this editor-only checkpoint. Original proof gates, OT-PERF-SLOW, Shared.Translate exact-source cache wait, optional compiler403 and browser+32.20percent STOP remain; goal/integration unchanged.
 
