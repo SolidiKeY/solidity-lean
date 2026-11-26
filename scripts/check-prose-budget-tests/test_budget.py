@@ -252,6 +252,28 @@ class AcceptanceTests(unittest.TestCase):
         self.assertEqual(updated['calibration'], self.policy['calibration'])
         self.assertTrue(all(value == '0' for row in updated['activation']['residuals'].values() for value in row.values()))
 
+    def test_git_predecessor_and_committed_regrowth(self):
+        def git(*args):
+            return subprocess.check_output(['git', '-C', str(self.root), *args], text=True).strip()
+        git('init', '-q')
+        git('config', 'user.email', 'test@example.invalid')
+        git('config', 'user.name', 'test')
+        path = self.root / 'scripts/prose-baseline.json'
+        path.parent.mkdir()
+        path.write_bytes(self.baseline.read_bytes())
+        git('add', '.')
+        git('commit', '-qm', 'active policy')
+        original = MODULE['previous_policy'](self.root, 'HEAD')
+        smaller = MODULE['activation_policy']()
+        smaller['activation']['residuals']['Solidity/Finish']['comment_lines'] = '0'
+        path.write_text(json.dumps({'_candidate': smaller}))
+        git('add', '.')
+        git('commit', '-qm', 'shrink')
+        with self.assertRaises(ValueError):
+            MODULE['validate_active'](original, MODULE['previous_policy'](self.root, 'HEAD'))
+        with self.assertRaisesRegex(ValueError, 'cannot read previous baseline'):
+            MODULE['previous_policy'](self.root, 'missing-ref')
+
     def test_frozen_active_fields(self):
         import copy
         for field, value in [('active', False), ('excluded_until_r1', []), ('activation', {})]:
@@ -261,7 +283,7 @@ class AcceptanceTests(unittest.TestCase):
                 MODULE['validate_active'](p)
         for field in ('ratio', 'margin'):
             p = copy.deepcopy(self.policy)
-            p['calibration']['Solidity/Automation']['metrics']['comment_lines'][field] = '0'
+            p['calibration']['Solidity/Automation']['metrics']['comment_lines'][field] = '1'
             with self.assertRaises(ValueError):
                 MODULE['validate_active'](p)
 

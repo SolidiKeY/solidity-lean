@@ -9,7 +9,6 @@ from pathlib import Path
 import re
 import sys
 import subprocess
-import copy
 
 RAW = re.compile(r'r(#+)?"')
 CHAR = re.compile(r"'(?:[^'\\\n]|\\(?:u\{[0-9a-fA-F]+\}|.))'")
@@ -618,11 +617,28 @@ def previous_policy(root, ref):
     if isinstance(old, dict) and old.get("active") is True:
         validate_active(old)
         return old
-    # The one-time transition is allowed only from the exact activation base.
+    # Allow integration on unchanged descendants of the activation base.
     sha = subprocess.check_output(["git", "-C", str(root), "rev-parse", ref + "^{commit}"], text=True).strip()
-    if sha != activation_policy()["activation"]["commit"]:
-        raise ValueError("inactive predecessor is not the activation commit")
+    activation = activation_policy()["activation"]["commit"]
+    frozen = subprocess.check_output(["git", "-C", str(root), "show", activation + ":scripts/prose-baseline.json"], text=True)
+    ancestry = subprocess.run(["git", "-C", str(root), "merge-base", "--is-ancestor", activation, sha])
+    if ancestry.returncode or data != json.loads(frozen):
+        raise ValueError("inactive predecessor is not the unchanged activation baseline")
     return activation_policy()
+
+
+def validate_history(root):
+    """Check every baseline-changing commit, including intermediate pushes/merges."""
+    activation = activation_policy()["activation"]["commit"]
+    revisions = subprocess.check_output(
+        ["git", "-C", str(root), "rev-list", "--full-history", activation + "..HEAD",
+         "--", "scripts/prose-baseline.json"], text=True).splitlines()
+    for revision in revisions:
+        policy = previous_policy(root, revision)
+        parents = subprocess.check_output(
+            ["git", "-C", str(root), "show", "-s", "--format=%P", revision], text=True).split()
+        for parent in parents:
+            validate_active(policy, previous_policy(root, parent))
 
 
 def measure_lines(source, scanner=None):
@@ -671,7 +687,8 @@ def candidate_report(root, actual, policy):
             codes[area] = codes.get(area, 0) + code_lines(path.read_text(encoding="utf-8"))
     total = sum(codes.values())
     rows = []
-    for area in sorted(actual.keys() | policy["calibration"].keys()):
+    for area in sorted(actual.keys() | policy["calibration"].keys() |
+                       (policy["activation"]["residuals"].keys() if active else set())):
         calibration = policy["calibration"].get(area)
         denominator = codes.get(area, 0) if area.startswith("Solidity/") else total
         for metric in METRICS:
@@ -702,6 +719,8 @@ def main():
     baseline_path = args.baseline or args.root / "scripts/prose-baseline.json"
     try:
         policy = read_baseline(baseline_path)["_candidate"]
+        if (args.root / ".git").exists():
+            validate_history(args.root)
         if args.base_ref or (args.root / ".git").exists():
             validate_active(policy, previous_policy(args.root, args.base_ref or "HEAD"))
         if args.candidate_update:
