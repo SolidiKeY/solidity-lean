@@ -7,265 +7,66 @@
       "root": ".",
       "description": "The Solidity-in-KeY calculus: programs, their proofs and the strategy's output.",
       "examples": [
-        {
-          "group": "Start here",
-          "file": "Solidity/Examples/Tactics/Tour.lean"
-        },
-        {
-          "group": "Start here",
-          "file": "Solidity/Examples/Verify.lean"
-        },
-        {
-          "group": "Contracts",
-          "file": "Solidity/Examples/Benchmark/SimpleStorage.lean"
-        },
-        {
-          "group": "Contracts",
-          "file": "Solidity/Examples/Benchmark/Counter.lean"
-        },
-        {
-          "group": "Contracts",
-          "file": "Solidity/Examples/Benchmark/Coin.lean"
-        },
-        {
-          "group": "Contracts",
-          "file": "Solidity/Examples/Benchmark/ERC20.lean"
-        },
-        {
-          "group": "Contracts",
-          "file": "Solidity/Examples/Benchmark/EtherWallet.lean"
-        },
-        {
-          "group": "Contracts",
-          "file": "Solidity/Examples/Benchmark/Mapping.lean"
-        },
-        {
-          "group": "Contracts",
-          "file": "Solidity/Examples/Benchmark/Purchase.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Revert.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Payment.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Calls.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Recursion.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Loops.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Termination.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/LexMetrics.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/LexDiamond.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Checked.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/TryCatch.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Inheritance.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Callback.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/Symex.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/Spec.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/FiniteSets.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/LexAnnotations.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/LexDiamond.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/FilteredSets.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Preconditions.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/SourceCounterexample.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/SolSpec.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/Derive.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Chains/Arithmetic.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Chains/Payment.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/ProofTree.lean"
-        },
-        {
-          "group": "Proofs",
-          "file": "Solidity/Examples/Tactics/SymbolicCounterexample.lean"
-        },
-        {
-          "group": "solkey's test suite",
-          "file": "Solidity/Solkey/TestSuite.lean"
-        },
-        {
-          "group": "solkey's test suite",
-          "file": "Solidity/TestSuite/Report.lean"
-        },
-        {
-          "group": "solkey's test suite",
-          "file": "Solidity/TestSuite/Derived1.lean"
-        },
-        {
-          "group": "solkey's test suite",
-          "file": "Solidity/TestSuite/Refuted.lean",
-          "title": "solkey's TestSuite, refuted"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/AbiFeatures.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Recovery.lean",
-          "title": "secp256k1 recovery conformance"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/Aggregates.lean"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/AggregateSlices.lean",
-          "title": "Calldata slices and evaluation order"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/DeclarationMetadata.lean"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
-          "title": "Imported ABI and ERC-7201"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/AggregatesImport.lean",
-          "title": "Imported arrays and reference copies"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
-          "title": "Source admission and compiler modes"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
-          "title": "Imported declaration identities"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
-          "title": "Imported Solidity literals"
-        },
-        {
-          "group": "Foundation",
-          "file": "Solidity/Examples/RecursiveStorage.lean",
-          "title": "Recursive storage foundation (standalone)"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/OperatorAliasesImport.lean",
-          "title": "Resolved Solidity operator aliases"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/CallExceptions.lean",
-          "title": "Error arguments and exact panic data"
-        },
-        {
-          "group": "Language",
-          "file": "Solidity/Examples/Tactics/SliceCopies.lean",
-          "title": "Fresh copies of calldata slices"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/SliceCopiesImport.lean",
-          "title": "Imported calldata slice copies"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/AbiHexCall.lean",
-          "title": "Hex literal widths in ABI calls"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/PublicGetters.lean",
-          "title": "Public getters and source ABI identities"
-        },
-        {
-          "group": "Foundation",
-          "file": "Solidity/Examples/Tactics/TransientStorage.lean",
-          "title": "Transient transaction model"
-        },
-        {
-          "group": "Foundation",
-          "file": "Solidity/Examples/Tactics/ContractWorld.lean",
-          "title": "Typed deployment and library world"
-        },
-        {
-          "group": "Compiler imports",
-          "file": "Solidity/Examples/Tactics/ContractWorldSource.lean",
-          "title": "Restricted source factories and libraries"
-        },
-        {
-          "group": "Foundation",
-          "file": "Solidity/Examples/RecursiveCopy.lean",
-          "title": "Recursive storage copy and ordinary-value bridge"
-        }
+        { "group": "Start here", "file": "Solidity/Examples/Tactics/Tour.lean" },
+        { "group": "Start here", "file": "Solidity/Examples/Verify.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/SimpleStorage.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Counter.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Coin.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/ERC20.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/EtherWallet.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Mapping.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Purchase.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Revert.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Payment.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Calls.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Recursion.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Loops.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Termination.lean" },
+        { "group": "Language", "file": "Solidity/Examples/LexMetrics.lean" },
+        { "group": "Language", "file": "Solidity/Examples/LexDiamond.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Checked.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/TryCatch.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Inheritance.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Callback.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/Symex.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/Spec.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/FiniteSets.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/LexAnnotations.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/LexDiamond.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/FilteredSets.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Preconditions.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/SourceCounterexample.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SolSpec.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/Derive.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Chains/Arithmetic.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Chains/Payment.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/ProofTree.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SymbolicCounterexample.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/Solkey/TestSuite.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Report.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Derived1.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Refuted.lean", "title": "solkey's TestSuite, refuted" },
+        {"group": "Language", "file": "Solidity/Examples/Tactics/AbiFeatures.lean"},
+        {"group": "Language", "file": "Solidity/Examples/Tactics/Recovery.lean", "title": "secp256k1 recovery conformance"},
+        {"group": "Language", "file": "Solidity/Examples/Tactics/Aggregates.lean"},
+        {"group": "Language", "file": "Solidity/Examples/Tactics/AggregateSlices.lean", "title": "Calldata slices and evaluation order"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/DeclarationMetadata.lean"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "title": "Imported ABI and ERC-7201"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/AggregatesImport.lean", "title": "Imported arrays and reference copies"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "title": "Source admission and compiler modes"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "title": "Imported declaration identities"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "title": "Imported Solidity literals"},
+        {"group": "Foundation", "file": "Solidity/Examples/RecursiveStorage.lean", "title": "Recursive storage foundation (standalone)"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/OperatorAliasesImport.lean", "title": "Resolved Solidity operator aliases"},
+        {"group": "Language", "file": "Solidity/Examples/Tactics/CallExceptions.lean", "title": "Error arguments and exact panic data"},
+        {"group": "Language", "file": "Solidity/Examples/Tactics/SliceCopies.lean", "title": "Fresh copies of calldata slices"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/SliceCopiesImport.lean", "title": "Imported calldata slice copies"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/AbiHexCall.lean", "title": "Hex literal widths in ABI calls"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/PublicGetters.lean", "title": "Public getters and source ABI identities"},
+        {"group": "Foundation", "file": "Solidity/Examples/Tactics/TransientStorage.lean", "title": "Transient transaction model"},
+        {"group": "Foundation", "file": "Solidity/Examples/Tactics/ContractWorld.lean", "title": "Typed deployment and library world"},
+        {"group": "Compiler imports", "file": "Solidity/Examples/Tactics/ContractWorldSource.lean", "title": "Restricted source factories and libraries"},
+        {"group": "Foundation", "file": "Solidity/Examples/RecursiveCopy.lean", "title": "Recursive storage copy and ordinary-value bridge"}
       ]
     },
     {
@@ -274,49 +75,23 @@
       "root": "Bridge",
       "description": "Solidity contracts verified by Velvet, the Dafny-style verifier built on Loom, from the optional Bridge package.",
       "examples": [
-        {
-          "group": "Solidity patterns",
-          "file": "SolidityVelvet/TestSuite.lean"
-        },
-        {
-          "group": "Solidity patterns",
-          "file": "SolidityVelvet.lean"
-        },
-        {
-          "group": "Solidity patterns",
-          "file": "SolidityVelvet/Bank.lean"
-        },
-        {
-          "group": "Solidity patterns",
-          "file": "SolidityVelvet/Token.lean"
-        },
-        {
-          "group": "Solidity patterns",
-          "file": "SolidityVelvet/Loops.lean"
-        },
-        {
-          "group": "Velvet's examples",
-          "file": "vendor/CaseStudies/Velvet/VelvetExamples/MaxElem.lean"
-        },
-        {
-          "group": "Velvet's examples",
-          "file": "vendor/CaseStudies/Velvet/VelvetExamples/IsSorted.lean"
-        },
-        {
-          "group": "Velvet's examples",
-          "file": "vendor/CaseStudies/Velvet/VelvetExamples/SumOfDigits.lean"
-        },
-        {
-          "group": "Velvet's examples",
-          "file": "vendor/CaseStudies/Velvet/VelvetExamples/GCD.lean"
-        }
+        { "group": "Solidity patterns", "file": "SolidityVelvet/TestSuite.lean" },
+        { "group": "Solidity patterns", "file": "SolidityVelvet.lean" },
+        { "group": "Solidity patterns", "file": "SolidityVelvet/Bank.lean" },
+        { "group": "Solidity patterns", "file": "SolidityVelvet/Token.lean" },
+        { "group": "Solidity patterns", "file": "SolidityVelvet/Loops.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/MaxElem.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/IsSorted.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/SumOfDigits.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/GCD.lean" }
       ]
     }
-  ],
-  "playground": [
-    {
-      "title": "Identity",
-      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\n\ncontract Identity {\n    /// @custom:key ensures \\result == value\n    function identity(uint256 value) public pure returns (uint256 result) {\n        return value;\n    }\n\n    function caller() public pure returns (uint256) {\n        return identity(1);\n    }\n}\n"
-    }
   ]
+,
+  "playground": [
+  {
+    "title": "Identity",
+    "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\n\ncontract Identity {\n    /// @custom:key ensures \\result == value\n    function identity(uint256 value) public pure returns (uint256 result) {\n        return value;\n    }\n\n    function caller() public pure returns (uint256) {\n        return identity(1);\n    }\n}\n"
+  }
+]
 }

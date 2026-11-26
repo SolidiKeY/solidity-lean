@@ -31,9 +31,17 @@ export function highlight(source, range) {
   let block=false;
   return source.split('\n').map((line,i)=>{
     let out='',at=0;
-    const token=/\/\*|\*\/|\/\/.*$|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:pragma|solidity|contract|function|returns|return|public|external|internal|private|pure|view|uint\d*|int\d*|bool|if|else|require|assert|mapping|while|for)\b/g;
-    for(const m of line.matchAll(token)) { out+=escapeHtml(line.slice(at,m.index)); const s=m[0]; let cls=block?'comment':s.startsWith('//')||s==='/*'?'comment':s.startsWith('"')||s.startsWith("'")?'string':'kw'; if(s==='/*') block=true; out+=`<span class="${cls}">${escapeHtml(s)}</span>`; if(s==='*/') block=false; at=m.index+s.length; }
-    out+=escapeHtml(line.slice(at));
+    while(at<line.length) {
+      if(block) { const end=line.indexOf('*/',at); const stop=end<0?line.length:end+2; out+=`<span class="comment">${escapeHtml(line.slice(at,stop))}</span>`;at=stop;if(end>=0)block=false;continue; }
+      if(line.startsWith('/*',at)) { block=true;continue; }
+      if(line.startsWith('//',at)) { out+=`<span class="comment">${escapeHtml(line.slice(at))}</span>`;break; }
+      const rest=line.slice(at);
+      const string=/^(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/.exec(rest);
+      const word=/^[A-Za-z_$][A-Za-z0-9_$]*/.exec(rest);
+      if(string) {out+=`<span class="string">${escapeHtml(string[0])}</span>`;at+=string[0].length;}
+      else if(word) {const text=escapeHtml(word[0]);out+=/^(?:pragma|solidity|contract|function|returns|return|public|external|internal|private|pure|view|uint\d*|int\d*|bool|if|else|require|assert|mapping|while|for)$/.test(word[0])?`<span class="kw">${text}</span>`:text;at+=word[0].length;}
+      else {out+=escapeHtml(line[at++]);}
+    }
     const marked=range && i>=range.start.line && i<=range.end.line-(range.end.line>range.start.line && range.end.character===0?1:0);
     return `<span class="line${marked?' marked':''}"><span class="no">${i+1}</span>${out || ' '}</span>`;
   }).join('');

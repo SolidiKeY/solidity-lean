@@ -22,3 +22,5 @@ test('results preserve unknown statuses and escape model values and function nam
 test('highlighting preserves escaped source and marks source lines',()=>{
   const html=highlight('contract X {\n // <script>\n}',{start:{line:1,character:0},end:{line:1,character:8}});assert.match(html,/class="kw">contract/);assert.match(html,/line marked/);assert.match(html,/&lt;script&gt;/);assert.equal((html.match(/class="no"/g)||[]).length,3);
 });
+
+test('block comments remain colored and LSP end lines are exclusive',()=>{const html=highlight('/* hi\nbye */\ncontract X {}',{start:{line:0,character:0},end:{line:2,character:0}});assert.match(html,/<span class="comment">bye \*\//);assert.equal((html.match(/line marked/g)||[]).length,2);});
