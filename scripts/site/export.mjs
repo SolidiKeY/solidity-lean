@@ -15,7 +15,7 @@
 // Exit 0 = every example recorded (with or without Lean errors, which the
 // page shows), 1 = the server failed or an example timed out.
 import { spawn, execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { dirname, resolve, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -184,8 +184,15 @@ function git(...args) {
   try { return execFileSync('git', args, { cwd: repo, encoding: 'utf8' }).trim(); } catch { return null; }
 }
 
+export const playgroundAssets = ['index.html','app.js','style.css','examples.json','playground.mjs','runtime-client.mjs','sw.js','runtime.md'];
+export function exportPlayground(out) {
+  mkdirSync(out, {recursive:true});
+  for (const file of playgroundAssets) copyFileSync(resolve(repo,'site',file),resolve(out,file));
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  exportPlayground(resolve(repo,args.out));
   const config = JSON.parse(readFileSync(resolve(repo, 'site/examples.json'), 'utf8'));
   const project = config.projects.find((p) => p.id === args.project);
   if (!project) throw new Error(`no project ${args.project} in site/examples.json`);

@@ -34,7 +34,7 @@ export function highlight(source, range) {
     const token=/\/\*|\*\/|\/\/.*$|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b(?:pragma|solidity|contract|function|returns|return|public|external|internal|private|pure|view|uint\d*|int\d*|bool|if|else|require|assert|mapping|while|for)\b/g;
     for(const m of line.matchAll(token)) { out+=escapeHtml(line.slice(at,m.index)); const s=m[0]; let cls=block?'comment':s.startsWith('//')||s==='/*'?'comment':s.startsWith('"')||s.startsWith("'")?'string':'kw'; if(s==='/*') block=true; out+=`<span class="${cls}">${escapeHtml(s)}</span>`; if(s==='*/') block=false; at=m.index+s.length; }
     out+=escapeHtml(line.slice(at));
-    const marked=range && i>=range.start.line && i<=range.end.line;
+    const marked=range && i>=range.start.line && i<=range.end.line-(range.end.line>range.start.line && range.end.character===0?1:0);
     return `<span class="line${marked?' marked':''}"><span class="no">${i+1}</span>${out || ' '}</span>`;
   }).join('');
 }
