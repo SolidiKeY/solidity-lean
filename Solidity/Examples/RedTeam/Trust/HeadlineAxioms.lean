@@ -20,4 +20,17 @@ namespace Solidity.Examples.RedTeam.Trust.HeadlineAxioms
 #print axioms Solidity.Backend.compiler_endpoint_of_stages
 #print axioms Solidity.Backend.static_stage
 
+-- Reject any dependency outside Lean's three standard logical axioms.
+open Lean Elab Command in
+run_elab do
+  for target in [``Solidity.Main.compiler_correct_v2,
+      ``Solidity.Main.compiler_correct,
+      ``Solidity.Backend.compiler_endpoint_correct,
+      ``Solidity.Backend.compiler_endpoint_of_stages,
+      ``Solidity.Backend.static_stage] do
+    let dependencies ← collectAxioms target
+    unless dependencies.all (fun name =>
+        [``propext, ``Classical.choice, ``Quot.sound].contains name) do
+      throwError "unexpected axiom dependencies for {target}: {dependencies}"
+
 end Solidity.Examples.RedTeam.Trust.HeadlineAxioms
