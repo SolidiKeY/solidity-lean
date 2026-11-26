@@ -6,6 +6,12 @@ import Solidity.Examples.Benchmark.Coin
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.ERC20
 import Solidity.Examples.Benchmark.EtherWallet
+import Solidity.Examples.Benchmark.Governance.EnglishAuction
+import Solidity.Examples.Benchmark.Governance.Multisig
+import Solidity.Examples.Benchmark.Governance.Ownable
+import Solidity.Examples.Benchmark.Governance.Pausable
+import Solidity.Examples.Benchmark.Governance.Timelock
+import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
