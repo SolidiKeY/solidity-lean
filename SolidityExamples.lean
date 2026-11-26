@@ -232,6 +232,7 @@ import Solidity.Examples.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeRefs
 import Solidity.Examples.Lowering.Total.FunctionTypeRoundTrip
+import Solidity.Examples.Lowering.Total.RawTypeAgreement
 import Solidity.Examples.Lowering.Total.ReferenceDecode
 import Solidity.Examples.Lowering.Total.ReferenceStateDecode
 import Solidity.Examples.Lowering.Total.ReferenceStatePlacement
