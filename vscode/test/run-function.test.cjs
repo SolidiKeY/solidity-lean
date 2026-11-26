@@ -85,6 +85,13 @@ test('native adapter registers accepted ownership and reuses existing runner API
 
 test('payable address retains numeric ABI validation',()=>{assert.equal(server.argument('address payable','42'),'42');assert.equal(server.supported('address payable'),true);});
 
+// Compare source semantics outside import literals; staging intentionally renames imports.
+function importSkeleton(text) {
+  const ts=require('../src/solidity-text.cjs').tokens(text);let importing=false;
+  return ts.map(t=>{if(t.text==='import')importing=true;if(t.text===';')importing=false;return importing&&t.kind==='string'?'IMPORT_PATH':t.text;});
+}
+function stagedText(snapshot){return fs.readFileSync(snapshot.source,'utf8');}
+
 test('absolute imports, contextual absolute remappings and relative parents relocate consistently',t=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'run-remapping-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
   const root=path.join(directory,'original'),vendor=path.join(root,'vendor'),nested=path.join(root,'nested');
@@ -98,14 +105,14 @@ test('absolute imports, contextual absolute remappings and relative parents relo
   assert.ok(project.sources[dependency]);assert.ok(project.sources[leaf]);
   const execution=path.join(directory,'execution');fs.mkdirSync(execution);
   const snapshot=server.materialize(project,execution);
-  const mirrored=projects.snapshot(snapshot.source,text,{projectRoot:snapshot.projectRoot,includePaths:snapshot.includePaths,remappings:snapshot.remappings});
-  assert.deepEqual(Object.values(mirrored.sources).map(s=>s.content).sort(),Object.values(project.sources).map(s=>s.content).sort());
+  const mirrored=projects.snapshot(snapshot.source,stagedText(snapshot),{projectRoot:snapshot.projectRoot,includePaths:snapshot.includePaths,remappings:snapshot.remappings});
+  assert.deepEqual(Object.values(mirrored.sources).map(s=>JSON.stringify(importSkeleton(s.content))).sort(),Object.values(project.sources).map(s=>JSON.stringify(importSkeleton(s.content))).sort());
   for(const file of Object.values(mirrored.files))assert.ok(!path.relative(execution,file.path).startsWith('..'));
   assert.equal(fs.readFileSync(dependency,'utf8'),project.sources[dependency].content);
   const relative={mainSource:'C.sol',sources:{'C.sol':{content:'import "../D.sol"; contract C {}'},'../D.sol':{content:'library D {}'}},remappings:[]};
   const nestedExecution=path.join(directory,'relative');fs.mkdirSync(nestedExecution);
   const moved=server.materialize(relative,nestedExecution);
-  const resolved=projects.snapshot(moved.source,relative.sources['C.sol'].content,{projectRoot:moved.projectRoot,includePaths:[nestedExecution],remappings:moved.remappings});
+  const resolved=projects.snapshot(moved.source,stagedText(moved),{projectRoot:moved.projectRoot,includePaths:[nestedExecution],remappings:moved.remappings});
   assert.equal(Object.keys(resolved.sources).length,2);
 });
 
@@ -117,8 +124,8 @@ test('relative imports in absolute dependencies honor absolute-prefix redirects 
     [vendor+'sub/../Lib.sol']:{content:'import "./Leaf.sol"; library Alias {}'},
     [override]:{content:'library Leaf {}'}},remappings:[`@dep/=${vendor}`,`@alias/=${vendor}sub/../`,`${vendor}Leaf.sol=${override}`]};
   const moved=server.materialize(original,directory),projects=require('../src/project.cjs');
-  const resolved=projects.snapshot(moved.source,original.sources['C.sol'].content,{projectRoot:moved.projectRoot,remappings:moved.remappings});
-  assert.deepEqual(Object.values(resolved.sources).map(s=>s.content).sort(),Object.values(original.sources).map(s=>s.content).sort());
+  const resolved=projects.snapshot(moved.source,stagedText(moved),{projectRoot:moved.projectRoot,remappings:moved.remappings});
+  assert.deepEqual(Object.values(resolved.sources).map(s=>JSON.stringify(importSkeleton(s.content))).sort(),Object.values(original.sources).map(s=>JSON.stringify(importSkeleton(s.content))).sort());
   assert.equal(fs.readdirSync(path.join(directory,'units')).length,4);
 });
 
@@ -126,8 +133,29 @@ test('materialize normalizes remapping target separators like project.snapshot',
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'run-remap-slashes-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
   const project={mainSource:'C.sol',sources:{'C.sol':{content:'import "@dep/Lib.sol"; contract C {}'},'vendor/Lib.sol':{content:'library Lib {}'}},remappings:['@dep/=vendor\\']};
   const moved=server.materialize(project,directory),projects=require('../src/project.cjs');
-  assert.equal(Object.keys(projects.snapshot(moved.source,project.sources['C.sol'].content,{projectRoot:moved.projectRoot,remappings:moved.remappings}).sources).length,2);
+  assert.equal(Object.keys(projects.snapshot(moved.source,stagedText(moved),{projectRoot:moved.projectRoot,remappings:moved.remappings}).sources).length,2);
 });
 test('native adapter refuses identity-sensitive compiler-code observations before execution',async()=>{
   await assert.rejects(server.runBackend({compilerCode:true},{signal:new AbortController().signal,service:{}}),/source-identity-preserving/);
+});
+
+test('equals and colon import names use safe literals in every import form',t=>{
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'run-equals-imports-'));t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
+  const text=`// import "untouched=comment.sol";
+import 'A=B.sol';
+import "A=B.sol" as DirectAlias;
+import { L as Named } from "A=C.sol";
+import * as NS from "D:E=F.sol";
+/// @custom:key ensures true
+contract C { string constant label = "A=B.sol"; }`;
+  const original={mainSource:'C.sol',sources:{'C.sol':{content:text},'A=B.sol':{content:'import "=leaf.sol"; library Direct {}'},'A=C.sol':{content:'library L {}'},'D:E=F.sol':{content:'library Other {}'},'=leaf.sol':{content:'import "A=B.sol"; library Leaf {}'}},remappings:[]};
+  const moved=server.materialize(original,directory),projects=require('../src/project.cjs');
+  const rewritten=stagedText(moved),resolved=projects.snapshot(moved.source,rewritten,{projectRoot:moved.projectRoot,remappings:moved.remappings});
+  const literal=name=>JSON.stringify(`units/${require('../src/project.cjs').hash(name)}.sol`);
+  const expected=text.replace("'A=B.sol'",literal('A=B.sol')).replace('import "A=B.sol" as DirectAlias;',`import ${literal('A=B.sol')} as DirectAlias;`).replace('"A=C.sol"',literal('A=C.sol')).replace('"D:E=F.sol"',literal('D:E=F.sol'));
+  assert.equal(rewritten,expected);
+  assert.deepEqual(moved.remappings,[]);assert.deepEqual(importSkeleton(rewritten),importSkeleton(text));
+  assert.ok(rewritten.includes('// import "untouched=comment.sol";'));assert.ok(rewritten.includes('label = "A=B.sol"'));
+  assert.equal(original.sources['C.sol'].content,text);
+  assert.deepEqual(Object.values(resolved.sources).map(s=>JSON.stringify(importSkeleton(s.content))).sort(),Object.values(original.sources).map(s=>JSON.stringify(importSkeleton(s.content))).sort());
 });

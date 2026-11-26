@@ -76,35 +76,41 @@ function outcome(report) {
     limitations:['Numeric panic/revert codes are unavailable from the typed-model report.', 'Emitted logs and written EVM slots are unavailable from Solidity.Frontend.Cli/runReport; storage text is final typed storage, not a write trace.', 'Fresh model state; constructor not executed.']};
 }
 
-// Keep source bytes and lexical source identities distinct, even for absolute
-// aliases or embedded ../ segments. The snapshot is already a closed import
-// graph: give each source a safe filename, then encode its resolved edges as
-// exact, source-contextual solc remappings. Nothing reads the original disk.
+// Keep lexical source identities distinct, even for absolute aliases or ../.
+// Give each source a safe filename and rewrite ONLY import-path string tokens
+// using the closed original graph. Remapping syntax cannot encode every valid
+// filename (notably `=`); bodies, specifications and comments stay untouched.
+// Compiler-code observations still require an identity-preserving backend.
 function materialize(project, directory) {
-  const {imports}=require('../solidity-text.cjs'),{posix}=path;
+  const {tokens}=require('../solidity-text.cjs'),{posix}=path;
   const names=Object.keys(project.sources),aliases=new Map(names.map(name=>[name,`units/${projects.hash(name)}.sol`]));
   const rules=(project.remappings || []).map((rule,index)=>{
     const at=rule.indexOf('='),head=rule.slice(0,at),colon=head.indexOf(':');
     return {context:colon<0?'':head.slice(0,colon),prefix:colon<0?head:head.slice(colon+1),target:rule.slice(at+1).replaceAll('\\','/'),index};
   });
-  const remappings=[];
   for(const name of names){
-    const alias=aliases.get(name),file=path.join(directory,alias);
-    fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,project.sources[name].content);
-    for(const spelling of imports(project.sources[name].content)){
+    const alias=aliases.get(name),file=path.join(directory,alias),content=project.sources[name].content;
+    const ts=tokens(content).filter(t=>t.kind!=='comment'),edits=[];
+    for(let i=0;i<ts.length;i++)if(ts[i].text==='import'){
+      let literal;while(++i<ts.length&&ts[i].text!==';')if(ts[i].kind==='string')literal=ts[i];
+      if(!literal)continue;
+      const spelling=literal.text.slice(1,-1);
+      if(!spelling)continue;
       // Match project.snapshot's precedence on ORIGINAL logical identities.
       let key=spelling.startsWith('.')?posix.normalize(posix.join(posix.dirname(name),spelling)):spelling;
       const rule=rules.filter(r=>key.startsWith(r.prefix)&&name.startsWith(r.context)).sort((a,b)=>b.context.length-a.context.length||b.prefix.length-a.prefix.length||b.index-a.index)[0];
       if(rule)key=rule.target+key.slice(rule.prefix.length);
       const dependency=aliases.get(key);
       if(!dependency)throw fail(`Snapshot dependency is missing: ${key}`);
-      const imported=spelling.startsWith('.')?posix.normalize(posix.join(posix.dirname(alias),spelling)):spelling;
-      remappings.push(`${alias}:${imported}=${dependency}`);
+      edits.push({start:literal.start,end:literal.end,text:JSON.stringify(dependency)});
     }
+    let rewritten=content;
+    for(const edit of edits.reverse())rewritten=rewritten.slice(0,edit.start)+edit.text+rewritten.slice(edit.end);
+    fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,rewritten);
   }
   const main=aliases.get(project.mainSource);
   if(!main)throw fail('Snapshot main source is missing');
-  return {source:path.join(directory,main),projectRoot:directory,includePaths:[],remappings};
+  return {source:path.join(directory,main),projectRoot:directory,includePaths:[],remappings:[]};
 }
 
 // Reuse the existing runSolidityTests action=run entry point in a bounded child.
