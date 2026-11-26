@@ -66,9 +66,10 @@ function declarationValues(doc, row, symbols) {
   }
   const result = [];
   for (const a of row.counterexample.arguments) {
-    if (!fn || !Number.isSafeInteger(a.paramIndex) || !a.sourceName) continue;
+    if (!fn || !Number.isSafeInteger(a.paramIndex)) continue;
     const param = params[a.paramIndex], last = param?.at(-1);
-    if (last?.kind === 'word' && last.text === a.sourceName) result.push({position:doc.positionAt(offset(fn.range.start) + last.start), name:a.sourceName, value:String(a.value)});
+    if (a.sourceName === '' && param?.length) result.push({position:doc.positionAt(offset(fn.range.start) + param[0].start), name:a.modelName, value:String(a.value)});
+    else if (last?.kind === 'word' && last.text === a.sourceName) result.push({position:doc.positionAt(offset(fn.range.start) + last.start), name:a.sourceName, value:String(a.value)});
   }
   for (const [name,value] of storageEntries(row.counterexample.initialStorage)) {
     const matches = (contract.children || []).filter(s => s.name === name && [7,8,13,14].includes(s.kind));

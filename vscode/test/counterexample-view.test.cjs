@@ -86,3 +86,10 @@ test('switching editors during Quick Pick cancels old document selection', async
   const pending=h.show();h.vscode.window.activeTextEditor=undefined;h.events.active();pick();await pending;
   assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
 });
+
+test('unnamed parameters use their returned parameter index',()=>{
+  const text='function f(uint, bool ok) public {}',doc={getText:()=>text,offsetAt:p=>p.character,positionAt:n=>point(0,n)};
+  const r=row('f',{range:{start:point(0),end:point(0,text.length)},counterexample:evidence({arguments:[{modelName:'p0',paramIndex:0,sourceName:'',type:'uint',value:'12'}],initialStorage:''})});
+  const values=declarationValues(doc,r,[{name:'C',children:[{name:'f',range:r.range}]}]);
+  assert.deepEqual(values,[{position:point(0,text.indexOf('uint')),name:'p0',value:'12'}]);
+});
