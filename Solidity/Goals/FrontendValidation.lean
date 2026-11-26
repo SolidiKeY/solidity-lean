@@ -69,7 +69,7 @@ def validators : List Lean.Name :=
     ``Solidity.Frontend.abiEnumPositions, ``Solidity.Frontend.staticCompilerLength?,
     ``Solidity.Frontend.staticCompilerBytes?, ``Solidity.Frontend.isBaseMember,
     ``Solidity.Frontend.isExternalMember, ``Solidity.Frontend.isValueCallee,
-    ``Solidity.Frontend.isSuperMember, ``Solidity.Frontend.withPush,
+    ``Solidity.Frontend.isSuperMember,
     ``Solidity.Frontend.pureExpr, ``Solidity.Frontend.condCalleeOk,
     ``Solidity.Frontend.condCallee?, ``Solidity.Frontend.validHexBytes,
     ``Solidity.Frontend.byteLiteralText, ``Solidity.Frontend.abiUnparen?,
