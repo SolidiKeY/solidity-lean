@@ -1,5 +1,6 @@
 'use strict';
 const {resolve} = require('node:path');
+const {fileURLToPath} = require('node:url');
 const {createHash} = require('node:crypto');
 const {validateCounterexample, escapedText} = require('../counterexample.cjs');
 const {tokens} = require('../solidity-text.cjs');
@@ -82,9 +83,9 @@ function baseReferences(doc, symbol) {
 // This is location metadata only: values always come from initialStorage.
 async function storageDeclarations(doc, row, symbols, service, openDocument, isCurrent = () => true) {
   const own = symbols.find(s => s.name === row.contract);
-  const direct = new Map((own?.children || []).filter(s => s.kind === 13).map(s => [s.name,s]));
-  if (!own) return {roots:direct, current:isCurrent, dependencies:new Set([doc.uri.toString()])};
+  const direct = new Map((own?.children || []).filter(s => s.kind === 13).map(s => [s.name,{...s,document:doc}]));
   const documents = new Map([[doc.uri.toString(), {doc, symbols, version:doc.version, text:doc.getText()}]]), graph = new Map(); let stale = false;
+  if (!own) return {roots:direct, current:isCurrent, dependencies:new Set(documents.keys()), documents};
   const current = () => !stale && isCurrent() && [...documents.values()].every(s => !s.doc.isClosed && s.doc.version === s.version && s.doc.getText() === s.text);
   async function visit(record, symbol) {
     if (!current()) throw Object.assign(new Error('Counterexample declaration lookup became stale'),{code:'STALE_DECLARATIONS'});
@@ -126,24 +127,27 @@ async function storageDeclarations(doc, row, symbols, service, openDocument, isC
     visiting.delete(entry); cache.set(entry,order); return order;
   }
   const lineage = linearize(root);
-  if (!lineage || !current()) return {roots:direct,current,dependencies:new Set(documents.keys())};
+  if (!lineage || !current()) return {roots:direct,current,dependencies:new Set(documents.keys()),documents};
   const fields = [...lineage].reverse().flatMap(owner => (owner.symbol.children || []).filter(s => s.kind === 13).map(symbol => ({owner,symbol}))), taken = new Set(fields.map(f => f.symbol.name)), roots = new Map();
   fields.forEach(({owner,symbol},i) => {
     let name = symbol.name;
     if (fields.slice(i+1).some(f => f.symbol.name === name)) {
       name = `${name}_${owner.symbol.name}`; while (taken.has(name)) name += '_'; taken.add(name);
     }
-    if (owner.record.doc.uri.toString() === doc.uri.toString()) roots.set(name,symbol);
+    roots.set(name,{...symbol,document:owner.record.doc});
   });
-  return {roots,current,dependencies:new Set(documents.keys())};
+  return {roots,current,dependencies:new Set(documents.keys()),documents};
 }
-function declarationValues(doc, row, symbols, storage) {
-  const foreign = row.diagnosticSource && (!doc.uri?.fsPath || resolve(row.diagnosticSource) !== resolve(doc.uri.fsPath));
+function declarationValues(doc, row, symbols, storage, documents) {
+  const sourcePath = document => document.uri?.fsPath || (document.uri?.toString().startsWith('file:') ? fileURLToPath(document.uri.toString()) : undefined);
+  const context = row.diagnosticSource ? [...(documents?.values() || [{doc,symbols}])].find(r => sourcePath(r.doc) && resolve(sourcePath(r.doc)) === resolve(row.diagnosticSource)) : {doc,symbols};
+  const parameterDoc = context?.doc || doc;
   const contract = symbols.find(s => s.name === row.contract);
   if (!contract) return [];
-  const functions = (foreign ? [] : symbols).flatMap(s => s.children || []).filter(s => s.name === row.function && (!row.range || samePoint(s.range.start, row.range.start)));
-  const fn = functions.length === 1 ? functions[0] : undefined, text = doc.getText();
-  const offset = p => doc.offsetAt(p);
+  const functions = (context?.symbols || []).flatMap(s => s.children || []).filter(s => s.name === row.function && (!row.range || samePoint(s.range.start, row.range.start)));
+  const fn = functions.length === 1 ? functions[0] : undefined, text = parameterDoc.getText();
+  const offset = p => parameterDoc.offsetAt(p);
+  const ownership = document => document === doc || document.uri?.toString() === doc.uri?.toString() ? {} : {document};
   const ts = tokens(fn ? text.slice(offset(fn.range.start), offset(fn.range.end)) : '').filter(t => t.kind !== 'comment');
   const open = ts.findIndex(t => t.text === '('); let depth = 0, index = 0; const params = [[]];
   for (const t of ts.slice(open + 1)) {
@@ -156,12 +160,12 @@ function declarationValues(doc, row, symbols, storage) {
   for (const a of row.counterexample.arguments) {
     if (!fn || !Number.isSafeInteger(a.paramIndex)) continue;
     const param = params[a.paramIndex], last = param?.at(-1);
-    if ((a.sourceName === undefined || a.sourceName === '') && param?.length) result.push({position:doc.positionAt(offset(fn.range.start) + param[0].start), name:a.modelName, value:String(a.value)});
-    else if (last?.kind === 'word' && last.text === a.sourceName) result.push({position:doc.positionAt(offset(fn.range.start) + last.start), name:a.sourceName, value:String(a.value)});
+    if ((a.sourceName === undefined || a.sourceName === '') && param?.length) result.push({...ownership(parameterDoc), position:parameterDoc.positionAt(offset(fn.range.start) + param[0].start), name:a.modelName, value:String(a.value)});
+    else if (last?.kind === 'word' && last.text === a.sourceName) result.push({...ownership(parameterDoc), position:parameterDoc.positionAt(offset(fn.range.start) + last.start), name:a.sourceName, value:String(a.value)});
   }
   for (const [name,value] of storageEntries(row.counterexample.initialStorage)) {
     const matches = storage ? [storage.get(name)].filter(Boolean) : (contract.children || []).filter(s => s.name === name && s.kind === 13);
-    if (matches.length === 1) result.push({position:matches[0].selectionRange.start, name, value});
+    if (matches.length === 1) result.push({...ownership(matches[0].document || doc), position:matches[0].selectionRange.start, name, value});
   }
   return result;
 }
@@ -172,6 +176,13 @@ function activate(context, {vscode, service, output}) {
     getTreeItem(element) {const item = new vscode.TreeItem(element.label, element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None); item.description = element.value; return item;}};
   const view = vscode.window.createTreeView('solidityLeanCounterexample', {treeDataProvider:provider});
   function clear() {generation++; selected = undefined; changed.fire(); for (const editor of vscode.window.visibleTextEditors) editor.setDecorations(decoration, []);}
+  function render() {
+    if (selected?.frames && !selected.current()) {snapshots.delete(selected.uri); clear(); return;}
+    for (const editor of vscode.window.visibleTextEditors) {
+      const frame = selected?.frames?.get(editor.document.uri.toString());
+      editor.setDecorations(decoration, frame?.doc === editor.document ? frame.decorations : []);
+    }
+  }
   function receive(params) {
     const doc = vscode.workspace.textDocuments.find(d => d.uri.toString() === params.uri);
     if (!doc || doc.isClosed || doc.version !== params.version || hash(doc.getText()) !== params.sourceHash) return;
@@ -186,7 +197,9 @@ function activate(context, {vscode, service, output}) {
     } catch (error) {output.appendLine(`Counterexample: ${error.message}`);}
   }
   async function show() {
-    const editor = vscode.window.activeTextEditor, doc = editor?.document;
+    const activeEditor = vscode.window.activeTextEditor;
+    const fromDependency = selected?.ready && activeEditor && selected.uri !== activeEditor.document.uri.toString() && selected.dependencies.has(activeEditor.document.uri.toString()) && !snapshots.has(activeEditor.document.uri.toString());
+    const editor = fromDependency ? selected.editor : activeEditor, doc = editor?.document;
     if (!doc) return;
     const initialGeneration = generation;
     const uri = doc.uri.toString(), snapshot = snapshots.get(uri);
@@ -194,12 +207,12 @@ function activate(context, {vscode, service, output}) {
     const position = editor.selection.active;
     const before = (a,b) => a.line < b.line || a.line === b.line && a.character <= b.character;
     const containing = snapshot.rows.filter(r => r.range && before(r.range.start,position) && before(position,r.range.end));
-    let row = containing.length === 1 ? containing[0] : undefined;
+    let row = fromDependency ? selected.row : containing.length === 1 ? containing[0] : undefined;
     if (!row && snapshot.rows.length === 1) row = snapshot.rows[0];
     if (!row && snapshot.rows.length > 1) row = (await vscode.window.showQuickPick(snapshot.rows.map(r => ({label:`${r.contract}.${r.signature || r.function}`, row:r}))))?.row;
-    if (!row || stopped || generation !== initialGeneration || vscode.window.activeTextEditor !== editor || snapshots.get(uri) !== snapshot || doc.version !== snapshot.version) return;
-    const toggle = selected?.row === row; enabled = toggle ? !enabled : true;
-    clear(); selected = {uri, row, tree:modelTree(row)}; view.title = `${row.contract}.${row.signature || row.function}`; changed.fire();
+    if (!row || stopped || generation !== initialGeneration || vscode.window.activeTextEditor !== activeEditor || snapshots.get(uri) !== snapshot || doc.version !== snapshot.version) return;
+    const toggle = selected?.row === row, ready = toggle && selected.ready; enabled = toggle ? !enabled : true;
+    clear(); selected = {uri, row, editor, ready, dependencies:new Set([uri,...(snapshot.dependencies || [])]), tree:modelTree(row)}; view.title = `${row.contract}.${row.signature || row.function}`; changed.fire();
     const epoch = generation;
     await vscode.commands.executeCommand('solidityLeanCounterexample.focus');
     if (!enabled || stopped || epoch !== generation) return;
@@ -210,23 +223,32 @@ function activate(context, {vscode, service, output}) {
       if (stopped || epoch !== generation) return;
       snapshot.dependencies = new Set([...(snapshot.dependencies || []), ...storage.dependencies]);
       if (!storage.current()) {snapshots.delete(uri); clear(); return;}
-      const values = declarationValues(doc, row, symbols,storage.roots), lines = new Map();
-      for (const value of values) {const list = lines.get(value.position.line) || []; list.push(`${value.name} = ${escapedText(value.value)}`); lines.set(value.position.line,list);}
-      const decorations = [...lines].map(([line,values]) => ({range:doc.lineAt(line).range, renderOptions:{after:{contentText:values.join('; ')}}}));
-      for (const target of vscode.window.visibleTextEditors) if (target.document === doc) target.setDecorations(decoration, decorations);
+      selected.dependencies = snapshot.dependencies;
+      const values = declarationValues(doc, row, symbols,storage.roots,storage.documents), frames = new Map();
+      for (const value of values) {
+        const target = value.document || doc, key = target.uri.toString(), frame = frames.get(key) || {doc:target,lines:new Map()};
+        const list = frame.lines.get(value.position.line) || []; list.push(`${value.name} = ${escapedText(value.value)}`); frame.lines.set(value.position.line,list); frames.set(key,frame);
+      }
+      for (const frame of frames.values()) frame.decorations = [...frame.lines].map(([line,values]) => ({range:frame.doc.lineAt(line).range,renderOptions:{after:{contentText:values.join('; ')}}}));
+      selected.frames = frames; selected.current = storage.current; selected.ready = true; render();
     } catch (error) {if (epoch === generation) {if (['STALE_DECLARATIONS','CANCELLED',-32800,-32801].includes(error.code)) {snapshots.delete(uri); clear();} output.appendLine(`Counterexample declarations: ${error.message}`);}}
   }
   service.on('report', receive);
   const invalidate = params => {
     for (const [uri,snapshot] of snapshots) if (uri === params.uri || snapshot.dependencies?.has(params.uri)) {snapshots.delete(uri); if (selected?.uri === uri) clear();}
   };
+  // A reply carries a source version, but no imported-buffer version vector.
+  // Any file-buffer edit/close therefore invalidates cached project models,
+  // including dependencies not yet visited by a declaration lookup.
+  const changedDocument = doc => {if (/^(file:|untitled:)/.test(doc.uri.toString())) failed(); else invalidate({uri:doc.uri.toString()});};
   service.on('invalidated', invalidate);
   const failed = () => {snapshots.clear(); clear();}; service.on('serverError', failed);
   context.subscriptions.push(changed, decoration, view,
     vscode.commands.registerCommand('solidityLean.showCounterexample', show),
-    vscode.workspace.onDidChangeTextDocument(e => invalidate({uri:e.document.uri.toString()})),
-    vscode.workspace.onDidCloseTextDocument(doc => invalidate({uri:doc.uri.toString()})),
-    vscode.window.onDidChangeActiveTextEditor(() => clear()),
+    vscode.workspace.onDidChangeTextDocument(e => changedDocument(e.document)),
+    vscode.workspace.onDidCloseTextDocument(changedDocument),
+    vscode.window.onDidChangeActiveTextEditor(editor => {if (!selected?.ready || editor && !selected.dependencies.has(editor.document.uri.toString())) clear();}),
+    vscode.window.onDidChangeVisibleTextEditors(render),
     {dispose() {stopped = true; clear(); snapshots.clear(); service.removeListener('report',receive); service.removeListener('invalidated',invalidate); service.removeListener('serverError',failed);}});
 }
 module.exports = {activate, split, valueNode, storageEntries, modelTree, declarationValues, baseReferences, storageDeclarations};

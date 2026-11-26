@@ -18,7 +18,7 @@ function harness(text = 'contract C {\nfunction f(uint x) public {\n}\n}') {
   const listen = name => fn => {events[name]=fn;return {dispose(){delete events[name];}};};
   const vscode = {EventEmitter:class {event=()=>({dispose(){}});fire(){}dispose(){}},ThemeColor:class{},TreeItem:class{constructor(label){this.label=label;}},TreeItemCollapsibleState:{Collapsed:1,None:0},
     workspace:{textDocuments:[doc],onDidChangeTextDocument:listen('edit'),onDidCloseTextDocument:listen('close')},
-    window:{activeTextEditor:editor,visibleTextEditors:[editor],createTextEditorDecorationType:()=>({dispose(){}}),createTreeView:(_,opts)=>{provider=opts.treeDataProvider;return {dispose(){}};},onDidChangeActiveTextEditor:listen('active'),showQuickPick:async items=>items[pick??0]},
+    window:{activeTextEditor:editor,visibleTextEditors:[editor],createTextEditorDecorationType:()=>({dispose(){}}),createTreeView:(_,opts)=>{provider=opts.treeDataProvider;return {dispose(){}};},onDidChangeActiveTextEditor:listen('active'),onDidChangeVisibleTextEditors:listen('visible'),showQuickPick:async items=>items[pick??0]},
     commands:{registerCommand:(name,fn)=>{handlers[name]=fn;return {dispose(){}};},executeCommand:async()=>{}}};
   service.request=async()=>[];
   activate({subscriptions},{vscode,service,output:{appendLine(){}}});
@@ -131,7 +131,7 @@ async function compilerDocuments(sources, main, run) {
     const compiled=compileFixture({args:['--source',path.join(directory,main),'--out',path.join(directory,'out.json'),'--no-wrapper'],sourceBytes:Buffer.from(sources[main]),analysisOnly:true,quiet:true});
     const files=compiled.project?.files || Object.fromEntries(Object.keys(compiled.rawAsts).map(name=>[name,{path:path.join(directory,name),text:sources[name]}])),documents=new Map(),indices=new Map();
     for (const [name,ast] of Object.entries(compiled.rawAsts)) {
-      const file=files[name],text=file.text,uri=pathToFileURL(file.path),doc={uri,version:1,isClosed:false,getText:()=>text,offsetAt:p=>lang.offset(text,p),positionAt:n=>lang.position(text,n)};
+      const file=files[name],text=file.text,uri=pathToFileURL(file.path),doc={uri,version:1,isClosed:false,getText:()=>text,offsetAt:p=>lang.offset(text,p),positionAt:n=>lang.position(text,n),lineAt:line=>({range:{start:point(line),end:point(line,text.split('\n')[line].replace(/\r$/,'').length)}})};
       documents.set(uri.toString(),doc);indices.set(uri.toString(),lang.index(text,ast,{asts:compiled.rawAsts,files,uri:uri.toString()}));
     }
     const doc=documents.get(pathToFileURL(path.join(directory,main)).toString()),requests=[];
@@ -159,12 +159,13 @@ test('compiler-owned diamond and private root collisions follow importer orderin
     assert.equal(values[0].position.character,text.indexOf('x;'));assert.equal(values[1].position.character,text.indexOf('x_A;'));assert.equal(values[2].position.character,text.indexOf('x;',text.indexOf('contract L')));assert.equal(values[3].position.character,text.indexOf('x;',text.indexOf('contract R')));
   });
 });
-test('compiler-owned imported aliases affect root renaming but foreign fields are not decorated',async()=>{
+test('compiler-owned imported aliases retain declaration ownership for all returned roots',async()=>{
   const sources={'Base.sol':'pragma solidity ^0.8.34; contract Imported { uint private x; uint z; }','Main.sol':'pragma solidity ^0.8.34; import {Imported as Alias} from "./Base.sol"; contract A is Alias { uint private x; uint a; } contract C is A { function f() public {} }'};
   await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,requests,documents})=>{
     const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x_Imported = 9; z = 12; x = 10; a = 11'})});
     const storage=await storageDeclarations(doc,r,symbols,service,open),values=declarationValues(doc,r,symbols,storage.roots);
-    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x','10'],['a','11']]);
+    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x_Imported','9'],['z','12'],['x','10'],['a','11']]);
+    assert.ok(values[0].document.uri.toString().endsWith('/Base.sol'));assert.ok(values[1].document.uri.toString().endsWith('/Base.sol'));assert.equal(values[2].document,undefined);
     assert.ok(requests.some(r=>r.method==='textDocument/documentSymbol'&&r.uri.endsWith('/Base.sol')));
     [...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol')).version++;assert.equal(storage.current(),false);
   });
@@ -226,4 +227,43 @@ test('returned parameter indices locate inherited arguments even without source 
     assert.deepEqual(values.map(v=>[v.name,v.value]),[['p0','7'],['x','9'],['y','10']]);
     assert.equal(values[0].position.character,text.indexOf('uint arg'));
   });
+});
+
+test('imported storage decorates both visible owners and toggles from either editor',async()=>{
+  const sources={'Base.sol':'pragma solidity ^0.8.34; contract B { uint x; }','Main.sol':'pragma solidity ^0.8.34; import "./Base.sol"; contract C is B { uint y; function f() public {} }'};
+  await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,documents})=>{
+    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.service.request=service.request;h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=open;
+    const base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol')),baseCalls=[],baseEditor={document:base,selection:{active:point(0)},setDecorations:(_,values)=>baseCalls.push(values)};
+    h.vscode.window.visibleTextEditors=[h.editor,baseEditor];
+    const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f');h.report([row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9; y = 17'})})]);
+    await h.show();assert.equal(h.calls.at(-1)[0].renderOptions.after.contentText,'y = 17');assert.equal(baseCalls.at(-1)[0].renderOptions.after.contentText,'x = 9');assert.deepEqual(baseCalls.at(-1)[0].range,base.lineAt(0).range);
+    h.vscode.window.activeTextEditor=baseEditor;h.events.active(baseEditor);assert.equal(h.provider.getChildren().length,5);
+    await h.show();assert.deepEqual(h.calls.at(-1),[]);assert.deepEqual(baseCalls.at(-1),[]);
+    await h.show();assert.equal(h.calls.at(-1)[0].renderOptions.after.contentText,'y = 17');assert.equal(baseCalls.at(-1)[0].renderOptions.after.contentText,'x = 9');
+    base.version++;h.events.edit({document:base});assert.deepEqual(h.calls.at(-1),[]);assert.deepEqual(baseCalls.at(-1),[]);assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
+  });
+});
+test('imported inherited function parameters decorate their owning buffer too',async()=>{
+  const sources={'Base.sol':'pragma solidity ^0.8.34; contract B { uint x; function f(uint arg) public {} }','Main.sol':'pragma solidity ^0.8.34; import "./Base.sol"; contract C is B { uint y; }'};
+  await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,documents})=>{
+    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.service.request=service.request;h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=open;
+    const base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol')),baseSymbols=await service.request('textDocument/documentSymbol',base,{}),fn=baseSymbols.find(s=>s.name==='B').children.find(s=>s.name==='f'),baseCalls=[];
+    h.vscode.window.visibleTextEditors=[h.editor,{document:base,setDecorations:(_,values)=>baseCalls.push(values)}];
+    h.report([row('f',{range:fn.range,diagnosticSource:require('node:url').fileURLToPath(base.uri),counterexample:evidence({arguments:[{modelName:'p0',paramIndex:0,sourceName:'arg',type:'uint',value:'7'}],initialStorage:'x = 9; y = 17'})})]);
+    await h.show();assert.equal(h.calls.at(-1)[0].renderOptions.after.contentText,'y = 17');assert.equal(baseCalls.at(-1)[0].renderOptions.after.contentText,'arg = 7; x = 9');h.dispose();
+  });
+});
+test('newly visible imported editors receive current values and cannot revive invalidated ones',async()=>{
+  const sources={'Base.sol':'pragma solidity ^0.8.34; contract B { uint x; }','Main.sol':'pragma solidity ^0.8.34; import "./Base.sol"; contract C is B { uint y; function f() public {} }'};
+  await compilerDocuments(sources,'Main.sol',async({doc,symbols,service,open,documents})=>{
+    const h=harness(sources['Main.sol']);h.doc.uri=doc.uri;h.service.request=service.request;h.vscode.Uri={parse:s=>s};h.vscode.workspace.openTextDocument=open;
+    const base=[...documents.values()].find(d=>d.uri.toString().endsWith('/Base.sol')),baseCalls=[],baseEditor={document:base,setDecorations:(_,values)=>baseCalls.push(values)},fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f');
+    h.report([row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x = 9; y = 17'})})]);await h.show();assert.equal(baseCalls.length,0);
+    h.vscode.window.visibleTextEditors.push(baseEditor);h.events.visible();assert.equal(baseCalls.at(-1)[0].renderOptions.after.contentText,'x = 9');
+    h.vscode.window.visibleTextEditors=[h.editor];h.doc.version++;h.events.edit({document:h.doc});
+    h.vscode.window.visibleTextEditors.push(baseEditor);h.events.visible();assert.deepEqual(baseCalls.at(-1),[]);assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
+  });
+});
+test('file-buffer edits before dependency discovery invalidate cached project models',async()=>{
+  const h=harness();h.report([row()]);h.events.edit({document:{uri:{toString:()=> 'file:///Base.sol'}}});await h.show();assert.deepEqual(h.provider.getChildren(),[]);h.dispose();
 });
