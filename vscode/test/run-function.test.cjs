@@ -82,3 +82,5 @@ test('native adapter registers accepted ownership and reuses existing runner API
   const result=await server.runBackend({project:{mainSource:'C.sol',sources:{'C.sol':{content:'contract C {}'}},remappings:[]},function:{contract:'C',signature:'f(uint8)',parameters:[{type:'uint8'}]},args:['42']},{service,signal:new AbortController().signal});
   assert.equal(result.status,'ok');assert.deepEqual(ownership,['spawn','close']);assert.deepEqual(fs.readdirSync(directory),['scripts']);
 });
+
+test('payable address retains numeric ABI validation',()=>{assert.equal(server.argument('address payable','42'),'42');assert.equal(server.supported('address payable'),true);});

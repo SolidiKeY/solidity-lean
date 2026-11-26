@@ -17,6 +17,7 @@ const fail = (message, code = -32602) => Object.assign(new Error(message), {code
 // A replacement injected runBackend(request,{signal}) must preserve this shape.
 // This is concrete typed-model execution, not kernel proof or bytecode replay.
 function argument(type, text) {
+  if(type==='address payable')type='address';
   const array = /^(.*)\[(\d*)\]$/.exec(type);
   if(array){
     const values = typeof text === 'string' ? (()=>{try{return JSON.parse(text);}catch{throw fail('Expected a JSON array');}})() : text;
@@ -49,6 +50,7 @@ function argument(type, text) {
   throw fail(`Unsupported ABI input type ${type}`);
 }
 function supported(type) {
+  if(type==='address payable')type='address';
   const array=/^(.*)\[\d*\]$/.exec(type);
   return array ? supported(array[1]) : /^(bool|string|bytes(?:[1-9]|[12]\d|3[0-2])?|address|u?int(?:\d+)?)$/.test(type);
 }
@@ -76,7 +78,7 @@ function outcome(report) {
 // Reuse the existing runSolidityTests action=run entry point in a bounded child.
 // Mirror the existing project snapshot so dirty buffers and imports stay exact.
 async function runBackend(request, {signal, service}) {
-  if(request.args.some((_,i)=>! /^(bool|u?int\d*|address)$/.test(request.function.parameters[i].type)))throw fail('Solidity.Frontend.Cli/runRequest currently accepts only bool and integer-valued arguments; this ABI type needs a backend extension');
+  if(request.args.some((_,i)=>! /^(bool|u?int\d*|address(?: payable)?)$/.test(request.function.parameters[i].type)))throw fail('Solidity.Frontend.Cli/runRequest currently accepts only bool and integer-valued arguments; this ABI type needs a backend extension');
   const directory = fs.mkdtempSync(path.join(service.directory,'run-'));
   let child, closed, timer, registration;
   const cancel = () => {if(child)terminateTree(child);};

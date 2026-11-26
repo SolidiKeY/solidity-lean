@@ -33,9 +33,10 @@ function activate(context,services) {
         current();if(value===undefined)return;
         argument(param.type,value);args.push(value);
       }
+      const timeoutMs=vscode.workspace.getConfiguration?.('solidityLean',doc.uri).get('timeoutMs',600000) || 600000;
       const result=await vscode.window.withProgress({location:vscode.ProgressLocation.Notification,title:`Running ${fn.signature}`,cancellable:true},async(_progress,token)=>{
         const cancellation=token.onCancellationRequested(()=>abort.abort());
-        try{if(token.isCancellationRequested)abort.abort();current();return await client.request('solidityLean/runFunction',doc,{sourceHash:listing.sourceHash,functionId:fn.id,args:args.map((a,i)=>argument(fn.parameters[i].type,a))},{signal:abort.signal});}
+        try{if(token.isCancellationRequested)abort.abort();current();return await client.request('solidityLean/runFunction',doc,{sourceHash:listing.sourceHash,functionId:fn.id,args:args.map((a,i)=>argument(fn.parameters[i].type,a))},{signal:abort.signal,timeoutMs:timeoutMs+5000});}
         finally{cancellation.dispose();}
       });
       current();defaults.set(key,args);output.appendLine(render(fn,result));output.show(true);return result;
