@@ -159,6 +159,18 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Governance/Timelock.lean` | Bound Ether-operation timelock: delay, cancellation and permanent completion; all four function specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Governance/EnglishAuction.lean` | Solidity SimpleAuction: constructor proved; bid, refund and final payout obligations retained as unknown, with snapshot/payment closer gaps documented in the module. |
 | `Examples/Benchmark/Governance/Multisig.lean` | Two-owner Ether multisig: constructor, revocation and threshold execution proved; fresh submission and no-double-confirmation specifications retained as unknown with snapshot/Boolean closer gaps. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/Algorithms/BinarySearch.lean` | Sorted-array half-open binary search; hit or absence specification. |
+| `Examples/Benchmark/Algorithms/FastExponentiation.lean` | Repeated squaring; exact natural power target retained pending specification lowering. |
+| `Examples/Benchmark/Algorithms/Fibonacci.lean` | Two-accumulator Fibonacci; exact recurrence target retained pending specification lowering. |
+| `Examples/Benchmark/Algorithms/FindIndex.lean` | First negative element; predicate-search bounds and minimality. |
+| `Examples/Benchmark/Algorithms/Gcd.lean` | Euclid remainder loop; zero case and exact common-divisor characterization. |
+| `Examples/Benchmark/Algorithms/InsertionSort.lean` | Small memory-array insertion sort; sortedness clauses and full permutation target. |
+| `Examples/Benchmark/Algorithms/LinearSearch.lean` | First matching index; successful, absent, and minimality cases. |
+| `Examples/Benchmark/Algorithms/Maximum.lean` | Nonempty-array maximum; upper bound and attained-element specification. |
+| `Examples/Benchmark/Algorithms/Reverse.lean` | In-place storage-array reversal; entry-state element and length specification. |
+| `Examples/Benchmark/Algorithms/Sum.lean` | Array prefix sum; exact fold target retained pending specification lowering. |
 | `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `scripts/trust/executable-goal-replay.lean` in Lean CI. |
 | `Examples/ExecutableRequestData.lean` | Shared synthetic request and nondefault raw contract data for quotation and retained-candidate examples; not source admission. |
 | `Examples/DecisionResidue.lean` | M7-next: residue members (halting `||` APF guard valid and false; VA1 mapping-field and normalization-budget labels; a leaf every hash try refuses), witness controls (in-target non-residue feature fixtures of earlier milestones answered through `DecisionTheorem'`; the answering route is not pinned) and the negative control (a valid and a false residue leaf, neither claimed). |
