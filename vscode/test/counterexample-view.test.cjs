@@ -10,7 +10,10 @@ const row = (name='f', overrides={}) => ({source:'C.sol',contract:'C',function:n
 function harness() {
   const service = new EventEmitter(), subscriptions = [], handlers = {}, calls = [], events = {};
   const text = 'contract C {\nfunction f(uint x) public {\n}\n}';
-  const doc = {uri:{toString:()=> 'file:///C.sol'},version:1,getText:()=>text,isClosed:false};
+  const doc = {uri:{toString:()=> 'file:///C.sol'},version:1,getText:()=>text,isClosed:false,
+    offsetAt:p=>text.split('\n').slice(0,p.line).reduce((n,line)=>n+line.length+1,0)+p.character,
+    positionAt:n=>{const lines=text.slice(0,n).split('\n');return point(lines.length-1,lines.at(-1).length);},
+    lineAt:line=>({range:{start:point(line),end:point(line,text.split('\n')[line].length)}})};
   const editor = {document:doc,selection:{active:point(2)},setDecorations:(_,v)=>calls.push(v)};
   let provider, pick;
   const listen = name => fn => {events[name]=fn;return {dispose(){delete events[name];}};};
@@ -92,4 +95,17 @@ test('unnamed parameters use their returned parameter index',()=>{
   const r=row('f',{range:{start:point(0),end:point(0,text.length)},counterexample:evidence({arguments:[{modelName:'p0',paramIndex:0,sourceName:'',type:'uint',value:'12'}],initialStorage:''})});
   const values=declarationValues(doc,r,[{name:'C',children:[{name:'f',range:r.range}]}]);
   assert.deepEqual(values,[{position:point(0,text.indexOf('uint')),name:'p0',value:'12'}]);
+});
+
+test('command renders the returned value after its parameter line and toggles it off',async()=>{
+  const h=harness();h.service.request=async()=>[{name:'C',children:[{name:'f',range:range(1,3)}]}];
+  h.report([row('f',{counterexample:evidence({arguments:[{modelName:'p0',paramIndex:0,sourceName:'x',type:'uint',value:'17'}],initialStorage:''})})]);
+  await h.show();assert.deepEqual(h.calls.at(-1),[{range:h.doc.lineAt(1).range,renderOptions:{after:{contentText:'x = 17'}}}]);
+  await h.show();assert.deepEqual(h.calls.at(-1),[]);h.dispose();
+});
+test('edit while focusing the tree prevents an obsolete declaration request',async()=>{
+  const h=harness();let focus,requests=0;
+  h.vscode.commands.executeCommand=()=>new Promise(resolve=>{focus=resolve;});h.service.request=async()=>{requests++;return [];};
+  h.report([row()]);const pending=h.show();h.doc.version++;h.events.edit({document:h.doc});focus();await pending;
+  assert.equal(requests,0);assert.deepEqual(h.provider.getChildren(),[]);assert.deepEqual(h.calls.at(-1),[]);h.dispose();
 });
