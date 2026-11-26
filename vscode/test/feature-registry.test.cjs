@@ -27,13 +27,16 @@ test('editor loads in sorted order, isolates failures, supplies fallbacks and di
     'ignored.js': `throw Error('must not load')`,
     'index.cjs': `throw Error('must not load')`
   });
-  const registry = await editor.activate({subscriptions:[]}, {vscode,output:{appendLine:x=>messages.push(x)},events}, dir);
+  const registry = editor.create({subscriptions:[]}, {vscode,output:{appendLine:x=>messages.push(x)},events}, dir);
+  commands.get('solidityLean.runFunction')();
+  assert.match(messages.pop(), /not available in this build/);
+  await registry.start({name:'ready'});
   assert.deepEqual(events.slice(0,4), ['a','b','dispose temporary','z']);
   assert.match(messages[0], /b\.cjs.*broken/);
   assert.equal(commands.get('solidityLean.runFunction')(), 42);
   commands.get('solidityLean.showObligation')();
   assert.match(messages.at(-1), /not available in this build/);
-  registry.dispose(); registry.dispose();
+  await registry.dispose(); await registry.dispose();
   assert.equal(commands.size, 0);
   assert.equal(events.filter(x=>x==='dispose solidityLean.runFunction').length,1);
   assert.ok(events.indexOf('dispose z') < events.indexOf('dispose solidityLean.runFunction'));

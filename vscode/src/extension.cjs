@@ -360,7 +360,10 @@ function activate(context) {
   const service=new (require('./lsp-client.cjs').LanguageServers)(configuration);
   const api=createExtension(vscode,context,args=>service.verify(args),service);
   runtime=api;
-  require('./features/index.cjs').activate(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')}).then(registry=>{if(api.disposed)registry.dispose();else context.subscriptions.push(registry);},error=>{if(!api.disposed)api.output.appendLine('Feature registry failed: '+error.message);});
+  const featureRegistry=require('./features/index.cjs').create(context,{vscode,client:service,service,output:api.output,backend:require('./backend.cjs'),counterexample:require('./counterexample.cjs'),report:require('./report.cjs')});
+  const startFeatures=identity=>{if(!api.disposed){service.removeListener('identity',startFeatures);featureRegistry.start(identity);}};
+  service.on('identity',startFeatures);
+  context.subscriptions.push({dispose(){service.removeListener('identity',startFeatures);return featureRegistry.dispose();}});
   const lensProvider=vscode.languages.registerCodeLensProvider?.(require('./editor-document.cjs').selector, {
     async provideCodeLenses(doc,token) {
       if (!vscode.workspace.getConfiguration('solidityLean',doc.uri).get('codeLens',true) || token?.isCancellationRequested) return [];
