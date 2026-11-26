@@ -138,6 +138,9 @@ class SlowExamples(unittest.TestCase):
             slow = root / "Solidity/Examples/Tactics/OpenLoops.lean"
             core.parent.mkdir(parents=True)
             slow.parent.mkdir(parents=True)
+            control = core.parent / "DeferredControls.lean"
+            control.write_text("import Solidity.Syntax.Core\n")
+            (root / "SolidityControls.lean").write_text("import Solidity.Syntax.DeferredControls\n")
             core.write_text("-- base\n")
             slow.write_text("import Solidity.Syntax.Core\n")
             (root / "SoliditySlowExamples.lean").write_text("import Solidity.Examples.Tactics.OpenLoops\n")
@@ -162,6 +165,12 @@ class SlowExamples(unittest.TestCase):
             self.assertIn("Solidity.Syntax.Core", commands)
             self.assertNotIn("Solidity.Examples.Tactics.OpenLoops", commands)
             self.assertNotIn("SoliditySlowExamples", commands)
+            self.assertNotIn("Solidity.Syntax.DeferredControls", commands)
+            calls.write_text("")
+            result = subprocess.run(["bash", str(gate), "touched"], cwd=root, env=env,
+                                    text=True, capture_output=True)
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertIn("Solidity.Syntax.DeferredControls", calls.read_text())
             result = subprocess.run(["bash", str(gate), "per-file", "Solidity/Syntax/Core.lean"],
                                     cwd=root, env=env, text=True, capture_output=True)
             self.assertEqual(0, result.returncode, result.stdout + result.stderr)
