@@ -155,7 +155,7 @@ test('compiler-owned diamond and private root collisions follow importer orderin
   await compilerDocuments({'Main.sol':text},'Main.sol',async({doc,symbols,service,open})=>{
     const fn=symbols.find(s=>s.name==='C').children.find(s=>s.name==='f'),r=row('f',{range:fn.range,counterexample:evidence({arguments:[],initialStorage:'x_A_ = 9; x_A = 10; x_L = 11; x = 14; r = 12; c = 13'})});
     const storage=await storageDeclarations(doc,r,symbols,service,open),values=declarationValues(doc,r,symbols,storage.roots);
-    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x_A_','9'],['x_A','10'],['x_L','11'],['x','14'],['r','12'],['c','13]]);
+    assert.deepEqual(values.map(v=>[v.name,v.value]),[['x_A_','9'],['x_A','10'],['x_L','11'],['x','14'],['r','12'],['c','13']]);
     assert.equal(values[0].position.character,text.indexOf('x;'));assert.equal(values[1].position.character,text.indexOf('x_A;'));assert.equal(values[2].position.character,text.indexOf('x;',text.indexOf('contract L')));assert.equal(values[3].position.character,text.indexOf('x;',text.indexOf('contract R')));
   });
 });
