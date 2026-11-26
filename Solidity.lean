@@ -3488,6 +3488,7 @@ import Solidity.Hash.CompilerCorrect
 import Solidity.Hash.CompilerCorrect.Prefix
 import Solidity.Hashes
 import Solidity.Interfaces.FrontendExecution
+import Solidity.Interfaces.FrontendValidation
 import Solidity.Keccak
 import Solidity.KeySort
 import Solidity.Language.FeatureInfo
