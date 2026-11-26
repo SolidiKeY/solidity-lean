@@ -34,8 +34,8 @@ function create(context, services, directory = __dirname) {
         } else registration = services.vscode.commands.registerCommand(name, handler, ...rest);
         subscriptions.push(registration); return registration;
       };
-      const commandsApi = new Proxy(services.vscode.commands, {get(target, key) {return key === 'registerCommand' ? registerCommand : target[key];}});
-      const vscode = new Proxy(services.vscode, {get(target, key) {return key === 'commands' ? commandsApi : target[key];}});
+      const commandsApi = new Proxy({}, {get(_target, key) {return key === 'registerCommand' ? registerCommand : services.vscode.commands[key];}});
+      const vscode = new Proxy({}, {get(_target, key) {return key === 'commands' ? commandsApi : services.vscode[key];}});
       try {
         const feature = require(path.join(directory, file));
         if (typeof feature.activate !== 'function') throw new Error('missing activate(context, services)');

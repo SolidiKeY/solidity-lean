@@ -134,3 +134,17 @@ test('registry disposal awaits asynchronous feature cleanup', async t => {
   let done=false;const closing=registry.dispose().then(()=>{done=true;});await new Promise(resolve=>setImmediate(resolve));
   assert.equal(done,false);assert.deepEqual(events,['disposing']);release();await closing;assert.deepEqual(events,['disposing','disposed']);assert.equal(commands.size,0);
 });
+
+test('server still cleans its service if registry initialization rejects', async () => {
+  const {PassThrough}=require('node:stream'),{pathToFileURL}=require('node:url');
+  const {RpcPeer}=require('../src/rpc.cjs'),{startServer}=require('../src/lsp-server.cjs');
+  const original=server.register;server.register=async()=>{throw Error('registry unavailable');};
+  const toServer=new PassThrough(),toClient=new PassThrough(),client=new RpcPeer(toClient,toServer),instance=startServer(toServer,toClient);
+  try {
+    const root=path.resolve(__dirname,'../..');
+    await assert.rejects(client.request('initialize',{rootUri:pathToFileURL(root).href,capabilities:{},initializationOptions:{backendPath:root}}),/registry unavailable/);
+    const directory=instance.service.directory;
+    await assert.rejects(client.request('shutdown'),/registry unavailable/);
+    assert.equal(instance.service.closed,true);assert.equal(fs.existsSync(directory),false);
+  } finally {server.register=original;client.close();toServer.destroy();toClient.destroy();await instance.service?.dispose();}
+});
