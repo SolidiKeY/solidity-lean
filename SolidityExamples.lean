@@ -26,6 +26,9 @@ import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.Syntax
+import Solidity.Examples.Benchmark.Tokens.ERC1155
+import Solidity.Examples.Benchmark.Tokens.ERC20
+import Solidity.Examples.Benchmark.Tokens.ERC721
 import Solidity.Examples.BooleanLinear
 import Solidity.Examples.CallReduction
 import Solidity.Examples.ChainExpand
@@ -287,6 +290,8 @@ import Solidity.Examples.ReadRealization
 import Solidity.Examples.ReadTrace
 import Solidity.Examples.RecursiveCopy
 import Solidity.Examples.RecursiveStorage
+import Solidity.Examples.RedTeam.Trust.ExternBoundary
+import Solidity.Examples.RedTeam.Trust.HeadlineAxioms
 import Solidity.Examples.Roadmap.V16.AbiEntryConsumer
 import Solidity.Examples.Roadmap.V16.CalculusConsumer
 import Solidity.Examples.Roadmap.V16.CallbackConsumers
