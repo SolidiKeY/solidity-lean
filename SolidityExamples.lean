@@ -28,7 +28,10 @@ import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Tokens.ERC1155
 import Solidity.Examples.Benchmark.Tokens.ERC20
+import Solidity.Examples.Benchmark.Tokens.ERC20Burnable
+import Solidity.Examples.Benchmark.Tokens.ERC20Capped
 import Solidity.Examples.Benchmark.Tokens.ERC721
+import Solidity.Examples.Benchmark.Tokens.ERC721Burnable
 import Solidity.Examples.BooleanLinear
 import Solidity.Examples.CallReduction
 import Solidity.Examples.ChainExpand
