@@ -209,7 +209,11 @@ def write_mode(check, force):
             continue
         if have_text is not None and not force and head is not None and any(head.has_dir(prefix) for prefix in (PIN_FRAGMENT_ROOTS if kind == "json" else (d,))):
             hgen = generate(head, c, d, kind, [])
-            if kind == "md": extra = direct_md(unmark(have_text, d), unmark(want, d), unmark(hgen, d))
+            if kind == "md":
+                # stale output: lines the fragments produced when c was last written are not direct edits
+                for rev in git("log", "-n", "3", "--format=%H", "HEAD", "--", c, check=False).decode().split():
+                    hgen += generate(Tree(rev), c, d, kind, [])
+                extra = direct_md(unmark(have_text, d), unmark(want, d), unmark(hgen, d))
             else:
                 try: extra = direct_json(unique_json(have_text), unique_json(want), unique_json(hgen))
                 except (ValueError, AttributeError): extra = ["(the file is not a JSON object)"]

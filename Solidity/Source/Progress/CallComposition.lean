@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.ReadyCatalogue
 
-/-! Finite composition of certified ordinary calls inside intrinsic expressions
-and exact argument lists. Callee admission is derived separately from actual
-elaboration; no recursive memory-call body graph is introduced. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

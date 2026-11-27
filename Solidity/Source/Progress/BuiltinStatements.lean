@@ -1,13 +1,9 @@
 import Solidity.Source.Progress.BuiltinAdmission
 
-/-! A builtin call used as an expression statement makes progress. This is a
-statement-level lemma: the callee-body catalogue checker does not admit
-bodies containing builtin statements, so no checked body reaches it yet. -/
 
 namespace Solidity.Source.Progress
 open EM
 
-/-- Lift expression non-stuckness through the actual statement sub frame. -/
 theorem execS_expression_ns {E : Env} (G : Glob E) (F : Fr) (n nps : Nat)
     (ph : Option (Ph E)) {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {t : STy}
     (e : RExpr E Γ t) (l : Locals E.layout Γ) (h : NS (evalE G F n e)) :

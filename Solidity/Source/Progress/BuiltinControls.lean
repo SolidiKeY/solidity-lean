@@ -2,10 +2,6 @@ import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.Controls
 import Solidity.Source.Preservation.EncodingVariantControls
 
-/-! Typed source builtin/event nodes (one `require` argument node is built
-directly) and exact interpreter observations.
-The checked-call consumer is nonempty. Refusal controls stay outside admission.
--/
 namespace Solidity.Source.Progress.BuiltinControls
 open Preservation.AllocationControls
 open EM
@@ -61,8 +57,10 @@ theorem wrong_hash_observation (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   intro h
   cases h
 
+example : Solidity.Lowering.P9.declaration ∈
+    Solidity.Lowering.P9.WholeProgram.functions Solidity.Lowering.P9.resolution := by decide
+
 open Solidity.Lowering.P9 in
-/-- A builtin whose argument really calls an admitted nonempty program. -/
 theorem checked_call_argument (fixed : Roadmap.Fixed) (n : Nat) :
     NS (evalE (Solidity.Lowering.P9.glob fixed) caller n
       (.builtin .require (.cons protectedCall .nil) rfl)) :=
@@ -72,7 +70,6 @@ theorem checked_call_argument (fixed : Roadmap.Fixed) (n : Nat) :
     (.require _ (.cons (.checked _ Controls.fragment trivial) .nil))
 
 open Solidity.Lowering.P9 in
-/-- The public statement adapter consumes the actual nonempty call catalogue. -/
 theorem checked_call_statement (fixed : Roadmap.Fixed) (n : Nat) :
     NS (execS (Solidity.Lowering.P9.glob fixed) caller (n+1) 0 none
       (.expr (R := []) (M := false) (k := .body)
@@ -125,8 +122,8 @@ theorem event_elaborates : (Source.elaborate eventResolution).isSome = true := b
 theorem event_catalogue (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     Solidity.Lowering.P9.WholeProgram.checkFunctions eventResolution (eventGlob p fixed) "Events" = true := rfl
 
-/-- Consume checked_emit with an actual event-only elaborated source unit.
-The function catalogue is empty; the emitted Boolean and locals are inhabited. -/
+example : Solidity.Lowering.P9.WholeProgram.functions eventResolution = [] := by rfl
+
 theorem checked_event (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (static : Bool)
     (n : Nat) (l : Locals eventUnit.env.layout [.bool]) :
     NS (execS (eventGlob p fixed) (eventFrame static) (n+1) 0 none eventStmt l) := by

@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.ReadyBodies
 
-/-! Modifier-free calls whose complete memory statement sequences are ready.
-All statement progress and memory preservation follow syntactic admission;
-return defaults and the actual selected frame/body remain explicit. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
