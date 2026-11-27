@@ -24,15 +24,16 @@ write/debit/credit laws is needed before its preservation can be stated here.
 
 The clauses below specify successful executions (box obligations). They do not
 prove that a call succeeds: checked arithmetic may revert. In particular there
-is no claim of overflow freedom for every input. Successful calls must retain
-uint bounds; proving non-reversion from sufficient balance, allowance and
-recipient headroom remains UNKNOWN and requires a diamond specification.
+is no claim of overflow freedom for every input. The diamonds below specify
+normal termination from valid words, funds and arithmetic headroom: approve
+is proved; the other six remain UNKNOWN at checked-update definedness
+and range propagation through successive storage saves.
 
 Verdicts: transfer, _mint, _burn, mint and burn proved with all clauses and
 frames. approve and transferFrom are UNKNOWN: their guarded two-key allowance
 frames remain after sol_prove (nested path-disjointness/save-read closure).
-The complete typed obligations remain below. The supply sum and successful-call
-no-overflow obligations above remain UNKNOWN.
+The complete typed obligations remain below. The supply sum and six remaining
+normal-termination/no-overflow obligations remain UNKNOWN.
 -/
 namespace Solidity.Examples.Benchmark.Tokens.ERC20
 
@@ -130,5 +131,81 @@ theorem burn_obligation : ⊢ spec!{ burn } := by
 theorem approve_writtenSlot : ⊢ dl!{ [ bool ok = approve(spender, amount); ]
     ok == true && allowance[msg.sender][spender] == amount } := by
   sol_prove
+
+/-! ## Successful calls under word-range and headroom conditions
+
+These natural diamond obligations supplement the unchanged box clauses. Each
+requires valid argument/key words, valid accessed storage words, zero value for
+a nonpayable call, and sufficient arithmetic headroom. Self-transfers need no
+recipient headroom beyond the original word bound. This specifies actual normal
+termination, rather than concluding no-overflow from a vacuous reverting box.
+Diamond verdicts: approve proved; transfer, transferFrom, _mint, _burn, mint
+and burn UNKNOWN at checked-update definedness/range propagation through
+successive storage saves. Each complete diamond remains stated below.
+-/
+
+/-- PROVED below: a valid allowance write returns normally. -/
+def approve_noOverflow_obligation : Fml ERC20 [] := dl!{
+  msg.value == 0 ∧ 0 <= msg.sender ∧ msg.sender <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= spender ∧ spender <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧ 0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 →
+  ⟨ bool ok = approve(spender, amount); ⟩ ok == true }
+
+/-- UNKNOWN: transfer succeeds with sender funds and recipient headroom. -/
+def transfer_noOverflow_obligation : Fml ERC20 [] := dl!{
+  msg.value == 0 ∧ 0 <= msg.sender ∧ msg.sender <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= recipient ∧ recipient <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧ 0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    balanceOf[msg.sender] >= amount ∧ balanceOf[msg.sender] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= balanceOf[recipient] ∧ balanceOf[recipient] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    (msg.sender == recipient ∨ balanceOf[recipient] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount) →
+  ⟨ bool ok = transfer(recipient, amount); ⟩ ok == true }
+
+/-- UNKNOWN: delegated transfer also has sufficient allowance. -/
+def transferFrom_noOverflow_obligation : Fml ERC20 [] := dl!{
+  msg.value == 0 ∧ 0 <= msg.sender ∧ msg.sender <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= sender ∧ sender <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧ 0 <= recipient ∧ recipient <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    allowance[sender][msg.sender] >= amount ∧ allowance[sender][msg.sender] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    balanceOf[sender] >= amount ∧ balanceOf[sender] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= balanceOf[recipient] ∧ balanceOf[recipient] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    (sender == recipient ∨ balanceOf[recipient] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount) →
+  ⟨ bool ok = transferFrom(sender, recipient, amount); ⟩ ok == true }
+
+/-- UNKNOWN: both mint additions fit in a word. -/
+def mintCore_noOverflow_obligation : Fml ERC20 [] := dl!{
+  msg.value == 0 ∧ 0 <= to ∧ to <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧ 0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= balanceOf[to] ∧ balanceOf[to] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount ∧
+    0 <= totalSupply ∧ totalSupply <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount →
+  ⟨ _mint(to, amount); ⟩ true }
+
+/-- UNKNOWN: both burn subtractions stay nonnegative. -/
+def burnCore_noOverflow_obligation : Fml ERC20 [] := dl!{
+  msg.value == 0 ∧ 0 <= holder ∧ holder <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧ 0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    balanceOf[holder] >= amount ∧ balanceOf[holder] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    totalSupply >= amount ∧ totalSupply <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 →
+  ⟨ _burn(holder, amount); ⟩ true }
+
+/-- UNKNOWN: the public mint wrapper has the same headroom contract. -/
+def mint_noOverflow_obligation : Fml ERC20 [] := dl!{
+  msg.value == 0 ∧ 0 <= to ∧ to <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧ 0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    0 <= balanceOf[to] ∧ balanceOf[to] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount ∧
+    0 <= totalSupply ∧ totalSupply <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount →
+  ⟨ mint(to, amount); ⟩ true }
+
+/-- UNKNOWN: the public burn wrapper has the same funds contract. -/
+def burn_noOverflow_obligation : Fml ERC20 [] := dl!{
+  msg.value == 0 ∧ 0 <= holder ∧ holder <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧ 0 <= amount ∧ amount <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    balanceOf[holder] >= amount ∧ balanceOf[holder] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 ∧
+    totalSupply >= amount ∧ totalSupply <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 →
+  ⟨ burn(holder, amount); ⟩ true }
+
+/-- Normal termination of approve under the complete stated word-range conditions. -/
+theorem approve_noOverflow : ⊢ approve_noOverflow_obligation := by
+  sol_prove
+
+
+
+
+
+
 
 end Solidity.Examples.Benchmark.Tokens.ERC20
