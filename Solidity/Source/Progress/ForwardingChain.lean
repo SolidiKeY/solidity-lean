@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.ForwardingReturns
 
-/-! Explicit finite prefixes of source forwarding entries. Every extension uses
-only already certified callees and a fresh declaration. This is a proof
-certificate over intrinsic bodies, not an automatic source/graph recognizer. -/
 namespace Solidity.Source.Progress
 open EM Solidity.Lowering.P9
 

@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.CallComposition
 
-/-! Single-return bodies may forward a certified composed expression, including
-ordinary calls to earlier ready memory callees. This derives body and call
-progress/preservation from expression composition, not a body oracle. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

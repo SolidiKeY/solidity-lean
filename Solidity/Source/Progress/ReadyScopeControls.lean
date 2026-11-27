@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.ReadyBodyControls
 
-/-! Direct intrinsic controls for the conditional, unchecked restoration and
-reference-tuple return arms of the ready statement admission. The source-unit
-control in ReadyBodyControls supplies the actual elaboration consumer. -/
 namespace Solidity.Source.Progress.ReadyScopeControls
 open EM ReadyBodyControls
 
