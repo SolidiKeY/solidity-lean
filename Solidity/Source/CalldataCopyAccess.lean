@@ -1,7 +1,6 @@
 import Solidity.Source.CalldataCopy
 
-/-! G18.05 extent and indexed-read transport through actual calldata copies.
-No new evaluator or compiler simulation is introduced. -/
+/-! extent and indexed-read transport through actual calldata copies. -/
 namespace Solidity.Source
 open EM
 variable {E : Env} {Γ : RCtx}

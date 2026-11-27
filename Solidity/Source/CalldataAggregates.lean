@@ -1,6 +1,6 @@
 import Solidity.Source.Calldata
 
-/-! Owned S02/G18.04 consumers of actual nested calldata operations. These
+/-! Consumers of actual nested calldata operations. These
 are Source execution/progress/layout facts; compiler/NEWBackend and EVM
 correspondence are separate obligations. Dynamic-base range slices remain
 refused, as pinned solc 0.8.38 error2148 requires. -/

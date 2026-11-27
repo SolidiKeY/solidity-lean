@@ -1,6 +1,6 @@
 import Solidity.Source.CalldataAggregates
 
-/-! G18.05 exact scalar-array calldata copy outcomes. Decoding precedes
+/-! exact scalar-array calldata copy outcomes. Decoding precedes
 allocation. These are actual Source interpreter equations, not compiler or
 EVM execution correspondence. Recursive reference-element copying is open. -/
 namespace Solidity.Source
