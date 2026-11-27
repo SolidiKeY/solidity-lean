@@ -140,7 +140,8 @@ class Globs(unittest.TestCase):
                                              "e4-hash-bridge", "t0-endpoint-total", "e2a-lower-total",
                                              "e2b-loops-producer", "yv1-yul-layout-view",
                                              "finish-intrinsic-session", "finish-lowering-sim", "finish-panic",
-                                             "finish-line", "finish-yul-layout", "calls-program-bridge"})
+                                             "finish-line", "finish-yul-layout", "calls-program-bridge",
+                                             "o1-optimizer-domain"})
         self.assertEqual(CFG["steps"]["yv1-yul-layout-view"], ["Solidity/Yul/Layout/**"])
         self.assertEqual(CFG["steps"]["finish-intrinsic-session"], ["Solidity/Correctness/IntrinsicSession/**", "Solidity/Semantics/IntrinsicSession/**"])
         self.assertEqual(CFG["steps"]["finish-lowering-sim"], ["Solidity/Correctness/Lowering/Sim/**"])
@@ -148,6 +149,7 @@ class Globs(unittest.TestCase):
         self.assertEqual(CFG["steps"]["finish-line"], ["Solidity/Finish/**"])
         self.assertEqual(CFG["steps"]["finish-yul-layout"], ["Solidity/Yul/Layout/**"])
         self.assertEqual(CFG["steps"]["calls-program-bridge"], ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"])
+        self.assertEqual(CFG["steps"]["o1-optimizer-domain"], ["Solidity/Backend/CompilerOptimizerDomain.lean", "Solidity/Backend/CompilerOptimizerDomain/**"])
 
 
 

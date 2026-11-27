@@ -24,6 +24,7 @@
     "finish-panic": ["Solidity/Correctness/Panic/**"],
     "finish-line": ["Solidity/Finish/**"],
     "finish-yul-layout": ["Solidity/Yul/Layout/**"],
-    "calls-program-bridge": ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"]
+    "calls-program-bridge": ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"],
+    "o1-optimizer-domain": ["Solidity/Backend/CompilerOptimizerDomain.lean", "Solidity/Backend/CompilerOptimizerDomain/**"]
   }
 }
