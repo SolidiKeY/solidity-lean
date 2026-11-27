@@ -6,9 +6,10 @@ import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.Weakening
 import Solidity.Backend.CompilerOptimizerDomain.Inline
 import Solidity.Backend.CompilerOptimizerDomain.CSE
+import Solidity.Backend.CompilerOptimizerDomain.Propagate
 
 /-! Integration controls for the proved folding, simplification, removal, LICM,
-weakening, inlining and CSE results. These check both
+weakening, inlining, CSE and constant-propagation results. These check both
 resource and fragment consequences against the unchanged public compiler domain;
 they do not assert preservation by the remaining optimizer stages or iteration. -/
 namespace Solidity.Backend.CompilerOptimizerDomain.Controls
@@ -82,6 +83,14 @@ example (hP : ProgOk [] P) (A : List (Optimizer.ConstFold.Avail C Γ)) :
     Evm.Prog.pushes (Optimizer.ConstFold.Prog.cse A P) = 0 ∧
       ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.cse A P) = some G := by
   have hQ := prog_cse_ok hP A
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- The actual initial facts table needs no new premise on accepted programs.
+example (hP : ProgOk [] P) :
+    Evm.Prog.pushes (Optimizer.ConstFold.Prog.cprop Optimizer.ConstFold.Facts.empty P) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.cprop Optimizer.ConstFold.Facts.empty P) = some G := by
+  have hQ := prog_cprop_ok hP facts_empty_ok
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
   exact ⟨hQ.quiet.1, G, h⟩
 
