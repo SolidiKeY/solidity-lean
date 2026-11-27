@@ -2,14 +2,13 @@ import Solidity.Syntax.Scoped
 import Solidity.Roadmap.Evm
 
 /-!
-# The stipend cost rule (decision G06 Q3)
+# The stipend cost rule
 
 A `transfer` or `send` to an instance of the compiled system forwards
 exactly the 2300-gas stipend, so whether it succeeds depends on the gas of
-the recipient's `receive`/fallback body.  The second-round decision fixes a
-**compiler-independent source rule**: the source semantics fails every such
+the recipient's `receive`/fallback body.  The **compiler-independent source rule**: the source semantics fails every such
 payment whose body the rule does not admit; the compiler must make every
-admitted body complete within the stipend (G06's `StipendRule.Fitted`), and
+admitted body complete within the stipend (`StipendRule.Fitted`), and
 make every other body fail when entered with at most the stipend
 (`Enforced`).  The rule assumes cold (EIP-2929) access costs.
 
@@ -42,7 +41,7 @@ call-free and straight-line**, and **small**:
   constants are generous per node (a checked addition with its overflow
   test is about 40 gas in solc's legacy output) and reserve the entry,
   dispatch and return.  They are part of the rule's definition: changing
-  them changes the source semantics, so G43 must prove the compiler fits
+  them changes the source semantics, so the compiler must fit
   them, not retune them.
 -/
 
@@ -59,7 +58,7 @@ structure CostModel where
   /-- Gas kept for the entry, dispatch and return. -/
   reserve : Nat
 
-/-- The model of the decision: Osaka with cold access costs. -/
+/-- Osaka with cold access costs. -/
 def osakaCold : CostModel := ⟨50, 300⟩
 
 /-! ## Cost of expressions and statements -/
@@ -158,16 +157,16 @@ def rule (C : Contract) : StipendRule (Body C) where
 
 instance (b : Body C) : Decidable ((rule C).fits b) := by unfold rule; infer_instance
 
-/-! ## What the compiler owes (G43) -/
+/-! ## What the compiler owes -/
 
 /-- The second half of the compiler's obligation: every body the rule
 rejects fails when entered with at most the stipend (`failsUnderStipend`
-is the compiled body's run, from G43's code), so source and EVM agree on
+is the compiled body's run, from compiled code), so source and EVM agree on
 every stipend payment to an instance of the system. -/
 def Enforced {Body : Type} (R : StipendRule Body) (failsUnderStipend : Body → Prop) : Prop :=
   ∀ b, ¬R.fits b → failsUnderStipend b
 
-/-- **The obligation G43 discharges**: admitted bodies complete within the
+/-- **The compiler obligation**: admitted bodies complete within the
 stipend (`StipendRule.Fitted`, `gasUsed` the compiled body's worst-case gas
 with cold access costs and EIP-2200's sentry), and rejected ones fail. -/
 def Obligation (C : Contract) (gasUsed : Body C → Nat) (failsUnderStipend : Body C → Prop) :
