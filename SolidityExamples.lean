@@ -232,6 +232,7 @@ import Solidity.Examples.LexRuleSyntax
 import Solidity.Examples.LexTermSize
 import Solidity.Examples.LexVariant
 import Solidity.Examples.LinearDecision
+import Solidity.Examples.Lowering.Sim.AssociationV2
 import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.CasesV2
 import Solidity.Examples.Lowering.Sim.Coverage

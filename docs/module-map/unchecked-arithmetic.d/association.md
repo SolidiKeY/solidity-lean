@@ -1,0 +1,2 @@
+| `Correctness/Lowering/Sim/Match/AssociationV2.lean` | Proposed P3 additive association: fixed P2 alias binding, frozen Reads, alignment, compatibility, total initial matching and separate callee/recursive inhabitance obligations; statement level pending review. |
+| `Examples/Lowering/Sim/AssociationV2.lean` | Statement-level type check of the proposed association contract; no proof or coverage witness claimed. |

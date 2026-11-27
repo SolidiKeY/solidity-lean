@@ -2492,6 +2492,7 @@ import Solidity.Correctness.Lowering.Sim.Expr.Scope
 import Solidity.Correctness.Lowering.Sim.Expr.Strength
 import Solidity.Correctness.Lowering.Sim.Induction.Knot
 import Solidity.Correctness.Lowering.Sim.Match
+import Solidity.Correctness.Lowering.Sim.Match.AssociationV2
 import Solidity.Correctness.Lowering.Sim.Match.Cases
 import Solidity.Correctness.Lowering.Sim.Match.CasesV2
 import Solidity.Correctness.Lowering.Sim.Match.CompositionV2
