@@ -1,55 +1,7 @@
-/-!
-# Hash collisions: the per-run premise and the birthday bound
 
-* **The per-run premise.** `CollisionFree f xs` says that the hash `f` does not
-  collide on the preimages `xs` an execution prefix hashed. It is closed under
-  sublists, prefixes and `[]`, so a premise about a whole run gives one about
-  every prefix (`CollisionFree.sublist`, `CollisionFree.of_prefix`). Global
-  injectivity of `f` stays forbidden: `no_injective_slot_encoding`
-  (`Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`) proves no
-  injective numeric encoding of slots exists.
-* **The random-oracle bound.** A random function into `N` values, restricted
-  to `q` distinct inputs, is modelled as one of the `N ^ q` output tuples
-  (`tuples N q`), each equally likely; that a uniform function on a larger
-  domain gives the same bound is the non-adaptive case of
-  `eagerAdaptiveBound` (`Solidity/Hash/Adaptive.lean`). At most
-  `q(q-1)/2 · N^(q-1)` of them collide
-  (`collisions_le`), so the collision probability is at most
-  `q(q-1)/(2N) ≤ q²/(2N)` (`collision_prob_le`, `collision_prob_le_sq`), that is
-  `q²/2²⁵⁷` for a 256-bit hash (`keccak_collision_prob_le`).
-
-* **The region premise.** The regions above hashed slots: `RegionsDisjoint N L f roots xs` says the
-  length-`L` regions at the hashes of `xs` pairwise do not overlap modulo `N`
-  and cover no root slot (`Near`, `Covers`, read by `near_of_overlap` and
-  `covers_of_hit`). It implies `CollisionFree` for `L > 0`. Its bound,
-  `q(q-1)(2L-1)/(2N) + q·|roots|·L/N`, is `keccak_region_prob_le`, about
-  `q²L/2²⁵⁶ + q·R·L/2²⁵⁶` for keccak.
-
-The counting is a union bound over pairs, done incrementally: a tuple
-`a :: t` collides if `t` already does (a pair among the first `q` outputs) or if
-`a` equals one of the `q` outputs of `t` (the `q` pairs with the new index), so
-`C(q+1) ≤ N · C(q) + q · N^q` (`collisions_succ_le`). Probabilities are stated
-cross-multiplied over `Nat` (`2 * N * bad ≤ q * (q - 1) * N ^ q` reads
-`bad / N^q ≤ q(q-1)/(2N)`), so no rationals are needed; every proof is by
-induction, with no `decide` tactic.
-
-**Scope of the bound.** The main bound fixes the `q` inputs before the
-oracle is sampled (non-adaptive queries); a run that hashes a preimage twice
-counts it once (`keccak_premise_fails_prob_le_dedup`). Queries that depend on
-earlier answers are covered here under lazy sampling for strategies that
-never repeat a query (`adaptive_lazy_collision_prob_le`, where the event
-reduces to the non-adaptive one). An oracle fixed before an adaptive game is
-`EagerAdaptiveBound` below; `Solidity/Hash/Adaptive.lean` proves it, together
-with repeated queries, early stopping and the region premise
-(`docs/feature-work/hash-collision-bound.md`, "Adaptive queries").
--/
 
 namespace Solidity.Hash
 
-/-! ## The per-run premise -/
-
-/-- `f` does not collide on the preimages `xs`: equal images on `xs` come from
-equal preimages. -/
 def CollisionFree {α β : Type _} (f : α → β) (xs : List α) : Prop :=
   ∀ x ∈ xs, ∀ y ∈ xs, f x = f y → x = y
 
@@ -64,8 +16,6 @@ theorem CollisionFree.singleton (x : α) : CollisionFree f [x] := by
   simp only [List.mem_singleton] at ha hb
   rw [ha, hb]
 
-/-- Collision freedom on `ys` gives it on every list whose elements are in
-`ys`; sublists, prefixes and suffixes are instances. -/
 theorem CollisionFree.mono {xs ys : List α} (h : CollisionFree f ys)
     (hsub : ∀ x ∈ xs, x ∈ ys) : CollisionFree f xs :=
   fun x hx y hy hxy => h x (hsub x hx) y (hsub y hy) hxy
@@ -90,8 +40,6 @@ theorem CollisionFree.append_right {xs ys : List α} (h : CollisionFree f (xs ++
     CollisionFree f ys :=
   h.mono fun _ hy => List.mem_append_right xs hy
 
-/-- Two collision-free lists join when no image of one meets an image of the
-other at a different preimage. -/
 theorem collisionFree_append {xs ys : List α} :
     CollisionFree f (xs ++ ys) ↔
       CollisionFree f xs ∧ CollisionFree f ys ∧
@@ -123,13 +71,10 @@ theorem collisionFree_cons {x : α} {xs : List α} :
     rw [List.mem_singleton.mp ha]
     exact hxy y hy
 
-/-- Collision freedom depends only on which preimages occur, not on their
-order or repetitions. -/
 theorem collisionFree_congr {xs ys : List α} (h : ∀ x, x ∈ xs ↔ x ∈ ys) :
     CollisionFree f xs ↔ CollisionFree f ys :=
   ⟨fun hx => hx.mono fun x hy => (h x).mpr hy, fun hy => hy.mono fun x hx => (h x).mp hx⟩
 
-/-- On distinct preimages, collision freedom is distinctness of the images. -/
 theorem collisionFree_iff_nodup_map {xs : List α} (hxs : xs.Nodup) :
     CollisionFree f xs ↔ (xs.map f).Nodup := by
   induction xs with
@@ -149,19 +94,9 @@ instance {xs : List α} [DecidableEq α] [DecidableEq β] : Decidable (Collision
 
 end Premise
 
-/-! ## The region premise
-
-The regions above hashed slots: an array's elements or a struct's members sit at
-`keccak(p) + i`, `i < L`, modulo the word size `N`. Words are values below
-`N`; a region is `[a, a + L)` read modulo `N`. -/
-
-/-- The length-`L` regions at words `a, b < N` overlap modulo `N`
-(`near_of_overlap`): their distance, read around the circle, is below `L`. -/
 def Near (N L a b : Nat) : Prop :=
   (a < b + L ∧ b < a + L) ∨ a + N < b + L ∨ b + N < a + L
 
-/-- The length-`L` region at word `a < N` covers the word `r < N` modulo `N`
-(`covers_of_hit`). -/
 def Covers (N L a r : Nat) : Prop :=
   (a ≤ r ∧ r < a + L) ∨ r + N < a + L
 
@@ -174,7 +109,6 @@ instance {N L a r : Nat} : Decidable (Covers N L a r) :=
 theorem Near.symm {N L a b : Nat} (h : Near N L a b) : Near N L b a := by
   unfold Near at h ⊢; omega
 
-/-- Overlapping regions are `Near`. -/
 theorem near_of_overlap {N L a b i j : Nat} (ha : a < N) (hb : b < N) (hL : L ≤ N)
     (hi : i < L) (hj : j < L) (h : (a + i) % N = (b + j) % N) : Near N L a b := by
   have hu : (a + i) / N < 2 := Nat.div_lt_of_lt_mul (by omega)
@@ -189,8 +123,10 @@ theorem near_of_overlap {N L a b i j : Nat} (ha : a < N) (hb : b < N) (hL : L �
   rcases (by omega : u = 0 ∨ u = 1) with rfl | rfl <;>
     rcases (by omega : v = 0 ∨ v = 1) with rfl | rfl <;> omega
 
-/-- A region that reaches a word covers it (the word is below `N`, as
-`(a + i) % N` is). -/
+example {N L i j : Nat} (a b : Fin N) (hL : L ≤ N) (hi : i < L) (hj : j < L)
+    (h : (a.val + i) % N = (b.val + j) % N) : Near N L a.val b.val :=
+  near_of_overlap a.isLt b.isLt hL hi hj h
+
 theorem covers_of_hit {N L a r i : Nat} (ha : a < N) (hL : L ≤ N)
     (hi : i < L) (h : (a + i) % N = r) : Covers N L a r := by
   have hu : (a + i) / N < 2 := Nat.div_lt_of_lt_mul (by omega)
@@ -200,12 +136,13 @@ theorem covers_of_hit {N L a r i : Nat} (ha : a < N) (hL : L ≤ N)
   unfold Covers
   rcases (by omega : u = 0 ∨ u = 1) with rfl | rfl <;> omega
 
+example {N L i : Nat} (a r : Fin N) (hL : L ≤ N) (hi : i < L)
+    (h : (a.val + i) % N = r.val) : Covers N L a.val r.val :=
+  covers_of_hit a.isLt hL hi h
+
 section Regions
 variable {α : Type _}
 
-/-- The region premise on the preimages `xs` hashed by a run: the length-`L`
-regions at their hashes `f x` pairwise do not overlap, and none covers a
-root slot in `roots`. -/
 def RegionsDisjoint (N L : Nat) (f : α → Nat) (roots : List Nat) (xs : List α) : Prop :=
   (∀ x ∈ xs, ∀ y ∈ xs, x ≠ y → ¬ Near N L (f x) (f y)) ∧
     ∀ x ∈ xs, ∀ r ∈ roots, ¬ Covers N L (f x) r
@@ -226,8 +163,6 @@ theorem RegionsDisjoint.of_prefix {xs ys : List α} (h : RegionsDisjoint N L f r
     (hp : xs <+: ys) : RegionsDisjoint N L f roots xs :=
   h.mono fun _ hx => hp.sublist.subset hx
 
-/-- Disjoint nonempty regions have distinct bases: the region premise implies
-the preimage premise. -/
 theorem RegionsDisjoint.collisionFree {xs : List α} (hL : 0 < L)
     (h : RegionsDisjoint N L f roots xs) : CollisionFree f xs := by
   intro x hx y hy hxy
@@ -258,20 +193,14 @@ theorem regionsDisjoint_cons {x : α} {xs : List α} (hx : x ∉ xs) :
 
 end Regions
 
-/-! ## Output tuples of a random function -/
-
-/-- All `q`-tuples (as lists) of outputs below `N`: the `N ^ q` equally likely
-restrictions of a uniformly random function into `N` values to `q` inputs. -/
 def tuples (N : Nat) : Nat → List (List Nat)
   | 0 => [[]]
   | q + 1 => (List.range N).flatMap fun a => (tuples N q).map (a :: ·)
 
-/-- Whether a tuple repeats a value. -/
 def hasDup : List Nat → Bool
   | [] => false
   | a :: t => t.contains a || hasDup t
 
-/-- The number of `q`-tuples below `N` that collide. -/
 def collisions (N q : Nat) : Nat := (tuples N q).countP hasDup
 
 theorem hasDup_eq_false_iff {t : List Nat} : hasDup t = false ↔ t.Nodup := by
@@ -281,7 +210,6 @@ theorem hasDup_eq_false_iff {t : List Nat} : hasDup t = false ↔ t.Nodup := by
     simp only [hasDup, ← ih, List.nodup_cons, Bool.eq_false_iff, ne_eq, Bool.or_eq_true, not_or,
       List.contains_iff_mem]
 
-/-- Sum of `g` over a list. -/
 def sumOver {γ : Type _} (l : List γ) (g : γ → Nat) : Nat := (l.map g).sum
 
 section Counting
@@ -319,8 +247,6 @@ theorem sumOver_ite {γ : Type _} (A : List γ) (p : γ → Bool) :
   | nil => rfl
   | cons a A ih => simp only [sumOver_cons, List.countP_cons, ih, Nat.add_comm]
 
-/-- Double counting: summing a two-place count either way gives the same
-total. -/
 theorem sumOver_swap {γ δ : Type _} (A : List γ) (T : List δ) (P : γ → δ → Bool) :
     sumOver A (fun a => T.countP (P a)) = sumOver T (fun t => A.countP (P · t)) := by
   induction T with
@@ -373,8 +299,6 @@ theorem length_of_mem_tuples {N q : Nat} {t : List Nat} (h : t ∈ tuples N q) :
     obtain ⟨_, _, u, hu, rfl⟩ := h
     simp only [List.length_cons, ih hu]
 
-/-- At most `|t|` of the distinct values of a duplicate-free list `A` occur
-in `t`. -/
 theorem countP_contains_le {A : List Nat} (hA : A.Nodup) (t : List Nat) :
     A.countP (fun a => t.contains a) ≤ t.length := by
   induction t with
@@ -404,7 +328,6 @@ theorem countP_contains_le {A : List Nat} (hA : A.Nodup) (t : List Nat) :
       countP_or_le A (fun a => a == x) (fun a => t.contains a)
     omega
 
-/-- The incremental union bound: `C(q+1) ≤ N · C(q) + q · N^q`. -/
 theorem collisions_succ_le (N q : Nat) :
     collisions N (q + 1) ≤ N * collisions N q + q * N ^ q := by
   simp only [collisions, tuples, countP_flatMap, List.countP_map]
@@ -423,7 +346,6 @@ theorem collisions_succ_le (N q : Nat) :
   rw [Nat.mul_comm q]
   omega
 
-/-- The birthday bound, cross-multiplied: `2 · N · C(q) ≤ q(q-1) · N^q`. -/
 theorem two_mul_collisions_le (N q : Nat) :
     2 * N * collisions N q ≤ q * (q - 1) * N ^ q := by
   induction q with
@@ -444,8 +366,6 @@ theorem two_mul_collisions_le (N q : Nat) :
     rw [Nat.add_sub_cancel, ← e2]
     omega
 
-/-- At most `q(q-1)/2 · N^(q-1)` of the `N^q` tuples collide (stated as
-`2 · C(q) ≤ q(q-1) · N^(q-1)`). -/
 theorem collisions_le (N q : Nat) :
     2 * collisions N q ≤ q * (q - 1) * N ^ (q - 1) := by
   cases q with
@@ -466,13 +386,10 @@ theorem collisions_le (N q : Nat) :
       simp only [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm] at h ⊢
       exact h
 
-/-- The collision probability over a uniformly random function is at most
-`q(q-1)/(2N)`: `bad / N^q ≤ q(q-1)/(2N)`, cross-multiplied. -/
 theorem collision_prob_le (N q : Nat) :
     2 * N * collisions N q ≤ q * (q - 1) * (tuples N q).length := by
   rw [length_tuples]; exact two_mul_collisions_le N q
 
-/-- The `q²/(2N)` form. -/
 theorem collision_prob_le_sq (N q : Nat) :
     2 * N * collisions N q ≤ q ^ 2 * (tuples N q).length := by
   have h : 2 * N * collisions N q ≤ q * (q - 1) * (tuples N q).length := collision_prob_le N q
@@ -480,8 +397,6 @@ theorem collision_prob_le_sq (N q : Nat) :
     rw [Nat.pow_two]; exact Nat.mul_le_mul_left q (Nat.sub_le q 1)
   exact Nat.le_trans h (Nat.mul_le_mul_right _ this)
 
-/-- For a `k`-bit hash (`N = 2^k`) the collision probability among `q`
-hashes is at most `q²/2^(k+1)`: `bad / 2^(k q) ≤ q² / 2^(k+1)`. -/
 theorem pow_two_collision_prob_le (k q : Nat) :
     2 ^ (k + 1) * collisions (2 ^ k) q ≤ q ^ 2 * 2 ^ (k * q) := by
   have h : 2 * 2 ^ k * collisions (2 ^ k) q ≤ q ^ 2 * (tuples (2 ^ k) q).length :=
@@ -489,22 +404,15 @@ theorem pow_two_collision_prob_le (k q : Nat) :
   rw [length_tuples, ← Nat.pow_mul, ← Nat.pow_succ'] at h
   exact h
 
-/-- Keccak-256 (`N = 2^256`): the collision probability among `q` hashes is
-at most `q²/2²⁵⁷` (written `2 ^ (256 + 1)`: the elaborator warns before
-evaluating the literal `2 ^ 257`, above its exponentiation threshold). -/
 theorem keccak_collision_prob_le (q : Nat) :
     2 ^ (256 + 1) * collisions (2 ^ 256) q ≤ q ^ 2 * 2 ^ (256 * q) :=
   pow_two_collision_prob_le 256 q
 
 end Counting
 
-/-! ## The oracle reading -/
-
 section Oracle
 variable {α : Type _} [DecidableEq α]
 
-/-- The function that answers the `i`-th input of `xs` with the `i`-th entry
-of the tuple `t` (and `0` elsewhere): the random oracle with outputs `t`. -/
 def oracleOf : List α → List Nat → α → Nat
   | x :: xs, a :: t, y => if y = x then a else oracleOf xs t y
   | _, _, _ => 0
@@ -527,7 +435,6 @@ theorem map_oracleOf {xs : List α} (hxs : xs.Nodup) {t : List Nat}
       have : y ≠ x := fun h => hxs.1 (h ▸ hy)
       simp only [this, ite_false]
 
-/-- The list without repetitions, keeping each element's last occurrence. -/
 def dedup : List α → List α
   | [] => []
   | x :: xs => if x ∈ xs then dedup xs else x :: dedup xs
@@ -558,26 +465,16 @@ theorem length_dedup_le (xs : List α) : (dedup xs).length ≤ xs.length := by
     · simp only [dedup, hx, ite_true, List.length_cons]; omega
     · simp only [dedup, hx, ite_false, List.length_cons]; omega
 
-/-- A run may hash the same preimage twice; the premise is that of its
-distinct preimages. -/
 theorem collisionFree_dedup {β : Type _} {f : α → β} (xs : List α) :
     CollisionFree f (dedup xs) ↔ CollisionFree f xs :=
   collisionFree_congr fun _ => mem_dedup
 
-/-- For `q` distinct inputs, the tuples whose oracle collides on them are
-exactly the colliding tuples, so `keccak_collision_prob_le` bounds the
-probability that a uniformly random 256-bit oracle breaks the per-run premise
-on `q` fixed preimages. -/
 theorem oracle_collides_iff {xs : List α} (hxs : xs.Nodup) {t : List Nat}
     (hl : t.length = xs.length) :
     ¬ CollisionFree (oracleOf xs t) xs ↔ hasDup t = true := by
   rw [collisionFree_iff_nodup_map hxs, map_oracleOf hxs hl, ← hasDup_eq_false_iff]
   simp only [Bool.not_eq_false]
 
-/-- The bound read on the per-run premise: among all `2^(256 q)` oracles on
-`q` fixed distinct preimages `xs`, those under which `CollisionFree` fails
-number `bad`, and `2^257 · bad ≤ q² · 2^(256 q)`. This is the
-non-adaptive reading: `xs` is fixed before the oracle is drawn. -/
 theorem keccak_premise_fails_prob_le {xs : List α} (hxs : xs.Nodup) :
     2 ^ (256 + 1) * (tuples (2 ^ 256) xs.length).countP
         (fun t => decide (¬ CollisionFree (oracleOf xs t) xs)) ≤
@@ -590,9 +487,6 @@ theorem keccak_premise_fails_prob_le {xs : List α} (hxs : xs.Nodup) :
   rw [hcount]
   exact keccak_collision_prob_le xs.length
 
-/-- The bound for a preimage list with repetitions: `q` is the number of
-distinct preimages, `(dedup xs).length ≤ xs.length` (`length_dedup_le`), and
-the oracle is drawn on those (`oracleOf (dedup xs)`). -/
 theorem keccak_premise_fails_prob_le_dedup (xs : List α) :
     2 ^ (256 + 1) * (tuples (2 ^ 256) (dedup xs).length).countP
         (fun t => decide (¬ CollisionFree (oracleOf (dedup xs) t) xs)) ≤
@@ -609,22 +503,13 @@ theorem keccak_premise_fails_prob_le_dedup (xs : List α) :
 
 end Oracle
 
-/-! ## The region bound
-
-The same counting with "equal" replaced by `Near`: a tuple `a :: t` is bad if
-`t` is, if `a`'s region overlaps one of the `q` regions of `t` (at most
-`2L - 1` values of `a` each, `countP_near_le`), or if it covers one of the
-roots (at most `L` values each, `countP_covers_le`). -/
-
 section RegionCounting
 
-/-- Whether a tuple of hash words breaks the region premise. -/
 def regionBad (N L : Nat) (roots : List Nat) : List Nat → Bool
   | [] => false
   | a :: t => t.any (fun b => decide (Near N L a b)) || roots.any (fun r => decide (Covers N L a r)) ||
       regionBad N L roots t
 
-/-- The number of `q`-tuples below `N` that break the region premise. -/
 def regionCollisions (N L : Nat) (roots : List Nat) (q : Nat) : Nat :=
   (tuples N q).countP (regionBad N L roots)
 
@@ -677,8 +562,6 @@ theorem countP_covers_le {N L r : Nat} (hr : r < N) :
   rw [countP_range_interval, countP_range_interval] at h1
   omega
 
-/-- The union bound over a list: an `any` is counted at most once per
-witness. -/
 theorem countP_any_le {γ δ : Type _} (A : List γ) (t : List δ) (P : γ → δ → Bool) :
     A.countP (fun a => t.any (P a)) ≤ sumOver t (fun b => A.countP (P · b)) := by
   induction t with
@@ -703,7 +586,6 @@ theorem lt_of_mem_tuples {N q : Nat} {t : List Nat} (h : t ∈ tuples N q) :
     · rw [e]; exact List.mem_range.mp ha
     · exact ih hu b hb'
 
-/-- The incremental bound: `B(q+1) ≤ N · B(q) + (q (2L-1) + |roots| L) · N^q`. -/
 theorem regionCollisions_succ_le {N L : Nat} {roots : List Nat} (hroots : ∀ r ∈ roots, r < N)
     (q : Nat) :
     regionCollisions N L roots (q + 1) ≤
@@ -756,9 +638,6 @@ theorem regionCollisions_succ_le {N L : Nat} {roots : List Nat} (hroots : ∀ r 
   rw [Nat.add_mul, Nat.mul_comm (q * (2 * L - 1)), Nat.mul_comm (roots.length * L)]
   omega
 
-/-- The region bound, cross-multiplied:
-`2 · N · B(q) ≤ (q(q-1)(2L-1) + 2 q |roots| L) · N^q`, that is, a probability
-of at most `q(q-1)(2L-1)/(2N) + q |roots| L / N`. -/
 theorem two_mul_regionCollisions_le {N L : Nat} {roots : List Nat}
     (hroots : ∀ r ∈ roots, r < N) (q : Nat) :
     2 * N * regionCollisions N L roots q ≤
@@ -788,7 +667,6 @@ theorem two_mul_regionCollisions_le {N L : Nat} {roots : List Nat}
       cases q <;> grind
     omega
 
-/-- A `k`-bit hash (`N = 2^k`). -/
 theorem pow_two_region_prob_le {k L : Nat} {roots : List Nat} (hroots : ∀ r ∈ roots, r < 2 ^ k)
     (q : Nat) :
     2 ^ (k + 1) * regionCollisions (2 ^ k) L roots q ≤
@@ -799,9 +677,6 @@ theorem pow_two_region_prob_le {k L : Nat} {roots : List Nat} (hroots : ∀ r �
   rw [← Nat.pow_mul, ← Nat.pow_succ'] at h
   exact h
 
-/-- Keccak-256 (`N = 2^256`): regions of length `L` at `q` hashed slots
-overlap each other or one of the `roots` with probability at most
-`q(q-1)(2L-1)/2²⁵⁷ + q |roots| L / 2²⁵⁶ ≤ (q² L + q |roots| L) / 2²⁵⁶`. -/
 theorem keccak_region_prob_le {L : Nat} {roots : List Nat} (hroots : ∀ r ∈ roots, r < 2 ^ 256)
     (q : Nat) :
     2 ^ (256 + 1) * regionCollisions (2 ^ 256) L roots q ≤
@@ -828,10 +703,6 @@ theorem regionsDisjoint_iff_regionBad {f : α → Nat} {xs : List α} (hxs : xs.
 
 variable [DecidableEq α]
 
-/-- The region bound read on the premise: among all `2^(256 q)` oracles on
-`q` fixed distinct preimages `xs`, those under which `RegionsDisjoint` fails
-number `bad`, and
-`2^257 · bad ≤ (q(q-1)(2L-1) + 2 q |roots| L) · 2^(256 q)`. -/
 theorem keccak_region_premise_fails_prob_le {xs : List α} (hxs : xs.Nodup)
     (hroots : ∀ r ∈ roots, r < 2 ^ 256) :
     2 ^ (256 + 1) * (tuples (2 ^ 256) xs.length).countP
@@ -849,19 +720,15 @@ theorem keccak_region_premise_fails_prob_le {xs : List α} (hxs : xs.Nodup)
   exact @keccak_region_prob_le L roots hroots xs.length
 
 omit [DecidableEq α] in
-/-- Like `CollisionFree`, the region premise depends only on membership. -/
+
 theorem regionsDisjoint_congr {f : α → Nat} {xs ys : List α} (h : ∀ x, x ∈ xs ↔ x ∈ ys) :
     RegionsDisjoint N L f roots xs ↔ RegionsDisjoint N L f roots ys :=
   ⟨fun hx => hx.mono fun x hy => (h x).mpr hy, fun hy => hy.mono fun x hx => (h x).mp hx⟩
 
-/-- A run may hash the same preimage twice; the region premise is that of its
-distinct preimages. -/
 theorem regionsDisjoint_dedup {f : α → Nat} (xs : List α) :
     RegionsDisjoint N L f roots (dedup xs) ↔ RegionsDisjoint N L f roots xs :=
   regionsDisjoint_congr fun _ => mem_dedup
 
-/-- The region bound for a preimage list with repetitions: `q` is the number
-of distinct preimages and the oracle is drawn on those. -/
 theorem keccak_region_premise_fails_prob_le_dedup (xs : List α)
     (hroots : ∀ r ∈ roots, r < 2 ^ 256) :
     2 ^ (256 + 1) * (tuples (2 ^ 256) (dedup xs).length).countP
@@ -881,13 +748,9 @@ theorem keccak_region_premise_fails_prob_le_dedup (xs : List α)
 
 end RegionOracle
 
-/-! ## Adaptive queries -/
-
 section Adaptive
 variable {α : Type _} [DecidableEq α]
 
-/-- The queries an adaptive strategy makes when the lazily sampled oracle
-answers `t`: the `i`-th query is `s` of the first `i` answers. -/
 def lazyQueries (s : List Nat → α) (t : List Nat) : List α :=
   (List.range t.length).map fun i => s (t.take i)
 
@@ -896,11 +759,6 @@ theorem length_lazyQueries (s : List Nat → α) (t : List Nat) :
     (lazyQueries s t).length = t.length := by
   simp only [lazyQueries, List.length_map, List.length_range]
 
-/-- The bound for adaptive queries under lazy sampling: each answer is a
-fresh uniform value, drawn when the query is made, and the `i`-th query may
-depend on the earlier answers. Among the `N^q` answer sequences, those whose
-queries are distinct yet collide under the oracle number at most
-`q(q-1)/(2N) · N^q`. -/
 theorem adaptive_lazy_collision_prob_le (s : List Nat → α) (N q : Nat) :
     2 * N * (tuples N q).countP (fun t =>
         decide ((lazyQueries s t).Nodup ∧
@@ -916,18 +774,10 @@ theorem adaptive_lazy_collision_prob_le (s : List Nat → α) (N q : Nat) :
     exact (oracle_collides_iff ht.1 (length_lazyQueries s t).symm).mp ht.2
   exact Nat.le_trans (Nat.mul_le_mul_left (2 * N) hle) (two_mul_collisions_le N q)
 
-/-- The queries an adaptive strategy makes against a fixed oracle `g`. -/
 def eagerQueries (s : List Nat → α) (g : α → Nat) : Nat → List α
   | 0 => []
   | k + 1 => let qs := eagerQueries s g k; qs ++ [s (qs.map g)]
 
-/-- The adaptive bound for an eagerly sampled oracle: a uniformly random
-function on a finite domain `dom` (one of the `N^|dom|` tuples, read by
-`oracleOf dom`) is queried `q` times by an adaptive strategy; the functions
-under which distinct queries collide are at most a `q(q-1)/(2N)` fraction.
-Proved as `eagerAdaptiveBound` in `Solidity/Hash/Adaptive.lean`, which
-imports this module (`docs/feature-work/hash-collision-bound.md`, "Adaptive
-queries"). -/
 def EagerAdaptiveBound.{u} : Prop :=
   ∀ (β : Type u) [DecidableEq β] (dom : List β), dom.Nodup →
     ∀ (s : List Nat → β), (∀ t, s t ∈ dom) → ∀ N q : Nat,

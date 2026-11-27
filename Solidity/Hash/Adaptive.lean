@@ -1,41 +1,10 @@
 import Solidity.Hash.CollisionBound
 
-/-!
-# Adaptive queries against a fixed random function
-
-`EagerAdaptiveBound` (`Solidity/Hash/CollisionBound.lean`) states the
-birthday bound for an oracle drawn once, as one of the `N^|dom|` tuples on a
-finite domain `dom`, and queried by an adaptive strategy `s`: query `i + 1`
-is `s` of the first `i` answers. This module proves it (`eagerAdaptiveBound`)
-and two strengthenings: queries may repeat (a repeat gets the same answer,
-so it is no collision) and the run may stop early (`two_mul_eager_stopped_le`);
-and the same holds for the region premise `RegionsDisjoint`
-(`two_mul_eagerRegionsFail_le`, `keccak_eager_region_prob_le`).
-
-The proof is a union bound over the queries that go wrong, counted
-over functions rather than answer sequences. `stepHit bad k g` holds when
-query `k + 1` under `g` is at a new point `x` and its answer is a bad value
-given the first `k` answers: equal to one of them (`repeatBad`), or near one
-of them or over a root word (`regionBadValue`). A failing run has such a
-step (not necessarily the first) (`collides_succ_imp`, `regionsFail_succ_imp`). For one step, group the
-functions by their values off `x`: changing `g` at `x` changes none of the
-first `k` answers, so the first `k + 1` queries and `x` itself stay the same
-(`eagerQueries_upd`). Each group has `N` members (`le_countP_group`) and at
-most `c` of them go wrong when at most `c` values are bad
-(`countP_stepHit_group_le`), so `N · |stepHit| ≤ c · N^|dom|`
-(`eager_step_le`); the double count over groups is `sumOver_swap`. With
-`c = k` (resp. `k(2L-1) + |roots| L`) and summing over `k < q` gives the
-bounds of `CollisionBound.lean` for adaptive runs. No probability monad or
-sampling equivalence is needed.
--/
-
 namespace Solidity.Hash
 
 section Upd
 variable {α : Type _} [DecidableEq α]
 
-/-- `t` with the entry for `x` (its first occurrence in `dom`) replaced by
-`b`: the oracle `oracleOf dom t` redefined at `x`. -/
 def upd : List α → List Nat → α → Nat → List Nat
   | y :: ys, a :: t, x, b => if x = y then b :: t else a :: upd ys t x b
   | [], t, _, _ => t
@@ -141,8 +110,6 @@ theorem upd_oracleOf (dom : List α) (t : List Nat) (x : α) :
 
 end Upd
 
-/-! ## Tuples: membership and distinctness -/
-
 section Tuples
 
 theorem mem_tuples_of {N : Nat} : ∀ {q : Nat} {t : List Nat}, t.length = q →
@@ -177,7 +144,6 @@ theorem upd_mem_tuples {α : Type _} [DecidableEq α] {N : Nat} {dom : List α} 
     · exact e ▸ hb
     · exact lt_of_mem_tuples ht c e
 
-/-- A duplicate-free list inside another is no longer. -/
 theorem length_le_of_nodup_subset {γ : Type _} [DecidableEq γ] :
     ∀ {M L : List γ}, M.Nodup → (∀ x ∈ M, x ∈ L) → M.length ≤ L.length
   | [], _, _, _ => Nat.zero_le _
@@ -203,8 +169,6 @@ theorem sumOver_ite_const {γ : Type _} (l : List γ) (p : γ → Bool) (c : Nat
       omega
 
 end Tuples
-
-/-! ## The eager game -/
 
 section Eager
 variable {α : Type _} [DecidableEq α] (s : List Nat → α) (dom : List α)
@@ -240,31 +204,21 @@ theorem mem_eagerQueries_of_le (o : α → Nat) {i k : Nat} (hik : i ≤ k) {y :
     · rw [eagerQueries_succ]; exact List.mem_append_left _ (ih (Nat.le_of_lt_succ h))
     · rw [← h]; exact hy
 
-/-- The point of query `k + 1` under `g`. -/
 def nextQuery (g : List Nat) (k : Nat) : α :=
   s ((eagerQueries s (oracleOf dom g) k).map (oracleOf dom g))
 
-/-- The answers to the first `k` queries under `g`. -/
 def answers (g : List Nat) (k : Nat) : List Nat :=
   (eagerQueries s (oracleOf dom g) k).map (oracleOf dom g)
 
-/-- Query `k + 1` goes wrong: its point is new and its answer is a bad value
-`bad A b` given the earlier answers `A`. For the preimage premise a bad value
-repeats an earlier answer (`repeatBad`); for the region premise it lies near
-an earlier answer or covers a root (`regionBadValue`). -/
 def stepHit (bad : List Nat → Nat → Bool) (k : Nat) (g : List Nat) : Bool :=
   decide (nextQuery s dom g k ∉ eagerQueries s (oracleOf dom g) k) &&
     bad (answers s dom g k) (oracleOf dom g (nextQuery s dom g k))
 
-/-- A value repeating an earlier answer. -/
 def repeatBad (A : List Nat) (b : Nat) : Bool := A.contains b
 
-/-- The first `q` queries under `g` collide; repeated queries are allowed. -/
 def eagerCollides (q : Nat) (g : List Nat) : Bool :=
   decide (¬ CollisionFree (oracleOf dom g) (eagerQueries s (oracleOf dom g) q))
 
-/-- Redefining `h` at the point of query `k + 1` keeps the answers to the
-first `k` queries. -/
 theorem map_eagerQueries_upd {h : List Nat} {k : Nat}
     (hnd : nextQuery s dom h k ∉ eagerQueries s (oracleOf dom h) k) (b : Nat) {i : Nat}
     (hik : i ≤ k) :
@@ -275,7 +229,6 @@ theorem map_eagerQueries_upd {h : List Nat} {k : Nat}
   have hyk : y ∈ eagerQueries s (oracleOf dom h) k := mem_eagerQueries_of_le s _ hik hy
   exact oracleOf_upd_ne fun e => hnd (e ▸ hyk)
 
-/-- …and therefore the first `k + 1` queries. -/
 theorem eagerQueries_upd {h : List Nat} {k : Nat}
     (hnd : nextQuery s dom h k ∉ eagerQueries s (oracleOf dom h) k) (b : Nat) :
     ∀ i, i ≤ k + 1 →
@@ -288,8 +241,6 @@ theorem eagerQueries_upd {h : List Nat} {k : Nat}
     rw [eagerQueries_succ, eagerQueries_succ, ih,
       map_eagerQueries_upd s dom hnd b (Nat.le_of_succ_le_succ hi)]
 
-/-- The first `q + 1` queries collide only if the first `q` do or query
-`q + 1` is new and repeats an earlier answer. -/
 theorem collides_succ_imp (q : Nat) (g : List Nat) (hg : eagerCollides s dom (q + 1) g = true) :
     (eagerCollides s dom q g || stepHit s dom repeatBad q g) = true := by
   simp only [eagerCollides, decide_eq_true_eq] at hg
@@ -311,18 +262,12 @@ theorem collides_succ_imp (q : Nat) (g : List Nat) (hg : eagerCollides s dom (q 
       exact absurd (e ▸ List.mem_map_of_mem hy) hnot
   · exact Or.inl hq
 
-/-- A value whose length-`L` region lies near an earlier answer's region or
-covers a root word. -/
 def regionBadValue (N L : Nat) (roots : List Nat) (A : List Nat) (b : Nat) : Bool :=
   A.any (fun a => decide (Near N L b a)) || roots.any (fun r => decide (Covers N L b r))
 
-/-- The region premise fails on the first `q` queries under `g`. -/
 def eagerRegionsFail (N L : Nat) (roots : List Nat) (q : Nat) (g : List Nat) : Bool :=
   decide (¬ RegionsDisjoint N L (oracleOf dom g) roots (eagerQueries s (oracleOf dom g) q))
 
-/-- The region premise fails on `q + 1` queries only if it fails on the
-first `q` or query `q + 1` is new and its region is near an earlier one or
-covers a root. -/
 theorem regionsFail_succ_imp (N L : Nat) (roots : List Nat) (q : Nat) (g : List Nat)
     (hg : eagerRegionsFail s dom N L roots (q + 1) g = true) :
     (eagerRegionsFail s dom N L roots q g || stepHit s dom (regionBadValue N L roots) q g) =
@@ -352,7 +297,6 @@ theorem regionsFail_succ_imp (N L : Nat) (roots : List Nat) (q : Nat) (g : List 
 
 variable {s dom}
 
-/-- At most `|A| (2L - 1) + |roots| L` values are bad for the region premise. -/
 theorem countP_regionBadValue_le {N L : Nat} {roots : List Nat} (hroots : ∀ r ∈ roots, r < N)
     (A : List Nat) (hA : ∀ a ∈ A, a < N) :
     (List.range N).countP (regionBadValue N L roots A) ≤
@@ -377,12 +321,9 @@ theorem countP_regionBadValue_le {N L : Nat} {roots : List Nat} (hroots : ∀ r 
   rw [sumOver_const] at hv hv'
   exact Nat.le_trans h1 (Nat.add_le_add (Nat.le_trans hu hv) (Nat.le_trans hu' hv'))
 
-/-- The group of `h` at step `k`: the `N` functions that agree with `h` off the
-point of query `k + 1`. -/
 def group (N k : Nat) (h : List Nat) : List (List Nat) :=
   (List.range N).map (upd dom h (nextQuery s dom h k))
 
-/-- A group has `N` members among the tuples. -/
 theorem le_countP_group (hs : ∀ t, s t ∈ dom) {N k : Nat} {h : List Nat}
     (hh : h ∈ tuples N dom.length) :
     N ≤ (tuples N dom.length).countP (fun g => decide (g ∈ group (s := s) (dom := dom) N k h)) := by
@@ -411,8 +352,6 @@ theorem le_countP_group (hs : ∀ t, s t ∈ dom) {N k : Nat} {h : List Nat}
   rw [List.countP_eq_length_filter]
   exact hle
 
-/-- At most `c` members of a group go wrong at query `k + 1`, when at most `c`
-values are bad. -/
 theorem countP_stepHit_group_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → Nat → Bool}
     {N k c : Nat}
     (hbad : ∀ A : List Nat, A.length = k → (∀ a ∈ A, a < N) → (List.range N).countP (bad A) ≤ c)
@@ -455,8 +394,6 @@ theorem countP_stepHit_group_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → Na
   rw [List.countP_eq_length_filter]
   exact Nat.le_trans (length_le_of_nodup_subset hndF hsub) hlen
 
-/-- One step of the union bound: `N · |E k| ≤ c · N^|dom|` when at most `c`
-values are bad. -/
 theorem eager_step_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → Nat → Bool} {N k c : Nat}
     (hbad : ∀ A : List Nat, A.length = k → (∀ a ∈ A, a < N) → (List.range N).countP (bad A) ≤ c) :
     N * (tuples N dom.length).countP (stepHit s dom bad k) ≤ c * N ^ dom.length := by
@@ -486,10 +423,6 @@ theorem eager_step_le (hs : ∀ t, s t ∈ dom) {bad : List Nat → Nat → Bool
   rw [Nat.mul_comm c]
   exact Nat.le_trans hlo (hswap ▸ hhi)
 
-/-- The union bound over the step of the first collision: among the
-`N^|dom|` functions, those under which the first `q` adaptive queries collide
-number at most `q(q-1)/(2N) · N^|dom|`. Queries may repeat; a repeat gets the
-same answer and is no collision. -/
 theorem two_mul_eagerCollides_le (hs : ∀ t, s t ∈ dom) (N : Nat) :
     ∀ q, 2 * N * (tuples N dom.length).countP (eagerCollides s dom q) ≤
       q * (q - 1) * N ^ dom.length
@@ -536,9 +469,6 @@ theorem two_mul_eagerCollides_le (hs : ∀ t, s t ∈ dom) (N : Nat) :
     rw [hid]
     omega
 
-/-- Runs that stop early: if the run under `g` makes `τ g ≤ q` queries (the
-stopping point may depend on `g`, hence on the answers), its queries are a
-prefix of the first `q`, so the same bound holds. -/
 theorem two_mul_eager_stopped_le (hs : ∀ t, s t ∈ dom) (N q : Nat) (τ : List Nat → Nat)
     (hτ : ∀ g, τ g ≤ q) :
     2 * N * (tuples N dom.length).countP (fun g =>
@@ -553,7 +483,6 @@ theorem two_mul_eager_stopped_le (hs : ∀ t, s t ∈ dom) (N q : Nat) (τ : Lis
     exact fun hcf => hg (hcf.mono fun y hy => mem_eagerQueries_of_le s _ (hτ g) hy)
   exact Nat.le_trans (Nat.mul_le_mul_left (2 * N) hle) (two_mul_eagerCollides_le hs N q)
 
-/-- For a `k`-bit oracle: probability at most `q(q-1)/2^(k+1)`. -/
 theorem pow_two_eager_collision_prob_le (hs : ∀ t, s t ∈ dom) (k q : Nat) :
     2 ^ (k + 1) * (tuples (2 ^ k) dom.length).countP (eagerCollides s dom q) ≤
       q * (q - 1) * 2 ^ (k * dom.length) := by
@@ -562,18 +491,11 @@ theorem pow_two_eager_collision_prob_le (hs : ∀ t, s t ∈ dom) (k q : Nat) :
   rw [← Nat.pow_mul, ← Nat.pow_succ'] at h
   exact h
 
-/-- Keccak-256 (`N = 2^256`): an adaptive run of `q` hashes against a uniformly
-random function on `dom` collides with probability at most `q(q-1)/2²⁵⁷`. -/
 theorem keccak_eager_collision_prob_le (hs : ∀ t, s t ∈ dom) (q : Nat) :
     2 ^ (256 + 1) * (tuples (2 ^ 256) dom.length).countP (eagerCollides s dom q) ≤
       q * (q - 1) * 2 ^ (256 * dom.length) :=
   pow_two_eager_collision_prob_le hs 256 q
 
-/-- The region premise against adaptive queries: among the `N^|dom|`
-functions, those under which the region premise fails on the first `q`
-queries number at most
-`(q(q-1)(2L-1) + 2 q |roots| L) / (2N) · N^|dom|`, the bound of
-`two_mul_regionCollisions_le`. Queries may repeat. -/
 theorem two_mul_eagerRegionsFail_le (hs : ∀ t, s t ∈ dom) (N L : Nat) {roots : List Nat}
     (hroots : ∀ r ∈ roots, r < N) :
     ∀ q, 2 * N * (tuples N dom.length).countP (eagerRegionsFail s dom N L roots q) ≤
@@ -623,8 +545,6 @@ theorem two_mul_eagerRegionsFail_le (hs : ∀ t, s t ∈ dom) (N L : Nat) {roots
     rw [hid, Nat.add_mul, Nat.mul_assoc 2 _ (N ^ dom.length)]
     omega
 
-/-- For a `k`-bit oracle: the region premise fails on an adaptive run with
-probability at most `(q(q-1)(2L-1) + 2 q R L)/2^(k+1)`. -/
 theorem pow_two_eager_region_prob_le (hs : ∀ t, s t ∈ dom) (k L : Nat) {roots : List Nat}
     (hroots : ∀ r ∈ roots, r < 2 ^ k) (q : Nat) :
     2 ^ (k + 1) * (tuples (2 ^ k) dom.length).countP
@@ -637,8 +557,6 @@ theorem pow_two_eager_region_prob_le (hs : ∀ t, s t ∈ dom) (k L : Nat) {root
   rw [← Nat.pow_mul, ← Nat.pow_succ'] at h
   exact h
 
-/-- Keccak-256: the region premise fails on an adaptive run of `q` hashes with
-probability at most `(q(q-1)(2L-1) + 2 q R L)/2²⁵⁷`, `R` root words. -/
 theorem keccak_eager_region_prob_le (hs : ∀ t, s t ∈ dom) (L : Nat) {roots : List Nat}
     (hroots : ∀ r ∈ roots, r < 2 ^ 256) (q : Nat) :
     2 ^ (256 + 1) * (tuples (2 ^ 256) dom.length).countP
@@ -648,8 +566,6 @@ theorem keccak_eager_region_prob_le (hs : ∀ t, s t ∈ dom) (L : Nat) {roots :
 
 end Eager
 
-/-- The adaptive birthday bound for an eagerly
-sampled oracle, as stated in `CollisionBound.lean`. -/
 theorem eagerAdaptiveBound : EagerAdaptiveBound.{u} := by
   intro β _ dom _ s hs N q
   have hle : (tuples N dom.length).countP (fun g =>
