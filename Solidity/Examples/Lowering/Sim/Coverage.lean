@@ -3,6 +3,7 @@ import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
+import Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip.Leaves
 
 /-!
 # Coverage obstructions and independent smoke facts
@@ -12,8 +13,9 @@ statement: the first example refutes it under the authorized kernel hypothesis.
 The second checks that versioned production retains the v1 receipt; the third
 shows that caller placement alone does not repair the frozen spelling relation.
 The final checks establish decoding, alignment, acceptance of the existing
-materialized program, and actual lowering of the smoke separately; no
-elaboration receipt or complete production receipt is inferred.
+materialized program, and actual lowering of the smoke separately. The generated
+flag declaration has an exact elaboration receipt below; the complete loop
+production receipt is still outstanding.
 -/
 namespace Solidity.Examples.Lowering.Sim.Coverage
 
@@ -109,6 +111,66 @@ example (out : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool,
     ∃ b' : Body, b'.SameInput Match.body ∧ ∃ m, diagram.Assoc b' (Match.emitted out) m :=
   diagram_total_boolean Match.body (Match.emitted out) (smoke_in_domain out) production accepted
 
+private theorem narrow_bool : narrowTy? "bool" = none := by
+  rw [Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip.narrowTy?_mk]; rfl
+private theorem bytes_bool : bytesTy? "bool" = none := by
+  rw [Solidity.Correctness.Lowering.Total.FunctionTypeRoundTrip.bytesTy?_mk]; rfl
+private theorem fn_bool : fnTy? "bool" = false := by
+  rw [Solidity.Correctness.Lowering.Total.FunctionTypeParserLaws.fnTy?_mk]; rfl
+
+private theorem bool_decl_type : elabDeclTy Match.C (.named "bool") = .ok (.prim .bool, 256) := by
+  unfold elabDeclTy
+  simp only [narrow_bool, bytes_bool, fn_bool, Bool.false_eq_true, if_false]
+  rw [elabTy]
+  rfl
+
+private theorem bool_checked (Γ : NCtx) : check Match.C Γ .bool (.bool false) =
+    .ok (.simple (.bool false)) := by
+  rw [check, checkVia, synth]
+  all_goals first | rfl | (intros; contradiction)
+
+private theorem bool_rows : bytesRowsOf Match.C (.named "bool") = .ok [] := by
+  simp only [bytesRowsOf, fn_bool, bytes_bool, Bool.false_eq_true, if_false]
+  rfl
+
+/-- The exact first elaborated instruction of the lowered Match smoke. -/
+def smokeFlagProgram : SProg Match.C :=
+  letI : FreshNames := productionNames
+  [.of (ECtx.toNCtx Match.locals)
+    (.declLocal .bool (Var.ofName "brk0") (some (.simple (.bool false))))]
+
+/-- The actual declaration arm preserves the counter and memo and adds only
+the generated Boolean flag. The enclosing block sets `top := false`.
+Its equation comes from the kernel hypothesis. -/
+theorem smoke_flag (hk : Solidity.Goals.elabKernelTotal) :
+    (((@elabStmtP Match.C productionNames
+      (.decl (.named "bool") "brk0" (some (.bool false)))).run { funs := [], top := false }).run
+      (Match.locals, 1)).run {} =
+      .ok ((smokeFlagProgram, (("brk0", .val .bool) :: Match.locals, 1)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  rw [hp]
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, Option.mapM, fnPure_other]
+  conv => lhs; whnf
+  simp only [bytesStmt, RawStmt.mapExprsM, Option.mapM, bytesPure_other]
+  conv => lhs; whnf
+  simp only [RawStmt.exprs, Option.toList, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
+    Bool.false_eq_true, if_false, narrowWholeUse?_other]
+  conv => lhs; whnf
+  simp only [narrowPure_other]
+  conv => lhs; whnf
+  rw [(hk.1 Match.C).1.2.2.2.1]
+  unfold elabStmt1With
+  dsimp only
+  rw [bool_decl_type]
+  dsimp only [ElabM.lift, StateT.lift, ReaderT.run, StateT.run, Bind.bind,
+    ReaderT.bind, StateT.bind, Pure.pure, ReaderT.pure, StateT.pure, Except.bind, Except.pure]
+  simp only [Option.mapM, checkIn, bool_checked, bool_rows]
+  conv => lhs; whnf
+  rfl
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -124,3 +186,5 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Stmt.inferred
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain.Input.decoded_stmt
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.diagram_total_boolean
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_flag
