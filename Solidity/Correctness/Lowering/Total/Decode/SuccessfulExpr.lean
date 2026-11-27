@@ -53,6 +53,35 @@ theorem inferN_delete {l : LVal Γ a τ}
   show (LVal.inferN n Γ a >>= _) = _
   simp [h, hm, hp]
 
+/-- Assignment retains conversion and local-reference refusal checks. -/
+theorem inferN_assign {b : Syn .expr} {σ : STy} {l : LVal Γ a τ} {d : Typed Γ b σ}
+    (hl : LVal.inferN n Γ a = some ⟨τ, l⟩)
+    (hr : Typed.inferN n Γ b = some ⟨σ, d⟩)
+    (hi : σ.implicit Γ.isBase Γ.mapFree τ = true) (hm : Γ.assignRefused τ a = false) :
+    Typed.inferN (n + 1) Γ (.assign .assign a b) = some ⟨τ, .assign l d hi hm⟩ := by
+  show (LVal.inferN n Γ a >>= _) = _
+  simp [hl, hr, hi, hm]
+
+/-- Copy assignment is reached only after implicit conversion fails. -/
+theorem inferN_assignCopy {b : Syn .expr} {σ : STy} {l : LVal Γ a τ} {d : Typed Γ b σ}
+    (hl : LVal.inferN n Γ a = some ⟨τ, l⟩)
+    (hr : Typed.inferN n Γ b = some ⟨σ, d⟩)
+    (hi : σ.implicit Γ.isBase Γ.mapFree τ = false)
+    (hc : σ.copiesTo τ = true) (hn : Γ.namesLocal a = false) :
+    Typed.inferN (n + 1) Γ (.assign .assign a b) = some ⟨τ, .assignCopy l d hc hn⟩ := by
+  show (LVal.inferN n Γ a >>= _) = _
+  simp [hl, hr, hi, hc, hn]
+
+/-- Every compound operator uses the existing operator-specific fit check. -/
+theorem inferN_compound {b : Syn .expr} {σ : STy} {l : LVal Γ a τ} {d : Typed Γ b σ}
+    (op : Source.AssignOp) (ho : op ≠ .assign)
+    (hl : LVal.inferN n Γ a = some ⟨τ, l⟩)
+    (hr : Typed.inferN n Γ b = some ⟨σ, d⟩)
+    (hf : op.fits Γ.isBase Γ.mapFree σ τ = true) :
+    Typed.inferN (n + 1) Γ (.assign op a b) = some ⟨τ, .compound l d hf⟩ := by
+  cases op <;> first | exact False.elim (ho rfl) |
+    (change (LVal.inferN n Γ a >>= _) = _; simp [hl, hr, hf])
+
 /-- Inline arrays keep the inferred common type and all element-fit checks. -/
 theorem inferN_inlineArray {xs : Syn (.list .expr)} {τs : List STy} {σ : STy}
     {d : Typed Γ a τ} {ds : Source.TypedArgs Γ xs τs}

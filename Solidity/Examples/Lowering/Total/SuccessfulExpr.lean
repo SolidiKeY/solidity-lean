@@ -50,6 +50,23 @@ example : ∃ d, Typed.inferN 3 Γ
     some ⟨.array .memory (.int IntTy.u256) none, d⟩ :=
   ⟨_, inferN_newArray rfl rfl rfl rfl⟩
 
+-- Assignment effects use real local lvalues and preserve refusal boundaries.
+example : ∃ d, Typed.inferN 3 Γ (.assign .assign (.ident "x") one) =
+    some ⟨.int IntTy.u256, d⟩ := ⟨_, inferN_assign rfl rfl rfl rfl⟩
+example : ∃ d, Typed.inferN 3 Γ (.assign .add (.ident "x") one) =
+    some ⟨.int IntTy.u256, d⟩ := ⟨_, inferN_compound .add (by decide) rfl rfl rfl⟩
+#guard ty (.assign .assign (.ident "x") (.lit (.bool true))) = none
+#guard ty (.assign .assign one one) = none
+-- Compound typing admits zero; this is not a claim of runtime success.
+#guard ty (.assign .div (.ident "x") (.lit (.num (.dec 0 0 0)))) = some (.int IntTy.u256)
+private def copyΓ : Source.Ctx := {Γ with locals :=
+  [("xs", .array .storage (.array .storage (.int IntTy.u256) none) none),
+   ("ys", .array .memory (.int IntTy.u256) none)]}
+example : ∃ d, Typed.inferN 4 copyΓ
+    (.assign .assign (.index (.ident "xs") (.some one)) (.ident "ys")) =
+    some ⟨.array .storage (.int IntTy.u256) none, d⟩ :=
+  ⟨_, inferN_assignCopy rfl rfl rfl rfl rfl⟩
+
 -- Tuple mobility, environment admission, shadowing, and refusal boundaries.
 example : ∃ d, Typed.inferN 3 Γ (.tuple (.some (.ident "x"))
     (.cons (.some (.ident "b")) .nil)) =
