@@ -2069,6 +2069,7 @@ import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Correctness.Lowering.Sim.CoverageBranch
+import Solidity.Correctness.Lowering.Sim.CoverageControl
 import Solidity.Correctness.Lowering.Sim.Expr.Capture
 import Solidity.Correctness.Lowering.Sim.Expr.Frame
 import Solidity.Correctness.Lowering.Sim.Expr.Operand
