@@ -2,8 +2,7 @@ import Solidity.Source.Progress.EffectBodies
 
 /-! A finite declaration-order certificate for nonrecursive effect bodies.
 Each head may call only its certified tail. Actual elaboration supplies the
-frame and signature facts; admission stores syntax checks, not progress.
-The original recursive value-fragment checker and CallsOK remain unchanged. -/
+frame and signature facts; admission stores syntax checks, not progress. -/
 namespace Solidity.Source.Progress
 open EM
 open Solidity.Lowering.P9

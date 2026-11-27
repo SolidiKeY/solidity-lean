@@ -2,7 +2,7 @@ import Solidity.Source.Progress.InitializedCalls
 import Solidity.Source.Progress.ForwardingChain
 
 /-! Finite initialized-return extensions of an existing forwarding chain.
-Each declaration has a
+Each added declaration has a
 syntax certificate, source provenance and an exact selected body; a separate
 coverage check yields the complete source-function call interface. -/
 namespace Solidity.Source.Progress

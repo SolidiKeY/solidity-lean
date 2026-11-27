@@ -2,7 +2,7 @@ import Solidity.Source.Progress.ReadyBodyCalls
 
 /-! Progress for same-type local rebinding with a ready RHS. Finite rebinding
 prefixes lead into the existing ready-body admission. The preservation proof
-uses BodyExpr.rebind and its local-reference writer; no evaluator is changed.
+uses BodyExpr.rebind and its local-reference writer.
 These are Source-only results, with explicit call/body/default premises. -/
 namespace Solidity.Source.Progress
 open EM

@@ -3,7 +3,7 @@ import Solidity.Source.Preservation.MemoryBodies
 
 /-! Typed struct-constructor allocation parents. Member layout agreement is
 derived from the existing constructor typing proof, not supplied as a semantic
-execution premise. Existing readiness and memory-body admissions are unchanged. -/
+execution premise. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

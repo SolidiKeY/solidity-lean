@@ -2,8 +2,7 @@ import Solidity.Source.Progress.AggregateDefaults
 import Solidity.Source.Progress.StructParentControls
 
 /-! Reference-bearing struct defaults: actual nested empty-byte allocations,
-inhabited memory preservation, and a timeout after the first child allocation.
-The original default/readiness policies and heap observations are unchanged. -/
+inhabited memory preservation, and a timeout after the first child allocation. -/
 namespace Solidity.Source.Progress.AggregateDefaultControls
 open EM StructParentControls
 abbrev Pty : STy := .struct .memory dn

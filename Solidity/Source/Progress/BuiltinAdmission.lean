@@ -2,7 +2,7 @@ import Solidity.Source.Progress.LiteralBuiltins
 
 /-! A direct builtin admission over the existing checked whole-program call
 fragment. It admits scalar/constant argument expressions and literal bytes.
-It does not change the old checker or admit emitting/builtin callee bodies.
+It does not admit emitting/builtin callee bodies.
 Memory/storage/calldata byte expressions need invariant-relative admission.
 -/
 namespace Solidity.Source.Progress
