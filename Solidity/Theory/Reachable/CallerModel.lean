@@ -1,33 +1,6 @@
 import Solidity.Theory.Reachable.CleanTail
 import Solidity.Calculus.CleanTailBoundary
 
-/-!
-# Reachable states under a caller model
-
-`Lifetime.Reachable` runs each entry call deterministically. Here an entry
-call runs under an execution relation `Exec C`: the outcomes a caller model
-admits for a program from an entry frame (`COut`: a result, a halt, or the
-callback invariant broken where control leaves the contract). The
-transaction layer is the same as `Lifetime`'s: the payable guard, the
-entry frame, a commit of a result, a rollback of a revert or a panic,
-waiting. A `violated` run admits any outcome, so an invariant proved under a
-caller model owes that its entries never violate the callback invariant.
-
-`ReachableE (noCallback) M` is exactly `Lifetime.Reachable M`
-(`reachableE_noCallback_iff`), so `ValidStartE` under `noCallback` is
-`ValidStart (.reachable M)`. Clean tails are an invariant under callbacks
-too, for entries that keep them across the callback boundary
-(`cleanTail_invariantE`, `KeepsCleanC`: a halt allowed, unlike the box
-`Prog.CleanTailCallbackBoundary`, which gives it).
-
-The two stub readings are not ordered in general: `ExecP J` may report a
-violation where the deterministic run succeeds. They agree on entries that
-call nobody back (`exec_noCallback_iff_withCallback`, `leOn_of_callsBack`),
-which is what `ReachableE.mono` needs on an interface (`Exec.LeOn`).
-
-Deployment stays deterministic (`Lifetime.System.Init`): a constructor's
-callbacks are not modelled here.
--/
 
 namespace Solidity.Reachable
 
@@ -35,31 +8,22 @@ open Lifetime
 
 variable {C : Contract} {D A : Type}
 
-/-- **An entry call's admitted outcomes**: from an entry frame, what a run of
-the program may end in. -/
 abbrev Exec (C : Contract) := (σ : State C []) → Prog C [] [] → COut C σ.H [] → Prop
 
-/-- `E₁` admits no more than `E₂`: a weaker attacker. -/
 def Exec.Le (E₁ E₂ : Exec C) : Prop := ∀ σ P r, E₁ σ P r → E₂ σ P r
 
-/-- The relation that admits every outcome: the strongest attacker. -/
 def Exec.top : Exec C := fun _ _ _ => True
 
 theorem Exec.le_top (E : Exec C) : Exec.Le E Exec.top := fun _ _ _ _ => trivial
 
-/-- **Caller models**: two readings of `ValidT`. -/
 inductive CallerStub (C : Contract) where
   | noCallback
   | withCallback (J : StateInv C)
 
-/-- The execution relation of a caller model. -/
 def CallerStub.exec : CallerStub C → Exec C
   | .noCallback => fun σ P r => r = COut.ofRes (P.run σ)
   | .withCallback J => fun σ P r => ExecP J σ P r
 
-/-- **One entry call under `E`**: refused, failing to enter, or run under
-`E` from the entry frame. A run that violates the callback invariant admits
-any result. -/
 inductive RunE (E : Exec C) (M : System C D A) (s : World C) (a : A) (tx : TTx) :
     TRes (World C) → Prop where
   | refused (h : M.refuses a tx = true) : RunE E M s a tx (.error .revert)
@@ -74,7 +38,6 @@ inductive RunE (E : Exec C) (M : System C D A) (s : World C) (a : A) (tx : TTx) 
       (en : s.enter tx = .ok σ) (run : E σ (M.call a) .violated) (r : TRes (World C)) :
       RunE E M s a tx r
 
-/-- `Lifetime.Step` with entry calls run under `E`. -/
 inductive StepE (E : Exec C) (M : System C D A) : World C → Event A → World C → Prop where
   | commit {s t : World C} {a : A} {tx : TTx}
       (accepted : s.accepts tx) (allowed : M.allowCall s a tx)
@@ -87,14 +50,11 @@ inductive StepE (E : Exec C) (M : System C D A) : World C → Event A → World 
   | wait {s : World C} {t : PrimTy.uint.Denote} (later : s.timestamp.1 ≤ t.1) :
       StepE E M s (.wait t) (s.atTime t)
 
-/-- **The worlds reachable under `E`**: a successful deployment, then
-admitted steps. -/
 inductive ReachableE (E : Exec C) (M : System C D A) : World C → Prop where
   | init {s : World C} (deployed : M.Init s) : ReachableE E M s
   | step {s t : World C} {a : Event A} (before : ReachableE E M s)
       (next : StepE E M s a t) : ReachableE E M t
 
-/-- An invariant under `E`, by induction over the entry points. -/
 structure InvariantE (E : Exec C) (M : System C D A) (I : World C → Prop) : Prop where
   initially : ∀ s, M.Init s → I s
   preserved : ∀ {s t a}, I s → StepE E M s a t → I t
@@ -106,9 +66,7 @@ theorem InvariantE.always {E : Exec C} {M : System C D A} {I : World C → Prop}
   | init deployed => exact h.initially _ deployed
   | step _ next ih => exact h.preserved ih next
 
-/-! ## Monotone in the caller model -/
 
-/-- `E₁` admits no more than `E₂` on `M`'s entries. -/
 def Exec.LeOn (M : System C D A) (E₁ E₂ : Exec C) : Prop :=
   ∀ a σ r, E₁ σ (M.call a) r → E₂ σ (M.call a) r
 
@@ -132,20 +90,17 @@ theorem StepE.mono {E₁ E₂ : Exec C} {M : System C D A} (hE : Exec.LeOn M E�
   | .rollback acc al run failed => .rollback acc al (run.mono hE) failed
   | .wait later => .wait later
 
-/-- **A weaker attacker reaches no more worlds.** -/
 theorem ReachableE.mono {E₁ E₂ : Exec C} {M : System C D A} (hE : Exec.LeOn M E₁ E₂)
     {s : World C} (h : ReachableE E₁ M s) : ReachableE E₂ M s := by
   induction h with
   | init deployed => exact .init deployed
   | step _ next ih => exact .step ih (next.mono hE)
 
-/-- **An invariant against a stronger attacker holds against a weaker one.** -/
 theorem InvariantE.weaken {E₁ E₂ : Exec C} {M : System C D A} (hE : Exec.LeOn M E₁ E₂)
     {I : World C → Prop} (h : InvariantE E₂ M I) : InvariantE E₁ M I where
   initially := h.initially
   preserved := fun hi step => h.preserved hi (step.mono hE)
 
-/-! ## `noCallback` is `Lifetime` -/
 
 theorem runE_noCallback_iff {M : System C D A} {s : World C} {a : A} {tx : TTx}
     {r : TRes (World C)} :
@@ -216,7 +171,6 @@ theorem stepE_noCallback_iff {M : System C D A} {s t : World C} {a : Event A} :
     | rollback acc al run failed => exact .rollback acc al (runE_noCallback_iff.2 run) failed
     | wait later => exact .wait later
 
-/-- **Under `noCallback` the reachable worlds are `Lifetime`'s.** -/
 theorem reachableE_noCallback_iff {M : System C D A} {s : World C} :
     ReachableE (CallerStub.noCallback (C := C)).exec M s ↔ Reachable M s := by
   constructor
@@ -229,21 +183,14 @@ theorem reachableE_noCallback_iff {M : System C D A} {s : World C} :
     | init deployed => exact .init deployed
     | step _ next ih => exact .step ih (stepE_noCallback_iff.2 next)
 
-/-! ## The mode under a caller model -/
 
-/-- The entry states of the worlds reachable under `E`: top-level
-transaction frames only. A frame at which a callback re-enters the contract
-inside a transaction is not one; what holds there is `ExecP`'s callback
-invariant `J`. -/
 def EntryStateE (E : Exec C) (M : System C D A) (σ : State C []) : Prop :=
   ∃ s tx a, ReachableE E M s ∧ s.accepts tx ∧ M.refuses a tx = false ∧ M.allowCall s a tx ∧
     s.enter tx = .ok σ
 
-/-- **`Fml.Valid` at the entry states reachable under a caller model.** -/
 def ValidStartE (E : Exec C) (M : System C D A) (φ : Fml C []) : Prop :=
   ∀ σ, EntryStateE E M σ → holds σ φ
 
-/-- Under `noCallback` the mode is `ValidStart (.reachable M)`. -/
 theorem validStartE_noCallback_iff {M : System C D A} {φ : Fml C []} :
     ValidStartE (CallerStub.noCallback (C := C)).exec M φ ↔ ValidStart (.reachable M) φ := by
   constructor
@@ -252,12 +199,10 @@ theorem validStartE_noCallback_iff {M : System C D A} {φ : Fml C []} :
   · intro h σ ⟨s, tx, a, hs, rest⟩
     exact h σ ⟨s, tx, a, reachableE_noCallback_iff.1 hs, rest⟩
 
-/-- What holds against a stronger attacker holds against a weaker one. -/
 theorem ValidStartE.weaken {E₁ E₂ : Exec C} {M : System C D A} (hE : Exec.LeOn M E₁ E₂)
     {φ : Fml C []} (h : ValidStartE E₂ M φ) : ValidStartE E₁ M φ :=
   fun σ ⟨s, tx, a, hs, rest⟩ => h σ ⟨s, tx, a, hs.mono hE, rest⟩
 
-/-- Validity under a caller model from its invariant. -/
 theorem ValidStartE.of_invariant {E : Exec C} {M : System C D A} {I : World C → Prop}
     {J φ : Fml C []} (hI : InvariantE E M I)
     (entry : ∀ s tx a σ, I s → s.accepts tx → M.refuses a tx = false → M.allowCall s a tx →
@@ -265,8 +210,6 @@ theorem ValidStartE.of_invariant {E : Exec C} {M : System C D A} {I : World C �
     (h : Fml.Valid (.imp J φ)) : ValidStartE E M φ :=
   fun σ ⟨s, tx, a, hs, acc, g, al, en⟩ => h σ (entry s tx a σ (hI.always s hs) acc g al en)
 
-/-- **Entries that call nobody back run alike under both stub readings**
-(`ExecP.eq_run`, `ExecP.of_run`): the caller model then changes nothing. -/
 theorem exec_noCallback_iff_withCallback {J : StateInv C} {σ : State C []} {P : Prog C [] []}
     (hc : Prog.callsBack J.pay P = false) {r : COut C σ.H []} :
     (CallerStub.noCallback (C := C)).exec σ P r ↔ (CallerStub.withCallback J).exec σ P r := by
@@ -278,8 +221,6 @@ theorem exec_noCallback_iff_withCallback {J : StateInv C} {σ : State C []} {P :
   · intro h
     exact ExecP.eq_run h hc
 
-/-- For an interface whose entries call nobody back, the two readings are
-ordered both ways on its entries. -/
 theorem leOn_of_callsBack {M : System C D A} {J : StateInv C}
     (hc : ∀ a, Prog.callsBack J.pay (M.call a) = false) :
     Exec.LeOn M (CallerStub.noCallback (C := C)).exec (CallerStub.withCallback J).exec ∧
@@ -287,13 +228,7 @@ theorem leOn_of_callsBack {M : System C D A} {J : StateInv C}
   ⟨fun a _ _ h => (exec_noCallback_iff_withCallback (hc a)).1 h,
    fun a _ _ h => (exec_noCallback_iff_withCallback (hc a)).2 h⟩
 
-/-! ## Clean tails under callbacks -/
 
-/-- **An entry keeps clean tails under callbacks**: from a clean storage, every
-callback run of it, the callee assumed to keep clean tails
-(`StateInv.cleanTail`), ends clean, halts, or (never) violates. Unlike
-`Prog.CleanTailCallbackBoundary` (a box), a halt is allowed: a panic rolls
-back. -/
 def KeepsCleanC (P : Prog C [] []) : Prop :=
   ∀ σ : State C [], σ.storage.CleanTail → ∀ o, ExecP (StateInv.cleanTail C) σ P o →
     match o with
@@ -301,7 +236,6 @@ def KeepsCleanC (P : Prog C [] []) : Prop :=
     | .halt _ => True
     | .violated => False
 
-/-- The callback boundary (a box) gives it. -/
 theorem KeepsCleanC.of_boundary {P : Prog C [] []} (h : P.CleanTailCallbackBoundary) :
     KeepsCleanC P := by
   intro σ hσ o ho
@@ -311,8 +245,6 @@ theorem KeepsCleanC.of_boundary {P : Prog C [] []} (h : P.CleanTailCallbackBound
   | halt e => trivial
   | violated => exact hb
 
-/-- **An entry that calls nobody back and exposes nothing keeps clean
-tails**: its callback runs are its run (`ExecP.eq_run`). -/
 theorem KeepsCleanC.of_run {P : Prog C [] []} (hc : Prog.callsBack true P = false)
     (he : P.exposesNone = true) : KeepsCleanC P := by
   intro σ hσ o ho
@@ -324,9 +256,6 @@ theorem KeepsCleanC.of_run {P : Prog C [] []} (hc : Prog.callsBack true P = fals
     exact Prog.run_cleanTail P he hσ rfl hr
   | error e => simp only [COut.ofRes]
 
-/-- **Clean tails under callbacks**, by induction over the entry points: a
-constructor that exposes nothing and entries that keep clean tails, the
-callee assumed to keep them. -/
 theorem cleanTail_invariantE {M : System C D A} (hd : ∀ d, (M.deploy d).exposesNone = true)
     (hc : ∀ a, KeepsCleanC (M.call a)) :
     InvariantE (CallerStub.withCallback (StateInv.cleanTail C)).exec M CleanWorld where
@@ -346,7 +275,6 @@ theorem cleanTail_invariantE {M : System C D A} (hd : ∀ d, (M.deploy d).expose
     | rollback => exact hi
     | wait => exact hi
 
-/-- **`TailMode.clean` follows from reachability under callbacks.** -/
 theorem _root_.Solidity.ValidTail.validStartE_withCallback {M : System C D A}
     (hd : ∀ d, (M.deploy d).exposesNone = true) (hc : ∀ a, KeepsCleanC (M.call a))
     {φ : Fml C []} (h : ValidTail .clean φ) :
