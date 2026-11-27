@@ -1237,6 +1237,7 @@ import Solidity.Backend.Passes.BitwiseValueContext
 import Solidity.Backend.Passes.BitwiseValueContextControls
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.Bytes.Coverage
+import Solidity.Backend.Passes.Bytes.FullMachine.Intrinsic
 import Solidity.Backend.Passes.Bytes.Stage
 import Solidity.Backend.Passes.CaptureAliases
 import Solidity.Backend.Passes.CaptureCases

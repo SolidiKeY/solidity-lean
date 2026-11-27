@@ -1,1 +1,2 @@
 | `Examples/Backend/BytesFullMachine/FixedLayout.lean` | Default-local acceptance and intrinsic write at arbitrary frame base; refutes a universal word-bounded fixed `32*b` layout without asserting byte agreement. |
+| `Backend/Passes/Bytes/FullMachine/Intrinsic.lean` | Existing intrinsic compiler outcome projections: fault iff source divergence and zero pending skip on success; no byte-entry or byte-execution claim. |
