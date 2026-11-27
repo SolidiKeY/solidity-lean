@@ -82,7 +82,7 @@ def closure(graph, roots):
 
 def generated(path, text):
     reasons = []
-    if path in ('Solidity.lean', 'SolidityExamples.lean', 'Bridge/SolidityBridge.lean'):
+    if path in ('SolidityControls.lean','Solidity.lean', 'SolidityExamples.lean', 'Bridge/SolidityBridge.lean'):
         reasons.append('generated library root')
     if '/Corpus/' in path or path == 'SolidityCorpus.lean': reasons.append('Corpus')
     if 'AxiomPins' in path: reasons.append('AxiomPins')
@@ -257,7 +257,7 @@ def build():
         source = texts[v['path']]
         refs = {p for p in scriptpaths if p in source}
         if '/Corpus/' in v['path']: refs.add('scripts/solkey-port.mjs')
-        if v['path'] in ('Solidity.lean','SolidityExamples.lean','Bridge/SolidityBridge.lean'): refs.add('scripts/coord-tools/register.sh')
+        if v['path'] in ('SolidityControls.lean','Solidity.lean','SolidityExamples.lean','Bridge/SolidityBridge.lean'): refs.add('scripts/coord-tools/register.sh')
         generators[m] = dict(paths=sorted(refs),ci_script_reachable=any(p in scriptreach for p in refs) if refs else None,
                              status='textual candidate linkage; not invocation proof' if refs else 'unknown; filename classification alone is not provenance')
     report = dict(schema=1,base=BASE,command='python3 -B docs/audits/direction-tools/reachability/reach.py --check',
