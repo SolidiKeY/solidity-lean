@@ -4,3 +4,4 @@
 | `Examples/FrontendValidation/SolcJson/Ir.lean` | Literal accepting/rejecting controls for IR channel selection, source/contract paths, lookup, and extracted text. |
 | `Examples/FrontendValidation/SolcJson/CallMetadata.lean` | Literal profile, call-shape, static-target, location and attachment controls; structural metadata only. |
 | `Examples/FrontendValidation/SolcJson/YulIngress.lean` | Literal JSON grammar, metadata, documentation safety and closed/scoped ingress controls; no source or execution authentication. |
+| `Examples/FrontendValidation/SolcJson/BodyHelpers.lean` | Literal rational, expression, tuple, storage-reference, aggregate and declaration-owner acceptance/refusal controls. |
