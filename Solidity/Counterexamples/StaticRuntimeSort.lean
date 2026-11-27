@@ -20,7 +20,7 @@ The consequence upstream: `\hasSort(x, \sort(alphaSt))` on an
 array-typed path binds `alphaSt := uint[]`, and the taclet's
 `find<[alphaSt]>(storage, x)` is then a term of sort `uint[]` that no
 `selectSt`/`find` simplification rule (all stated on `Struct`) can
-consume. Today's `solidityProgramRules.key` binds only `alphaPrim` under
+consume. `solidityProgramRules.key` binds only `alphaPrim` under
 `\hasSort`, so the gap is latent; a future taclet that binds `alphaSt`
 on an unconstrained `Path` would hit it. See `docs/solkey-feedback.md`.
 -/

@@ -7,7 +7,7 @@ import Solidity.Typing.HeredRun
 `Storage.CleanTail` (`Typing/CleanTail.lean`) is not kept by every run: a
 write through an alias left past a live end by a shrink (a `pop`, a
 `delete`, a copy over a longer array) lands in the slots past the end, and
-an empty `push` later exposes it (`docs/options.md`, O6).  It is kept by a
+an empty `push` later exposes it (`docs/options.md`).  It is kept by a
 program that never shrinks an array while a storage alias may point into
 it (`Prog.exposesNone`): then every alias stays at live slots, every write
 lands at live slots, and what lies past an end is only what a clear left,
