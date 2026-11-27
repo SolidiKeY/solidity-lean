@@ -178,6 +178,7 @@ import Solidity.Examples.FreshNamesLaw
 import Solidity.Examples.FrontendValidation.SolcJson
 import Solidity.Examples.FrontendValidation.SolcJson.CallMetadata
 import Solidity.Examples.FrontendValidation.SolcJson.Ir
+import Solidity.Examples.FrontendValidation.SolcJson.YulIngress
 import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
 import Solidity.Examples.Goals.BenchmarkBudgetsMet
