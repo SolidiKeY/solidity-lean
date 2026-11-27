@@ -1,37 +1,6 @@
 import Solidity.Signature
 import Solidity.Typing.CleanTail
 
-/-!
-# What a typed symbol denotes in the Theory, and the bridge
-
-A formula's equation reads its terms in the typed Theory
-(`Theory/Typed/Obs.lean`: a value is its observations), KeY's total model:
-a read off the end of what is there reads the default, a write always
-lands, so solkey's laws need no "the write lands" premise.  `Op0.denote` …
-`Op3.denote` read the typed symbols of `Signature.lean` there, over the
-typed global part's storage read as its observations (`Storage.obs`);
-`Tm.denote` (`Calculus/Lands.lean`) is one recursion over them.  A sort
-denotes `Srt.TDen C`: a word or a KeY `int` an `Option` (`none` a halt), a
-path a storage location (`SLoc`), a storage a `TSto`, a stored value a
-`TVal`.
-
-**The bridge** (`Op0.denote_eval` … `Op3.denote_eval`): where the typed
-evaluation returns (`OpN.eval`, `some`), the denotation is its value read
-as its observations (`Srt.Bridge`): literally, by the bridge lemmas of
-`Theory/Typed/Obs.lean` (`Storage.obs_write`, `obs_delete`, `obs_push`, …).
-
-**Where it does not follow the Theory.**
-- Arithmetic is the interpreter's checked arithmetic (`BinOp.evalT`,
-  `UnOp.evalT`), a halt `none`.
-- The memory island is not abstracted: `read`, `mlen` and `copyMem` denote
-  the typed evaluation's value, and the memory sorts denote nothing.
-- A path is not bounds-checked (`at`): that is KeY's guard, a premise of the
-  laws.  `next` reads the length in the global storage, `nextIn` in its
-  storage term.
-
-This is the only Theory module that imports the signature directly; `Theory/Typed/Mem.lean` reads it (`MAddrT`, `Grown.writeT`) through
-`Calculus/StateFacts.lean`.
--/
 
 namespace Solidity
 
@@ -39,12 +8,7 @@ open Semantics (lookupBy)
 
 variable {C : Contract}
 
-/-! ## The Theory's sorts -/
 
-/-- What a term of each sort denotes in the Theory: a word or a KeY `int`
-its value (`none`, a halt), a path a storage location, a storage and a
-stored value their observations; the memory sorts denote nothing of their
-own. -/
 @[reducible] def Srt.TDen (C : Contract) : Srt → Type
   | .val p => Option p.Denote
   | .path T => SLoc C T
@@ -55,13 +19,10 @@ own. -/
   | .kint => Option Int
   | .ident _ | .addr _ | .mem | .mv _ => Unit
 
-/-- A live length as a `uint`: past the bound, nothing. -/
 def lenW (n : Nat) : Option PrimTy.uint.Denote :=
   if h : n < 2 ^ 256 then some (lenU n h) else none
 
-/-! ## The symbols in the Theory -/
 
-/-- A constant in the Theory. -/
 def Op0.denote (g : State C []) {s : Srt} : Op0 C s → s.TDen C
   | .lit v => some v
   | .env k => some (g.envVal k)
@@ -72,9 +33,6 @@ def Op0.denote (g : State C []) {s : Srt} : Op0 C s → s.TDen C
   | .member _ f h => .ref (SRef.ofRoot (C := Contract.ofStruct _) f h)
   | .zlit n => some n
 
-/-- A unary symbol in the Theory, its argument's denotation given.
-`cleanTail(s)` is what the observations of `s` show (`TSto.CleanTails`,
-`Typing/CleanTail.lean`), so it is classical. -/
 noncomputable def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen C
   | .unop op h, da => da.bind (op.evalT h)
   | .net, da => da.map fun n => (lookupBy n g.net).getD 0
@@ -96,8 +54,6 @@ noncomputable def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen
   | .fixedCopy shape, da => shape.observe da
   | .cleanTail, ds => open Classical in if TSto.CleanTails ds then some true else none
 
-/-- A binary symbol in the Theory, its arguments' typed readings and
-denotations given. -/
 def Op2.denote (g : State C []) {a b s : Srt} :
     Op2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → a.TDen C → b.TDen C → s.TDen C
   | .binop op h, _, _, da, db => da.bind fun x => binopT op h x db
@@ -130,7 +86,6 @@ def Op2.denote (g : State C []) {a b s : Srt} :
     | some a, some b => (Storage.anon L a b).obs
     | _, _ => (Storage.init C).obs
 
-/-- A ternary symbol in the Theory, its arguments' denotations given. -/
 def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen C → b.TDen C → c.TDen C → s.TDen C
   | .ite, dc, da, db => dc.bind fun x => cond x da db
   | .save, ds, dp, dv => ds.copyTo dp dv
@@ -140,10 +95,7 @@ def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen C → b.TDen C → c.T
   | .saveIn, ds, dp, dv => ds.copyTo dp dv
   | .modular op, dx, dy, dk => do op.evalT (← dx) (← dy) (← dk)
 
-/-! ## The bridge -/
 
-/-- A denotation agrees with a typed value: the value itself, the
-reference, the storage or stored value read as its observations. -/
 def Srt.Bridge (C : Contract) (H : HTy) : (s : Srt) → s.TDen C → s.Den C H → Prop
   | .val _, d, x => d = some x
   | .path _, d, r => d = .ref r
@@ -154,7 +106,6 @@ def Srt.Bridge (C : Contract) (H : HTy) : (s : Srt) → s.TDen C → s.Den C H �
   | .kint, d, n => d = some n
   | .ident _, _, _ | .addr _, _, _ | .mem, _, _ | .mv _, _, _ => True
 
-/-- A denotation agrees with a typed reading wherever it returns. -/
 def Srt.BridgeO (C : Contract) (H : HTy) (s : Srt) (d : s.TDen C) (x : Option (s.Den C H)) : Prop :=
   ∀ v, x = some v → Srt.Bridge C H s d v
 
@@ -182,7 +133,6 @@ theorem Storage.obs_word_ref_some {P : PrimTy} {st : Storage C} {r : SRef C (.pr
   rw [e]
   cases w; rfl
 
-/-- A push that returns had room. -/
 theorem Storage.full_of_push {C : Contract} {E : Ty} {st st' : Storage C}
     {r : SRef C (.ref (.array E))} {val : SVal E → Option (SVal E)}
     (h : st.push r val = some st') : st.full r = false := by
@@ -200,7 +150,6 @@ theorem Storage.full_of_push {C : Contract} {E : Ty} {st st' : Storage C}
         simp only [Option.bind_none, Option.bind_some, hb, dite_false, reduceCtorEq,
           imp_self]
 
-/-- A push as a place that returns had room. -/
 theorem Storage.full_of_pushPlace {C : Contract} {E : Ty} {st : Storage C}
     {r : SRef C (.ref (.array E))} {q : Storage C × PrimTy.uint.Denote}
     (h : st.pushPlace r = some q) : st.full r = false :=

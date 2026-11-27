@@ -1,21 +1,5 @@
 import Solidity.Theory.Progress.Fragment
 
-/-!
-# Progress with internal calls over the extended fragment
-
-The joint induction of `Solidity/Source/StmtProgress.lean` (`FragAt`,
-`fragAt`) over the extended fragment of `Theory/Progress/Fragment.lean`:
-expressions (with internal calls to the allowed declarations `A`),
-statements and blocks of `SFrag X A`, bodies without modifiers and
-internal calls are never `stuck`, at every horizon, from every state, for
-a program whose allowed functions are bodies of the extended fragment
-(`CallsOKX`) and an extension whose node step is proved
-(`StmtExt.Sound`).
-
-Expression progress is kept at every horizon up to `n` (`FragXAt.expr`),
-which the tuple literal of a tuple declaration needs (its components are
-evaluated at the lower horizons `evalArgs` steps through).
--/
 
 namespace Solidity.Theory.Progress
 
@@ -23,25 +7,18 @@ open Solidity.Source Solidity.Source.Progress EM
 
 variable {E : Env}
 
-/-- **The program premise**: every function `A` allows, dispatched from
-contract `c`, is a body without modifiers in the extended fragment, in the
-operations' domains, whose locals are the frame the call builds and whose
-return types have defaults. `CallsOK` with `IFrag` for `ValFragC`. -/
 def CallsOKX (X : StmtExt E) (A : Decl → Prop) (G : Glob E) (c : String) : Prop :=
   ∀ (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → A d →
     ∃ b, G.prog.body (G.dispatchFn c d) = some b ∧ b.mods = [] ∧
       rs.reverseAux (ps.reverseAux []) = b.locals ∧ b.rs = rs ∧ b.ps.length = ps.length ∧
       (∀ τ ∈ rs, (Val.default E.layout τ).isSome = true) ∧ IFrag X A b.items ∧ b.items.OpsOK
 
-/-- Every program the original fragment admits is admitted. -/
 theorem CallsOK.toX {A : Decl → Prop} {G : Glob E} {c : String} (h : CallsOK A G c) (X : StmtExt E) :
     CallsOKX X A G c := by
   intro d ps rs hs hA
   obtain ⟨b, hb, hm, hl, hr, hp, hz, hf, ho⟩ := h d hs hA
   exact ⟨b, hb, hm, hl, hr, hp, hz, .base b.items hf, ho⟩
 
-/-- **The joint induction hypothesis** at horizon `n`, for frames of
-contract `c`. -/
 structure FragXAt (X : StmtExt E) (A : Decl → Prop) (G : Glob E) (c : String) (n : Nat) : Prop where
   expr : ∀ m, m ≤ n → ∀ F, F.contract = c → ExprNSAt A G F m
   stmt : StmtNSAtX G X A (· = c) n
@@ -49,7 +26,24 @@ structure FragXAt (X : StmtExt E) (A : Decl → Prop) (G : Glob E) (c : String) 
     b.items.OpsOK → BodyFrame b.ps.length b.rs b.locals → NS (runMods G F n b [] l)
   call : ∀ F, F.contract = c → CallNS A G F n
 
-/-- At horizon `0` everything times out. -/
+example (G : Glob E) (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ) :
+    evalE G F 0 e = halt .timeout := by rw [evalE.eq_1]
+
+example (G : Glob E) (F : Fr) {Γ : RCtx} {σ ρ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ ρ) :
+    evalPair G F 0 a b = halt .timeout := by rw [evalPair.eq_1]
+
+example (G : Glob E) (F : Fr) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) :
+    evalLoc G F 0 l = halt .timeout := by rw [evalLoc.eq_1]
+
+example (G : Glob E) (F : Fr) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs) :
+    evalConvArgs G F 0 es = halt .timeout := by rw [evalConvArgs.eq_1]
+
+example (G : Glob E) (F : Fr) (b : RBody E) (mods : List (RModInv E b.locals)) (l : Locals E.layout b.locals) :
+    runMods G F 0 b mods l = halt .timeout := by rw [runMods.eq_1]
+
+example (G : Glob E) (F : Fr) (d : Decl) {ps : List STy} (vs : Vals E.layout ps) (rs : List STy) :
+    callInternal G F 0 d vs rs = halt .timeout := by rw [callInternal.eq_1]
+
 theorem fragXAt_zero (X : StmtExt E) (A : Decl → Prop) (G : Glob E) (c : String) : FragXAt X A G c 0 where
   expr m hm F _ := by
     rw [Nat.le_zero.1 hm]
@@ -61,7 +55,6 @@ theorem fragXAt_zero (X : StmtExt E) (A : Decl → Prop) (G : Glob E) (c : Strin
 section
 variable {X : StmtExt E} {A : Decl → Prop} {Q : String → Prop} {G : Glob E} {c : String} {n : Nat}
 
-/-- The statement step over the extended fragment. -/
 theorem stmtNSAtX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ F, Q F.contract → ExprNSAt A G F m)
     (hS : X.Sound G A Q) : StmtNSAtX G X A Q (n + 1) where
   execS F hP nps ph _ _ _ _ _ s l hf ho hfr := execSX_step ih hX hS F hP nps ph s l hf ho hfr
@@ -69,7 +62,6 @@ theorem stmtNSAtX_step (ih : StmtNSAtX G X A Q n) (hX : ∀ m, m ≤ n → ∀ F
   forIter F hP nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr :=
     forIterX_step ih (hX n (Nat.le_refl n)) F hP nps ph c post body l hc hc' hp hp' hb hb' hfr
 
-/-- **A modifier-free body** of the extended fragment, one step up. -/
 theorem modsX_step (ih : FragXAt X A G c n) (F : Fr) (hc : F.contract = c) (b : RBody E)
     (l : Locals E.layout b.locals) (hf : IFrag X A b.items) (ho : b.items.OpsOK)
     (hfr : BodyFrame b.ps.length b.rs b.locals) : NS (runMods G F (n + 1) b [] l) := by
@@ -83,7 +75,6 @@ theorem modsX_step (ih : FragXAt X A G c n) (F : Fr) (hc : F.contract = c) (b : 
   | brk _ => exact nomatch ho'
   | cont _ => exact nomatch ho'
 
-/-- **An internal call** to an allowed function, one step up. -/
 theorem callX_step (hG : CallsOKX X A G c) (ih : FragXAt X A G c n) (F : Fr) (hc : F.contract = c) :
     CallNS A G F (n + 1) := by
   intro d ps rs hs hA vs
@@ -101,7 +92,6 @@ theorem callX_step (hG : CallsOKX X A G c) (ih : FragXAt X A G c n) (F : Fr) (hc
 
 end
 
-/-- **The joint progress induction** over the extended fragment. -/
 theorem fragXAt {X : StmtExt E} {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOKX X A G c)
     (hS : X.Sound G A (· = c)) : ∀ n, FragXAt X A G c n
   | 0 => fragXAt_zero X A G c
