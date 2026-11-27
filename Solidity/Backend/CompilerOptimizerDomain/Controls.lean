@@ -1,3 +1,4 @@
+import Solidity.Backend.CompilerOptimizerDomain
 import Solidity.Backend.CompilerOptimizerDomain.UnusedVar
 import Solidity.Backend.CompilerOptimizerDomain.StmtFold
 import Solidity.Backend.CompilerOptimizerDomain.DeadCode
@@ -13,7 +14,7 @@ import Solidity.Backend.CompilerOptimizerDomain.Strengthening
 /-! Integration controls for the proved folding, simplification, removal, LICM,
 weakening/strengthening, inlining, CSE and constant-propagation results. These check both
 resource and fragment consequences against the unchanged public compiler domain;
-they do not assert preservation by the remaining optimizer stages or iteration. -/
+the final control checks arbitrary iterations of the complete actual pipeline. -/
 namespace Solidity.Backend.CompilerOptimizerDomain.Controls
 open Solidity Solidity.Evm
 open Solidity.Backend.AbiWorld.PublicCompilerTotal
@@ -111,5 +112,11 @@ example (hP : ProgOk [] P) :
   have hQ := prog_uve_ok hP
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
   exact ⟨hQ.quiet.1, G, h⟩
+
+-- The full actual optimizer retains both properties for every accepted input.
+example (n : Nat) (hP : ProgOk [] P) :
+    Evm.Prog.pushes (P.optimize n) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (P.optimize n) = some G :=
+  ⟨optimize_pushes n hP, optimize_frag n hP⟩
 
 end Solidity.Backend.CompilerOptimizerDomain.Controls
