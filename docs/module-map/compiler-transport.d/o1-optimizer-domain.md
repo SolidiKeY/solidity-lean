@@ -1,1 +1,1 @@
-| `Backend/CompilerOptimizerDomain/{ConstFold,StmtFold,Controls}.lean` | Constant-fold expression and program domain preservation, generic statement lifting, and resource/fragment integration controls. |
+| `Backend/CompilerOptimizerDomain/{ConstFold,StmtFold,DeadCode,DeadStore,Controls}.lean` | Accepted-domain preservation for constant folding and statement/store removal, with resource/fragment integration controls. |

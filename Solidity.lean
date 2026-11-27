@@ -161,6 +161,8 @@ import Solidity.Backend.CompilerEndpointV2
 import Solidity.Backend.CompilerEndpointWitnesses
 import Solidity.Backend.CompilerOptimized
 import Solidity.Backend.CompilerOptimizerDomain.ConstFold
+import Solidity.Backend.CompilerOptimizerDomain.DeadCode
+import Solidity.Backend.CompilerOptimizerDomain.DeadStore
 import Solidity.Backend.CompilerOptimizerDomain.StmtFold
 import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control
