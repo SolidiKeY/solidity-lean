@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.ArithmeticBuiltins
 
-/-! Progress for `ecrecover` on scalar and string-literal arguments. The
-result follows the evaluator's precompile call; see `ScalarBuiltinControls`
-for its failure case. -/
 
 namespace Solidity.Source.Progress
 open EM
@@ -13,7 +10,6 @@ def WordSource (s : STy) : Prop := ScalarSource s ∨ ∃ bs, s = .stringLit bs
 theorem keyable_value {t : STy} (ht : t.keyable = true) : t.isValue = true := by
   cases t <;> first | rfl | cases ht
 
-/-- The exact conversion/word extraction used by ecrecover. -/
 def builtinW (F : Fr) (n : Nat) {s : STy} (t : STy) (x : RVal E.layout s) : EM E Γ Roadmap.Bytes := do
   match (← getV (← convRV F n t x)).word with
   | some w => pure (wordBytes w)

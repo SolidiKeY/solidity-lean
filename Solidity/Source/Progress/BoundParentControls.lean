@@ -2,9 +2,6 @@ import Solidity.Source.Progress.BoundParents
 import Solidity.Source.Progress.ReadyReturns
 import Solidity.Lowering.P9.InferenceCuts
 
-/-! Actual Source-inferred body binds an allocating parent to a local before
-return. Inhabited calls exercise local-frame growth, return-slot writes and
-scope restoration while retaining both default and returned heap objects. -/
 namespace Solidity.Source.Progress.BoundParentControls
 open EM Solidity.Lowering.P9
 

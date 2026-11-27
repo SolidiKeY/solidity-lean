@@ -2,9 +2,6 @@ import Solidity.Source.Progress.InlineArrayParents
 import Solidity.Source.Progress.StructParents
 import Solidity.Source.Progress.ReadyBodyCalls
 
-/-! Finite allocation-parent expression prefixes over the existing Source
-items. Their memory admission and actual progress are derived, then composed
-with modifier-free internal calls. Existing readiness predicates are unchanged. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

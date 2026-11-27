@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.StructParents
 import Solidity.Lowering.P9.InferenceCuts
 
-/-! Struct-parent progress with old and freshly allocated reference fields.
-The struct declaration environment is elaborated; constructor nodes are built
-directly. Both pipelines retain allocation/alias, panic and packing boundaries. -/
 namespace Solidity.Source.Progress.StructParentControls
 open EM
 

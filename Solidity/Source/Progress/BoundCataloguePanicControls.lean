@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.BoundCatalogue
 import Solidity.Source.Progress.BoundParentPanicControls
 
-/-! Inhabited catalogue consumers over an actual elaborated program. No
-parameter/return/local frame equations are supplied to the public adapter;
-elaboration derives them. Coverage omission and false body metadata refuse. -/
 namespace Solidity.Source.Progress.BoundCataloguePanicControls
 open EM Solidity.Lowering.P9 BoundParentPanicControls
 
