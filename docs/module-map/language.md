@@ -228,6 +228,8 @@ commands; it never enters the core import graph.
 | `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned: soundness, the rule table against the strategy (`rule_exists`, `rule_of_step`), the solkey fragment at the rule level (`solkey_rule_exists`, `solkey_rule_lt_calculus`, `solkey_step_taclet`) and at the judgement level (`solkey_eq_calculus`, `solkey_lt_calculus`), the compiler (`σ ≈[C, L, b, F] m`: `Evm.Sim` of the typed state). |
 
 | `Semantics/StaticCallState.lean` | Existing-frame resumption and exact visible havoc equality; no execution producer. |
+| `Solidity/Syntax/StringLaws.lean` | Core-only character-count bounds for extraction, substring conversion, drop/take, trimming and split pieces; strict drop/dropRight and non-singleton split decrease. |
+| `Solidity/Examples/StringLaws.lean` | Parametric consumers and Unicode, empty-separator and oversized-count checks for the core String laws. |
 | `Examples/FreshNamesLaw.lean` | Universal default and table round-trip checks; rejection of conflicting prefixes, aliases, and constant schemes. |
 | `Hash/Bridge.lean` | Run-local ideal special case, exact region clearance, guard/prefix transfer and concrete collision control. |
 | `Hash/CollisionBridge.lean` | Combined adaptive oracle count, exact fixed-hash replacement, actual-query inclusion and corrected q=0/q=1 controls. |

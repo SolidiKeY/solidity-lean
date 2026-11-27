@@ -28,13 +28,17 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Automation/H28/Prove.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
 | `Tools/VerifierMetadata.lean` | Additive kernel facts tying each reported `postFails` index to the exact typed false postcondition clause and final run state; no source span, original-obligation or candidate association is inferred. |
 | `Tools/ExecutableGoalBinding.lean` | Exact executable-goal failure at a proved same candidate; retains distinct source-values equality obligations and makes no importer transport or source-authentication claim. |
+| `Docs/ProseRatio/Allowance.lean` | Floor rounding, value equivalence and minimum bounds. |
+| `Docs/ProseRatio/Classification.lean` | Acceptance over all areas and inert or code-free padding. |
+| `Docs/ProseRatio/Policy.lean` | Missing entries, shrink-only policy updates and ratio-preserving growth. |
+| `Docs/ProseRatio.lean` | Assembles the exact `proseRatioRuleSound` laws for every decidable area type. |
 | `Docs/ProseCalibrated/Allowance.lean` | Exact allowance arithmetic: rational order, componentwise minimum, numerator antitonicity, floor/boundary evaluation, equivalence invariance, and zero calibration laws over `Goals.ProseCalibrated`. |
 | `Examples/Docs/ProseCalibrated/Allowance.lean` | Checks the complete public types of the seven allowance arithmetic laws and four helpers against their proved constants. |
 | `Solidity/Docs/ProseCalibrated/Classification.lean` | Calibrated prose classification, exclusion, locality and lexical padding laws over the frozen model. |
 | `Solidity/Docs/ProseCalibrated/Policy.lean` | Calibrated prose policy laws: acceptance decides the declarative order, rejection, unseen keys, fail-closed unavailable measurements, and the shrink, tighten and no-replacement laws. |
 | `Solidity/Docs/ProseCalibrated.lean` | Assembles `prose_calibrated_ratio_rule_sound` from the allowance, classification and policy laws; checker correspondence stays a separate obligation. |
-
-| `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
+| `**/*Controls.lean` | Library membership (H627): unreachable Controls belong to the generated default-target `SolidityControls` library; reachable Controls stay in `Solidity`. `controls-classify.py --check` verifies the partition. |
+| `SolidityControls.lean` | Generated default-target root for unreachable Controls (t2b-controls-root-split). CI and the axiom audit cover this library; root readers retain library classification and heartbeat baselines. `register.sh --check` and `controls-classify.py --check` verify generated membership. |
 
 | `Tools/FastMode/Engine.lean` | Compiled JSON verdicts over exact frontend obligations, proved rule/closer execution, native open-sequent diagnostics and `#fast_export` executable definitions; no result theorem. |
 | `Tools/FastMode/Meta.lean` | Compiled extended-reading tactics over exact frontend targets; detached candidate audit/discard, native open-goal diagnostics and per-function reading discovery; no final result theorem. |

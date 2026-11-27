@@ -92,7 +92,7 @@ RUFF_RULES = "F401,F811,F841"
 RUFF_ERROR_RULES = "F821,F822,F823,F63,F7,E9,PLE,B006,B008,B012"
 PROOF_KINDS = ("theorem", "lemma")
 DIRECTIVE = re.compile(r'^(?:namespace|section|end|open|variable|attribute|set_option|import)\b', re.M)
-ROOTS = ("Solidity.lean", "SolidityExamples.lean", "Bridge/SolidityBridge.lean", "SolidityCorpus.lean")
+ROOTS = ("Solidity.lean", "SolidityControls.lean", "SolidityExamples.lean", "Bridge/SolidityBridge.lean", "SolidityCorpus.lean")
 PUNCT = re.compile(r"[^\w\s]")
 WARNING = re.compile(r"^warning: (\S+?):(\d+):(\d+): (.*)$", re.M)
 
