@@ -2069,6 +2069,7 @@ import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Correctness.Lowering.Sim.CoverageBranch
+import Solidity.Correctness.Lowering.Sim.CoverageControl
 import Solidity.Correctness.Lowering.Sim.Expr.Capture
 import Solidity.Correctness.Lowering.Sim.Expr.Frame
 import Solidity.Correctness.Lowering.Sim.Expr.Operand
@@ -2139,6 +2140,7 @@ import Solidity.Correctness.Lowering.Total.Decode.Marked
 import Solidity.Correctness.Lowering.Total.Decode.Self
 import Solidity.Correctness.Lowering.Total.Decode.Spelling
 import Solidity.Correctness.Lowering.Total.Decode.SuccessfulContext
+import Solidity.Correctness.Lowering.Total.Decode.SuccessfulExpr
 import Solidity.Correctness.Lowering.Total.Decode.Tables
 import Solidity.Correctness.Lowering.Total.Decode.Widths
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
@@ -2223,6 +2225,10 @@ import Solidity.Docs.ProseCalibrated
 import Solidity.Docs.ProseCalibrated.Allowance
 import Solidity.Docs.ProseCalibrated.Classification
 import Solidity.Docs.ProseCalibrated.Policy
+import Solidity.Docs.ProseRatio
+import Solidity.Docs.ProseRatio.Allowance
+import Solidity.Docs.ProseRatio.Classification
+import Solidity.Docs.ProseRatio.Policy
 import Solidity.ERC7201
 import Solidity.Eqns
 import Solidity.Evm.Compile
@@ -3957,6 +3963,7 @@ import Solidity.Syntax.Quote
 import Solidity.Syntax.Raw
 import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
+import Solidity.Syntax.StringLaws
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
 import Solidity.Theory.CallerModel.Static
