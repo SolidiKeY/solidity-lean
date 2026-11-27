@@ -127,6 +127,18 @@
 | `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
 | `Correctness/Lowering/Sim/Induction/Knot.lean` | The actual elaborator record satisfies the frozen case predicates by `elabKernelTotal` induction, conditional on the three case hypotheses and the explicit loop-arm bridge; an intermediate step toward `loweringBySimulation`. |
 | `Examples/Lowering/Sim/Induction.lean` | Uses the intermediate knot-closure theorem with production fresh names and its loop-arm bridge hypothesis. |
+| `Solidity/Correctness/Lowering/Sim/CoverageControl.lean` | Exact condition/then/else and default lowered-loop condition/body run-success composition; actual-producer specialization requires explicit `elabKernelTotal`. |
+| `Solidity/Examples/Lowering/Sim/CoverageControl.lean` | Actual recursive-producer execution assertions with nonempty branches, preserved counters and seeded memo. |
+
+These helpers advance `Solidity.Goals.loweringBySimulation` without changing
+its statement or asserting `Diagram.Total`. Receipts expose entry contexts,
+intermediate fresh counters, the complete reader and both state layers.
+LS3B must supply the individual condition and scope receipts after establishing
+capture, assignment and branch behavior. The default loop emits `LoopAnn.auto`;
+arbitrary annotations, raw-loop lowering, remaining grammar cases, capture
+reachability, placement, acceptance, concrete nonvacuity and final coverage
+validation remain with the original LS3B lane. The executable examples do not
+discharge kernel totality or substitute for those obligations.
 | `Solidity/Correctness/Lowering/Sim/Coverage/ThreadedV2.lean` | Additive caller-context threading contract, v1 projection and association bridge for `loweringBySimulation`. |
 | `Solidity/Examples/Lowering/Sim/Coverage/ThreadedV2.lean` | Existing standalone-loop vocabulary exercises the bridge with explicit threading and placement receipts. |
 | `Correctness/Lowering/Sim/Coverage/Obstruction.lean` | Exact accepted empty production run under `elabKernelTotal` refuting frozen v1 diagram coverage: placement may use an unrelated context. |
