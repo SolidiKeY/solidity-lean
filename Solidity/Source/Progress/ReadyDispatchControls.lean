@@ -1,10 +1,6 @@
 import Solidity.Source.Progress.ReadyCatalogue
 import Solidity.Lowering.P9.OverrideControls
 
-/-! Nonidentity dispatch consumes the elaboration-derived ready catalogue.
-These primitive-return bodies are deliberately placed in the ready catalogue
-to exercise its selected-target metadata derivation, rather than the old value
-branch. The call-expression node is intrinsic over a legacy-elaborated unit. -/
 namespace Solidity.Source.Progress.ReadyDispatchControls
 open EM Solidity.Lowering.P9.OverrideControls
 

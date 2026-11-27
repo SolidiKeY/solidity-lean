@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.EmitBuiltins
 
-/-! Progress for `addmod` and `mulmod` on scalar arguments: the arguments are
-converted to `uint256` exactly as the evaluator does, and a zero modulus
-panics rather than getting stuck. -/
 
 namespace Solidity.Source.Progress
 open EM
@@ -11,7 +8,6 @@ variable {E : Env} {Γ : RCtx}
 def ScalarSource (s : STy) : Prop :=
   s.isValue = true ∨ (∃ q, s = .rational q) ∨ (∃ q k, s = .hexConst q k)
 
-/-- The exact unsigned conversion used by addmod/mulmod. -/
 def builtinU (F : Fr) (n : Nat) {s : STy} (v : RVal E.layout s) : EM E Γ Int := do
   match ← getV (← convRV F n (.int IntTy.u256) v) with
   | .int i _ => pure i
@@ -24,8 +20,6 @@ theorem builtinU_ns (F : Fr) (n : Nat) {s : STy}
   obtain ⟨i, hi, rfl⟩ := Val.eq_int x
   exact NS.pure' _
 
-/-- Both argument orders and the existing division-by-zero panic are retained.
-No nonzero runtime modulus assumption is added. -/
 theorem evalBuiltin_mod_ns (G : Glob E) (F : Fr) (n : Nat) (b : Builtin)
     (hb : b = .addmod ∨ b = .mulmod) {x y k : STy} (args : RArgs E Γ [x,y,k])
     (hx : ScalarSource x) (hy : ScalarSource y) (hk : ScalarSource k)

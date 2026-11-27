@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.BuiltinStatements
 
-/-! Callee-body sequences containing the proved builtin and emit statements.
-This additive syntactic admission keeps the old value statement fragment,
-including its loops, intact. New effects are admitted at sequence positions;
-effects nested inside an old conditional/loop remain outside this admission. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
@@ -23,8 +19,6 @@ inductive EffectItems (A : Decl → Prop) {R : List STy} {M : Bool} :
       ps.all STy.keyable = true → args.ValFragC A → args.OpsOK → EffectItems A rest →
       EffectItems A (.stmt (.emit ev he args) rest)
 
-/-- A builtin expression statement either halts non-stuck or returns normal;
-this is the flow fact needed to continue the containing body. -/
 theorem builtin_statement_normal {A : Decl → Prop} (G : Glob E) (F : Fr)
     (he : ∀ n, ExprNSAt A G F n) (n nps : Nat) (ph : Option (Ph E))
     {R : List STy} {M : Bool} {Γ : RCtx} {ts : List STy} {t : STy}
@@ -44,8 +38,6 @@ theorem builtin_statement_normal {A : Decl → Prop} (G : Glob E) (F : Fr)
       (NSP.weaken (NSP.of_ns expression) (fun _ _ _ => trivial))) (fun p _ => ?_)
     exact NSP.pure' ⟨p.2,rfl⟩
 
-/-- Elementary emits keep their actual static revert and event encoding, and
-on success return a normal statement outcome. -/
 theorem emit_statement_normal {A : Decl → Prop} (G : Glob E) (F : Fr)
     (he : ∀ n, ExprNSAt A G F n) (n nps : Nat) (ph : Option (Ph E))
     {R : List STy} {M : Bool} {Γ : RCtx} {ps : List STy}
@@ -67,8 +59,6 @@ theorem emit_statement_normal {A : Decl → Prop} (G : Glob E) (F : Fr)
         {s with logs := (F.this,G.selector (sigOf E.layout ev.name ps) ++ data) :: s.logs}))) (fun _ _ => ?_)
       exact NSP.pure' ⟨p.2,rfl⟩
 
-/-- The complete sequence progresses, rather than just its direct effect
-nodes. Every old statement retains its body-frame and operations premises. -/
 theorem effect_items_ns {A : Decl → Prop} {G : Glob E} {c : String}
     (he : ∀ n F, F.contract = c → ExprNSAt A G F n)
     (hs : ∀ n, StmtNSAt G A (· = c) n) (F : Fr) (hc : F.contract = c)
