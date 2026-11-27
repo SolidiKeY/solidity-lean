@@ -3,9 +3,9 @@ import Solidity.Source.CalldataLayout
 import Solidity.Source.Resolve
 
 /-!
-# Static typing (S01)
+# Static typing
 
-The typing judgments of Solidity 0.8.38 over S00's syntax, with name
+The typing judgments of Solidity 0.8.38 over the source syntax, with name
 resolution (`Solidity/Source/Resolve.lean`), compile-time constants
 (`Solidity/Source/Const.lean`) and conversions (`Solidity/Source/Types.lean`).
 
@@ -15,7 +15,7 @@ derivation records every resolution (a local's position, a state variable's
 or function's declaration, the unique overload), every implicit conversion
 and every constant.  `Solidity/Source/Resolved.lean` reads a derivation as
 an intrinsically typed term over a context of types (`RExpr`), which is
-S01's resolved layer; `HasType` and `StmtOK` are the corresponding `Prop`s
+the typing judgment's resolved layer; `HasType` and `StmtOK` are the corresponding `Prop`s
 (`Nonempty`).
 
 - `Syn.tys`: the elaboration of type names, parameter lists, struct members
@@ -31,7 +31,7 @@ S01's resolved layer; `HasType` and `StmtOK` are the corresponding `Prop`s
 - `StmtD`/`ItemsD`: statement and block typing, threading the locals a
   declaration adds, with solc's data-location rules for local declarations.
 
-**Fixed point (second round).** `-e` is typed at `ufixed` too (solc's type
+**Fixed point.** `-e` is typed at `ufixed` too (solc's type
 checker accepts it; it panics at run time unless `e` is 0); shifts and `**`
 have no rule at a fixed-point operand (solc reaches an internal assertion, so
 no such program compiles); a fixed-point and an integer operand meet at the
@@ -498,7 +498,7 @@ def STy.calldataRef : STy → Bool
 
 /-- Whether `delete e` at type `τ` is refused: a local `storage` pointer
 (solc: "delete cannot be applied to storage pointers") or a `calldata`
-reference (calldata is read-only; decision 2026-10-30). -/
+reference (calldata is read-only). -/
 def Ctx.deleteRefused (Γ : Ctx) (τ : STy) (e : Syn .expr) : Bool :=
   τ.storageRef && Γ.namesLocal e || τ.calldataRef
 
@@ -536,7 +536,7 @@ def Decl.fitsParams (E : Env) (isBase : DeclName → DeclName → Bool) (mapFree
   | Option.none => false
 
 
-/-! ## Structs, external functions, payments and ABI encoding (S02 prerequisites) -/
+/-! ## Structs, external functions, payments and ABI encoding -/
 
 /-- The member names of a struct, in order. -/
 def Syn.memberNames : {c : Cat} → Syn c → List String
@@ -749,15 +749,14 @@ def Ctx.decodeTys (Γ : Ctx) (e : Syn .expr) : Option (List STy) :=
    | e => e.typeExprs Γ).map (fun τs : List STy => τs.map STy.payableTop)
 
 /-- The data `abi.decode` reads: `bytes` in memory or storage, or a string
-literal (all implicitly `bytes memory`), or `bytes calldata` (lane FU2-B,
-read through its reference), as solc requires. -/
+literal (all implicitly `bytes memory`), or `bytes calldata` (read through its reference), as solc requires. -/
 def STy.decodeSrc : STy → Bool
   | .bytes .memory | .bytes .storage | .bytes .calldata | .stringLit _ => true
   | _ => false
 
 /-- solc's `Type::commonType` of two element types of an inline array:
 `a`'s mobile type if `b` converts to it, else `b`'s if `a`'s mobile type
-converts to it (lane FU2-B; solc's fold starts at the first element's
+converts to it (solc's fold starts at the first element's
 mobile type, so `[1, -1]` has none: `uint8` and `int8`). -/
 def STy.common (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (a b : STy) : Option STy :=
   if b.implicit B M a.mobile then Option.some a.mobile
@@ -771,7 +770,7 @@ def STy.commonOf (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (a
     | Option.some c => STy.commonOf B M c bs
     | Option.none => Option.none
 
-/-- **A type `new` allocates with a length** (lane FU2-B): `bytes`,
+/-- **A type `new` allocates with a length**: `bytes`,
 `string`, a dynamic memory array of one-word elements. -/
 def STy.newable : STy → Bool
   | .bytes .memory | .string .memory => true
@@ -806,7 +805,7 @@ def STy.decodableElem (E : Env) : STy → Bool
   | τ => τ.wordElem
 
 /-- **A type `abi.decode` reads in the source semantics**: the types the
-ABI decoder of S02/S04 (`decodeArgs`) decodes: a one-word value type, an
+ABI decoder (`decodeArgs`) decodes: a one-word value type, an
 enum at its member count, a user-defined value type at its underlying
 type, `bytes`/`string` in memory, and a dynamic memory array of
 one-word values. Static arrays, structs, nested arrays, fixed point and
@@ -819,7 +818,7 @@ def STy.decodable (E : Env) : STy → Bool
 
 /-- A copy into storage (`s = m`): the source is the target's type in
 `memory` or `calldata`, or a string literal into `bytes`/`string`
-`storage` (solc copies member by member; S01's `assign` covers pointer
+`storage` (solc copies member by member; the typing judgment's `assign` covers pointer
 assignments). -/
 def STy.copiesTo (σ τ : STy) : Bool :=
   match σ, τ with
@@ -863,7 +862,7 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   /-- `-e` on a signed integer. -/
   | neg {e : Syn .expr} {t : IntTy} : Typed Γ e (.int t) → t.signed = true →
       Typed Γ (.unaryPrefix .neg e) (.int t)
-  /-- `-e` on any fixed-point type, `ufixed` included (second round). -/
+  /-- `-e` on any fixed-point type, `ufixed` included. -/
   | negFixed {e : Syn .expr} {f : FixTy} : Typed Γ e (.fixed f) →
       Typed Γ (.unaryPrefix .neg e) (.fixed f)
   | not {e : Syn .expr} : Typed Γ e .bool → Typed Γ (.unaryPrefix .not e) .bool
@@ -1015,7 +1014,7 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
   literal; the target is a storage location, not a local `storage` pointer. -/
   | assignCopy {a b : Syn .expr} {τ σ : STy} : LVal Γ a τ → Typed Γ b σ → σ.copiesTo τ = true →
       Γ.namesLocal a = false → Typed Γ (.assign .assign a b) τ
-  /-- `a[s:e]`, `a[s:]`, `a[:e]`, `a[:]` (lane FU2-B): a slice of a
+  /-- `a[s:e]`, `a[s:]`, `a[:e]`, `a[:]`: a slice of a
   `calldata` `bytes` or dynamic array, at the array's type (solc's slice
   type converts implicitly to it), the bounds unsigned indices. -/
   | slice {a s e : Syn .expr} {τ σ ρ : STy} : Typed Γ a τ → τ.sliceable = true →
@@ -1027,21 +1026,21 @@ inductive Typed (Γ : Ctx) : Syn .expr → STy → Type where
       Typed Γ e ρ → ρ.isIndex = true → Typed Γ (.slice a .none (.some e)) τ
   | sliceAll {a : Syn .expr} {τ : STy} : Typed Γ a τ → τ.sliceable = true →
       Typed Γ (.slice a .none .none) τ
-  /-- `abi.decode(data, (T₁, …, Tₙ))` (FU2-B): the values the ABI decoder
+  /-- `abi.decode(data, (T₁, …, Tₙ))`: the values the ABI decoder
   reads from `bytes` data, at the named types in `memory`, each one the
   decoder reads (`STy.decodable`); one type is its value, more a tuple. -/
   | abiDecode {g : String} {x ts : Syn .expr} {σ : STy} {τs : List STy} :
       Γ.resolve g = Option.some (.builtin .abi) → Typed Γ x σ → σ.decodeSrc = true →
       Γ.decodeTys ts = Option.some τs → τs.all (STy.decodable Γ.env) = true →
       Typed Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) (STy.ret τs)
-  /-- `[e₁, …, eₙ]` (lane FU2-B): a new `T[n] memory`, `T` the elements'
+  /-- `[e₁, …, eₙ]`: a new `T[n] memory`, `T` the elements'
   common type (`STy.commonOf`), each element converting to it; only
   one-word element types (references are not modelled). -/
   | inlineArray {e : Syn .expr} {es : Syn (.list .expr)} {τ σ : STy} {τs : List STy} :
       Typed Γ e τ → TypedArgs Γ es τs → STy.commonOf Γ.isBase Γ.mapFree τ τs = Option.some σ → σ.oneWord = true →
       argsFit Γ.isBase Γ.mapFree (τ :: τs) (List.replicate (τs.length + 1) σ) = true →
       Typed Γ (.inlineArray e es) (.array .memory σ (Option.some (τs.length + 1)))
-  /-- `new T[](n)`, `new bytes(n)`, `new string(n)` (lane FU2-B): a new
+  /-- `new T[](n)`, `new bytes(n)`, `new string(n)`: a new
   memory object of `n` zeroed elements (`STy.newable`); `n` an index. -/
   | newArray {t : Syn .typeName} {x : Syn .expr} {τ σ : STy} :
       t.ty Γ.env Γ.scope .memory = Option.some τ → τ.newable = true → Typed Γ x σ → σ.isIndex = true →

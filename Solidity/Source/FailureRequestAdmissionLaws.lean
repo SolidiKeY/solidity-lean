@@ -1,8 +1,6 @@
 import Solidity.Source.FailureRequestAdmission
 import Solidity.Source.Horizon
 
-/-! Nonconstant-plan, arbitrary-cursor exact admission equations for the
-EXISTING requestValueScope. No new runtime operation or body-outcome oracle. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env} {Γ : RCtx} {α : Type}
@@ -22,8 +20,6 @@ theorem request_value_underfunded_at (points : Roadmap.Evm.FailurePoints)
     admitRequestFate, fate, if_pos invalid]
   rfl
 
-/-- Admission is a literal unchanged full plan when its current running fate
-is affordable. No constant-plan or horizon-zero restriction is required. -/
 theorem admission_at_funded (points : Roadmap.Evm.FailurePoints) (index : Nat)
     (request : Roadmap.Request) (balance : Nat) (cut : Option Nat)
     (fate : points.tx index = .runs balance cut) (valid : request.value.val ≤ balance) :

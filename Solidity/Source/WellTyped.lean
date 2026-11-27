@@ -2,7 +2,7 @@ import Solidity.Source.Eval
 import Solidity.Source.Hoare
 
 /-!
-# Well-typed run-time states (lane V04b, preservation)
+# Well-typed run-time states (preservation)
 
 Most of a run-time state is typed by construction: a value of type `τ` is a
 `Val D τ` (ranges, enum bounds, byte lengths inside), locals are

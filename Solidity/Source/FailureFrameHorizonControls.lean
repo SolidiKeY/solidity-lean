@@ -1,7 +1,6 @@
 import Solidity.Source.FailureFrameHorizon
 import Solidity.Source.FailureMachineControls
 
-/-! Inhabited full-state controls and the attempt/Approx refusal boundary. -/
 namespace Solidity.Source.FailureExecution.FrameHorizonControls
 open EM Controls
 
@@ -31,13 +30,10 @@ theorem caller_bytes :
       ((frame (some childPlan) (emitSeven (some childPlan))).run (caller,seed)).2 =
       (.ok [0xDE,0xAD],(caller,ownExpected)) := by rfl
 
--- A body ending in pure 7 cannot swallow the actual outer frame's event cut.
 theorem outer_cut :
     (frame (some ownPlan) (emitSeven (some ownPlan))).run (caller,seed) =
       (.error (.revert []),(caller,ownExpected)) := by rfl
 
--- Concrete counterexample: captured timeout is an ordinary result, so a
--- blanket Approx.attempt rule would be unsound even on inhabited callers.
 theorem attempt_not_approx :
     ¬ Approx (attempt (halt .timeout : EM E [.bytes .memory,.bool] Nat))
       (attempt (pure 7)) := by

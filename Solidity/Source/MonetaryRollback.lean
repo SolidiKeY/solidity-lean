@@ -1,9 +1,6 @@
 import Solidity.Source.MonetaryExecution
 import Solidity.Source.Hoare
 
-/-! Actual monetary-operation rollback with exact caller-state restoration.
-This is a selected Source execution law, not world/compiler adequacy or a
-whole-program balance invariant. No transaction finalization is inferred. -/
 namespace Solidity.Source.MonetaryExecution
 open Solidity.Roadmap (Address Word)
 variable {E : Env} {Γ : RCtx}
@@ -25,8 +22,6 @@ theorem rollback_preserves (locals : Locals E.layout Γ) (state : St E)
   simp only [rollback_run]
   exact state.ex.undoN_balancesFit _ fit
 
-/-- Capture the actual credit outcome, then explicitly undo to the actual
-mark. Attempt alone retains post-state and performs no rollback. -/
 def creditRollback (address : Address) (value : Word) : EM E Γ (Except Halt Unit) := do
   let saved ← mark
   let outcome ← EM.attempt (credit address value)
@@ -38,8 +33,6 @@ theorem attempt_run {α : Type} (operation : EM E Γ α) (locals : Locals E.layo
     (EM.attempt operation).run (locals,state) =
       (.ok (operation.run (locals,state)).1,(operation.run (locals,state)).2) := by rfl
 
-/-- Full pre-state, including nonempty journal/log prefixes, heap aliases,
-locals, function locals and resource cursor, is restored on both branches. -/
 theorem creditRollback_run (locals : Locals E.layout Γ) (state : St E)
     (address : Address) (value : Word) :
     (creditRollback address value : EM E Γ (Except Halt Unit)).run (locals,state) =

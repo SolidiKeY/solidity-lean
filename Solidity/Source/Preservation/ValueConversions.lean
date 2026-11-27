@@ -1,8 +1,5 @@
 import Solidity.Source.Preservation.Combinators
 
-/-! Preservation for the value fragment's actual implicit conversion paths.
-The source conversion/fragment premises are retained; every halt preserves memory.
--/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
@@ -13,19 +10,19 @@ theorem convRV_pres {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.is
   have hl := loc_of_frag hσ
   unfold convRV
   split
-  · -- a constant
+  ·
     dsimp only
     split
     · exact MemPres.pure' _
     · rename_i he
       exact MemPres.bind (MemPres.pure' _) fun _ => MemPres.bind (MemPres.lift' _)
         fun _ => MemPres.pure' _
-  · -- a hexadecimal constant to `bytesN`
+  ·
     dsimp only
     split
     · exact MemPres.pure' _
     · exact MemPres.bind (MemPres.pure' _) fun _ => MemPres.pure' _
-  · -- a hexadecimal constant to another type
+  ·
     rename_i hτ
     dsimp only
     split
@@ -36,7 +33,7 @@ theorem convRV_pres {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.is
     | (exfalso; rcases hσ with h | ⟨_, h⟩ | ⟨_, _, h⟩ <;> cases h)
     | (rename_i h; rw [hl] at h; cases h)
     | skip
-  · -- a plain value
+  ·
     rename_i x hr hh _ _ _ _ _ _ _
     dsimp only
     split
@@ -49,7 +46,7 @@ theorem convRV_pres {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.is
         · exact (hh q k _ rfl HEq.rfl).elim
       exact MemPres.bind (MemPres.pure' _) fun _ =>
         MemPres.bind (MemPres.lift' _) fun _ => MemPres.pure' _
-  · -- not a plain value: impossible for the fragment's types
+  ·
     rename_i hr hh _ _ _ hval _ _ _ _
     exfalso
     rcases hσ with hσ | ⟨q, rfl⟩ | ⟨q, k, rfl⟩

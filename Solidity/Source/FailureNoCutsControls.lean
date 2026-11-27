@@ -1,8 +1,6 @@
 import Solidity.Source.FailureNoCutsEffects
 import Solidity.Source.FailureMachineControls
 
-/-! Actual nested no-cut budgets, event ticks and full-state check controls.
-No account-balance installation or whole NoFail evaluator is claimed. -/
 namespace Solidity.Source.FailureExecution.NoCutsControls
 open EM Controls
 
@@ -50,7 +48,6 @@ theorem emitted_full_state : emitTwo.run (caller,state) =
 theorem retained_bytes : (heapBytes 0 : EM E [.bytes .memory,.bool] Roadmap.Bytes).run
     (caller,after) = (.ok [0xDE,0xAD],(caller,after)) := by rfl
 
--- Input NoFail is insufficient if the actual cursor was built from a cut plan.
 def mismatched : St E := { journalSeed with resource := Cursor.empty.enterFrame zeroPlan }
 def stopped : St E := { mismatched with resource :=
   { mismatched.resource with pending := some (.frame ⟨0,by decide⟩) } }

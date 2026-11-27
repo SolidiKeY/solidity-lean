@@ -1,42 +1,18 @@
 import Solidity.Source.Resolved
 import Solidity.Source.Elaborated
 
-/-!
-# Uniqueness of meaning for constants (Q1)
-
-With solc's literal typing (a number literal is always a constant; a
-hexadecimal literal's type `STy.hexConst` records its compatible bytes
-length, `Typed.litBytes`; a checksummed address literal folds into no
-constant), literals no longer give an expression several types.
-
-`Typed.constShape` proves it for every constant expression (`Syn.const`):
-each derivation has its rational type, or, for a bare or parenthesized
-hexadecimal literal, its `hexConst` type, and elaborates to that constant.
-Operators, shifts and comparisons on two constants fold and are never typed
-as operations (`Syn.const_binOp`, `STy.common?_const`).
-`zeroLength_illTyped` is the negative control: `0.length`, which had 32
-derivations before, has none.
-
-Uniqueness for every expression (`Typed.unique`: any two derivations have one
-type and one elaboration) builds on these literal cases with a
-per-constructor case analysis, recorded in
-`docs/feature-work/source-s02.md`, "Uniqueness".
--/
 
 namespace Solidity.Source
 
-/-- The hexadecimal literal an expression is, through parentheses. -/
 def Syn.hexLit? : {c : Cat} → Syn c → Option NumLit
   | _, .lit (.num n) => Option.some n
   | _, .tuple (.some e) .nil => e.hexLit?
   | _, _ => Option.none
 
-/-- **Two constant types never meet**: no implicit conversion between them. -/
 theorem STy.common?_const {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {a b : STy} (ha : a.isConstTy = true)
     (hb : b.isConstTy = true) : STy.common? B M a b = Option.none := by
   simp only [STy.common?, ha, hb, Bool.true_or, Bool.and_self, if_true]
 
-/-- A bind that succeeds had a value. -/
 theorem Option.isSome_of_bind_eq_some {α β : Type} {o : Option α} {f : α → Option β} {b : β}
     (h : o.bind f = Option.some b) : o.isSome = true := by
   cases o
@@ -79,8 +55,6 @@ theorem Syn.const_equality (o : EqOp) (a b : Syn .expr) : (Syn.equality o a b).c
 theorem Syn.const_and (a b : Syn .expr) : (Syn.and a b).const = Option.none := rfl
 theorem Syn.const_or (a b : Syn .expr) : (Syn.or a b).const = Option.none := rfl
 
-/-- **A constant operation has constant operands**, and comparisons and
-logical operators never fold. -/
 theorem Syn.const_binOp {e a b : Syn .expr} {k : BinKind} (hb : e.binOp? = Option.some (k, a, b)) {q : Q}
     (hq : e.const = Option.some q) :
     a.const.isSome = true ∧ b.const.isSome = true ∧ k ≠ .order ∧ k ≠ .eq ∧ k ≠ .logic := by
@@ -101,7 +75,6 @@ theorem Syn.const_binOp {e a b : Syn .expr} {k : BinKind} (hb : e.binOp? = Optio
     simp only [ha, hb', Option.bind_none, Option.bind_some, Option.bind_fun_none, reduceCtorEq,
       Option.isSome_some, ne_eq, not_false_eq_true, and_self] at hq ⊢)
 
-/-- The operands of a binary operation are smaller. -/
 theorem Syn.binOp?_sizeOf {e a b : Syn .expr} {k : BinKind} (hb : e.binOp? = Option.some (k, a, b)) :
     sizeOf a < sizeOf e ∧ sizeOf b < sizeOf e := by
   cases e
@@ -112,8 +85,6 @@ theorem Syn.binOp?_sizeOf {e a b : Syn .expr} {k : BinKind} (hb : e.binOp? = Opt
     Syn.exp.sizeOf_spec, Syn.bitAnd.sizeOf_spec, Syn.bitOr.sizeOf_spec, Syn.bitXor.sizeOf_spec,
     Syn.order.sizeOf_spec, Syn.equality.sizeOf_spec, Syn.and.sizeOf_spec, Syn.or.sizeOf_spec]; omega)
 
-/-- A hexadecimal literal of bytes length is a constant of its value (a
-checksummed address literal is neither). -/
 theorem Syn.const_hexLit {n : NumLit} {len : Nat} (h : (Syn.lit (.num n)).hexLen? = Option.some len) :
     (Syn.lit (.num n)).const = Option.some n.value := by
   cases n with
@@ -127,8 +98,6 @@ theorem Syn.const_hexLit {n : NumLit} {len : Nat} (h : (Syn.lit (.num n)).hexLen
       rw [if_neg hc.2.2.2]
     · cases h
 
-/-- The shape of a constant expression's derivation: its rational, or a
-hexadecimal literal's type; elaborated to that constant. -/
 def ConstShape (Γ : Ctx) (e : Syn .expr) (q : Q) (τ : STy) (r : RExpr Γ.env Γ.tys τ) : Prop :=
   (τ = .rational q ∧ e.hexLen? = Option.none ∧ HEq r (RExpr.const (E := Γ.env) (Γ := Γ.tys) q)) ∨
   (∃ nl len, e.hexLit? = Option.some nl ∧ e.hexLen? = Option.some len ∧ nl.value = q ∧
@@ -138,12 +107,6 @@ theorem ConstShape.isConstTy {Γ : Ctx} {e : Syn .expr} {q : Q} {τ : STy} {r : 
     (h : ConstShape Γ e q τ r) : τ.isConstTy = true := by
   rcases h with ⟨rfl, _, _⟩ | ⟨_, _, _, _, _, rfl, _⟩ <;> rfl
 
-/-- **Constant expressions have only their constant types**: every
-derivation of an expression that folds (`Syn.const`) is its constant (an
-arithmetic, bitwise, shift or power operation on constants never types as
-an operation), and elaborates to it.  This is uniqueness of meaning, not of
-derivations: `(1)` is both `const` and `paren (const …)`, which elaborate
-alike. -/
 theorem Typed.constShape {Γ : Ctx} {e : Syn .expr} {τ : STy} {q : Q} (d : Typed Γ e τ)
     (hq : e.const = Option.some q) : ConstShape Γ e q τ d.toR := by
   cases d
@@ -218,8 +181,6 @@ decreasing_by
     | (subst_vars; simp only [Syn.tuple.sizeOf_spec, Syn.some.sizeOf_spec, Syn.unaryPrefix.sizeOf_spec]; omega)
     | (subst_vars; omega)
 
-/-- **Two derivations of a constant expression have one type and one
-elaboration.** -/
 theorem Typed.const_unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} {q : Q} (d : Typed Γ e τ)
     (d' : Typed Γ e τ') (hq : e.const = Option.some q) : τ = τ' ∧ HEq d.toR d'.toR := by
   rcases Typed.constShape d hq with ⟨rfl, hx, h1⟩ | ⟨nl, len, hl, hx, -, rfl, h1⟩ <;>
@@ -229,29 +190,20 @@ theorem Typed.const_unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} {q : Q} (d 
   · rw [hx] at hx'; cases hx'
   · rw [hl] at hl'; cases hl'; rw [hx] at hx'; cases hx'; exact ⟨rfl, h1.trans h2.symm⟩
 
-/-! ## Uniqueness of meaning for every expression
 
-By strong induction on the size of the syntax (`Uniq`), one lemma per
-syntactic shape, each over the pairs of rules that type that shape. -/
-
-/-- Uniqueness of meaning at one expression. -/
 def UniqE (Γ : Ctx) (e : Syn .expr) : Prop :=
   ∀ {τ τ' : STy} (d : Typed Γ e τ) (d' : Typed Γ e τ'), τ = τ' ∧ HEq d.toR d'.toR
 
-/-- … of its lvalue derivations. -/
 def UniqL (Γ : Ctx) (e : Syn .expr) : Prop :=
   ∀ {τ τ' : STy} (l : LVal Γ e τ) (l' : LVal Γ e τ'), τ = τ' ∧ HEq l.toR l'.toR
 
-/-- … of argument lists. -/
 def UniqA (Γ : Ctx) (es : Syn (.list .expr)) : Prop :=
   ∀ {τs τs' : List STy} (d : TypedArgs Γ es τs) (d' : TypedArgs Γ es τs'), τs = τs' ∧ HEq d.toR d'.toR
 
-/-- … of tuple slots (at mobile types and as arguments). -/
 def UniqS (Γ : Ctx) (s : Syn (.list (.opt .expr))) : Prop :=
   ∀ {τs τs' : List STy} (d : TypedSlots Γ s τs) (d' : TypedSlots Γ s τs'),
     τs = τs' ∧ HEq d.toR d'.toR ∧ HEq (TypedArgs.ofSlots d) (TypedArgs.ofSlots d')
 
-/-- The induction hypothesis: uniqueness below size `n`. -/
 structure Uniq (Γ : Ctx) (n : Nat) : Prop where
   e : ∀ e : Syn .expr, sizeOf e < n → UniqE Γ e
   l : ∀ e : Syn .expr, sizeOf e < n → UniqL Γ e
@@ -297,14 +249,12 @@ theorem bin_same {e a b a' b' : Syn .expr} {k k' : BinKind} (hb : e.binOp? = Opt
     (h : e.binOp? = Option.some (k', a', b')) : k = k' ∧ a = a' ∧ b = b' := by
   rw [hb] at h; cases h; exact ⟨rfl, rfl, rfl⟩
 
-/-- Two constant operands make no typed operation (they fold). -/
 theorem bin_const_false {Γ : Ctx} {a b : Syn .expr} {qa qb : Q} {τa τb τ : STy} (ha : a.const = Option.some qa)
     (hb : b.const = Option.some qb) (da : Typed Γ a τa) (db : Typed Γ b τb)
     (hc : STy.common? Γ.isBase Γ.mapFree τa τb = Option.some τ) : False := by
   rw [STy.common?_const (Typed.constShape da ha).isConstTy (Typed.constShape db hb).isConstTy] at hc
   cases hc
 
-/-- **Binary operations.** -/
 theorem uniqE_bin {Γ : Ctx} {e a b : Syn .expr} {k : BinKind} (hb : e.binOp? = Option.some (k, a, b))
     (hce : e.const = Option.none) (ih : Uniq Γ (sizeOf e)) : UniqE Γ e := by
   intro τ τ' d d'
@@ -545,7 +495,6 @@ theorem Uniq.mono {Γ : Ctx} {n m : Nat} (h : Uniq Γ n) (hm : m ≤ n) : Uniq �
   ⟨fun e he => h.e e (by omega), fun e he => h.l e (by omega), fun es he => h.a es (by omega),
     fun s he => h.s s (by omega)⟩
 
-/-- A name that denotes a builtin types only as `this`. -/
 theorem Typed.ident_builtin {Γ : Ctx} {g : String} {b : Builtin} {τ : STy}
     (hr : Γ.resolve g = Option.some (.builtin b)) (d : Typed Γ (.ident g) τ) : b = .this := by
   have hce : (Syn.ident g).const = Option.none := rfl
@@ -558,7 +507,6 @@ theorem Typed.ident_builtin {Γ : Ctx} {g : String} {b : Builtin} {τ : STy}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Names.** -/
 theorem uniqE_ident {Γ : Ctx} {x : String} (ih : Uniq Γ (sizeOf (Syn.ident x))) : UniqE Γ (.ident x) := by
   intro τ τ' d d'
   have hce : (Syn.ident x).const = Option.none := rfl
@@ -592,14 +540,20 @@ theorem uniqE_ident {Γ : Ctx} {x : String} (ih : Uniq Γ (sizeOf (Syn.ident x))
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- A hexadecimal literal of 39 to 41 digits has no bytes length. -/
 theorem Syn.hexLen?_addressLike {ds : List (Fin 16)} {cs : Bool} (h : ds.length = 40) :
     (Syn.lit (.num (.hex ds cs))).hexLen? = Option.none := by
   change (if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧ ¬ (39 ≤ ds.length ∧ ds.length ≤ 41) then
     Option.some (ds.length / 2) else Option.none) = Option.none
   rw [if_neg (fun hc => hc.2.2.2 ⟨by omega, by omega⟩)]
 
-/-- **Literals** (other than constants, which `Typed.const_unique` covers). -/
+example {ds : List (Fin 16)} {cs : Bool}
+    (lower : 39 ≤ ds.length) (upper : ds.length ≤ 41) :
+    (Syn.lit (.num (.hex ds cs)) : Syn .expr).hexLen? = none := by
+  change (if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧
+    ¬ (39 ≤ ds.length ∧ ds.length ≤ 41) then
+      some (ds.length / 2) else none) = none
+  exact if_neg (fun allowed => allowed.2.2.2 ⟨lower, upper⟩)
+
 theorem uniqE_lit {Γ : Ctx} {l : Lit} (hce : (Syn.lit l).const = Option.none) : UniqE Γ (.lit l) := by
   intro τ τ' d d'
   have hbo : (Syn.lit l).binOp? = Option.none := rfl
@@ -642,7 +596,6 @@ theorem uniqE_lit {Γ : Ctx} {l : Lit} (hce : (Syn.lit l).const = Option.none) :
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **`payable(x)`.** -/
 theorem uniqE_payable {Γ : Ctx} {args : Syn .callArgs} (ih : Uniq Γ (sizeOf (Syn.payableConv args))) :
     UniqE Γ (.payableConv args) := by
   intro τ τ' d d'
@@ -666,7 +619,6 @@ theorem uniqE_payable {Γ : Ctx} {args : Syn .callArgs} (ih : Uniq Γ (sizeOf (S
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Parentheses and tuples.** -/
 theorem uniqE_tuple {Γ : Ctx} {o : Syn (.opt .expr)} {sl : Syn (.list (.opt .expr))}
     (hce : (Syn.tuple o sl).const = Option.none) (ih : Uniq Γ (sizeOf (Syn.tuple o sl))) :
     UniqE Γ (.tuple o sl) := by
@@ -705,7 +657,6 @@ theorem uniqE_tuple {Γ : Ctx} {o : Syn (.opt .expr)} {sl : Syn (.list (.opt .ex
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Prefix operators.** -/
 theorem uniqE_prefix {Γ : Ctx} {op : PrefixOp} {x : Syn .expr}
     (hce : (Syn.unaryPrefix op x).const = Option.none) (ih : Uniq Γ (sizeOf (Syn.unaryPrefix op x))) :
     UniqE Γ (.unaryPrefix op x) := by
@@ -783,7 +734,6 @@ theorem uniqE_prefix {Γ : Ctx} {op : PrefixOp} {x : Syn .expr}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Postfix `++`/`--`.** -/
 theorem uniqE_suffix {Γ : Ctx} {op : SuffixOp} {x : Syn .expr} (ih : Uniq Γ (sizeOf (Syn.unarySuffix op x))) :
     UniqE Γ (.unarySuffix op x) := by
   intro τ τ' d d'
@@ -805,7 +755,6 @@ theorem uniqE_suffix {Γ : Ctx} {op : SuffixOp} {x : Syn .expr} (ih : Uniq Γ (s
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- A copy into storage is never an implicit conversion. -/
 theorem STy.implicit_of_copiesTo {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {σ τ : STy} (h : σ.copiesTo τ = true) :
     σ.implicit B M τ = false := by
   cases σ <;> cases τ
@@ -826,7 +775,6 @@ theorem STy.implicit_of_copiesTo {B : DeclName → DeclName → Bool} {M : DeclN
       | (cases h; done)
       | (change ((_ && false) && _) = false; simp only [Bool.and_false, Bool.false_and])
 
-/-- **Indexing.** -/
 theorem uniqE_index {Γ : Ctx} {a : Syn .expr} {o : Syn (.opt .expr)} (ih : Uniq Γ (sizeOf (Syn.index a o))) :
     UniqE Γ (.index a o) := by
   intro τ τ' d d'
@@ -896,7 +844,6 @@ theorem uniqE_index {Γ : Ctx} {a : Syn .expr} {o : Syn (.opt .expr)} (ih : Uniq
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Assignments.** -/
 theorem uniqE_assign {Γ : Ctx} {op : AssignOp} {a b : Syn .expr} (ih : Uniq Γ (sizeOf (Syn.assign op a b))) :
     UniqE Γ (.assign op a b) := by
   intro τ τ' d d'
@@ -964,7 +911,6 @@ theorem uniqE_assign {Γ : Ctx} {op : AssignOp} {a b : Syn .expr} (ih : Uniq Γ 
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Members.** -/
 theorem uniqE_member {Γ : Ctx} {a : Syn .expr} {x : String} (ih : Uniq Γ (sizeOf (Syn.member a x))) :
     UniqE Γ (.member a x) := by
   intro τ τ' d
@@ -1035,7 +981,6 @@ theorem uniqE_member {Γ : Ctx} {a : Syn .expr} {x : String} (ih : Uniq Γ (size
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-! ### What a callee name denotes -/
 
 theorem Ctx.convTarget_spec {Γ : Ctx} {n : String} {τ : STy} (h : Γ.convTarget n = Option.some τ) :
     ∃ d, Γ.resolve n = Option.some (.decls [d]) ∧ d.kind ≠ .function ∧ d.kind ≠ .struct := by
@@ -1072,13 +1017,10 @@ theorem Ctx.functions_spec {Γ : Ctx} {n : String} {d : Decl} (h : d ∈ Γ.func
 theorem mem_of_filter_singleton {α : Type} {p : α → Bool} {l : List α} {d : α} (h : l.filter p = [d]) : d ∈ l :=
   (List.mem_filter.1 (h ▸ List.mem_singleton_self d)).1
 
-/-- Two names that resolve differently. -/
 theorem resolve_conflict {Γ : Ctx} {n : String} {a b : Denot} (ha : Γ.resolve n = Option.some a)
     (hb : Γ.resolve n = Option.some b) : a = b := by
   rw [ha] at hb; cases hb; rfl
 
-/-- **Calls of a name**: conversions to a contract or enum, internal calls,
-builtins, struct construction. -/
 theorem uniqE_callIdent {Γ : Ctx} {n : String} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.ident n) A))) : UniqE Γ (.call (.ident n) A) := by
   intro τ τ' d d'
@@ -1175,11 +1117,8 @@ theorem uniqE_callIdent {Γ : Ctx} {n : String} {A : Syn .callArgs}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- `decode` is no encoding function. -/
 theorem AbiKind.ofMember_decode : AbiKind.ofMember "decode" = Option.none := by decide
 
-/-- **Calls through a member**: external calls, payments, ABI encoding and
-decoding. -/
 theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.member c n) A))) : UniqE Γ (.call (.member c n) A) := by
   intro τ τ' d
@@ -1284,7 +1223,6 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- `[x, xs…]` (lane FU2-B): the elements' types fix the common type. -/
 theorem uniqE_inline {Γ : Ctx} {x : Syn .expr} {xs : Syn (.list .expr)}
     (ih : Uniq Γ (sizeOf (Syn.inlineArray x xs))) : UniqE Γ (.inlineArray x xs) := by
   intro τ τ' d d'
@@ -1309,7 +1247,6 @@ theorem uniqE_inline {Γ : Ctx} {x : Syn .expr} {xs : Syn (.list .expr)}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Slices** (`a[s:e]`, FU2-B). -/
 theorem uniqE_slice {Γ : Ctx} {a : Syn .expr} {o o' : Syn (.opt .expr)}
     (ih : Uniq Γ (sizeOf (Syn.slice a o o'))) : UniqE Γ (.slice a o o') := by
   intro τ τ' d d'
@@ -1373,7 +1310,6 @@ theorem uniqE_slice {Γ : Ctx} {a : Syn .expr} {o o' : Syn (.opt .expr)}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Conversions to an elementary type** (`T(x)`). -/
 theorem uniqE_callElem {Γ : Ctx} {el : Elem} {hel : el ≠ .addressPayable} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.elemType el hel) A))) : UniqE Γ (.call (.elemType el hel) A) := by
   intro τ τ' d d'
@@ -1396,7 +1332,6 @@ theorem uniqE_callElem {Γ : Ctx} {el : Elem} {hel : el ≠ .addressPayable} {A 
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **`new T[](n)`** (lane FU2-B): the type name fixes the type. -/
 theorem uniqE_callNew {Γ : Ctx} {t : Syn .typeName} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.new t) A))) : UniqE Γ (.call (.new t) A) := by
   intro τ τ' d d'
@@ -1419,7 +1354,6 @@ theorem uniqE_callNew {Γ : Ctx} {t : Syn .typeName} {A : Syn .callArgs}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **External calls with value** (`c.f{value: v}(args)`). -/
 theorem uniqE_callOpts {Γ : Ctx} {f : Syn .expr} {o : Syn .namedArg} {os : Syn (.list .namedArg)}
     {A : Syn .callArgs} (ih : Uniq Γ (sizeOf (Syn.call (.callOptions f o os) A))) :
     UniqE Γ (.call (.callOptions f o os) A) := by
@@ -1453,7 +1387,6 @@ theorem uniqE_callOpts {Γ : Ctx} {f : Syn .expr} {o : Syn .namedArg} {os : Syn 
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Lvalues.** -/
 theorem uniqL_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqL Γ e := by
   intro τ τ' l l'
   cases l with
@@ -1524,7 +1457,6 @@ theorem uniqL_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqL Γ
       rw [h] at h'; cases h'
       exact ⟨rfl, by simp only [LVal.toR]; rw [eq_of_heq e1]⟩
 
-/-- **Argument lists.** -/
 theorem uniqA_of {Γ : Ctx} {es : Syn (.list .expr)} (ih : Uniq Γ (sizeOf es)) : UniqA Γ es := by
   intro τs τs' d d'
   cases d with
@@ -1542,7 +1474,6 @@ theorem uniqA_of {Γ : Ctx} {es : Syn (.list .expr)} (ih : Uniq Γ (sizeOf es)) 
       simp only [TypedArgs.toR]
       rw [eq_of_heq e1, eq_of_heq e2]
 
-/-- **Tuple slots.** -/
 theorem uniqS_of {Γ : Ctx} {sl : Syn (.list (.opt .expr))} (ih : Uniq Γ (sizeOf sl)) : UniqS Γ sl := by
   intro τs τs' d d'
   cases d with
@@ -1562,11 +1493,9 @@ theorem uniqS_of {Γ : Ctx} {sl : Syn (.list (.opt .expr))} (ih : Uniq Γ (sizeO
       · simp only [TypedArgs.ofSlots]
         rw [eq_of_heq e1, eq_of_heq e3]
 
-/-- An expression no rule types. -/
 theorem uniqE_empty {Γ : Ctx} {e : Syn .expr} (h : ∀ τ, Typed Γ e τ → False) : UniqE Γ e :=
   fun d _ => (h _ d).elim
 
-/-- **Every expression's derivations agree**, given the hypothesis below its size. -/
 theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ e := by
   cases hce : e.const with
   | some q => exact fun d d' => Typed.const_unique d d' hce
@@ -1612,7 +1541,6 @@ theorem uniqE_of {Γ : Ctx} {e : Syn .expr} (ih : Uniq Γ (sizeOf e)) : UniqE Γ
       | exact (no_const hce ‹_›).elim
       | (exfalso; apply no_binOp hb; assumption))
 
-/-- **Uniqueness below every size.** -/
 theorem uniq_all (Γ : Ctx) : ∀ n, Uniq Γ n
   | 0 => ⟨fun _ h => absurd h (Nat.not_lt_zero _), fun _ h => absurd h (Nat.not_lt_zero _),
       fun _ h => absurd h (Nat.not_lt_zero _), fun _ h => absurd h (Nat.not_lt_zero _)⟩
@@ -1621,24 +1549,26 @@ theorem uniq_all (Γ : Ctx) : ∀ n, Uniq Γ n
     ⟨fun _ h => uniqE_of (ih.mono (by omega)), fun _ h => uniqL_of (ih.mono (by omega)),
       fun _ h => uniqA_of (ih.mono (by omega)), fun _ h => uniqS_of (ih.mono (by omega))⟩
 
-/-- **Typing derivations agree** (Q1): any two derivations of one
-expression have one type and elaborate to one resolved term, so a unit's
-meaning does not depend on the derivation an elaboration carries. -/
 theorem Typed.unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} (d : Typed Γ e τ) (d' : Typed Γ e τ') :
     τ = τ' ∧ HEq d.toR d'.toR :=
   (uniq_all Γ (sizeOf e + 1)).e e (by omega) d d'
 
-/-- Lvalue derivations agree. -/
+example (Γ : Ctx) :
+    ∃ d1 d2 : Typed Γ (.tuple (.some (.lit (.num (.dec 1 0 0)))) .nil)
+      (.rational (Q.ofInt 1)), d1 ≠ d2 ∧ HEq d1.toR d2.toR := by
+  refine ⟨.const rfl rfl rfl, .paren (.const rfl rfl rfl), ?_, ?_⟩
+  · intro equal
+    cases equal
+  · rfl
+
 theorem LVal.unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} (l : LVal Γ e τ) (l' : LVal Γ e τ') :
     τ = τ' ∧ HEq l.toR l'.toR :=
   (uniq_all Γ (sizeOf e + 1)).l e (by omega) l l'
 
-/-- Argument-list derivations agree. -/
 theorem TypedArgs.unique {Γ : Ctx} {es : Syn (.list .expr)} {τs τs' : List STy} (d : TypedArgs Γ es τs)
     (d' : TypedArgs Γ es τs') : τs = τs' ∧ HEq d.toR d'.toR :=
   (uniq_all Γ (sizeOf es + 1)).a es (by omega) d d'
 
-/-- Tuple-slot derivations agree. -/
 theorem TypedSlots.unique {Γ : Ctx} {s : Syn (.list (.opt .expr))} {τs τs' : List STy}
     (d : TypedSlots Γ s τs) (d' : TypedSlots Γ s τs') :
     τs = τs' ∧ HEq d.toR d'.toR ∧ HEq (TypedArgs.ofSlots d) (TypedArgs.ofSlots d') :=
@@ -1667,23 +1597,18 @@ theorem filter_single {α : Type} {p : α → Bool} {l : List α} {a b : α} (h 
 
 theorem underscore_isUnderscore : (Syn.ident "_" : Syn .expr).isUnderscore = true := rfl
 
-/-- `return (a, b);` is not `return t;` of a single return: the tuple has
-two or more components. -/
 theorem argsFit_single {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {σ τ : STy} {σs : List STy} (hne : σs ≠ [])
     (h : argsFit B M (σ :: σs) [τ] = true) : False := by
   cases σs with
   | nil => exact hne rfl
   | cons _ _ => simp only [argsFit, List.length_cons, List.length_nil, Bool.and_eq_true, beq_iff_eq] at h; omega
 
-/-- A `catch` clause fixes its binding and block (lane FU2-B). -/
 theorem CatchD.unique {k : SCtx} {cl : Syn (.catchClause k)} {x x' : Option String} {cb cb' : Syn (.list (.item k))}
     (h : CatchD cl x cb) (h' : CatchD cl x' cb') : x = x' ∧ cb = cb' := by
   cases h <;> cases h' <;> exact ⟨rfl, rfl⟩
 
 mutual
 
-/-- **Statement derivations agree**: the locals a statement leaves and its
-resolved form do not depend on the derivation. -/
 theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {s : Syn (.stmt k)}
     (d : StmtD C L s L₁) (d' : StmtD C L s L₂) : L₁ = L₂ ∧ HEq d.toR d'.toR :=
   match s, L₁, d, d' with
@@ -1841,7 +1766,6 @@ theorem StmtD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {
       exact ⟨rfl, HEq.rfl⟩
 termination_by structural d
 
-/-- Block derivations agree. -/
 theorem ItemsD.unique {C : Ctx} {k : SCtx} {L L₁ L₂ : List (String × STy)} {b : Syn (.list (.item k))}
     (d : ItemsD C L b L₁) (d' : ItemsD C L b L₂) : L₁ = L₂ ∧ HEq d.toR d'.toR :=
   match b, L₁, d, d' with
@@ -1866,8 +1790,6 @@ termination_by structural d
 
 end
 
-/-- **A body's meaning is the derivation's**: two derivations of one
-function body elaborate to one `RBody`. -/
 theorem RBody.ofDerivation_unique {E : Env} {scope : Option String} (f : Frame)
     {L₁ L₂ : List (String × STy)} (D : ItemsD (f.ctx E scope) f.locals f.body L₁)
     (D' : ItemsD (f.ctx E scope) f.locals f.body L₂) (mods : List (RModInv E (tysOf f.locals))) :
@@ -1877,24 +1799,21 @@ theorem RBody.ofDerivation_unique {E : Env} {scope : Option String} (f : Frame)
   simp only [RBody.ofDerivation]
   rw [eq_of_heq h]
 
-/-! ### Controls of the conversion rules (solc's `RationalNumberType`) -/
 
-/-- `bytes2 x = 0x1234;` converts. -/
 theorem hex_to_bytes2 (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     STy.implicit B M (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 2 (by decide)) = true := rfl
-/-- `bytes4 x = 0x1234;` does not (solc requires the exact size). -/
 theorem hex_to_bytes4_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     STy.implicit B M (.hexConst (Q.ofInt 0x1234) 2) (.fixedBytes 4 (by decide)) = false := rfl
-/-- `uint16 x = 0x1234;` converts by value. -/
 theorem hex_to_uint16 (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     STy.implicit B M (.hexConst (Q.ofInt 0x1234) 2) (.int ⟨false, 16, by decide⟩) = true := rfl
-/-- `bytes4 x = 0;` converts (zero to every `bytesN`); `bytes4 x = 1;` does not. -/
 theorem zero_to_bytes4 (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     STy.implicit B M (.rational (Q.ofInt 0)) (.fixedBytes 4 (by decide)) = true ∧
     STy.implicit B M (.rational (Q.ofInt 1)) (.fixedBytes 4 (by decide)) = false := ⟨rfl, rfl⟩
 
-/-- The canonical rethrow names its buffer: `revert(add(data, 32), mload(data))`
-rethrows `data`, and with two different buffers it names none. -/
+example (B : DeclName → DeclName → Bool) (M : DeclName → Bool)
+    (n : Nat) (valid : 1 ≤ n ∧ n ≤ 32) :
+    STy.implicit B M (.rational (Q.ofInt 0)) (.fixedBytes n valid) = true := rfl
+
 theorem rethrowVar_canonical :
     rethrowVar? (.cons (.yulExprStmt (.yulCall "revert" (.cons (.yulCall "add" (.cons
       (.yulPath "data" []) (.cons (.yulLit (.dec 32)) .nil))) (.cons (.yulCall "mload"
@@ -1903,27 +1822,38 @@ theorem rethrowVar_canonical :
       (.yulPath "a" []) (.cons (.yulLit (.dec 32)) .nil))) (.cons (.yulCall "mload"
       (.cons (.yulPath "b" []) .nil)) .nil)))) .nil) = Option.none := by decide
 
-/-! ### Controls of the literal-typing gaps (solc's `binaryOperatorResult`) -/
 
-/-- The left operand of `1 << x` and `0x12 ** x` (a non-constant amount)
-is at `uint256`, not at `uint8`; of `-1 << x`, at `int256`. -/
 theorem shiftTy_literal : STy.shiftTy (.rational (Q.ofInt 1)) = .int IntTy.u256 ∧
     STy.shiftTy (.hexConst (Q.ofInt 0x12) 1) = .int IntTy.u256 ∧
     STy.shiftTy (.rational (Q.ofInt (-1))) = .int ⟨true, 256, by decide⟩ := ⟨rfl, rfl, rfl⟩
 
-/-- `0x12 == b` and `0 == b` with `b : bytes1` have no common type: a
-constant on the left of a `bytesN` is refused. -/
 theorem common_literal_bytes_refused (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     STy.common? B M (.hexConst (Q.ofInt 0x12) 1) (.fixedBytes 1 (by decide)) = Option.none ∧
     STy.common? B M (.rational (Q.ofInt 0)) (.fixedBytes 1 (by decide)) = Option.none := ⟨rfl, rfl⟩
 
-/-- `x + 0x0100` with `x : uint8` is at `uint16`, the constant's mobile type. -/
 theorem common_mobile_step (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     STy.common? B M (.int IntTy.u8) (.hexConst (Q.ofInt 0x0100) 2) =
       Option.some (.int ⟨false, 16, by decide⟩) := rfl
 
-/-- Hexadecimal literals of 39 to 41 digits are neither bytes nor numbers
-(solc: "looks like an address"); 38 digits are both. -/
+example {ds : List (Fin 16)} {cs : Bool}
+    (lower : 39 ≤ ds.length) (upper : ds.length ≤ 41) :
+    (Syn.lit (.num (.hex ds cs)) : Syn .expr).const = none := by
+  change (if 39 ≤ ds.length ∧ ds.length ≤ 41 then none
+    else some (NumLit.hex ds cs).value) = none
+  exact if_pos ⟨lower, upper⟩
+
+example {ds : List (Fin 16)} {cs : Bool} (length : ds.length = 38) :
+    (Syn.lit (.num (.hex ds cs)) : Syn .expr).hexLen? = some 19 ∧
+      (Syn.lit (.num (.hex ds cs)) : Syn .expr).const.isSome = true := by
+  constructor
+  · change (if ds.length % 2 = 0 ∧ 2 ≤ ds.length ∧ ds.length ≤ 64 ∧
+      ¬ (39 ≤ ds.length ∧ ds.length ≤ 41) then
+        some (ds.length / 2) else none) = some 19
+    simp [length]
+  · change (if 39 ≤ ds.length ∧ ds.length ≤ 41 then none
+      else some (NumLit.hex ds cs).value).isSome = true
+    simp [length]
+
 theorem address_like_refused :
     (Syn.lit (.num (.hex (List.replicate 40 1) false)) : Syn .expr).hexLen? = Option.none ∧
     (Syn.lit (.num (.hex (List.replicate 39 1) false)) : Syn .expr).const = Option.none ∧
@@ -1933,9 +1863,6 @@ theorem address_like_refused :
     ((Syn.lit (.num (.hex (List.replicate 38 1) false)) : Syn .expr).const).isSome = true := by
   decide
 
-/-- **`0.length` is ill typed** (solc refuses it): `0` is a constant,
-never a `bytesN`, and a constant has no `length`.  Under S01's former
-literal typing it had a derivation at every `bytesN`, with lengths 1 to 32. -/
 theorem zeroLength_illTyped (Γ : Ctx) (τ : STy) :
     ¬ HasType Γ (.member (.lit (.num (.dec 0 0 0))) "length") τ := by
   intro ⟨d⟩

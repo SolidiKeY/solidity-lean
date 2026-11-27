@@ -1,7 +1,7 @@
 /-!
-# The pinned source grammar as intrinsic syntax (S00)
+# The pinned source grammar as intrinsic syntax
 
-The abstract syntax of Solidity 0.8.38, after the ANTLR grammar pinned by G00
+The abstract syntax of Solidity 0.8.38, after the pinned ANTLR grammar
 (`docs/grammar/SolidityParser.g4` and `SolidityLexer.g4` at `argotorg/solidity`
 commit `1835d247`, vendored as `tests/upstream/grammar-0.8.38/`).  It is
 independent of the compiler, of the intrinsic programs (`Solidity.Syntax.*`)
@@ -24,7 +24,7 @@ element (`Struct` members, `enum` values, import aliases, call options, inline
 arrays, catch clauses, …) the constructor takes the first element apart from
 the rest.  Flags the grammar allows at most once (`virtual`, a visibility,
 `override`, …) are an `Option` or a `Bool`; their source order is lexical
-detail (G08–G11).
+detail.
 
 **Out of the profile but present.**  Inline assembly, with its Yul body,
 `layout at`, the `>>>` operators and the `years` unit are syntax here, so a
@@ -36,10 +36,10 @@ paths of an assignment, the function-call-only expression statement and the
 canonical rethrow (`Syn.excl`), which these approximations do not reach.
 
 **Lexical content.**  Identifiers are strings, number literals their exact
-value (underscores and spelling are lexical, G08), string literals the bytes
+value (underscores and spelling are lexical), string literals the bytes
 of their concatenated fragments.  `int`/`uint` are `int256`/`uint256`.
 Fixed-point type names carry solc's bounds (`FixDims`).  Paths, pragma words
-and identifiers are not checked non-empty: that is lexical (G08).
+and identifiers are not checked non-empty: that is lexical.
 
 The constructor index and the mapping to the grammar's rules and labelled
 alternatives are in `Solidity/Source/Ctor.lean`.
@@ -135,9 +135,9 @@ inductive Denom where
 
 /-- A number literal (`DecimalNumber`/`HexNumber`).  A decimal denotes
 `mantissa / 10^fracDigits * 10^exp` (one value has several spellings; the
-spelling is lexical, G08); a hexadecimal keeps its digits (their count types
+spelling is lexical); a hexadecimal keeps its digits (their count types
 an address literal) and whether its letter case is a valid EIP-55 checksum,
-which the lexer computes from the spelling (G08). -/
+which the lexer computes from the spelling. -/
 inductive NumLit where
   | dec (mantissa fracDigits : Nat) (exp : Int)
   | hex (digits : List (Fin 16)) (checksummed : Bool)

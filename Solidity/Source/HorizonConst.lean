@@ -1,11 +1,5 @@
 import Solidity.Source.HorizonGrow
 
-/-!
-# Horizons: helpers keep the events
-
-Split from `Solidity/Source/Horizon.lean` for checking cost. `const_go`:
-the helpers that leave the event log as it is.
--/
 
 namespace Solidity.Source
 
@@ -14,9 +8,7 @@ open Solidity.Roadmap (Address Word Bytes Request Outcome Event)
 
 variable {E : Env}
 
-/-! ## Helpers keep the events -/
 
-/-- A computation leaves the events as they are. -/
 def Const {Γ : RCtx} {α : Type} (m : EM E Γ α) : Prop :=
   ∀ x, (m.run x).2.2.events = x.2.events
 
@@ -33,8 +25,6 @@ theorem Const.bind {Γ : RCtx} {α β : Type} {m : EM E Γ α} {k : α → EM E 
   | ok a => exact (hk a y).trans h1
   | error e => exact h1
 
-/-- A computation that keeps the events approximates itself at a larger
-horizon exactly when it is below it. -/
 theorem Approx.of_below {Γ : RCtx} {α : Type} {m m' : EM E Γ α} (hb : Below m m') (hc : Const m)
     (hc' : Const m') : Approx m m' := by
   refine ⟨fun x => (hc x).symm ▸ List.prefix_refl _, fun x => (hc' x).symm ▸ List.prefix_refl _, fun x => ?_⟩
@@ -42,6 +32,16 @@ theorem Approx.of_below {Γ : RCtx} {α : Type} {m m' : EM E Γ α} (hb : Below 
   · exact .inl ⟨ht, by rw [hc, hc']; exact List.prefix_refl _⟩
   · exact .inr he
 
+
+example {Γ : RCtx} {α : Type} {m m' : EM E Γ α}
+    (hc : Const m) (hc' : Const m') : Approx m m' ↔ Below m m' := by
+  constructor
+  · intro h x
+    rcases h.2.2 x with ht | he
+    · exact .inl ht.1
+    · exact .inr he
+  · intro hb
+    exact Approx.of_below hb hc hc'
 
 theorem Const.st {Γ : RCtx} : Const (st : EM E Γ (St E)) := fun _ => rfl
 theorem Const.locals {Γ : RCtx} : Const (locals : EM E Γ (Locals E.layout Γ)) := fun _ => rfl
@@ -80,8 +80,6 @@ theorem alloc_const {Γ : RCtx} {τ : STy} (x : Data E.layout τ) : Const (alloc
   rw [run_bind, run_st]
   exact rfl
 
-/-- Close `Const body`: through binds, `match`es and `if`s, by the given
-lemmas at the calls; a `modSt` keeps or appends events. -/
 syntax "const_go" "[" ident,* "]" : tactic
 macro_rules
   | `(tactic| const_go [$ls,*]) => `(tactic| repeat' (first

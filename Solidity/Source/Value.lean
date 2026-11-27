@@ -2,26 +2,26 @@ import Solidity.Source.Observe
 import Solidity.Source.Resolved
 
 /-!
-# Runtime values and their operations (S02)
+# Runtime values and their operations
 
-The values S02's expression semantics computes, intrinsic in S01's static
+The values expression semantics computes, intrinsic in the typing judgment's static
 types (`STy`), and the pure operations on them:
 
 - `RVal D τ`: a value of an expression of type `τ`.  A value or reference
-  type's value is S04.01's `Val D τ`; a constant (`.rational q`), a
+  type's value is `Val D τ`; a constant (`.rational q`), a
   hexadecimal literal (`.hexConst q len`) and a string literal
   (`.stringLit bs`) carry no run-time data beyond their type, so their values
   are `const q`, `hex q len` and `strLit bs`, which only a conversion node
   consumes; a tuple is its components;
 - `Halt`: how an evaluation stops early: a revert with its exact data
-  (`Panic(uint256)` codes included, G01 Q5), a stuck state (a run-time type
+  (`Panic(uint256)` codes included), a stuck state (a run-time type
   mismatch that well-formed programs never reach), or the end of the
   horizon (`timeout`, never a failure the source allows: the semantics is the
   family over every horizon);
 - the arithmetic of solc 0.8: checked operations panic with `0x11` out of
   range and wrap inside `unchecked` (`IntTy.wrap`, `IntTy.wrap_mem`),
   division and modulo by zero panic with `0x12` in both modes, `/` and `%`
-  truncate toward zero; fixed point by the second-round decisions (exact
+  truncate toward zero; fixed point (exact
   product and quotient truncated toward zero, `-x` on `ufixed` panics unless
   `x = 0`);
 - shifts and powers by an unsigned amount, without computing a power beyond
@@ -266,7 +266,7 @@ def intBin (t : IntTy) (checked : Bool) (op : BinOp) (x y : Int) : R (Val D (.in
   | _ => stuck "not an integer operation"
 
 /-- An arithmetic operation on two scaled fixed-point values of type `t`:
-`*` and `/` exact, then truncated toward zero (second round). -/
+`*` and `/` exact, then truncated toward zero. -/
 def fixBin (t : FixTy) (checked : Bool) (op : BinOp) (x y : Int) : R (Val D (.fixed t)) :=
   match op with
   | .add => fixRes t checked (x + y)
@@ -423,7 +423,7 @@ def enumOfInt (d : DeclName) (x : Int) : R (Val D (.enum d)) :=
 bit pattern between integers (wrapping), integers and `bytesN` of one
 width, `uint160`, `bytes20` and addresses; `bytesN` cut or padded on the
 right; enums from integers with `Panic(0x21)`; fixed point rescaled,
-truncated toward zero and wrapped (second round). -/
+truncated toward zero and wrapped. -/
 def convExplicitVal : {σ : STy} → (τ : STy) → Val D σ → R (Val D τ)
   | .int _, .int t', .int x _ => pure (intWrap t' x)
   | .int a, .fixedBytes n h, .int x _ =>
