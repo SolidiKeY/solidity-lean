@@ -66,7 +66,7 @@ theorem convRV_cdArray (F : Fr) (n : Nat) (σ : STy) (offset length : Nat) :
       cdToMem F (.array .memory σ none) offset length := by
   rfl
 
-theorem memory_array_ne_calldata_array (σ : STy) :
+example (σ : STy) :
     (.array .memory σ none : STy) ≠ .array .calldata σ none := by
   intro h
   cases h

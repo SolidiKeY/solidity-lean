@@ -15,13 +15,13 @@ theorem cdTail_ok (data : Bytes) (i stride : Nat) : NotStuckR (cdTail data i str
   repeat' split at hw
   all_goals cases hw
 
-theorem cdTail_error (data : Bytes) (i stride : Nat) (halt : Halt)
+example (data : Bytes) (i stride : Nat) (halt : Halt)
     (failed : cdTail data i stride = .error halt) : halt = .revert [] := by
   simp only [cdTail] at failed
   repeat' split at failed
   all_goals cases failed <;> rfl
 
-theorem cdTail_success (data : Bytes) (i stride : Nat)
+example (data : Bytes) (i stride : Nat)
     (header : ¬ data.length < wordAt data i + 32)
     (length : ¬ 2 ^ 64 ≤ wordAt (data.drop (wordAt data i)) 0)
     (extent : wordAt data i + 32 + stride * wordAt (data.drop (wordAt data i)) 0 ≤ data.length) :
@@ -95,7 +95,7 @@ theorem decodeArgs_entry_ok {H : HeapTy} (data : Bytes) : ∀ (τs : List STy) (
     exact Hoare.pure' fun _ ⟨hy, hvs, _, hv, hle⟩ => ⟨hy, hv.mono hle, hvs⟩
 
 
-theorem cdWordAt_past_data (F : Fr) (off : Nat) (outside : F.cd.length ≤ off) :
+example (F : Fr) (off : Nat) (outside : F.cd.length ≤ off) :
     cdWordAt F off = 0 := by
   unfold cdWordAt
   rw [List.drop_eq_nil_of_le outside]
@@ -108,7 +108,7 @@ theorem readLoc_cd_ok {P : EMState E Γ → Prop} (F : Fr) (off : Nat) {τ : STy
   exact Hoare.conseq (Hoare.lift_ns (decodeWord_ok _ hτ)) (fun _ h => h)
     (fun v _ hy => ⟨hy, Val.refOK_of_loc (STy.decodableElem_loc hτ) v⟩) (fun _ _ h => h)
 
-theorem readLoc_cd_run (F : Fr) (off : Nat) {τ : STy} (before : EMState E Γ) :
+example (F : Fr) (off : Nat) {τ : STy} (before : EMState E Γ) :
     (readLoc F (.cd off) : EM E Γ (Val E.layout τ)).run before =
       (decodeWord E.layout (cdWordAt F off) τ, before) := by
   simp only [readLoc, EM.lift]
@@ -119,7 +119,7 @@ theorem cdByte_ok {D : Layout} (F : Fr) (off len k : Nat) : NotStuckR (cdByte (D
   simp only [cdByte] at hw
   split at hw <;> cases hw
 
-theorem cdByte_out {D : Layout} (F : Fr) (off len k : Nat) (outside : ¬ k < len) :
+example {D : Layout} (F : Fr) (off len k : Nat) (outside : ¬ k < len) :
     cdByte (D := D) F off len k = .error (.revert (panicData .index)) := by
   simp only [cdByte, if_neg outside]
   rfl
@@ -132,20 +132,20 @@ theorem sliceR_ok {D : Layout} {τ : STy} (h : τ.loc? = some .calldata) (off le
   all_goals cases hw
 
 
-theorem sliceR_order_error {D : Layout} {τ : STy}
+example {D : Layout} {τ : STy}
     (h : τ.loc? = some .calldata) (off len s e : Nat) (toEnd : Bool)
     (backwards : (if toEnd then len else e) < s) :
     sliceR (D := D) (.cdRef h off len) s e toEnd = .error (.revert []) := by
   simp only [sliceR, if_pos backwards]
 
-theorem sliceR_length_error {D : Layout} {τ : STy}
+example {D : Layout} {τ : STy}
     (h : τ.loc? = some .calldata) (off len s e : Nat) (toEnd : Bool)
     (ordered : ¬ (if toEnd then len else e) < s)
     (outside : len < (if toEnd then len else e)) :
     sliceR (D := D) (.cdRef h off len) s e toEnd = .error (.revert []) := by
   simp only [sliceR, if_neg ordered, if_pos outside]
 
-theorem sliceR_success {D : Layout} {τ : STy}
+example {D : Layout} {τ : STy}
     (h : τ.loc? = some .calldata) (off len s e : Nat) (toEnd : Bool)
     (ordered : ¬ (if toEnd then len else e) < s)
     (inside : ¬ len < (if toEnd then len else e)) :

@@ -23,7 +23,7 @@ theorem deleteLocal_array_run (F : Fr) (budget : Nat) (σ : STy)
   | zero => rfl
   | succ budget => cases budget <;> rfl
 
-theorem deleteLocal_array_old_cell (F : Fr) (budget : Nat) (σ : STy)
+example (F : Fr) (budget : Nat) (σ : STy)
     (index : Idx Γ (.array .memory σ none)) (before : EMState E Γ) (address : Nat)
     (old_address : address ≠ before.2.heap.next) :
     ((deleteLoc F budget (.local index)).run before).2.2.heap.get address =
@@ -48,7 +48,7 @@ theorem deleteLocal_bytes_run (F : Fr) (budget : Nat)
   | zero => rfl
   | succ budget => cases budget <;> rfl
 
-theorem deleteLocal_bytes_old_cell (F : Fr) (budget : Nat)
+example (F : Fr) (budget : Nat)
     (index : Idx Γ (.bytes .memory)) (before : EMState E Γ) (address : Nat)
     (old_address : address ≠ before.2.heap.next) :
     ((deleteLoc F budget (.local index)).run before).2.2.heap.get address =

@@ -33,7 +33,7 @@ theorem nested_copy :
     (nested.2.2.heap.get (sB.heap.next + 2)).map (·.1) = some (.array .memory pair none) := by
   refine ⟨rfl, rfl, rfl, rfl⟩
 
-theorem nested_outer_refs :
+example :
     nested.2.2.heap.get (sB.heap.next + 2) =
       some ⟨.array .memory pair none,
         Data.array 2 (fun _ h => nomatch h)
