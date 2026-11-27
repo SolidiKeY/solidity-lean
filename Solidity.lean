@@ -2554,6 +2554,7 @@ import Solidity.Correctness.Lowering.Total.Decode.Casts
 import Solidity.Correctness.Lowering.Total.Decode.Marked
 import Solidity.Correctness.Lowering.Total.Decode.Self
 import Solidity.Correctness.Lowering.Total.Decode.Spelling
+import Solidity.Correctness.Lowering.Total.Decode.SuccessfulContext
 import Solidity.Correctness.Lowering.Total.Decode.Tables
 import Solidity.Correctness.Lowering.Total.Decode.Widths
 import Solidity.Correctness.Lowering.Total.Decode.WithExpr
