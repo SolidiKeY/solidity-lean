@@ -1,18 +1,15 @@
 import Solidity.Goals.Hash
 import Solidity.Storage.Representation.Transport
 
-/-! Operational producers and encoding facts. -/
 namespace Solidity.Hash.CompilerCorrect
 
 open Solidity.Evm Solidity.Goals.HashContract
 
-/-- Iterate the specified transition without filtering any execution prefix. -/
 noncomputable def iteratePrefix (atom : Instr → S → Result S)
     (test : S → Option (Bool × S)) : Nat → Cursor S → Cursor S
   | 0, c => c
   | n + 1, c => tick atom test (iteratePrefix atom test n c)
 
-/-- One producer for both machines, including terminal stuttering. -/
 noncomputable def producer : Producer where
   ideal n c m := iteratePrefix (fun i s => idealResult (i.step s)) idealTest n (.running c 0 [] m)
   numeric F n c m := iteratePrefix (numericAtom F) numericTest n (.running c 0 [] m)
@@ -23,14 +20,12 @@ theorem producer_produces : Produces producer where
   ideal_succ _ _ _ := rfl
   numeric_succ _ _ _ _ := rfl
 
-/-- The contract equations determine every ideal prefix uniquely. -/
 theorem ideal_unique (E : Producer) (h : Produces E) (n : Nat)
     (c : List Instr) (m : Machine) : E.ideal n c m = producer.ideal n c m := by
   induction n with
   | zero => exact h.ideal_zero c m
   | succ n ih => rw [h.ideal_succ, producer_produces.ideal_succ, ih]
 
-/-- Numeric traces are likewise fixed, even after a revert or fault. -/
 theorem numeric_unique (E : Producer) (h : Produces E) (F : Roadmap.Fixed)
     (n : Nat) (c : List Instr) (m : Numeric) :
     E.numeric F n c m = producer.numeric F n c m := by
@@ -45,7 +40,6 @@ theorem prefix_halted (atom : Instr → S → Result S)
   | zero => rfl
   | succ n ih => simp only [iteratePrefix, ih, tick]
 
-/-- Split an actual prefix at any instruction boundary. -/
 theorem prefix_add (atom : Instr → S → Result S)
     (test : S → Option (Bool × S)) (n k : Nat) (c : Cursor S) :
     iteratePrefix atom test (n + k) c = iteratePrefix atom test k (iteratePrefix atom test n c) := by
@@ -56,7 +50,6 @@ theorem prefix_add (atom : Instr → S → Result S)
       tick atom test (iteratePrefix atom test k (iteratePrefix atom test n c))
     rw [ih]
 
-/-- Once halted, every later prefix has exactly the same outcome. -/
 theorem prefix_done_le (atom : Instr → S → Result S)
     (test : S → Option (Bool × S)) {n k : Nat} {c : Cursor S} {r : Result S}
     (hnk : n ≤ k) (hn : iteratePrefix atom test n c = .halted r) :
@@ -64,7 +57,6 @@ theorem prefix_done_le (atom : Instr → S → Result S)
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hnk
   rw [prefix_add, hn, prefix_halted]
 
-/-- The limit convention always has an outcome, with fault for no terminal prefix. -/
 theorem prefix_limit_exists (atom : Instr → S → Result S)
     (test : S → Option (Bool × S)) (c : Cursor S) :
     ∃ r, Limit (fun n => iteratePrefix atom test n c) r := by
@@ -74,7 +66,6 @@ theorem prefix_limit_exists (atom : Instr → S → Result S)
     exact ⟨r, Or.inl ⟨n, hn⟩⟩
   · exact ⟨.fault, Or.inr ⟨rfl, fun n r hn => h ⟨n, r, hn⟩⟩⟩
 
-/-- Fault-as-divergence cannot introduce a second limit outcome. -/
 theorem prefix_limit_unique (atom : Instr → S → Result S)
     (test : S → Option (Bool × S)) (c : Cursor S) {r t : Result S}
     (hr : Limit (fun n => iteratePrefix atom test n c) r)
@@ -89,7 +80,6 @@ theorem prefix_limit_unique (atom : Instr → S → Result S)
     · exact False.elim (hn k t hk)
     · rfl
 
-/-- Decoding runtime bytes recovers the complete natural-byte preimage. -/
 theorem encoded_toNat (p : Storage.Pre) :
     (encoded p).map UInt8.toNat = Storage.encode p := by
   simp only [encoded, List.map_map]
@@ -109,12 +99,10 @@ theorem encoded_eq_iff (p q : Storage.Pre) :
   · intro h
     exact congrArg (List.map UInt8.ofNat) h
 
-/-- Runtime encoding is injective on the same word domain as the natural encoder. -/
 theorem encoded_inj {p q : Storage.Pre} (hp : p.Words) (hq : q.Words)
     (h : encoded p = encoded q) : p = q :=
   Storage.encode_inj hp hq ((encoded_eq_iff p q).mp h)
 
-/-- Symbolic slot interpretation is already reduced to a word. -/
 theorem slot_word_lt (F : Roadmap.Fixed) (s : Slot) :
     (Storage.ofSlot s).word W (hashPre F) < W := by
   cases s <;> exact Nat.mod_lt _ W_pos
@@ -123,7 +111,6 @@ theorem address_val (F : Roadmap.Fixed) (s : Slot) :
     (address F s).val = (Storage.ofSlot s).word W (hashPre F) :=
   Nat.mod_eq_of_lt (slot_word_lt F s)
 
-/-- Every recursively accessed representation preimage has word-sized fields. -/
 theorem slot_pres_words (F : Roadmap.Fixed) (s : Slot) :
     ∀ p ∈ (Storage.ofSlot s).pres W (hashPre F), p.Words := by
   induction s with
@@ -143,7 +130,6 @@ theorem slot_pres_words (F : Roadmap.Fixed) (s : Slot) :
       subst p
       exact slot_word_lt F s
 
-/-- Move the exact byte-level region obligation to its natural preimages. -/
 theorem representation_regions (F : Roadmap.Fixed) (slots : List Slot)
     (hr : RegionsDisjoint W F.regionLen (fun b => (F.hash b).val)
       (List.range F.rootSlots) (preimages F slots)) :
@@ -162,7 +148,6 @@ theorem representation_regions (F : Roadmap.Fixed) (slots : List Slot)
   · intro p hp r hroot
     exact hr.2 (encoded p) (List.mem_map_of_mem hp) r hroot
 
-/-- The explicit footprint supplies the existing finite transport conditions. -/
 theorem representation_run (F : Roadmap.Fixed) (slots : List Slot)
     (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
     (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
@@ -184,7 +169,6 @@ theorem representation_run (F : Roadmap.Fixed) (slots : List Slot)
     obtain ⟨s, hs, rfl⟩ := List.mem_map.mp hl
     exact List.mem_flatMap.mpr ⟨s, hs, hp⟩
 
-/-- On the explicit bounded footprint, numeric address equality reflects slot equality. -/
 theorem address_injective_on (F : Roadmap.Fixed) (slots : List Slot)
     (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
     (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
@@ -198,7 +182,6 @@ theorem address_injective_on (F : Roadmap.Fixed) (slots : List Slot)
   have hv := congrArg Fin.val he
   simpa only [address_val] using hv
 
-/-- A concrete numeric write preserves every covered symbolic observation. -/
 theorem store_write_agrees (F : Roadmap.Fixed) (slots : List Slot)
     (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
     (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
@@ -218,7 +201,6 @@ theorem store_write_agrees (F : Roadmap.Fixed) (slots : List Slot)
     apply Fin.ext
     exact (WordStore.write_other st a.val he).symm
 
-/-- SLOAD preserves the full machine relation on the covered footprint. -/
 theorem sload_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (s : Slot) (tail : List Word) (shape : m.stack = .slot s :: tail)
@@ -232,7 +214,6 @@ theorem sload_related (F : Roadmap.Fixed) (slots : List Slot)
   refine ⟨rfl, ?_, mem, store, env⟩
   simp only [List.map_cons, word, store s hs]
 
-/-- SSTORE derives the numeric storage update; no step simulation is assumed. -/
 theorem sstore_related (F : Roadmap.Fixed) (slots : List Slot)
     (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
     (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
@@ -249,21 +230,18 @@ theorem sstore_related (F : Roadmap.Fixed) (slots : List Slot)
   simp only [Instr.step, shape, numericAtom, stack', idealResult, ResultRelated]
   exact ⟨True.intro, rfl, mem, store_write_agrees F slots hL hR hb hr m.store v.store store s hs a, env⟩
 
-/-- Mapping KECCAK consumes exactly the numeric key and recursively interpreted parent. -/
 theorem address_hash (F : Roadmap.Fixed) (k : Fin W) (s : Slot) :
     address F (.hash k s 0) = F.hash (encoded (.entry k.val (address F s).val)) := by
   apply Fin.ext
   simp only [address_val, Storage.ofSlot, Storage.Loc.word, hashPre, Nat.add_zero]
   exact Nat.mod_eq_of_lt (F.hash _).isLt
 
-/-- Array KECCAK uses the same parent preimage as the symbolic location. -/
 theorem address_data (F : Roadmap.Fixed) (s : Slot) :
     address F (.data s 0) = F.hash (encoded (.data (address F s).val)) := by
   apply Fin.ext
   simp only [address_val, Storage.ofSlot, Storage.Loc.word, hashPre, Nat.add_zero]
   exact Nat.mod_eq_of_lt (F.hash _).isLt
 
-/-- Mapping hash execution commutes with the full machine representation. -/
 theorem keccakMap_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (k : Fin W) (s : Slot) (tail : List Word)
@@ -278,7 +256,6 @@ theorem keccakMap_related (F : Roadmap.Fixed) (slots : List Slot)
   refine ⟨rfl, ?_, mem, store, env⟩
   simp only [List.map_cons, word, address_hash]
 
-/-- Array hash execution commutes with the full machine representation. -/
 theorem keccakArr_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (s : Slot) (tail : List Word) (shape : m.stack = .slot s :: tail) :
@@ -292,7 +269,6 @@ theorem keccakArr_related (F : Roadmap.Fixed) (slots : List Slot)
   refine ⟨rfl, ?_, mem, store, env⟩
   simp only [List.map_cons, word, address_data]
 
-/-- Symbolic offset addition is the same modular numeric address addition. -/
 theorem address_add (F : Roadmap.Fixed) (s : Slot) (i : Nat) :
     address F (s.add i) = wmod ((address F s).val + i) := by
   apply Fin.ext
@@ -300,7 +276,6 @@ theorem address_add (F : Roadmap.Fixed) (s : Slot) (i : Nat) :
     simp only [address, Storage.ofSlot, Slot.add, Storage.Loc.word, wmod,
       Nat.mod_mod, Nat.mod_add_mod, Nat.add_assoc]
 
-/-- Either legal symbolic-slot ADD order agrees with ordinary numeric ADD. -/
 theorem add_slot_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (s : Slot) (i : Fin W) (tail : List Word)
@@ -315,7 +290,6 @@ theorem add_slot_related (F : Roadmap.Fixed) (slots : List Slot)
       true_and] <;>
     exact ⟨rfl, mem, store, env⟩
 
-/-- A reached symbolic SLOAD emits exactly the numeric read event. -/
 theorem sload_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (s : Slot) (tail : List Word) (shape : m.stack = .slot s :: tail)
@@ -325,7 +299,6 @@ theorem sload_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
   simp only [idealAccessAt, numericAccessAt, rep.1, shape, List.map_cons, word,
     List.map_nil, mapAccess]
 
-/-- A reached symbolic SSTORE retains both the numeric address and written value. -/
 theorem sstore_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (s : Slot) (a : Fin W) (tail : List Word)
@@ -335,7 +308,6 @@ theorem sstore_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
   simp only [idealAccessAt, numericAccessAt, rep.1, shape, List.map_cons, word,
     List.map_nil, mapAccess]
 
-/-- Empty-stack storage/hash/ADD faults are retained by the numeric atom. -/
 theorem empty_stack_fault_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v) (shape : m.stack = [])
     (i : Instr) (hi : i ∈ [.sload, .sstore, .keccakMap, .keccakArr, .add]) :
@@ -345,7 +317,6 @@ theorem empty_stack_fault_related (F : Roadmap.Fixed) (slots : List Slot)
     simp only [Instr.step, shape, numericAtom, rep.1, List.map_nil, embed,
       idealResult, resultMap, ResultRelated]
 
-/-- One semantic loop turn unfolds even when its remaining execution diverges. -/
 theorem loop_run_unfold (rc rb : Machine → Evm.Out) (m : Machine) :
     loopRun rc rb m =
       match loopTurn rc rb m with
@@ -366,13 +337,11 @@ theorem loop_run_unfold (rc rb : Machine → Evm.Out) (m : Machine) :
         | succ n => exact h ⟨r, n, by simpa only [loopIterN, ht] using hn⟩
       simp only [loopRun, h, hm, dif_neg, not_false_eq_true]
 
-/-- Reinterpret the contract result in the existing EVM outcome type. -/
 def outOfResult : Result Machine → Evm.Out
   | .ok m k => .ok m k
   | .revert => .revert
   | .fault => .fault
 
-/-- Remaining loop execution, followed by the code after the loop. -/
 noncomputable def continueLoop (c b rest : List Instr) (m : Machine) : Evm.Out :=
   (loopRun (Evm.run c) (Evm.run b) m).bind (fun m k => Evm.exec rest k m)
 
@@ -401,7 +370,6 @@ noncomputable def finishFrames : List Frame → Evm.Out → Evm.Out
   | [], r => r
   | f :: fs, r => finishFrames fs (frameResult f r)
 
-/-- Denotation includes all pending frames, including divergent continuations. -/
 noncomputable def denoteCursor : Cursor Machine → Evm.Out
   | .running c k fs m => finishFrames fs (Evm.exec c k m)
   | .halted r => outOfResult r
@@ -442,7 +410,6 @@ theorem continueLoop_test (c b rest : List Instr) (m : Machine) :
               cases j <;> simp [loopTurn, hc, hs, hz, hb, testResult, bodyResult,
                 continueLoop, Evm.Out.bind]
 
-/-- An atomic transition preserves the denotation of its entire continuation. -/
 theorem denote_atom (out : Evm.Out) (rest : List Instr) (fs : List Frame) :
     denoteCursor (match idealResult out with
       | .ok m k => .running rest k fs m
@@ -454,7 +421,6 @@ theorem denote_atom (out : Evm.Out) (rest : List Instr) (fs : List Frame) :
   | revert => exact (finishFrames_revert fs).symm
   | fault => exact (finishFrames_fault fs).symm
 
-/-- Every specified ideal tick preserves the complete EVM denotation. -/
 theorem denote_tick (cur : Cursor Machine) :
     denoteCursor (tick (fun i s => idealResult (i.step s)) idealTest cur) =
       denoteCursor cur := by
@@ -512,7 +478,6 @@ theorem denote_prefix (n : Nat) (cur : Cursor Machine) :
   | zero => rfl
   | succ n ih => rw [iteratePrefix, denote_tick, ih]
 
-/-- Any actual finite terminal prefix agrees with the original EVM semantics. -/
 theorem ideal_finite_sound (n : Nat) (c : List Instr) (m : Machine) (r : Result Machine)
     (h : producer.ideal n c m = .halted r) : idealResult (Evm.run c m) = r := by
   have hd := denote_prefix n (.running c 0 [] m)
@@ -521,7 +486,6 @@ theorem ideal_finite_sound (n : Nat) (c : List Instr) (m : Machine) (r : Result 
   have hr : idealResult (outOfResult r) = r := by cases r <;> rfl
   exact (congrArg idealResult hd).symm.trans hr
 
-/-- Reachability uses precisely the already fixed ideal tick sequence. -/
 def IdealReaches (a b : Cursor Machine) : Prop :=
   ∃ n, iteratePrefix (fun i s => idealResult (i.step s)) idealTest n a = b
 
@@ -536,7 +500,6 @@ theorem reaches_trans {a b c : Cursor Machine} (hab : IdealReaches a b)
   obtain ⟨k, hk⟩ := hbc
   exact ⟨n + k, by rw [prefix_add, hn, hk]⟩
 
-/-- Non-fault loop outcomes have a finite witness, even with unbounded loops. -/
 theorem loop_nonfault_witness (rc rb : Machine → Evm.Out) (m : Machine)
     (h : loopRun rc rb m ≠ .fault) :
     ∃ n, loopIterN rc rb n m = .inr (loopRun rc rb m) := by
@@ -545,13 +508,11 @@ theorem loop_nonfault_witness (rc rb : Machine → Evm.Out) (m : Machine)
     exact ⟨n, by rw [loopRun_of_iterN hn]; exact hn⟩
   · exact False.elim (h (by simp only [loopRun, hex, dif_neg, not_false_eq_true]))
 
-/-- A completed subcode leaves successful results at its frame boundary. -/
 def afterCode (fs : List Frame) : Evm.Out → Cursor Machine
   | .ok m k => .running [] k fs m
   | .revert => .halted .revert
   | .fault => .halted .fault
 
-/-- Internal induction property; no completeness premise is added to the goal. -/
 def CodeComplete (c : List Instr) : Prop :=
   ∀ k fs m, Evm.exec c k m ≠ .fault →
     IdealReaches (.running c k fs m) (afterCode fs (Evm.exec c k m))
@@ -569,7 +530,6 @@ theorem complete_nil : CodeComplete [] := by
   intro k fs m _
   exact reaches_refl _
 
-/-- Pending jumps consume instructions without invoking their semantics. -/
 theorem complete_skip {rest : List Instr} (hr : CodeComplete rest)
     (i : Instr) (k : Nat) (fs : List Frame) (m : Machine)
     (hne : Evm.exec (i :: rest) (k + 1) m ≠ .fault) :
@@ -585,7 +545,6 @@ def afterAtom (rest : List Instr) (fs : List Frame) : Evm.Out → Cursor Machine
   | .revert => .halted .revert
   | .fault => .halted .fault
 
-/-- Realize finitely many semantic loop turns using the actual ideal ticks. -/
 theorem loop_turns_complete (c b : List Instr) (hc : CodeComplete c)
     (hb : CodeComplete b) (rest : List Instr) (fs : List Frame)
     (n : Nat) (m : Machine) (r : Evm.Out)
@@ -645,7 +604,7 @@ theorem loop_turns_complete (c b : List Instr) (hc : CodeComplete c)
                     hbr) hbt) (ih t hn)
 
 mutual
-/-- Every non-fault instruction outcome has its actual finite execution. -/
+
 theorem instr_complete (i : Instr) (m : Machine) (rest : List Instr) (fs : List Frame)
     (hne : i.step m ≠ .fault) :
     IdealReaches (.running (i :: rest) 0 fs m) (afterAtom rest fs (i.step m)) := by
@@ -666,7 +625,6 @@ theorem instr_complete (i : Instr) (m : Machine) (rest : List Instr) (fs : List 
 termination_by sizeOf i
 decreasing_by all_goals simp_all only; all_goals simp_wf; all_goals omega
 
-/-- Structural completeness includes nested loops and arbitrary pending frames. -/
 theorem code_complete (c : List Instr) : CodeComplete c := by
   intro k fs m hne
   cases shape : c with
@@ -704,7 +662,6 @@ theorem ideal_nonfault_complete (c : List Instr) (m : Machine)
       ⟨1, by cases k <;> rfl⟩
     exact reaches_trans hc ht
 
-/-- Limit soundness uses non-fault completeness in the no-terminal-prefix case. -/
 theorem ideal_limit_sound (c : List Instr) (m : Machine) (out : Result Machine)
     (h : Limit (fun n => producer.ideal n c m) out) :
     out = idealResult (Evm.run c m) := by
@@ -715,7 +672,6 @@ theorem ideal_limit_sound (c : List Instr) (m : Machine) (out : Result Machine)
     · obtain ⟨n, he⟩ := ideal_nonfault_complete c m hf
       exact False.elim (hn n _ he)
 
-/-- Adequacy for all ideal code, including nested loops and divergence. -/
 theorem producer_idealAdequacy : IdealAdequacy producer := by
   intro c m out
   constructor
@@ -728,8 +684,6 @@ theorem producer_idealAdequacy : IdealAdequacy producer := by
     cases he
     exact hr
 
-/-- Once the compiler simulation is proved, its actual prefix failures are
-bounded by the existing adaptive theorem on one shared transcript. -/
 theorem adaptive_of_compilerBridge (E : Producer) (bridge : CompilerBridge E) :
     AdaptiveBridge E := by
   classical
@@ -751,7 +705,6 @@ theorem adaptive_of_compilerBridge (E : Producer) (bridge : CompilerBridge E) :
   exact hbad ((hb.2 (CollisionBridge.oracleFixed F dom g) (v g) observed).1 n
     (hready g hg) hp)
 
-/-- Pointwise correspondence preserves both terminal and divergent limits. -/
 theorem limits_related (F : Roadmap.Fixed) (c : List Instr) (m : Machine) (v : Numeric)
     (observed : List Slot) (ir : Result Machine) (nr : Result Numeric)
     (hi : Limit (fun n => producer.ideal n c m) ir)
@@ -782,7 +735,6 @@ theorem limits_related (F : Roadmap.Fixed) (c : List Instr) (m : Machine) (v : N
       | halted r => exact False.elim (hi j r he)
     · trivial
 
-/-- The compiler's limit clause follows once every actual prefix is related. -/
 theorem numeric_limits (F : Roadmap.Fixed) (c : List Instr) (m : Machine) (v : Numeric)
     (observed : List Slot)
     (hrel : ∀ n, Related F observed (producer.ideal n c m) (producer.numeric F n c v)) :
@@ -795,8 +747,6 @@ theorem numeric_limits (F : Roadmap.Fixed) (c : List Instr) (m : Machine) (v : N
   obtain ⟨out, hn⟩ := prefix_limit_exists (numericAtom F) numericTest (.running c 0 [] v)
   exact ⟨⟨out, hn, hall out hn⟩, hall⟩
 
-/-- A non-fault execution cannot reach an atom whose ideal step faults.
-Compiler certificates, rather than a new caller premise, must supply this fact. -/
 theorem reached_step_nonfault (c : List Instr) (m : Machine) (n : Nat)
     (i : Instr) (rest : List Instr) (fs : List Frame) (s : Machine)
     (hr : producer.ideal n c m = .running (i :: rest) 0 fs s)
@@ -808,7 +758,6 @@ theorem reached_step_nonfault (c : List Instr) (m : Machine) (n : Nat)
   simp only [denoteCursor, exec_cons_zero, hf, Evm.Out.bind, finishFrames_fault] at hd
   exact hne hd.symm
 
-/-- Value-headed loop tests agree and preserve every represented field. -/
 theorem test_step_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (w : Fin W) (tail : List Word) (shape : m.stack = .val w :: tail) :
@@ -819,7 +768,6 @@ theorem test_step_related (F : Roadmap.Fixed) (slots : List Slot)
   · simp only [numericTest, rep.1, shape, List.map_cons, word]
   · exact ⟨rfl, rep.2⟩
 
-/-- PUSH translates the actual symbolic operand without a synthetic runtime hash. -/
 theorem push_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v) (w : Word) :
     ResultRelated F slots (idealResult ((Instr.push w).step m)) (numericAtom F (.push w) v) := by
@@ -827,7 +775,6 @@ theorem push_related (F : Roadmap.Fixed) (slots : List Slot)
   exact ⟨True.intro, by simpa only [List.map_cons] using congrArg (List.cons (word F w)) rep.1,
     rep.2⟩
 
-/-- POP preserves the representation even when the discarded word is a slot. -/
 theorem pop_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (w : Word) (tail : List Word) (shape : m.stack = w :: tail) :
@@ -838,7 +785,6 @@ theorem pop_related (F : Roadmap.Fixed) (slots : List Slot)
     Function.comp_def, word, true_and]
   exact ⟨rfl, mem, store, env⟩
 
-/-- Ordinary binary arithmetic acts identically on represented value operands. -/
 theorem binary_values_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (a b : Fin W) (tail : List Word) (shape : m.stack = .val a :: .val b :: tail)
@@ -866,7 +812,6 @@ theorem unary_values_related (F : Roadmap.Fixed) (slots : List Slot)
       List.map_map, Function.comp_def, true_and] <;>
     exact ⟨rfl, mem, store, env⟩
 
-/-- Loading a symbolic memory word returns its represented numeric value. -/
 theorem mload_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v) (x : Nat) :
     ResultRelated F slots (idealResult ((Instr.mload x).step m)) (numericAtom F (.mload x) v) := by
@@ -876,7 +821,6 @@ theorem mload_related (F : Roadmap.Fixed) (slots : List Slot)
     Function.comp_def, word, true_and]
   exact ⟨by rw [mem x]; rfl, mem, store, env⟩
 
-/-- Memory stores commute on every cell, including symbolic pointer values. -/
 theorem mstore_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (x : Nat) (w : Word) (tail : List Word) (shape : m.stack = w :: tail) :
@@ -913,7 +857,6 @@ theorem mstoreAt_related (F : Roadmap.Fixed) (slots : List Slot)
   intro y
   by_cases h : y = x.val <;> simp [Evm.upd, h, word, mem]
 
-/-- Unconditional jumps preserve the exact pending skip count. -/
 theorem jump_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v) (n : Nat) :
     ResultRelated F slots (idealResult ((Instr.jump n).step m)) (numericAtom F (.jump n) v) := by
@@ -932,7 +875,6 @@ theorem jumpi_related (F : Roadmap.Fixed) (slots : List Slot)
     ResultRelated, Represents, List.map_cons, List.map_map, Function.comp_def, word, true_and]
   exact ⟨rfl, mem, store, env⟩
 
-/-- Environment reads retain the unchanged world components of Represents. -/
 theorem environment_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (i : Instr) (hi : i ∈ [.caller, .callvalue, .timestamp, .selfbalance, .address]) :
@@ -945,7 +887,6 @@ theorem environment_related (F : Roadmap.Fixed) (slots : List Slot)
       Function.comp_def, word, bal, bal₀, self, accepts, caller, value, time, true_and, and_true]
     <;> exact ⟨rfl, mem, store⟩
 
-/-- CALL uses the same balance and payment oracle, including refusal and self-call. -/
 theorem call_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (amount dest : Fin W) (tail : List Word)
@@ -964,7 +905,6 @@ theorem call_related (F : Roadmap.Fixed) (slots : List Slot)
         Function.comp_def, word, if_true, if_false, true_and, and_true] <;>
       exact ⟨rfl, fun _ => True.intro, fun _ _ => True.intro⟩
 
-/-- DUP copies the represented word at the exact checked stack position. -/
 theorem dup_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (n : Nat) (w : Word) (found : m.stack[n]? = some w) :
@@ -977,7 +917,6 @@ theorem dup_related (F : Roadmap.Fixed) (slots : List Slot)
     Function.comp_def, word, true_and]
   exact ⟨rfl, mem, store, env⟩
 
-/-- SWAP preserves symbolic words at both positions and throughout the tail. -/
 theorem swap_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (n : Nat) (a b : Word) (tail : List Word)
@@ -995,7 +934,6 @@ theorem revert_related (F : Roadmap.Fixed) (slots : List Slot) (m : Machine) (v 
     ResultRelated F slots (idealResult (Instr.revert.step m)) (numericAtom F .revert v) := by
   trivial
 
-/-- Invert an actual non-fault unary value operation. -/
 theorem nonfault_one_value {st : List Word} {f : Fin W → List Word → Evm.Out}
     (h : (match st with | .val a :: tail => f a tail | _ => .fault) ≠ .fault) :
     ∃ a tail, st = .val a :: tail := by
@@ -1006,7 +944,6 @@ theorem nonfault_one_value {st : List Word} {f : Fin W → List Word → Evm.Out
     | slot s => exact False.elim (h rfl)
     | val a => exact ⟨a, tail, rfl⟩
 
-/-- Invert an actual non-fault binary value operation. -/
 theorem nonfault_two_values {st : List Word}
     {f : Fin W → Fin W → List Word → Evm.Out}
     (h : (match st with | .val a :: .val b :: tail => f a b tail | _ => .fault) ≠ .fault) :
@@ -1024,7 +961,6 @@ theorem nonfault_two_values {st : List Word}
         | slot s => exact False.elim (h rfl)
         | val b => exact ⟨a, b, tail, rfl⟩
 
-/-- Value-only binary opcodes cannot silently accept symbolic slot operands. -/
 theorem binary_nonfault_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (i : Instr) (hi : i ∈ [.sub, .mul, .div, .mod, .lt, .gt, .eq, .or, .and,
@@ -1083,8 +1019,6 @@ theorem nonfault_slot_value {st : List Word}
         | slot t => exact False.elim (h rfl)
         | val a => exact ⟨s, a, tail, rfl⟩
 
-
-/-- ADD's non-fault shapes include both symbolic offset orders. -/
 theorem add_nonfault_related (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (safe : Instr.add.step m ≠ .fault) :
@@ -1105,8 +1039,6 @@ theorem add_nonfault_related (F : Roadmap.Fixed) (slots : List Slot)
         | val b => exact add_slot_related F slots m v rep a b tail (Or.inr shape)
         | slot b => exact False.elim (safe (by simp [Instr.step, shape]))
 
-/-- Every non-fault atomic step preserves the concrete representation. Storage
-writes use the explicit bounded regions; no storage simulation is a premise. -/
 theorem nonfault_atom_related (F : Roadmap.Fixed) (slots : List Slot)
     (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
     (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
@@ -1193,9 +1125,6 @@ theorem nonfault_atom_related (F : Roadmap.Fixed) (slots : List Slot)
   case revert => exact revert_related F slots m v
   case loop c b => exact False.elim (nonloop c b rfl)
 
-
-/-- Access correspondence keeps each actual storage read and write, including
-steps before reversion; it does not substitute representation coverage for events. -/
 theorem nonfault_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
     (i : Instr) (safe : i.step m ≠ .fault)
@@ -1210,7 +1139,6 @@ theorem nonfault_access_agrees (F : Roadmap.Fixed) (slots : List Slot)
     obtain ⟨s, a, tail, shape⟩ := nonfault_slot_value safe
     exact sstore_access_agrees F slots m v rep s a tail shape rest fs
 
-
 theorem tick_atom_eq (atom : Instr → S → Result S) (test : S → Option (Bool × S))
     (i : Instr) (rest : List Instr) (fs : List Frame) (m : S)
     (nonloop : ∀ a b, i ≠ .loop a b) :
@@ -1222,8 +1150,6 @@ theorem tick_atom_eq (atom : Instr → S → Result S) (test : S → Option (Boo
   cases i <;> try rfl
   case loop a b => exact False.elim (nonloop a b rfl)
 
-/-- The exact protocol preserves representation once the reached atom and
-condition obligations have been established; loop entry never executes an atom. -/
 theorem running_tick_related (F : Roadmap.Fixed) (slots : List Slot)
     (c : List Instr) (k : Nat) (fs : List Frame)
     (m : Machine) (v : Numeric) (rep : Represents F slots m v)
@@ -1267,7 +1193,6 @@ theorem running_tick_related (F : Roadmap.Fixed) (slots : List Slot)
         have h := atom i rest rfl rfl nonloop
         cases ha : idealResult (i.step m) <;> cases hv : numericAtom F i v <;>
           simp only [ha, hv, ResultRelated, Related, true_and] at h ⊢ <;> exact h
-
 
 end Solidity.Hash.CompilerCorrect
 
