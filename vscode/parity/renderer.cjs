@@ -32,8 +32,10 @@ class DevTools {
    const task=this.pending.get(message.id);if(!task){this.note('response.unmatched',{id:message.id});return;}
    this.pending.delete(message.id);clearTimer(task.timer);const elapsedMs=now()-task.started;
    if(elapsedMs>=5000){this.note('response.late',{id:message.id,method:task.method,elapsedMs});task.reject(Error('CDP timeout '+task.method));return;}
+   if(task.remaining){try{task.remaining();}catch(error){task.reject(error);return;}}
    const ok=this.note('response',{id:message.id,method:task.method,elapsedMs,error:message.error??null,exception:message.result?.exceptionDetails?.text??null,exceptionDetails:message.result?.exceptionDetails??null,bytes:Buffer.byteLength(event.data)});
    if(!ok){task.reject(this.failure);return;}
+   if(task.remaining&&Object.hasOwn(this,'failure')){task.reject(this.failure);return;}
    if(message.error){task.reject(Error(JSON.stringify(message.error)));return;}
    if(Object.hasOwn(message.result,'exceptionDetails')){
     task.reject(Object.assign(Error('CDP execution exception: '+(typeof message.result.exceptionDetails?.text==='string'?message.result.exceptionDetails.text:'unknown exception')),{code:'CDP_EXECUTION_EXCEPTION',exceptionDetails:message.result.exceptionDetails}));return;
@@ -43,18 +45,58 @@ class DevTools {
     const recorded=this.note('response.late',{id:message.id,method:task.method,elapsedMs:completedMs,stage:'after-diagnostic'});
     task.reject(recorded?Error('CDP timeout '+task.method):this.failure);return;
    }
+   if(task.remaining){try{task.remaining();}catch(error){task.reject(error);return;}}
    task.resolve(message.result);
   });
  }
  note(event,data={}){if(this.diagnosticFailure)return false;try{this.diagnostic({...this.identity,event,monotonicMs:this.now(),wallTime:Date.now(),...data});return true;}catch(error){this.diagnosticFailure=error;this.abort(error,'diagnostic.failure');return false;}}
  abort(error,event,data={}){if(this.failure)return;this.failure=error;this.clearTimer(this.connectTimer);this.note(event,data);this.readyReject(error);for(const [id,t]of this.pending){this.clearTimer(t.timer);this.note('request.aborted',{id,method:t.method});t.reject(error);}this.pending.clear();try{this.socket.close();}catch(closeError){this.note('socket.close-failed',{error:closeError.message});}}
- async request(method,params={}){
+ async request(method,params={},options=undefined){
+  if(options!==undefined)return this.requestBounded(method,params,options);
   await this.ready;if(this.failure)throw this.failure;const id=++this.next,started=this.now();
   return new Promise((resolve,reject)=>{
    const timer=this.setTimer(()=>{this.pending.delete(id);this.note('request.timeout',{id,method,elapsedMs:this.now()-started});reject(Error('CDP timeout '+method));},5000);
    this.pending.set(id,{resolve,reject,timer,started,method});
    if(!this.note('request',{id,method,deadlineMs:5000,paramsHash:createHash('sha256').update(JSON.stringify(params)).digest('hex'),...(method.startsWith('Input.')?{input:params}:{})}))return;
    try{this.socket.send(JSON.stringify({id,method,params}));}catch(error){this.pending.delete(id);this.clearTimer(timer);this.note('request.send-failed',{id,method,error:error.message});reject(error);}
+  });
+ }
+ // Optional caller deadline; ordinary requests retain their existing path.
+ async requestBounded(method,params,options){
+  if(!options||typeof options!=='object'||Array.isArray(options)||Reflect.ownKeys(options).length!==2||!Object.hasOwn(options,'deadlineWall')||!Object.hasOwn(options,'wallNow'))throw Error('Invalid CDP deadline options');
+  const {deadlineWall,wallNow}=options;
+  if(!Number.isFinite(deadlineWall)||typeof wallNow!=='function')throw Error('Invalid CDP deadline options');
+  let lastWall=-Infinity,started;
+  const timeout=()=>Error('CDP timeout '+method);
+  const remaining=()=>{
+   const wall=wallNow();
+   if(Object.hasOwn(this,'failure'))throw this.failure;
+   if(!Number.isFinite(wall)||wall<lastWall)throw Error('Invalid CDP deadline clock');
+   lastWall=wall;
+   const elapsed=started===undefined?0:this.now()-started;
+   if(Object.hasOwn(this,'failure'))throw this.failure;
+   if(!Number.isFinite(elapsed)||elapsed<0)throw Error('Invalid CDP deadline clock');
+   const left=Math.min(deadlineWall-wall,started===undefined?Infinity:5000-elapsed);
+   if(left<=0)throw timeout();
+   return left;
+  };
+  let readyTimer;
+  try{const left=remaining();await Promise.race([this.ready,new Promise((_,reject)=>{readyTimer=this.setTimer(()=>reject(timeout()),left);})]);}
+  finally{if(readyTimer!==undefined)this.clearTimer(readyTimer);}
+  if(this.failure)throw this.failure;
+  started=this.now();const left=remaining(),id=++this.next;
+  return new Promise((resolve,reject)=>{
+   let settled=false,timer;
+   const settle=(fn,value)=>{if(settled)return;settled=true;this.pending.delete(id);if(timer!==undefined)this.clearTimer(timer);fn(value);};
+   const fail=error=>settle(reject,error);
+   timer=this.setTimer(()=>{const ok=this.note('request.timeout',{id,method,elapsedMs:this.now()-started});fail(ok?timeout():this.failure);},left);
+   this.pending.set(id,{resolve:value=>settle(resolve,value),reject:fail,timer,started,method,remaining});
+   try{
+    const payload=JSON.stringify({id,method,params}),paramsHash=createHash('sha256').update(JSON.stringify(params)).digest('hex');
+    if(!this.note('request',{id,method,deadlineMs:left,deadlineWall,paramsHash,...(method.startsWith('Input.')?{input:params}:{})}))return;
+    // No diagnostic, serialization or await between the sampled guard and send.
+    remaining();if(settled)return;this.socket.send(payload);
+   }catch(error){fail(error);}
   });
  }
  finish(){const failure=this.failure;this.close();if(failure)throw failure;}

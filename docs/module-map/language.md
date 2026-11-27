@@ -249,6 +249,7 @@ commands; it never enters the core import graph.
 | `Syntax/Elab/CallMeasure.lean` | Weighted call-expansion decreases; constant-folding nonincrease and capture, operand, and argument output-height preservation. |
 | `Syntax/Elab/CallOutput.lean` | Structural expression and capture output-height bounds supporting elaborator totality. |
 | `Correctness/Elab/Congruence.lean` | Callback agreement for the elaborator's helpers and call arm, at run level and scope by scope (`Agree`, `Out`), with the proof procedure `agree_run`: a block, argument, pair, binary-operator and eager-argument hoisting, call-argument preparation, an inlined body and `elabCallRetCore`/`elabCallRetWith` give the same result over callbacks that agree at the invocations each makes (for the call arm: the dispatch callbacks at the call, the block callback in the constructor's scope, a strict prefix of the callable functions, or a fresh recursion frame). |
+| `Correctness/Elab/Congruence.lean` | State-passing callback agreement (`AgreeS`) for bind, map, list and option traversals; `mapExprsM_agree` preserves agreement for a statement's own expressions and the target of a declaring `send`. |
 | `Syntax/Elab/Measure.lean` | The elaborator knot's decrease vocabulary: `ElabMeasure` (a measure per recursive field), `cut` (a record below a level), the guarded arm shape `Stable`, `stmtsArm_stable`. |
 | `Examples/ElabTotal/Measure.lean` | Clause 2 of `elabKernelTotal` from the arms' guarded decrease (`elabKernelInduction_of_stable`); the unguarded cycle `elabStmtP → elabStmt1 → elabStmtsP` (`rel_cycle_forT_blk`; one decrease proved from `Stable`, two `#guard`ed). |
 | `Syntax/Elab/Guard.lean` | No output guard over the five fields: `hoistStmtWith` at `l = n;` is the record's `hoistAssign` (`hoistStmtWith_assign_num`), so a kept guard bounds nothing there (`ElabPreds.free_at_assign`); `stmtsArm_head_lt` under any guard; the shape at the knot's record (`OffFive`, `StableAt`). |
@@ -357,6 +358,8 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Syntax/NumericV2.lean` | Additive full-domain signed-power range guard and statement/value pair; v1 remains unchanged. |
 | `Syntax/NumericV2Correct.lean` | Exact mathematical range/value, guard-before-value execution and full Source arithmetic panic-payload proofs. |
 | `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
+| `Solidity/Correctness/Elab/HashCongruence.lean` | Run-level hash and ERC7201 callback congruences through actual intermediate outputs; helper agreement only. |
+| `Solidity/Examples/ElabTotal/HashCongruence.lean` | Instantiated successful hash allocation, ERC7201 folding, and callback/arity failure boundaries. |
 | `Goals/Panic.lean` | `runCarriesPanicCodes`: conjunction of `panicRunOutcomes`, `panicCodeProvenance` and `panicSourceAssociation` (plan w3b-panic-bind). |
 | `Correctness/Panic/Main.lean` | `Semantics.run_panic_codes` assembles the three component proofs; guarded axiom pin permits only `propext`, `Classical.choice` and `Quot.sound`. |
 | `Examples/Goals/Panic.lean` | Roadmap pin and example of `runCarriesPanicCodes` proved by `Semantics.run_panic_codes`. |

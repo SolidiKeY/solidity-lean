@@ -1,10 +1,6 @@
 import Solidity.Source.Progress.ReadyDefaults
 import Solidity.Source.Preservation.LocalFrames
 
-/-! Finite aggregate default shapes over the existing Source types. Fixed
-memory arrays and memory structs recursively witness their element/field
-defaults. This is a proof certificate, not a replacement type representation;
-the original evaluator, ZeroReady and default/allocation policies are unchanged. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env} {Γ : RCtx}

@@ -2,9 +2,6 @@ import Solidity.Source.Progress.BoundCatalogue
 import Solidity.Source.Progress.ReadyReturns
 import Solidity.Lowering.P9.InferenceCuts
 
-/-! A parent argument calls an elaborated bound-parent body through the
-catalogue adapter. Frame equations are derived, not supplied; argument,
-default and returned allocations are observed separately on inhabited inputs. -/
 namespace Solidity.Source.Progress.BoundCatalogueParentControls
 open EM Solidity.Lowering.P9
 

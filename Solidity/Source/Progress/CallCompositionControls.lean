@@ -1,10 +1,6 @@
 import Solidity.Source.Progress.CallComposition
 import Solidity.Source.Progress.ReadyCatalogueControls
 
-/-! Intrinsic nested calls over an actual elaborated memory-identity unit.
-A fresh argument escapes through two alias-returning calls; earlier argument
-references survive the later nested call. Both source evaluator pipelines keep
-their actual allocation, timeout and caller-restoration behavior. -/
 namespace Solidity.Source.Progress.CallCompositionControls
 open EM Preservation.MemoryProgramControls
 abbrev U : STy := .int .u256

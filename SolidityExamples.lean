@@ -161,6 +161,7 @@ import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ElabTotal.Context
 import Solidity.Examples.ElabTotal.Guard
+import Solidity.Examples.ElabTotal.HashCongruence
 import Solidity.Examples.ElabTotal.Lower
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ElabTotal.Stmts
@@ -263,6 +264,7 @@ import Solidity.Examples.Lowering.Total.ConstructorDecode
 import Solidity.Examples.Lowering.Total.ConstructorPlacement
 import Solidity.Examples.Lowering.Total.EnumDecode
 import Solidity.Examples.Lowering.Total.EnumUseDecode
+import Solidity.Examples.Lowering.Total.FullDomain
 import Solidity.Examples.Lowering.Total.FunctionTypeDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws

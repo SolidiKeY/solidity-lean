@@ -2,9 +2,6 @@ import Solidity.Source.Progress.AllocationBodyCalls
 import Solidity.Lowering.P9.InferenceCuts
 import Solidity.Roadmap.Controls
 
-/-! Source-elaborated memory-call controls for allocation-parent prefixes.
-Both caller and callee use the actual selected body. No target/compiler
-correspondence or general memory-call graph is asserted. -/
 namespace Solidity.Source.Progress.AllocationBodyCallControls
 open EM Solidity.Lowering.P9
 
@@ -263,7 +260,6 @@ theorem old_ready_refused : ¬ReadyItems (fun _=>False) rs false flatBody.items 
 #print axioms heap_and_frame
 #print axioms old_ready_refused
 
-/-- Allocation panic keeps the callee's already-created return default. -/
 def hugeCallee : Locals E.layout Δ :=
   .cons (.memRef rfl 1) (.cons (.int (2^64) (by decide)) (.cons (.memRef rfl 0) .nil))
 

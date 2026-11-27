@@ -1,7 +1,5 @@
 import Solidity.Source.Progress.ScalarBuiltinControls
 
-/-! Controls for `sha256`, `ripemd160`, `require` and `revert` with
-string-literal arguments, on actual elaborated builtin calls. -/
 
 namespace Solidity.Source.Progress.LiteralBuiltinControls
 open EM Preservation.AllocationControls
