@@ -8,11 +8,9 @@ bytes of a slot at a byte offset, lower-order aligned, holding its `M`-bit
 two's-complement pattern (not sign-extended), as solc packs `intM`
 (`storageBytes = M/8`, `leftAligned = false`, `Types.h:552–553` at
 `v0.8.38`).  solc emits no storage code for fixed-point types, so this is
-`intM`'s rule carried over (P6).  For the source semantics the physical
-layout is not observable (the scope's "Readings": solc's slot behaviour fixes
-the logical alias semantics, not the physical packing), so the layout is a
-choice there; a backend proof (G28) fixes it as part of its specification
-(`docs/feature-work/fixed-point-semantics.md`, §6.4).
+`intM`'s rule carried over.  For the source semantics the physical
+layout is not observable, so the layout is a
+choice there.
 
 * `field` / `setField` — a byte range of a word, read and written;
   `field_setField` (read after write), `field_setField_below`,
@@ -279,11 +277,10 @@ theorem load_zero (off : Nat) : load t ⟨0, Nat.two_pow_pos 256⟩ off = zero t
   have hz : wrapInt t 0 = 0 := wrapInt_of_inRange (zero t).2
   simp only [load, field, Nat.zero_div, Nat.zero_mod, Int.natCast_zero, ofBits, wrap, zero, hz]
 
-/-- A mapping key: the padded ABI word that is hashed (P6). -/
+/-- A mapping key: the padded ABI word that is hashed. -/
 def keyWord (a : Fx t) : Fin (2 ^ 256) := encode a
 
-/-- Distinct keys are distinct words (what is hashed; the hash itself is
-the storage-hashing lane's). -/
+/-- Distinct keys are distinct words. -/
 theorem keyWord_injective {a b : Fx t} (h : keyWord a = keyWord b) : a = b := by
   have ha : decodeV2 t (encode a) = some a := decodeV2_encode a
   have hb : decodeV2 t (encode b) = some b := decodeV2_encode b

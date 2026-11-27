@@ -14,21 +14,20 @@ fixed-point type in five ways (`docs/feature-work/fixed-point-semantics.md`,
 * an implicit conversion, exact and in range or a compile error
   (`Fx.ofRat?`; `Fx.ofLiteral?_isSome_iff_solc`: exactly solc's test);
 * an explicit conversion, folded at the target's digits and truncated
-  toward zero, a compile error when out of range (`Fx.explicitRat?`, Q2, P1);
+  toward zero, a compile error when out of range (`Fx.explicitRat?`);
 * the mobile type a fractional constant takes when it needs a type of its
   own (`mobileFx?`, solc's `RationalNumberType::fixedPointType`), which
   holds the constant truncated toward zero (`mobileFx?_inRange`) and holds
   it exactly if and only if its digits suffice (`mobileFx?_exact`);
 * a standalone fractional constant (no type to convert to: an
   inline-array element or an ABI argument here; solc also treats tuple
-  components and conditional branches so, where S01 does not yet) takes
+  components and conditional branches so) takes
   that mobile type, truncated toward zero there, as solc does (`mobileConst?`, `mobileConst?_trunc`, `mobileConst?_exact`); as an
   ABI argument it is encoded at that type (`abiConst?`, `abiConst?_decode`),
   where solc 0.8.38 refuses ("Fractional numbers cannot yet be encoded.",
   6090);
 * the common type of a fixed-point operand and a constant operand:
-  `x op c` (`litCommon?`) is solc's `Type::commonType` restricted, as Q1
-  requires, to pairs where the constant converts exactly
+  `x op c` (`litCommon?`) is solc's `Type::commonType` restricted, to pairs where the constant converts exactly
   (`litCommon?_solc`); `c op x` (`litCommonRev?`) is solc's rule, which
   refuses a fractional `c` (`litCommonRev?_eq_solc`).
 
@@ -218,7 +217,7 @@ theorem explicitConst?_eq_some_iff {num : Int} {den : Nat} (hd : den ≠ 0) {a :
     exact congrArg some (Subtype.ext h.symm)
 
 /-- An explicit conversion of a constant is a compile error exactly when
-the truncated value is out of range (Q2). -/
+the truncated value is out of range. -/
 theorem explicitConst?_eq_none_iff {num : Int} {den : Nat} (hd : den ≠ 0) :
     explicitConst? t num den = none ↔ t.inRange (literalTrunc t num den) = false := by
   unfold explicitConst? ofInt?
@@ -608,7 +607,7 @@ theorem literalTrunc_rescale {t t' : FxTy} (num : Int) {den : Nat} (hd : den ≠
 
 /-- When the target has no more digits than the mobile type, the route
 through the mobile type — the constant typed there, then converted by this
-model's run-time conversion (rescale toward zero, then wrap; Q2, Q3) — is
+model's run-time conversion (rescale toward zero, then wrap) — is
 the wrap of the exactly folded value. -/
 theorem explicit_mobile_route {q : Rat} {m t : FxTy} (hm : mobileFx? q = some m)
     (hd : t.digits ≤ m.digits) :
@@ -619,8 +618,8 @@ theorem explicit_mobile_route {q : Rat} {m t : FxTy} (hm : mobileFx? q = some m)
   simp only [explicit, hr]
 
 /-- …so where the exact fold fits the target (`explicitRat?` succeeds), the
-route gives exactly the folded value: P1 changes no such conversion.  Out of
-range, solc accepts and this model refuses (Q2). -/
+route gives exactly the folded value.  Out of
+range, solc accepts and this model refuses. -/
 theorem explicitRat?_mobile_route {q : Rat} {m t : FxTy} (hm : mobileFx? q = some m)
     (hd : t.digits ≤ m.digits) {a : Fx t} (ha : explicitRat? t q = some a) :
     explicit t (⟨literalTrunc m q.num q.den, mobileFx?_inRange hm⟩ : Fx m) = a := by
@@ -636,7 +635,7 @@ theorem explicitRat?_mobile_route {q : Rat} {m t : FxTy} (hm : mobileFx? q = som
 `Type::commonType(t, c)`): `t` if `c` converts to it implicitly; else, for a
 fractional `c`, `c`'s mobile type if `t` converts to it (an integer
 constant's mobile type is an integer type, to which no fixed-point type
-converts) — and, as Q1 requires, only when `c` is exact there (solc would
+converts) — and only when `c` is exact there (solc would
 truncate `c`, e.g. `ufixed8x77 x; x + 1/3` at `ufixed256x77`). -/
 def litCommon? (t : FxTy) (q : Rat) : Option FxTy :=
   if (Fx.ofRat? t q).isSome then some t
@@ -737,7 +736,7 @@ theorem litCommonRev?_exact {t u : FxTy} {q : Rat} (h : litCommonRev? q t = some
 
 /-- **A standalone fractional constant** (`q` fractional; an integral
 constant's mobile type is an integer type, `Solidity/Frontend/Static/Standalone.lean`):
-solc's mobile type and the constant truncated toward zero at its digits (QL2: the truncation is
+solc's mobile type and the constant truncated toward zero at its digits (the truncation is
 admitted, as in solc); `none` without a mobile type (a compile error). -/
 def mobileConst? (q : Rat) : Option ((t : FxTy) × Fx t) :=
   match h : mobileFx? q with
@@ -788,7 +787,7 @@ theorem mobileConst?_exact {q : Rat} {t : FxTy} (h : mobileFx? q = some t) {b : 
   exact (Option.some.inj h1).symm
 
 /-- **A fractional constant as an ABI argument**: the word encoding of its
-standalone value.  solc 0.8.38 refuses it (6090); backfill item 5 admits it
+standalone value.  solc 0.8.38 refuses it (6090); the model admits it
 at the mobile type, so `abi.encode(0.1)` is `abi.encode(ufixed8x1(0.1))`. -/
 def abiConst? (q : Rat) : Option (List UInt8) := (mobileConst? q).map fun x => abiEncode x.2
 
@@ -855,8 +854,7 @@ example : (mobileFx? (mkRat 1 2)).map (fun t => (t.signed, t.bits, t.digits)) =
     (mobileFx? (mkRat (2 ^ 257 + 1) 2)).isSome = false := by
   decide +kernel
 
-/-- An explicit conversion of an out-of-range constant is a compile error
-(Q2): `ufixed256x80(1/3)` needs `3.3·10^79 > 2^256`, where solc's type
+/-- An explicit conversion of an out-of-range constant is a compile error: `ufixed256x80(1/3)` needs `3.3·10^79 > 2^256`, where solc's type
 checker admits it through the mobile type; `ufixed256x77(1/3)` holds 77
 threes. -/
 example : (explicitRat? ⟨false, 256, 80, by decide⟩ (mkRat 1 3)).isNone ∧
@@ -864,7 +862,7 @@ example : (explicitRat? ⟨false, 256, 80, by decide⟩ (mkRat 1 3)).isNone ∧
       some ((10 ^ 77 - 1) / 3) := by
   decide +kernel
 
-/-- Exact folding at the target's digits (P1) differs from solc's route
+/-- Exact folding at the target's digits differs from solc's route
 through the mobile type: `c = (2^257 - 1) / 20` has mobile type
 `ufixed256x0` (`10·c` exceeds `2^256 - 1`), so solc would convert
 `ufixed256x1(c)` from `trunc(c)`, giving `2^256 - 6`; folded exactly it is

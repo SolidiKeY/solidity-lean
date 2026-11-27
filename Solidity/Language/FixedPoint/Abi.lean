@@ -10,7 +10,7 @@ at `v0.8.38`), and names a type in a selector by its canonical name, the
 aliases `fixed` / `ufixed` as `fixed128x18` / `ufixed128x18`
 (`abi-spec.rst:71–72`).  solc 0.8.38 generates no ABI code for these types
 (its cleanup and validation functions are unimplemented for them), so the
-coder behaviour below is a proposal by analogy with `intM` / `uintM` (P5),
+coder behaviour below is a proposal by analogy with `intM` / `uintM`,
 not compiler behaviour; `docs/feature-work/fixed-point-semantics.md`, §6.3,
 records the reading.
 
@@ -21,13 +21,13 @@ records the reading.
   Decoding is exactly the inverse of `encode`: `Fx.decodeV2_encode`,
   `Fx.encode_of_decodeV2`, `Fx.decodeV2_eq_none_iff`.
 * `Fx.decodeV1` — ABI coder v1 (the legacy pipeline's pragma may select
-  it; G00 Q4): no validation, the low `M` bits cleaned as v1 cleans `intM`;
+  it): no validation, the low `M` bits cleaned as v1 cleans `intM`;
   `Fx.decodeV1_of_decodeV2` (the coders agree on clean words).
 * `Fx.encodePacked` — `abi.encodePacked` of a top-level argument: the
   `M/8`-byte two's complement, unpadded (`abi-spec.rst:755`); there is no
   packed decoder in Solidity, and `Fx.ofPackedBytes` only witnesses that
   the encoding loses nothing.
-* The type names include `N = 0` (`fixedMx0`, P4), which the ABI
+* The type names include `N = 0` (`fixedMx0`), which the ABI
   specification excludes (`0 < N`, `abi-spec.rst:66–67`): a deliberate
   extension, since solc's scanner admits the types.
 -/
@@ -261,8 +261,7 @@ def abiEncode (a : Fx t) : List UInt8 := beBytes 32 (encode a).val
 theorem abiEncode_length (a : Fx t) : (abiEncode a).length = 32 := beBytes_length 32 _
 
 /-- An isolated 32-byte head decoded at the type with coder v2 (solc's
-decoder reads a head at an offset and ignores trailing data; offsets are
-G40's). -/
+decoder reads a head at an offset and ignores trailing data). -/
 def abiDecodeV2 (t : FxTy) (bs : List UInt8) : Option (Fx t) :=
   if bs.length = 32 then decodeV2 t ⟨beNat bs % 2 ^ 256, Nat.mod_lt _ (Nat.two_pow_pos 256)⟩
   else none
@@ -330,7 +329,7 @@ theorem ofPackedBytes_encodePacked (a : Fx t) : ofPackedBytes t (encodePacked a)
 /-! ### Canonical type names -/
 
 /-- Canonical type names (as selectors spell them): the aliases are spelled
-out, and `N = 0` keeps its `x0` (P4). -/
+out, and `N = 0` keeps its `x0`. -/
 example : FxTy.fixed.name = "fixed128x18" ∧ FxTy.ufixed.name = "ufixed128x18" ∧
     fixed8x1.name = "fixed8x1" ∧ (⟨false, 256, 0, by decide⟩ : FxTy).name = "ufixed256x0" := by
   decide +kernel

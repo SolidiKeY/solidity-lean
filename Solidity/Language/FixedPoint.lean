@@ -3,10 +3,7 @@
 
 The values and operations of Solidity's `fixedMxN` / `ufixedMxN` types
 (`docs/feature-work/fixed-point-semantics.md`).  solc 0.8.38 type-checks
-them but generates no code for them (`UnimplementedFeatureError`), so this
-module is the reference the scope decision G00 Q6 ("full fixed-point
-support, beyond the acceptance boundary of pinned solc") needs.  It is not
-wired into the AST, the elaborator or the compiler yet.
+them but generates no code for them (`UnimplementedFeatureError`).
 
 A type `FxTy` carries its signedness, its width `M` (8 … 256 in steps of 8)
 and its decimal digits `N` (0 … 80), exactly solc's scanner bounds
@@ -22,10 +19,7 @@ outside the range fails with `Fail.overflow`, solc's `Panic(0x11)`) or wraps
 it modulo `2^M` (`Mode.unchecked`).  A zero divisor fails with
 `Fail.divZero` (`Panic(0x12)`) in either mode, as solc's integer division
 does (its `control-structures.rst`: the check "can not be disabled through
-`unchecked`"); G01 Q5 observes these codes exactly, where the current core
-reads both as a revert (`docs/solc-alignment.md`).  Where the language
-specification is silent, the user's answers to the document's questions
-Q1–Q8 are encoded, each named at its definition.
+`unchecked`").
 
 This module imports nothing.
 -/
@@ -228,14 +222,13 @@ def add (m : Mode) (a b : Fx t) : Except Fail (Fx t) := result m t (a.1 + b.1)
 def sub (m : Mode) (a b : Fx t) : Except Fail (Fx t) := result m t (a.1 - b.1)
 
 /-- `-a` (accepted at `ufixed` too, as solc's type checker does: there it
-fails, or wraps, unless `a` is zero; Q5). -/
+fails, or wraps, unless `a` is zero). -/
 def neg (m : Mode) (a : Fx t) : Except Fail (Fx t) := result m t (-a.1)
 
-/-- `a * b`: the exact product, its extra `N` digits truncated toward zero
-(Q8, Q3). -/
+/-- `a * b`: the exact product, its extra `N` digits truncated toward zero. -/
 def mul (m : Mode) (a b : Fx t) : Except Fail (Fx t) := result m t ((a.1 * b.1).tdiv t.scale)
 
-/-- `a / b`: the exact quotient truncated toward zero at `N` digits (Q8, Q3). -/
+/-- `a / b`: the exact quotient truncated toward zero at `N` digits. -/
 def div (m : Mode) (a b : Fx t) : Except Fail (Fx t) :=
   if b.1 = 0 then .error .divZero else result m t ((a.1 * t.scale).tdiv b.1)
 
@@ -243,7 +236,7 @@ def div (m : Mode) (a b : Fx t) : Except Fail (Fx t) :=
 def mod (m : Mode) (a b : Fx t) : Except Fail (Fx t) :=
   if b.1 = 0 then .error .divZero else result m t (a.1.tmod b.1)
 
-/-- `++a`: adds the value `1` (Q6). -/
+/-- `++a`: adds the value `1`. -/
 def inc (m : Mode) (a : Fx t) : Except Fail (Fx t) := result m t (a.1 + t.scale)
 
 /-- `--a`: subtracts the value `1`. -/
@@ -368,8 +361,7 @@ def solcImplicit (t t' : FxTy) : Bool :=
   decide (t.digits ≤ t'.digits) && decide (t.bits ≤ t'.bits) &&
     decide (t.maxInt ≤ t'.maxInt) && decide (t'.minInt ≤ t.minInt)
 
-/-- The implicit conversion: solc's, restricted to the exact ones (the
-user's answer to Q1 of the document); `FxTy.implicitOK_iff` (`FixedPoint/Laws.lean`)
+/-- The implicit conversion: solc's, restricted to the exact ones; `FxTy.implicitOK_iff` (`FixedPoint/Laws.lean`)
 proves it equal to `subsumes`. -/
 def implicitOK (t t' : FxTy) : Bool := solcImplicit t t' && subsumes t t'
 
@@ -428,8 +420,8 @@ theorem implicit_lt (h : t.subsumes t' = true) (a b : Fx t) :
     exact Int.mul_lt_mul_of_pos_right hl hc
 
 /-- An explicit conversion of a run-time value: rescale (truncating toward
-zero, Q3), then wrap modulo `2^M'`, as explicit integer conversions cut
-higher-order bits and never fail (Q2).  An explicit conversion of a constant
+zero), then wrap modulo `2^M'`, as explicit integer conversions cut
+higher-order bits and never fail.  An explicit conversion of a constant
 is `explicitConst?`. -/
 def explicit (t' : FxTy) (a : Fx t) : Fx t' :=
   wrap t' (rescale t.digits t'.digits a.1)
@@ -469,7 +461,7 @@ theorem ofInteger_inRange {lo hi k : Int} (h : t.intImplicit lo hi = true)
 
 /-- An explicit integer-to-fixed conversion of a run-time value (solc admits
 it where the implicit one exists and at the same width and signedness), by
-value (Q7): the integer scaled, wrapped modulo `2^M` (Q2). -/
+value: the integer scaled, wrapped modulo `2^M`. -/
 def ofIntegerExplicit (t : FxTy) (k : Int) : Fx t := wrap t (k * t.scale)
 
 /-- Where solc's implicit integer-to-fixed conversion exists, the explicit
@@ -482,7 +474,7 @@ theorem ofIntegerExplicit_of_implicit {lo hi k : Int} (h : t.intImplicit lo hi =
 
 /-- An explicit `bytesM`-to-fixed conversion (solc admits it at the same
 width), by bit pattern: the bytes' unsigned integer `u < 2^M` is the scaled
-integer, two's complement where signed (Q7). -/
+integer, two's complement where signed. -/
 def ofBits (t : FxTy) (u : Int) : Fx t := wrap t u
 
 /-- The `M`-bit pattern of a value, `0 ≤ · < 2^M`: the inverse of `ofBits`
@@ -491,7 +483,7 @@ witnesses that `ofBits` is a bijection; solc has no fixed-to-`bytesM`
 conversion, so it is not a modelled conversion. -/
 def toBits (a : Fx t) : Int := a.1 % 2 ^ t.bits
 
-/-- An explicit conversion to an integer, by value (Q7): the
+/-- An explicit conversion to an integer, by value: the
 integer part, truncated toward zero (then the integer type's own explicit
 conversion). -/
 def toIntTrunc (a : Fx t) : Int := a.1.tdiv t.scale
@@ -505,11 +497,11 @@ def ofLiteral? (t : FxTy) (num : Int) (den : Nat) : Option (Fx t) :=
   else if (num * t.scale) % den = 0 then ofInt? t ((num * t.scale) / den) else none
 
 /-- A rational literal's scaled integer at `N` digits, truncated toward
-zero (Q3): what an explicit conversion folds exactly. -/
+zero: what an explicit conversion folds exactly. -/
 def literalTrunc (t : FxTy) (num : Int) (den : Nat) : Int := (num * t.scale).tdiv den
 
 /-- An explicit conversion of a constant `num / den`, folded exactly at the
-target's digits: `none`, a compile error, when it does not fit (Q2), as an
+target's digits: `none`, a compile error, when it does not fit, as an
 explicit conversion of an out-of-range literal to an integer type is. -/
 def explicitConst? (t : FxTy) (num : Int) (den : Nat) : Option (Fx t) :=
   if den = 0 then none else ofInt? t (literalTrunc t num den)
@@ -606,7 +598,7 @@ example : (explicitConst? ⟨false, 8, 1, by decide⟩ 1 3).map Subtype.val = so
 
 /-- solc's implicit fixed-to-fixed test accepts lossy conversions:
 `fixed8x3 → ufixed8x3` (whose integer parts are both `0`) loses `-0.128`, and
-`ufixed8x3 → ufixed8x4` loses `0.255`; the implicit test (`FxTy.implicitOK`, Q1) refuses both. -/
+`ufixed8x3 → ufixed8x4` loses `0.255`; the implicit test (`FxTy.implicitOK`) refuses both. -/
 theorem solc_lossy :
     FxTy.solcImplicit fixed8x3 ufixed8x3 = true ∧ FxTy.subsumes fixed8x3 ufixed8x3 = false ∧
     FxTy.solcImplicit ufixed8x3 ufixed8x4 = true ∧ FxTy.subsumes ufixed8x3 ufixed8x4 = false := by

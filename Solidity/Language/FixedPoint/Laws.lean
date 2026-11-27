@@ -3,9 +3,7 @@ import Solidity.Language.FixedPoint
 /-!
 # Fixed-point laws
 
-The laws of `Solidity/Language/FixedPoint.lean` the reviews of the
-second-round decisions asked for (`docs/feature-work/fixed-point-semantics.md`,
-§6.1): checked and unchecked arithmetic agree wherever nothing overflows;
+The laws of `Solidity/Language/FixedPoint.lean`: checked and unchecked arithmetic agree wherever nothing overflows;
 `*` and `/` are exact when the exact result has at most `N` digits and
 otherwise truncate toward zero by less than one unit in the last place, as
 the digit-dropping conversions do; lossless conversions round-trip;
@@ -18,7 +16,7 @@ exactly the range-contained one
 order.
 
 A checked `*` or `/` range-checks the truncated exact result only: the
-exact product or quotient is an unbounded intermediate (Q8), so no
+exact product or quotient is an unbounded intermediate, so no
 overflow of a 512-bit or 256-bit intermediate is observable.
 -/
 
@@ -200,7 +198,7 @@ theorem result_checked_val {v : Int} {r : Fx t} (h : result .checked t v = .ok r
   · simp only [result, hv, Bool.false_eq_true, dite_false] at h
     exact nomatch h
 
-/-- Unary minus at a `ufixed` type (Q5): checked, `0x11` unless the operand
+/-- Unary minus at a `ufixed` type: checked, `0x11` unless the operand
 is `0`; unchecked it wraps (`neg_agree`, `result_val`). -/
 theorem neg_unsigned (hs : t.signed = false) (a : Fx t) :
     neg .checked a = if a.1 = 0 then .ok a else .error .overflow := by
@@ -224,7 +222,7 @@ theorem neg_unsigned (hs : t.signed = false) (a : Fx t) :
 
 /-- A checked product is the exact product truncated toward zero: `r·10^N`
 lies between `0` and `a·b`, less than one `10^N` away (an error below one
-unit in the last place, Q3, Q8).  An unchecked product is the wrap of the
+unit in the last place).  An unchecked product is the wrap of the
 same integer (`mul_agree`, `result_val`). -/
 theorem mul_trunc {a b r : Fx t} (h : mul .checked a b = .ok r) :
     (0 ≤ a.1 * b.1 → 0 ≤ r.1 * t.scale ∧ r.1 * t.scale ≤ a.1 * b.1 ∧
@@ -243,7 +241,7 @@ theorem mul_exact {a b r : Fx t} (h : mul .checked a b = .ok r)
   exact Int.tdiv_mul_cancel hd
 
 /-- A checked quotient is the exact quotient truncated toward zero:
-`a·10^N = r·b + e` with `|e| < |b|` and `e` of the sign of `a` (Q3, Q8),
+`a·10^N = r·b + e` with `|e| < |b|` and `e` of the sign of `a`,
 which determines `r`. -/
 theorem div_trunc {a b r : Fx t} (h : div .checked a b = .ok r) :
     b.1 ≠ 0 ∧ ∃ e : Int, a.1 * t.scale = r.1 * b.1 + e ∧ e.natAbs < b.1.natAbs ∧
@@ -275,7 +273,7 @@ theorem div_exact {a b r : Fx t} (h : div .checked a b = .ok r)
     rw [hr]
     exact Int.tdiv_mul_cancel hd
 
-/-- Checked `++` and `--` move the value by exactly `1` (Q6); unchecked they
+/-- Checked `++` and `--` move the value by exactly `1`; unchecked they
 wrap the same integer (`result_val`). -/
 theorem inc_val {a r : Fx t} (h : inc .checked a = .ok r) : r.1 = a.1 + t.scale :=
   result_checked_val h
@@ -286,7 +284,7 @@ theorem dec_val {a r : Fx t} (h : dec .checked a = .ok r) : r.1 = a.1 - t.scale 
 /-! ### Conversions: truncation and lossless round trips -/
 
 /-- Dropping digits truncates toward zero: the rescaled integer, scaled
-back, lies between `0` and `v`, less than one dropped unit away (Q3). -/
+back, lies between `0` and `v`, less than one dropped unit away. -/
 theorem rescale_down_trunc (n n' : Nat) (h : n' < n) (v : Int) :
     (0 ≤ v → 0 ≤ rescale n n' v * 10 ^ (n - n') ∧ rescale n n' v * 10 ^ (n - n') ≤ v ∧
       v < rescale n n' v * 10 ^ (n - n') + 10 ^ (n - n')) ∧
@@ -402,7 +400,7 @@ theorem ofIntegerExplicit_toIntTrunc (a : Fx t) (h : t.scale ∣ a.1) :
   apply Subtype.ext
   simp only [ofIntegerExplicit, toIntTrunc, wrap, Int.tdiv_mul_cancel h, wrapInt_of_inRange a.2]
 
-/-- Conversion to an integer truncates toward zero (Q3, Q7). -/
+/-- Conversion to an integer truncates toward zero. -/
 theorem toIntTrunc_trunc (a : Fx t) :
     (0 ≤ a.1 → 0 ≤ toIntTrunc a * t.scale ∧ toIntTrunc a * t.scale ≤ a.1 ∧
       a.1 < toIntTrunc a * t.scale + t.scale) ∧
@@ -411,7 +409,7 @@ theorem toIntTrunc_trunc (a : Fx t) :
   tdiv_trunc a.1 t.scale t.scale_pos
 
 /-- A bit pattern read as a value and back is the bit pattern (`bytesM`
-by bit pattern, Q7). -/
+by bit pattern). -/
 theorem toBits_ofBits {u : Int} (h0 : 0 ≤ u) (h1 : u < 2 ^ t.bits) :
     toBits (ofBits t u) = u := by
   simp only [toBits, ofBits, wrap, wrapInt_emod]

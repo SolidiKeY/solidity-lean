@@ -3,13 +3,13 @@ import Solidity.Language.FixedPoint.Literals
 /-!
 # Fixed-point conformance with the pinned upstream tests
 
-Kernel-checked verdicts of the decided rules on the fixed-point uses in
+Kernel-checked verdicts of the rules on the fixed-point uses in
 the pinned upstream syntax tests (`tests/upstream/solidity-0.8.38.tar.gz`,
 under `test/libsolidity/syntaxTests/`).  Each `example` names its test
 file; `docs/feature-work/fixed-point-semantics.md`, §6.5, classifies every
 use (including those decided by the parser, the scanner or the exclusions,
 which no function here computes) and records each deviation from solc's
-type checker as intended, with the decision it follows.
+type checker as intended.
 
 solc's verdict is the test's expectation: a test whose only error is
 `UnimplementedFeatureError 1834` passes solc's type checker.
@@ -33,7 +33,7 @@ def implicitOK (t : FxTy) (q : Rat) : Bool := (ofRat? t q).isSome
 compiles. -/
 def explicitOK (t : FxTy) (q : Rat) : Bool := (explicitRat? t q).isSome
 
-/-! ### Accepted by solc's type checker and by the decided rules -/
+/-! ### Accepted by solc's type checker and by the rules -/
 
 /-- `constants/mod_div_rational.sol`: `0.1 % ∓0.4271087646484375 = 0.1` and
 `0 / ±0.123 = 0`, all exact at `fixed`. -/
@@ -210,7 +210,7 @@ example : CExpr.eval (.div (.lit (mkRat 1 (2 ^ 4095))) (.lit (2 ^ 4095))) = none
 /-- `298`, `299`, `300`, `302`, `types/weird_sized_types.sol`: these (M, N)
 are not in the scanner's bounds, so the names are identifiers (the
 leading-zero spellings of `weird_sized_types.sol` are the scanner's
-spelling rule, G08, not checked here). -/
+spelling rule, not checked here). -/
 example : (FxTy.mk? true 99999999999999999999999999999999999999 7).isNone ∧
     (FxTy.mk? true 0 7).isNone ∧ (FxTy.mk? true 7 8).isNone ∧ (FxTy.mk? true 0 0).isNone ∧
     (FxTy.mk? true 8 888888888888888888888888888888888888888888888888888).isNone ∧
@@ -220,7 +220,7 @@ example : (FxTy.mk? true 99999999999999999999999999999999999999 7).isNone ∧
 /-! ### Accepted by solc's type checker, rejected here (intended) -/
 
 /-- `317_fixed_type_valid_explicit_conversions.sol`: `ufixed256x80(1/3)` and
-`ufixed248x80(1/3)` are out of range at 80 digits, compile errors by Q2;
+`ufixed248x80(1/3)` are out of range at 80 digits, compile errors;
 `ufixed8x1(1/3)` is `0.3`. -/
 example : explicitOK (ty false 256 80 (by decide)) (mkRat 1 3) = false ∧
     explicitOK (ty false 248 80 (by decide)) (mkRat 1 3) = false ∧
@@ -229,7 +229,7 @@ example : explicitOK (ty false 256 80 (by decide)) (mkRat 1 3) = false ∧
 
 /-- `328_rational_to_fixed_literal_expression.sol`, lines `e` and `f`:
 `ufixed256x80(35.245 % 12.9)` (`9.445`) and `ufixed256x80(1.2 % 2)` (`1.2`)
-are out of range at 80 digits, compile errors by Q2. -/
+are out of range at 80 digits, compile errors. -/
 example : CExpr.eval (.mod (.lit 35.245) (.lit 12.9)) = some 9.445 ∧
     (CExpr.eval (.mod (.lit 35.245) (.lit 12.9))).map
       (explicitOK (ty false 256 80 (by decide))) = some false ∧
