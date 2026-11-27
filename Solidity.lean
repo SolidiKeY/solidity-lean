@@ -3963,6 +3963,7 @@ import Solidity.Syntax.Quote
 import Solidity.Syntax.Raw
 import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
+import Solidity.Syntax.StringLaws
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
 import Solidity.Theory.CallerModel.Static
