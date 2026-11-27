@@ -2,38 +2,6 @@ import Solidity.Calculus.StateFacts
 import Solidity.Typing.Values
 import Solidity.Semantics.AllocBytes
 
-/-!
-# The Theory of memory, typed
-
-solkey's memory theory (`memoryRules.key`, `structMemoryRules.key`) read on
-the typed heap: a memory is a heap grown from the global part's
-(`Grown H`), an address an identity with a member or an element
-(`MAddrT T`), and each law a statement about `Grown.readT`, `writeT` and
-the allocations (`Heap.allocDefault`, `SVal.copyStToM`), generic in the
-types it is read at, as the storage laws are generic over their
-locations (`Theory/Typed/Obs.lean`).
-
-* **readOnWrite**, its `\then` and its `\else`: a write reads back where it
-  lands, and leaves every address apart from it (`Grown.writeT_facts`,
-  `Heap.readAddr_writeAddr_same`, `Heap.readAddr_writeAddr_apart`).
-* **readOnAddM** `\else`: an allocation keeps every older object
-  (`Heap.Keeps`, `Heap.readAddr_allocDefault`, `MAddrT.resolve_wk`); and,
-  Lean only, its objects are new (`Grown.alloc_id_ge`), the freshness
-  behind `newFromAdd`.
-* **readOnAddM** `\then`, then **initMember**, **initSize**: a fresh object
-  reads its default (`Heap.Dflt`, `Heap.dflt_allocDefault`,
-  `Heap.initMember`, `Heap.initSize`).
-* **readFromCopyToStorage**, its `\then` and its `\else`, and
-  **findOnCopy**: a copy between storage and memory reads what it copied,
-  and leaves the older objects (`SVal.copyStToM_field`,
-  `SVal.keeps_copyStToM`, `Heap.readAddr_copyStToM`, `MVal.copyMToSt_field`).
-
-The section at the end restates each law under its solkey taclet's name,
-a taclet's `\else` as its frame (`readOnWriteFrame`), as the storage laws
-name theirs (`Obs.findOnSaveFrame`).
-
-The laws are proved on the typed heap alone: no erasure is read (`docs/intrinsic.md`).
--/
 
 namespace Solidity
 
@@ -67,7 +35,6 @@ theorem Heap.get_set_ne {H : HTy} {R R₂ : RefTy} (hp : Heap H) (r : HRef H R) 
     (hne : r.id ≠ r₂.id) (o : MObj H R) : (hp.set r o).get r₂ = hp.get r₂ :=
   Objs.get_set_ne H hp r.id r₂.id hne r.get? r₂.get? o
 
-/-- Two references of one identity are one reference. -/
 theorem HRef.heq_of_id {H : HTy} {R R₂ : RefTy} (r : HRef H R) (r₂ : HRef H R₂) (e : r.id = r₂.id) :
     R = R₂ ∧ HEq r r₂ := by
   rcases r with ⟨i, h⟩
@@ -109,19 +76,15 @@ theorem MObj.elems_setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) (o : M
     (v : MVal H E) : MObj.elems a (MObj.setElem a o i v) = (MObj.elems a o).set i v := by
   cases a <;> simp only [MObj.setElem_dyn, MObj.elems_dyn, MObj.setElem_fixed, MObj.elems_fixed]
 
-/-- An array object is not a struct. -/
 theorem ArrTy.ne_struct {R : RefTy} {E : Ty} (a : ArrTy R E) (s : Name) : R ≠ .struct s := by
   cases a <;> exact fun h => RefTy.noConfusion h
 
-/-- Two addresses that never meet: two members, or a member and an element
-(two kinds of object), or two elements of one array at two indices. -/
 def MAddr.Apart {H : HTy} {T U : Ty} : MAddr H T → MAddr H U → Prop
   | @MAddr.field _ _ f _ _ _, @MAddr.field _ _ g _ _ _ => f ≠ g
   | .field .., .index .. => True
   | .index .., .field .. => True
   | .index r _ i, .index r' _ j => r.id = r'.id → i ≠ j
 
-/-- **A write reads back where it lands** (`readOnWrite`). -/
 theorem Heap.readAddr_writeAddr_same {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : MAddr H T}
     {v : MVal H T} (h : hp.writeAddr ad v = some hp') : hp'.readAddr ad = some v := by
   cases ad with
@@ -139,7 +102,6 @@ theorem Heap.readAddr_writeAddr_same {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : 
         List.getElem?_set_self hb]
     · simp only [reduceCtorEq] at h
 
-/-- **A write leaves an address apart from it** (`readOnWrite` `\else`). -/
 theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad : MAddr H T}
     {bd : MAddr H U} {v : MVal H T} (h : hp.writeAddr ad v = some hp') (hab : ad.Apart bd) :
     hp'.readAddr bd = hp.readAddr bd := by
@@ -186,7 +148,6 @@ theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad
 
 end Heap
 
-/-- The object an address is in. -/
 def MAddrT.id {T : Ty} : MAddrT T → Nat
   | .field id _ => id
   | .index id _ _ => id
@@ -196,13 +157,6 @@ theorem HRef.id_lt {H : HTy} {R : RefTy} (r : HRef H R) : r.id < H.length :=
   (List.getElem?_eq_some_iff.1 r.get?).1
 
 
-/-! ## A grown heap keeps the older objects
-
-An allocation appends an object and leaves every older one as it was, its
-references weakened into the grown typing (`Heap.Keeps`): so does a copy
-into memory (`SVal.keeps_copyStToM`), a chain of allocations, and so
-`Heap.allocDefault`.  An address of an older object therefore reads what
-it read, weakened (`Heap.Keeps.readAddr`): `readOnAddM`'s `\else`. -/
 
 section Keeps
 
@@ -233,7 +187,6 @@ theorem MObj.elems_wk {H H' : HTy} (e : H <+: H') {R : RefTy} {E : Ty} (a : ArrT
     (o : MObj H R) : MObj.elems a (MObj.wk e R o) = (MObj.elems a o).map (MVal.wk e E) := by
   cases a <;> simp only [MObj.wk, MObj.elems_dyn, MObj.elems_fixed]
 
-/-- An array object's elements weakened twice, pointwise once. -/
 private theorem map_wk_wk {H H₁ H₂ : HTy} (e₁ : H <+: H₁) (e₂ : H₁ <+: H₂) {E : Ty}
     (l : List (MVal H E)) :
     (l.map (MVal.wk e₁ E)).map (MVal.wk e₂ E) = l.map (MVal.wk (e₁.trans e₂) E) :=
@@ -275,7 +228,6 @@ theorem Objs.get_snoc_last {H : HTy} {R : RefTy} (o : MObj H R) : (Rs : List Ref
     (os : Objs H Rs) → (h : (Rs ++ [R])[Rs.length]? = some R) →
     Objs.get (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h = o := Solidity.Objs.get_snoc_top o
 
-/-- The object allocated is the one given. -/
 theorem Heap.get_alloc {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R) :
     (hp.alloc o).1.get (hp.alloc o).2 = MObj.wk (List.prefix_append H [R]) R o :=
   Solidity.Heap.get_alloc_self hp o
@@ -289,7 +241,6 @@ theorem Heap.Keeps.trans {H H₁ H₂ : HTy} {e₁ : H <+: H₁} {e₂ : H₁ <+
   show hp₂.get ((r.wk e₁).wk e₂) = _
   rw [h₂, h₁, MObj.wk_wk]
 
-/-- **An allocation keeps every older object.** -/
 theorem Heap.keeps_alloc {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R) :
     Heap.Keeps (List.prefix_append H [R]) hp (hp.alloc o).1 := fun r => by
   show Objs.get (H ++ [R]) (Objs.snoc _ H (Objs.wk _ H hp)) r.id _ = _
@@ -301,7 +252,6 @@ theorem Grown.keeps_alloc {H : HTy} {R : RefTy} {hp : Heap H} (g : Grown H (MObj
   hg.trans (Heap.keeps_alloc g.heap g.val)
 
 mutual
-/-- **A copy into memory keeps every older object.** -/
 theorem SVal.keeps_copyStToM : {T : Ty} → (v : SVal T) → (h : T.mapFree = true) →
     {H : HTy} → (hp : Heap H) → Heap.Keeps (v.copyStToM hp h).ext hp (v.copyStToM hp h).heap
   | _, .prim _, _, _, hp => by
@@ -370,7 +320,6 @@ theorem Heap.Keeps.len {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Heap H'}
     hp'.len (r.wk e) a = hp.len r a := by
   simp only [Heap.len, hk r, MObj.elems_wk, List.length_map]
 
-/-- **A grown heap reads an older address as before**, weakened. -/
 theorem Heap.Keeps.readAddr {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Heap H'}
     (hk : Heap.Keeps e hp hp') {T : Ty} (ra : MAddr H T) :
     hp'.readAddr (ra.wk e) = (hp.readAddr ra).map (MVal.wk e T) := by
@@ -379,15 +328,12 @@ theorem Heap.Keeps.readAddr {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Hea
   | index r a i =>
     simp only [MAddr.wk, Heap.readAddr, Heap.index, hk r, MObj.elems_wk, List.getElem?_map]
 
-/-- An allocation keeps every object below it: the slot at an address
-there reads the same, weakened. -/
 theorem Heap.readAddr_allocDefault {H : HTy} (hp : Heap H) (R : RefTy)
     (hR : (Ty.ref R).mapFree = true) {T : Ty} (ra : MAddr H T) :
     (hp.allocDefault R hR).heap.readAddr (ra.wk (hp.allocDefault R hR).ext) =
       (hp.readAddr ra).map (MVal.wk (hp.allocDefault R hR).ext T) :=
   Heap.Keeps.readAddr (SVal.keeps_copyStToM _ hR hp) ra
 
-/-- A copy into memory keeps every object below it. -/
 theorem Heap.readAddr_copyStToM {H : HTy} (hp : Heap H) {U : Ty} (v : SVal U)
     (hU : U.mapFree = true) {T : Ty} (ra : MAddr H T) :
     (v.copyStToM hp hU).heap.readAddr (ra.wk (v.copyStToM hp hU).ext) =
@@ -396,8 +342,6 @@ theorem Heap.readAddr_copyStToM {H : HTy} (hp : Heap H) {U : Ty} (v : SVal U)
 
 end Keeps
 
-/-- The address in a grown typing: the same object, where it is below the
-smaller one. -/
 theorem MAddrT.resolve_wk {H H' : HTy} (e : H <+: H') {T : Ty} (a : MAddrT T)
     (hid : a.id < H.length) : a.resolve H' = (a.resolve H).map (MAddr.wk e) := by
   obtain ⟨t, rfl⟩ := e
@@ -418,26 +362,15 @@ theorem HRef.ofId?_self {H : HTy} {R : RefTy} (r : HRef H R) : HRef.ofId? H R r.
   simp only [HRef.ofId?, r.get?, dite_true]
 
 
-/-! ## Memory, read by identity
 
-A memory read returns a value over the heap typing it reads in, so two
-reads over two typings are not of one type; read as a word or an identity
-(`Grown.readId`, `MvT`), they are, and a write is named with what it leaves
-there. -/
-
-/-- A slot value as a word or an identity (`MvT`), whatever the heap
-typing. -/
 def MVal.toMvT (H : HTy) : (T : Ty) → MVal H T → MvT T
   | .prim _, v => v
   | .ref _, r => (r : HRef H _).id
 
-/-- `read(m, a)` as a word or an identity. -/
 def Grown.readId {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (a : MAddrT T) :
     Option (MvT T) :=
   (m.readT a).map (MVal.toMvT m.H' T)
 
-/-- A dynamic array's length by identity, independent of the heap typing in
-the result, as the memory `size` read of `memoryLengthRead`. -/
 def Grown.lenId {H : HTy} (m : Grown H (fun _ => Unit)) (E : Ty) (id : Nat) :
     Option PrimTy.uint.Denote :=
   (HRef.ofId? m.H' (.array E) id).bind fun r => some (m.heap.lenU r)
@@ -446,15 +379,12 @@ theorem Grown.lenId_ref {H : HTy} (m : Grown H (fun _ => Unit)) {E : Ty}
     (r : HRef m.H' (.array E)) : m.lenId E r.id = some (m.heap.lenU r) := by
   simp only [Grown.lenId, HRef.ofId?_self, Option.bind_some]
 
-/-- Two memory addresses that never meet: two objects, two members of one
-object, or two elements of one array; or a member and an element. -/
 def MAddrT.Apart {T U : Ty} : MAddrT T → MAddrT U → Prop
   | @MAddrT.field _ f _ id _, @MAddrT.field _ g _ id' _ => ¬ id = id' ∨ ¬ f = g
   | .field .., .index .. => True
   | .index .., .field .. => True
   | .index id _ i, .index id' _ j => ¬ id = id' ∨ ¬ i = j
 
-/-- The object of an address. -/
 def MAddr.id {H : HTy} {T : Ty} : MAddr H T → Nat
   | .field r _ => r.id
   | .index r _ _ => r.id
@@ -471,7 +401,6 @@ theorem MVal.toMvT_toMVal {H : HTy} : {T : Ty} → {v : MvT T} → {w : MVal H T
   | .prim _, _, _, h => by cases h; rfl
   | .ref _, _, _, h => HRef.id_of_ofId? h
 
-/-- **A write leaves an address on another object**, or apart on its own. -/
 theorem Heap.readAddr_writeAddr_frame {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad : MAddr H T}
     {bd : MAddr H U} {v : MVal H T} (h : hp.writeAddr ad v = some hp')
     (hab : ¬ ad.id = bd.id ∨ ad.Apart bd) : hp'.readAddr bd = hp.readAddr bd := by
@@ -529,8 +458,6 @@ theorem MAddrT.apart_resolve {H : HTy} {T U : Ty} {a : MAddrT T} {b : MAddrT U}
       · exact .inl hne
       · exact .inr fun _ => hne
 
-/-- What a write to memory leaves: the word or identity written at its
-address, and every address apart from it as it was. -/
 theorem Grown.writeT_facts {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}
     {v : MvT T} (h : m.writeT a v = some m') :
     m'.readId a = some v ∧ ∀ {U : Ty} (b : MAddrT U), a.Apart b → m'.readId b = m.readId b := by
@@ -549,14 +476,11 @@ theorem Grown.writeT_facts {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {
       rw [Heap.readAddr_writeAddr_frame hhp (MAddrT.apart_resolve hab had hb)]
 
 
-/-! ## A copy into memory, at a member -/
 
-/-- The fresh object of an allocation is the one given, weakened. -/
 theorem Grown.alloc_get {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
     (Grown.alloc g).heap.get (Grown.alloc g).val = MObj.wk (List.prefix_append g.H' [R]) R g.val :=
   Heap.get_alloc g.heap g.val
 
-/-- A member of a fresh struct: the member given, weakened. -/
 theorem Grown.alloc_field {H : HTy} {s f : Name} {T : Ty} (g : Grown H (MObj · (.struct s)))
     (hf : lookupBy f (structDef s) = some T) :
     (Grown.alloc g).heap.field (Grown.alloc g).val hf =
@@ -565,8 +489,6 @@ theorem Grown.alloc_field {H : HTy} {s f : Name} {T : Ty} (g : Grown H (MObj · 
   rw [Grown.alloc_get]
   exact MFields.get_wk _ _ g.val hf
 
-/-- The members a struct copy into memory holds: a word member is the
-storage member's word. -/
 theorem SFields.copyStToM_get_prim {H : HTy} (hp : Heap H) {f : Name} {p : PrimTy} :
     {fs : List (Name × Ty)} → (x : SFields fs) → (h : ∀ fT ∈ fs, fT.2.mapFree = true) →
     (hf : lookupBy f fs = some (.prim p)) →
@@ -585,8 +507,6 @@ theorem SFields.copyStToM_get_prim {H : HTy} (hp : Heap H) {f : Name} {p : PrimT
     · simp only [MFields.get, e, dite_false]
       exact SFields.copyStToM_get_prim _ rest _ _
 
-/-- **A member of a storage struct copied into memory** reads what the
-struct held there. -/
 theorem SVal.copyStToM_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (sv : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
     (hf : lookupBy f (structDef s) = some (.prim p)) :
@@ -598,10 +518,7 @@ theorem SVal.copyStToM_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     exact SFields.copyStToM_get_prim hp fs _ hf
 
 
-/-! ## Allocations: older objects -/
 
-/-- A read of an address the grown heap `μ₀.then g` resolves as `μ₀` does:
-the old object, read there, weakened. -/
 theorem Grown.read_then_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {α : HTy → Type}
     (g : Grown μ₀.H' α) (hg : Heap.Keeps g.ext μ₀.heap g.heap)
     {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
@@ -615,12 +532,10 @@ theorem Grown.read_then_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {α : HT
     simp only [Option.map_some, Option.bind_some]
     exact hg.readAddr rb
 
-/-- A word read in a grown heap is the word. -/
 theorem MVal.map_wk_prim {H H' : HTy} (e : H <+: H') {p : PrimTy} (x : Option (MVal H (.prim p))) :
     (x.map (MVal.wk e (.prim p)) : Option p.Denote) = (x : Option p.Denote) := by
   cases x <;> rfl
 
-/-- An identity read in a grown heap is the identity. -/
 theorem MVal.bind_id_map_wk {H H' : HTy} (e : H <+: H') {R : RefTy} (x : Option (MVal H (.ref R))) :
     (x.map (MVal.wk e (.ref R))).bind (fun r => some (r : HRef H' R).id) =
       x.bind (fun r => some (r : HRef H R).id) := by
@@ -630,8 +545,6 @@ theorem MVal.toMvT_comp_wk {H H' : HTy} (e : H <+: H') (T : Ty) :
     MVal.toMvT H' T ∘ MVal.wk e T = MVal.toMvT H T := by
   cases T <;> rfl
 
-/-- Below a growth that keeps the older objects, an address whose object is
-older reads what it read, as a word or an identity. -/
 theorem Grown.readId_then_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {α : HTy → Type}
     (g : Grown μ₀.H' α) (hg : Heap.Keeps g.ext μ₀.heap g.heap)
     {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
@@ -643,11 +556,9 @@ theorem Grown.readId_then_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {α : 
   exact congrArg (fun f => Option.map f _) (MVal.toMvT_comp_wk g.ext T)
 
 
-/-! ## Lengths: what a read of an element needs -/
 
 section Len
 
-/-- An element reads exactly below the array's length. -/
 theorem Heap.readAddr_index_isSome {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R)
     (a : ArrTy R E) (i : PrimTy.uint.Denote) :
     (hp.readAddr (.index r a i)).isSome = decide (i.1.toNat < hp.len r a) := by
@@ -656,7 +567,6 @@ theorem Heap.readAddr_index_isSome {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H) 
   · simp only [hl, getElem?_pos, Option.isSome_some, decide_true]
   · simp only [hl, not_false_eq_true, getElem?_neg, Option.isSome_none, decide_false]
 
-/-- A slot writes exactly where it reads. -/
 theorem Heap.writeAddr_isSome {H : HTy} {T : Ty} (hp : Heap H) (ad : MAddr H T) (v : MVal H T) :
     (hp.writeAddr ad v).isSome = (hp.readAddr ad).isSome := by
   cases ad with
@@ -668,8 +578,6 @@ theorem Heap.writeAddr_isSome {H : HTy} {T : Ty} (hp : Heap H) (ad : MAddr H T) 
     · simp_all only [Option.isSome_some, and_self, decide_true]
     · simp_all only [Option.isSome_none, decide_false]
 
-/-- **A write keeps every length**: a member is no array, and an element
-written keeps its array's length. -/
 theorem Heap.len_writeAddr {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : MAddr H T} {v : MVal H T}
     (h : hp.writeAddr ad v = some hp') {R : RefTy} {E : Ty} (r : HRef H R) (a : ArrTy R E) :
     hp'.len r a = hp.len r a := by
@@ -699,13 +607,11 @@ theorem MObj.elems_wk_length {H H' : HTy} (e : H <+: H') {R : RefTy} {E : Ty} (a
     (o : MObj H R) : (MObj.elems a (MObj.wk e R o)).length = (MObj.elems a o).length := by
   cases a <;> simp only [MObj.wk, MObj.elems_dyn, MObj.elems_fixed, List.length_map]
 
-/-- **A fresh array's length** is the length of the elements it was given. -/
 theorem Grown.alloc_len {H : HTy} {R : RefTy} {E : Ty} (g : Grown H (MObj · R)) (a : ArrTy R E) :
     (Grown.alloc g).heap.len (Grown.alloc g).val a = (MObj.elems a g.val).length := by
   show (MObj.elems a ((g.heap.alloc g.val).1.get (g.heap.alloc g.val).2)).length = _
   rw [Heap.get_alloc, MObj.elems_wk_length]
 
-/-- A fresh array's length as a `uint`, of the length it was given. -/
 theorem lenU_eq {n : Nat} (h : n < 2 ^ 256) (x : PrimTy.uint.Denote) (e : (n : Int) = x.1) :
     Solidity.lenU n h = x := Subtype.ext e
 
@@ -719,8 +625,6 @@ theorem Heap.lenU_eq {H H' : HTy} {E : Ty} {hp : Heap H} {hp' : Heap H'} {r : HR
     {r' : HRef H' (.array E)} (h : hp.len r .dyn = hp'.len r' .dyn) : hp.lenU r = hp'.lenU r' :=
   Subtype.ext (congrArg Nat.cast h)
 
-/-- **A grown heap keeps every older array's length**, where it keeps the
-older objects. -/
 theorem Grown.lenU_then_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {α : HTy → Type}
     (g : Grown μ₀.H' α) (hg : Heap.Keeps g.ext μ₀.heap g.heap)
     {E : Ty} (id : Nat) (hid : id < μ₀.H'.length) :
@@ -748,7 +652,6 @@ theorem Grown.lenU_copySt_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {U : T
       (HRef.ofId? μ₀.H' (.array E) id).map (fun r => μ₀.heap.lenU r) :=
   Grown.lenU_then_old μ₀ _ (SVal.keeps_copyStToM v hU μ₀.heap) id hid
 
-/-- **A fresh dynamic array is empty.** -/
 theorem Heap.allocDefault_array_len {H : HTy} (hp : Heap H) (E : Ty)
     (hR : (Ty.ref (.array E)).mapFree = true) :
     (hp.allocDefault (.array E) hR).heap.len (hp.allocDefault (.array E) hR).val .dyn = 0 := by
@@ -758,7 +661,6 @@ theorem Heap.allocDefault_array_len {H : HTy} (hp : Heap H) (E : Ty)
   rw [SVal.copyStToM_array]
   exact (Grown.alloc_len _ .dyn).trans (by rw [MObj.elems_dyn]; exact (SVec.copyStToM hp .nil _).val.2)
 
-/-- **A fresh array of `n` elements** (`new T[](n)`) has length `n`. -/
 theorem newArrT_copy_len {H : HTy} (hp : Heap H) (E : Ty) (n : PrimTy.uint.Denote)
     (h : (RefTy.array E).newArrOk = true) (hU : (Ty.ref (.array E)).mapFree = true) :
     ((newArrT (.array E) n h).copyStToM hp hU).heap.len ((newArrT (.array E) n h).copyStToM hp hU).val
@@ -771,8 +673,6 @@ theorem newArrT_copy_len {H : HTy} (hp : Heap H) (E : Ty) (n : PrimTy.uint.Denot
   rw [MObj.elems_dyn]
   exact (SVec.copyStToM hp _ _).val.2.trans (List.length_replicate ..)
 
-/-- **A copy of a stored array has its live length** (`copyStToM` copies
-the live elements, not the shadow). -/
 theorem SVal.copyStToM_array_len {H : HTy} (hp : Heap H) {E : Ty} (v : SVal (.ref (.array E)))
     (hU : (Ty.ref (.array E)).mapFree = true) :
     (v.copyStToM hp hU).heap.len (v.copyStToM hp hU).val .dyn = (SVal.view v : ArrView E).n := by
@@ -783,8 +683,6 @@ theorem SVal.copyStToM_array_len {H : HTy} (hp : Heap H) {E : Ty} (v : SVal (.re
     rw [MObj.elems_dyn]
     exact (SVec.copyStToM hp e _).val.2
 
-/-- A fresh array's element is a default in range and absent past its end.
-This is the typed observation behind allocation's initialized memory reads. -/
 theorem newArrT_find_at {E V : Ty} (n k : PrimTy.uint.Denote)
     (h : (RefTy.array E).newArrOk = true) (p : Path E V) :
     (newArrT (.array E) n h).findM (.at k p) =
@@ -793,7 +691,6 @@ theorem newArrT_find_at {E V : Ty} (n k : PrimTy.uint.Denote)
     List.append_nil, List.getElem?_replicate]
   split <;> rfl
 
-/-- Copying primitive defaults allocates no child objects. -/
 theorem SVec.copyStToM_prim_defaults {H : HTy} (hp : Heap H) (P : PrimTy) (n : Nat) :
     (SVec.ofList (List.replicate n (SVal.prim (PrimTy.dflt P)))).copyStToM hp rfl =
       (⟨List.prefix_refl H, hp, ⟨List.replicate n (PrimTy.dflt P), by
@@ -812,8 +709,6 @@ theorem SVec.copyStToM_prim_defaults {H : HTy} (hp : Heap H) (P : PrimTy) (n : N
     simpa only [step, List.replicate_succ, SVec.ofList, SVec.copyStToM_cons,
       SVal.copyStToM_prim, MVal.wk] using congrArg step ih
 
-/-- `initElement` for a primitive element of a freshly allocated array;
-an out-of-range address remains absent in the typed heap. -/
 theorem newArrT_copy_prim_index {H : HTy} (hp : Heap H) (P : PrimTy)
     (n i : PrimTy.uint.Denote) (h : (RefTy.array (.prim P)).newArrOk = true) :
     let g := (newArrT (.array (.prim P)) n h).copyStToM hp rfl
@@ -831,7 +726,6 @@ theorem newArrT_copy_prim_index {H : HTy} (hp : Heap H) (P : PrimTy)
   rw [SVec.copyStToM_prim_defaults]
   exact List.getElem?_replicate
 
-/-- **A write keeps every length**, on the grown heap. -/
 theorem Grown.writeT_lenU {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}
     {v : MvT T} (h : m.writeT a v = some m') {E : Ty} (id : Nat) :
     (HRef.ofId? m'.H' (.array E) id).map (fun r => m'.heap.lenU r) =
@@ -844,14 +738,10 @@ theorem Grown.writeT_lenU {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a
   | none => rfl
   | some r => exact congrArg some (Heap.lenU_eq (Heap.len_writeAddr hhp r .dyn))
 
-/-- **An allocation's identity is new** (Lean only, the freshness behind
-solkey's `newFromAdd`): past every identity of the heap it grows. -/
 theorem Grown.alloc_id_ge {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
     H.length ≤ ((Grown.alloc g).val : HRef _ R).id :=
   g.ext.length_le
 
-/-- A copy into memory of a reference is a fresh object: its identity is
-past the heap's. -/
 theorem SVal.copyStToM_id_ge {H : HTy} (hp : Heap H) {R : RefTy} (v : SVal (.ref R))
     (h : (Ty.ref R).mapFree = true) :
     H.length ≤ ((v.copyStToM hp h).val : HRef _ R).id := by
@@ -865,19 +755,9 @@ theorem SVal.copyStToM_id_ge {H : HTy} (hp : Heap H) {R : RefTy} (v : SVal (.ref
 
 end Len
 
-/-! ## A fresh default object
-
-`addM(m, R)` copies the default of `R` into memory (`Heap.allocDefault`):
-the fresh object, and every object it reaches by its members and its
-fixed arrays' elements, holds its type's default (`Heap.Dflt`).  A read
-below the fresh root at a path its type declares is therefore a default
-(`readOnAddM`, `initMember`, `initSize`). -/
 
 section Dflt
 
-/-- The slot `v` holds what a default copied into memory holds: a word its
-type's default; a struct each member's; a dynamic array no element; a fixed
-array each element's. -/
 inductive Heap.Dflt {H : HTy} (hp : Heap H) : (T : Ty) → MVal H T → Prop
   | prim {p : PrimTy} : Heap.Dflt hp (.prim p) (PrimTy.dflt p : MVal H (.prim p))
   | struct {s : Name} (r : HRef H (.struct s))
@@ -889,7 +769,6 @@ inductive Heap.Dflt {H : HTy} (hp : Heap H) : (T : Ty) → MVal H T → Prop
       (h : ∀ v ∈ MObj.elems .fixed (hp.get r), Heap.Dflt hp E v) :
       Heap.Dflt hp (.ref (.fixed E n)) r
 
-/-- A default stays one in a heap that keeps its objects. -/
 theorem Heap.Dflt.wk {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Heap H'}
     (hk : Heap.Keeps e hp hp') {T : Ty} {v : MVal H T} (hd : hp.Dflt T v) :
     hp'.Dflt T (MVal.wk e T v) := by
@@ -903,7 +782,6 @@ theorem Heap.Dflt.wk {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Heap H'}
     obtain ⟨w, hw, rfl⟩ := List.mem_map.1 hv
     exact ih w hw
 
-/-- Every member at its default. -/
 def MFields.AllDflt {H : HTy} (hp : Heap H) : (fs : List (Name × Ty)) → MFields H fs → Prop
   | [], _ => True
   | (_, T) :: fs, x => hp.Dflt T x.1 ∧ MFields.AllDflt hp fs x.2
@@ -921,7 +799,6 @@ theorem MFields.AllDflt.get {H : HTy} {hp : Heap H} {f : Name} : (fs : List (Nam
     · simp only [MFields.get, e, dite_false]
       exact MFields.AllDflt.get fs hx.2 _
 
-/-- A fresh struct whose members are defaults is one. -/
 theorem Grown.dflt_alloc_struct {H : HTy} {s : Name} (g : Grown H (MObj · (.struct s)))
     (hg : MFields.AllDflt g.heap (structDef s) g.val) :
     (Grown.alloc g).heap.Dflt (.ref (.struct s)) (Grown.alloc g).val :=
@@ -929,7 +806,6 @@ theorem Grown.dflt_alloc_struct {H : HTy} {s : Name} (g : Grown H (MObj · (.str
     rw [Grown.alloc_field]
     exact (MFields.AllDflt.get _ hg hf).wk (Heap.keeps_alloc g.heap g.val)
 
-/-- A fresh fixed array whose elements are defaults is one. -/
 theorem Grown.dflt_alloc_fixed {H : HTy} {E : Ty} {n : Nat} (g : Grown H (MObj · (.fixed E n)))
     (hg : ∀ w ∈ (g.val : {l : List (MVal g.H' E) // l.length = n}).1, g.heap.Dflt E w) :
     (Grown.alloc g).heap.Dflt (.ref (.fixed E n)) (Grown.alloc g).val :=
@@ -938,7 +814,6 @@ theorem Grown.dflt_alloc_fixed {H : HTy} {E : Ty} {n : Nat} (g : Grown H (MObj �
     obtain ⟨w, hw, rfl⟩ := List.mem_map.1 hv
     exact (hg w hw).wk (Heap.keeps_alloc g.heap g.val)
 
-/-- The members of a default struct, copied into memory, are defaults. -/
 theorem MFields.allDflt_copy_dfltBelow (k : Nat) {ih : (T : Ty) → tyRank T < k → SVal T}
     (hih : ∀ (T : Ty) (hT : tyRank T < k) (hm : T.mapFree = true) {H : HTy} (hp : Heap H),
       ((ih T hT).copyStToM hp hm).heap.Dflt T ((ih T hT).copyStToM hp hm).val) :
@@ -954,8 +829,6 @@ theorem MFields.allDflt_copy_dfltBelow (k : Nat) {ih : (T : Ty) → tyRank T < k
     exact ⟨(hih T _ _ hp).wk (SFields.keeps_copyStToM _ _ _),
       MFields.allDflt_copy_dfltBelow k hih fs _ _ _⟩
 
-/-- The elements of `n` copies of a default, copied into memory, are
-defaults. -/
 theorem SVec.allDflt_copy_replicate {E : Ty} (v : SVal E)
     (hv : ∀ (hm : E.mapFree = true) {H : HTy} (hp : Heap H),
       (v.copyStToM hp hm).heap.Dflt E (v.copyStToM hp hm).val) :
@@ -973,7 +846,6 @@ theorem SVec.allDflt_copy_replicate {E : Ty} (v : SVal E)
     · exact (hv hm hp).wk (SVec.keeps_copyStToM _ _ _)
     · exact SVec.allDflt_copy_replicate v hv n hm _ w hw
 
-/-- **A default copied into memory is a default**, at every rank. -/
 theorem Heap.dflt_copy_dfltBelow : (k : Nat) → (T : Ty) → (h : tyRank T < k) →
     (hm : T.mapFree = true) → {H : HTy} → (hp : Heap H) →
     ((SVal.dfltBelow k T h).copyStToM hp hm).heap.Dflt T ((SVal.dfltBelow k T h).copyStToM hp hm).val
@@ -1002,13 +874,11 @@ theorem Heap.dflt_copy_dfltBelow : (k : Nat) → (T : Ty) → (h : tyRank T < k)
     simp only [Ty.mapFree, Bool.false_eq_true] at hm
 termination_by k T => (k, sizeOf T)
 
-/-- **The fresh object of `addM(m, R)` is a default.** -/
 theorem Heap.dflt_allocDefault {H : HTy} (hp : Heap H) (R : RefTy)
     (hR : (Ty.ref R).mapFree = true) :
     (hp.allocDefault R hR).heap.Dflt (.ref R) (hp.allocDefault R hR).val :=
   Heap.dflt_copy_dfltBelow _ _ _ hR hp
 
-/-- A word that is a default is the type's default. -/
 theorem Heap.Dflt.prim_eq {H : HTy} {hp : Heap H} {p : PrimTy} {v : MVal H (.prim p)}
     (h : hp.Dflt (.prim p) v) : (v : p.Denote) = PrimTy.dflt p := by
   cases h
@@ -1017,7 +887,6 @@ theorem Heap.Dflt.prim_eq {H : HTy} {hp : Heap H} {p : PrimTy} {v : MVal H (.pri
 end Dflt
 
 
-/-! ## Copies into storage: what a copy reads (`copyMem`) -/
 
 section CopyMem
 
@@ -1047,7 +916,6 @@ theorem SVal.array_ofList_congr {E : Ty} {l l' : List (SVal E)} (e : l = l')
   rfl
 
 mutual
-/-- The copy at one rank reads only the copies below it. -/
 theorem MVal.copyAt_congr {H : HTy} (hp : Heap H) {k k' : Nat}
     {ih : (T : Ty) → tyRank T < k → MVal H T → SVal T}
     {ih' : (T : Ty) → tyRank T < k' → MVal H T → SVal T}
@@ -1080,7 +948,6 @@ theorem MVal.copyRefAt_congr {H : HTy} (hp : Heap H) {k k' : Nat}
   | .mapping _ _, _, _, r => (hp.get r : Empty).elim
 end
 
-/-- The copy at any two fuels past the type's rank is one copy. -/
 theorem MVal.copyBelow_fuel {H : HTy} (hp : Heap H) : (k k' : Nat) → (T : Ty) →
     (h : tyRank T < k) → (h' : tyRank T < k') → (v : MVal H T) →
     MVal.copyBelow hp k T h v = MVal.copyBelow hp k' T h' v
@@ -1089,7 +956,6 @@ theorem MVal.copyBelow_fuel {H : HTy} (hp : Heap H) : (k k' : Nat) → (T : Ty) 
   | k + 1, k' + 1, T, h, h', v =>
     MVal.copyAt_congr hp (fun T h h' v => MVal.copyBelow_fuel hp k k' T h h' v) T h h' v
 
-/-- The copy at any fuel past the type's rank is the copy. -/
 theorem MVal.copyBelow_eq {H : HTy} (hp : Heap H) (k : Nat) (T : Ty) (h : tyRank T < k)
     (v : MVal H T) : MVal.copyBelow hp k T h v = v.copyMToSt hp :=
   MVal.copyBelow_fuel hp _ _ T h _ v
@@ -1109,8 +975,6 @@ theorem MFields.copyBelow_get {H : HTy} (k : Nat) (ih : (T : Ty) → tyRank T < 
         x.2 (SFields.lookupBy_cons_neg e h)
       exact ⟨hT, by simp only [MFields.copyBelow, SFields.get_cons, MFields.get, e, dite_false, he]⟩
 
-/-- **A struct copied to storage, at a member** (`selectOnCopyMem`): the
-copy of the member's value. -/
 theorem MVal.copyMToSt_findM_field {H : HTy} (hp : Heap H) {s f : Name} {T U : Ty}
     (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some T) (p : Path T U) :
     (MVal.copyMToSt hp (T := .ref (.struct s)) r).findM (.field hf p) =
@@ -1124,8 +988,6 @@ theorem MVal.copyMToSt_findM_field {H : HTy} (hp : Heap H) {s f : Name} {T U : T
   rw [he, MVal.copyBelow_eq]
   rfl
 
-/-- **A dynamic array copied to storage, at an element**: the copy of the
-element, within the array's length. -/
 theorem MVal.copyMToSt_findM_at {H : HTy} (hp : Heap H) {E U : Ty} (r : HRef H (.array E))
     (i : PrimTy.uint.Denote) (p : Path E U) :
     (MVal.copyMToSt hp (T := .ref (.array E)) r).findM (.at i p) =
@@ -1134,7 +996,6 @@ theorem MVal.copyMToSt_findM_at {H : HTy} (hp : Heap H) {E U : Ty} (r : HRef H (
     SVec.toList_ofList, SList.toList_nil, List.append_nil, List.getElem?_map, MObj.elems_dyn]
   cases (hp.get r : {l : List (MVal H E) // l.length < 2 ^ 256}).1[i.1.toNat]? <;> rfl
 
-/-- A fixed array copied to storage, at an element. -/
 theorem MVal.copyMToSt_findM_atF {H : HTy} (hp : Heap H) {E U : Ty} {n : Nat}
     (r : HRef H (.fixed E n)) (i : PrimTy.uint.Denote) (p : Path E U) :
     (MVal.copyMToSt hp (T := .ref (.fixed E n)) r).findM (.atF i p) =
@@ -1148,20 +1009,16 @@ theorem MVal.copyMToSt_findM_atF {H : HTy} (hp : Heap H) {E U : Ty} {n : Nat}
     exact congrArg (·.findM p) ((MVal.copyBelow_eq hp (rankBound E + 2) E _ v).trans
       (MVal.copyBelow_eq hp (rankBound E + 1) E _ v).symm)
 
-/-- A dynamic array copied to storage has the array's length. -/
 theorem MVal.copyMToSt_len {H : HTy} (hp : Heap H) {E : Ty} (r : HRef H (.array E)) :
     ((MVal.copyMToSt hp (T := .ref (.array E)) r).view : ArrView E).n = hp.len r .dyn := by
   simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.view_array,
     Heap.len, MObj.elems_dyn]
   exact (List.length_map _).trans rfl
 
-/-- A word copied to storage is the word. -/
 theorem MVal.copyMToSt_prim {H : HTy} (hp : Heap H) {P : PrimTy} (v : MVal H (.prim P)) :
     MVal.copyMToSt hp v = .prim v := by
   cases P <;> rfl
 
-/-- **A member of a memory struct copied into storage** holds what the
-object held there. -/
 theorem MVal.copyMToSt_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p)) :
     (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) =
@@ -1171,58 +1028,38 @@ theorem MVal.copyMToSt_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
 
 end CopyMem
 
-/-! ## The laws by solkey's taclets
-
-`memoryRules.key`, `structMemoryRules.key` and the cross-domain taclets,
-each stated on the typed heap and proved by the lemma above it; a taclet's
-`\then` is its name, its `\else` (the frame) its name with `Frame`.  A rule
-whose term has no counterpart on the typed heap is not restated:
-`readFromEmptyMemory` and `newFromEmptyMemory` (a memory grows from the
-global part's heap, never from an empty one), `readR*` (a path is read one
-address at a time), and `initIdentity` (a reference member is allocated
-with its parent, so it is a member read like a word). -/
 
 section Solkey
 
-/-- **readOnWrite** `\then`: a write reads back where it lands. -/
 theorem Grown.readOnWrite {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}
     {v : MvT T} (h : m.writeT a v = some m') : m'.readId a = some v :=
   (Grown.writeT_facts h).1
 
-/-- **readOnWrite** `\else`: a write leaves every address apart from it. -/
 theorem Grown.readOnWriteFrame {H : HTy} {T U : Ty} {m m' : Grown H (fun _ => Unit)}
     {a : MAddrT T} {v : MvT T} (h : m.writeT a v = some m') (b : MAddrT U) (hab : a.Apart b) :
     m'.readId b = m.readId b :=
   (Grown.writeT_facts h).2 b hab
 
-/-- **readOnAddM** `\else`: an allocation leaves every older object. -/
 theorem Grown.readOnAddMFrame {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
     (hR : (Ty.ref R).mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
     (μ₀.then (μ₀.heap.allocDefault R hR)).readId bd = μ₀.readId bd :=
   Grown.readId_then_old μ₀ _ (SVal.keeps_copyStToM _ hR μ₀.heap) bd hid
 
-/-- An allocation's identity is past every older one (Lean only: the
-freshness behind `newFromAdd`, KeY's `idp1 ≠ idp2`). -/
 theorem Grown.alloc_fresh {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
     H.length ≤ ((Grown.alloc g).val : HRef _ R).id :=
   Grown.alloc_id_ge g
 
-/-- **readOnAddM** `\then`, then **initMember**: a member of a fresh struct
-reads the default of its type. -/
 theorem Heap.initMember {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (hR : (Ty.ref (.struct s)).mapFree = true) (hf : lookupBy f (structDef s) = some (.prim p)) :
     (hp.allocDefault (.struct s) hR).heap.field (hp.allocDefault (.struct s) hR).val hf =
       (((SVal.view (SVal.dflt (.ref (.struct s))) : SFields _).get hf).view : p.Denote) :=
   SVal.copyStToM_field hp _ hR hf
 
-/-- **initSize**: a fresh dynamic array has no elements. -/
 theorem Heap.initSize {H : HTy} (hp : Heap H) (E : Ty)
     (hR : (Ty.ref (.array E)).mapFree = true) :
     (hp.allocDefault (.array E) hR).heap.len (hp.allocDefault (.array E) hR).val .dyn = 0 :=
   Heap.allocDefault_array_len hp E hR
 
-/-- **readFromCopyToStorage** `\then`: a member of a storage struct copied
-into memory reads what the struct held there. -/
 theorem SVal.readFromCopyToStorage {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (sv : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
     (hf : lookupBy f (structDef s) = some (.prim p)) :
@@ -1230,16 +1067,11 @@ theorem SVal.readFromCopyToStorage {H : HTy} (hp : Heap H) {s f : Name} {p : Pri
       (((SVal.view sv : SFields _).get hf).view : p.Denote) :=
   SVal.copyStToM_field hp sv hT hf
 
-/-- **readFromCopyToStorage** `\else`, and **readFromCopyToStorageIdentity**
-`\else`: a copy into memory leaves every older object (the premise the
-object older than the copy, where KeY's is `idp1 ≠ idp2`). -/
 theorem Grown.readFromCopyToStorageFrame {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {U : Ty}
     (v : SVal U) (hU : U.mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
     (μ₀.then (v.copyStToM μ₀.heap hU)).readId bd = μ₀.readId bd :=
   Grown.readId_then_old μ₀ _ (SVal.keeps_copyStToM v hU μ₀.heap) bd hid
 
-/-- **findOnCopy** at a one-member path, **selectOnCopyMemPrim**: a member of
-a memory struct copied into storage holds what the object held there. -/
 theorem MVal.findOnCopy {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p)) :
     (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) =

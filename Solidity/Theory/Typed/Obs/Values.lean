@@ -1,36 +1,23 @@
 import Solidity.Theory.Typed.Obs.Paths
 
-/-!
-# Observations of values and storages
-
-A typed value and a storage as their observations, one component, a read
-step by step, and the bridge of a delete, a strip, a copy.
-
-A piece of `Theory/Typed/Obs.lean`, whose docstring describes the whole.
--/
 
 namespace Solidity
 
 open Semantics (structDef lookupBy setBy)
 
-/-! ## A typed value as its observations -/
 
-/-- The word a read finds: the default where nothing is there. -/
 def SVal.wordOf {P : PrimTy} : Option (SVal (.prim P)) → P.Denote
   | some w => SVal.view w
   | none => PrimTy.dflt P
 
-/-- The live length a read finds: `0` where nothing is there. -/
 def SVal.lenOf {E : Ty} : Option (SVal (.ref (.array E))) → Nat
   | some w => (SVal.view w : ArrView E).n
   | none => 0
 
-/-- A value that may not be there, read below. -/
 def SVal.obsOpt {T : Ty} (x : Option (SVal T)) : TVal T :=
   ⟨fun r => SVal.wordOf (x.bind (·.findM r)), fun r => SVal.lenOf (x.bind (·.findM r)),
     fun r => (x.bind (·.findM r)).isSome⟩
 
-/-- **A typed value as its observations.** -/
 def SVal.obs {T : Ty} (v : SVal T) : TVal T := SVal.obsOpt (some v)
 
 theorem SVal.obs_word {T : Ty} (v : SVal T) {P : PrimTy} (r : Path T (.prim P)) :
@@ -40,12 +27,10 @@ theorem SVal.obs_len {T : Ty} (v : SVal T) {E : Ty} (r : Path T (.ref (.array E)
 theorem SVal.obs_has {T : Ty} (v : SVal T) {U : Ty} (r : Path T U) :
     v.obs.has r = (v.findM r).isSome := rfl
 
-/-- What a value holds at `p`, read below. -/
 theorem SVal.obs_find {T U : Ty} (v : SVal T) (p : Path T U) : v.obs.find p = SVal.obsOpt (v.findM p) := by
   apply Obs.ext <;> intro _ r <;>
     simp only [Obs.find, SVal.obs, SVal.obsOpt, Option.bind_some, ObsLoc.app_path, SVal.findM_append]
 
-/-- **`findOnSave`, the bridge**: a typed save, read, is the Theory's. -/
 theorem SVal.obs_saveM {T U : Ty} {x x' : SVal T} {p : Path T U} {v : SVal U}
     (h : x.saveM p v = some x') : x'.obs = x.obs.save p v.obs := by
   have key : ∀ {W : Ty} (q : Path T W), Path.strip? p q = none →
@@ -98,10 +83,7 @@ theorem SVal.obsOpt_find {T U : Ty} (x : Option (SVal T)) (p : Path T U) :
   | none => rfl
   | some v => exact SVal.obs_find v p
 
-/-! ## A storage as its observations -/
 
-/-- **A typed storage as its observations**: at a state variable's path what
-the value there shows, a dangling location not there. -/
 def Storage.obs {C : Contract} (st : Storage C) : TSto C :=
   ⟨fun l => match l with
      | .ref r => (st.get r.hroot).obs.word r.path
@@ -124,19 +106,16 @@ theorem obs_len_ref (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) :
 theorem obs_has_ref (st : Storage C) {U : Ty} (r : SRef C U) :
     st.obs.has (.ref r) = (st.get r.hroot).obs.has r.path := rfl
 
-/-- What a storage holds at `r`, read below. -/
 theorem obs_find {U : Ty} (st : Storage C) (r : SRef C U) :
     st.obs.find (.ref r) = SVal.obsOpt (st.find r) := by
   rw [Storage.find, SVal.find_eq_findM, ← SVal.obs_find]
   rfl
 
-/-- The storage read at a root: the value there. -/
 theorem obs_find_root (st : Storage C) (n : Name) {T : Ty} (hn : C.rootType n = some T) :
     st.obs.find (.ref (SRef.ofRoot n hn)) = (st.get hn).obs := by
   rw [obs_find, Storage.find, SVal.find_eq_findM]
   cases st.get hn <;> rfl
 
-/-- Two storages that agree at every root agree. -/
 theorem obs_ext {o : TSto C} (st : Storage C)
     (h : ∀ (n : Name) {T : Ty} (hn : C.rootType n = some T),
       (st.get hn).obs = o.find (.ref (SRef.ofRoot n hn)))
@@ -163,7 +142,6 @@ theorem obs_ext {o : TSto C} (st : Storage C)
     | ref q => rw [obs_has_ref, h, e q]; rfl
     | dangling U p => exact (hh U p).symm
 
-/-- **The bridge of a save**: a typed save, read, is the Theory's. -/
 theorem obs_save {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     (h : st.save r v = some st') : st'.obs = st.obs.save (.ref r) v.obs := by
   unfold Storage.save at h
@@ -189,19 +167,10 @@ theorem obs_save {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
 
 end Storage
 
-/-! ## One component of the observations
 
-A delete, a strip and a copy are read one component at a time (`Comp`): a
-word, a length, or whether a location is there; each is defined once over
-the component and is the three of them (`TVal.ofComp`). -/
-
-/-- A component of the observations at the locations of type `V`. -/
 structure Comp (V : Ty) (α : Type) where
-  /-- The component at `r` of a value. -/
   read : {U : Ty} → TVal U → Path U V → α
-  /-- The component of a typed value found, or of nothing. -/
   ofOpt : Option (SVal V) → α
-  /-- The component at a location deleted. -/
   reset : TVal V → α
   read_obsOpt : ∀ {U : Ty} (x : Option (SVal U)) (r : Path U V),
     read (SVal.obsOpt x) r = ofOpt (x.bind (·.findM r))
@@ -214,7 +183,6 @@ structure Comp (V : Ty) (α : Type) where
 
 namespace Comp
 
-/-- The word at a primitive location. -/
 def word (P : PrimTy) : Comp (.prim P) P.Denote where
   read o r := o.word r
   ofOpt := SVal.wordOf
@@ -226,7 +194,6 @@ def word (P : PrimTy) : Comp (.prim P) P.Denote where
   reset_some x := by cases x; rw [SVal.defaultOf_prim]; rfl
   reset_none := rfl
 
-/-- The live length of a dynamic array. -/
 def len (E : Ty) : Comp (.ref (.array E)) Nat where
   read o r := o.len r
   ofOpt := SVal.lenOf
@@ -238,7 +205,6 @@ def len (E : Ty) : Comp (.ref (.array E)) Nat where
   reset_some x := by cases x; rw [SVal.defaultOf_array]; rfl
   reset_none := rfl
 
-/-- Whether a location is there. -/
 def has (V : Ty) : Comp V Bool where
   read o r := o.has r
   ofOpt x := x.isSome
@@ -250,14 +216,12 @@ def has (V : Ty) : Comp V Bool where
   reset_some x := by cases x <;> rfl
   reset_none := rfl
 
-/-- What is not there. -/
 abbrev absent {V : Ty} {α : Type} (c : Comp V α) : α := c.ofOpt none
 
 end Comp
 
 namespace TVal
 
-/-- A value from its three components, each read by `f`. -/
 def ofComp {U : Ty} (f : {V : Ty} → {α : Type} → Comp V α → Path U V → α) : TVal U :=
   ⟨fun r => f (Comp.word _) r, fun r => f (Comp.len _) r, fun r => f (Comp.has _) r⟩
 
@@ -268,8 +232,6 @@ theorem eq_ofComp {U : Ty} {o : TVal U} {f : {V : Ty} → {α : Type} → Comp V
 
 variable {V : Ty} {α : Type}
 
-/-- A delete, one component (`SVal.defaultOf`): reset below the location,
-but a mapping's entries and an array's slots past its live end are kept. -/
 def delR (c : Comp V α) : {U : Ty} → TVal U → Path U V → α
   | _, o, .nil => c.reset o
   | _, o, .field h r => delR c (o.find (.field h .nil)) r
@@ -278,8 +240,6 @@ def delR (c : Comp V α) : {U : Ty} → TVal U → Path U V → α
   | _, o, .at i r =>
     if i.1.toNat < o.len .nil then delR c (o.find (.at i .nil)) r else c.read o (.at i r)
 
-/-- A value as nothing has written it, one component (`SVal.strip`): no
-slots past an array's live end. -/
 def stripR (c : Comp V α) : {U : Ty} → TVal U → Path U V → α
   | _, o, .nil => c.read o .nil
   | _, o, .field h r => stripR c (o.find (.field h .nil)) r
@@ -288,10 +248,6 @@ def stripR (c : Comp V α) : {U : Ty} → TVal U → Path U V → α
   | _, o, .at i r =>
     if i.1.toNat < o.len .nil then stripR c (o.find (.at i .nil)) r else c.absent
 
-/-- A copy of `n` laid over `o`, one component (`SVal.overlay`): member by
-member, element by element over the old slots (onto fresh ones as nothing
-wrote them), the old elements past the new length deleted, the old slots
-past both kept, a mapping kept. -/
 def ovR (c : Comp V α) : {U : Ty} → TVal U → TVal U → Path U V → α
   | _, _, n, .nil => c.read n .nil
   | _, o, n, .field h r => ovR c (o.find (.field h .nil)) (n.find (.field h .nil)) r
@@ -308,14 +264,10 @@ def ovR (c : Comp V α) : {U : Ty} → TVal U → TVal U → Path U V → α
 
 end TVal
 
-/-- **`delValue`** of a stored value: reset, as `delete` resets it. -/
 def TVal.del {U : Ty} (o : TVal U) : TVal U := TVal.ofComp fun c r => TVal.delR c o r
-/-- A value as written to fresh slots (`SVal.strip`). -/
 def TVal.strip {U : Ty} (o : TVal U) : TVal U := TVal.ofComp fun c r => TVal.stripR c o r
-/-- **A copy**: `n` laid over `o` (`SVal.overlay`). -/
 def TVal.overlay {U : Ty} (o n : TVal U) : TVal U := TVal.ofComp fun c r => TVal.ovR c o n r
 
-/-! ### A read, step by step -/
 
 theorem SVal.findM_nil' {T : Ty} (x : SVal T) : x.findM .nil = some x := by cases x <;> rfl
 
@@ -343,7 +295,6 @@ theorem SVal.findM_at_nil {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn :
   | none => rfl
   | some w => exact SVal.findM_nil' w
 
-/-! ### Members and elements of a delete, a strip, a copy -/
 
 theorem SFields.get_defaultOf {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
     (xs : SFields fs) → (h : lookupBy f fs = some T) →
@@ -384,7 +335,6 @@ theorem SFields.get_overlay {f : Name} : {fs : List (Name × Ty)} → {T : Ty} �
     · simp only [e, dite_false]
       exact SFields.get_overlay os ns _
 
-/-- A default's member is its type's default. -/
 theorem SFields.dflt_get {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
     (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
   | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
@@ -409,7 +359,6 @@ theorem SVec.toList_strip {E : Ty} : {n : Nat} → (e : SVec E n) →
   | _, .cons v rest => by
     rw [SVec.strip_cons, SVec.toList_cons, SVec.toList_cons, SVec.toList_strip rest]; rfl
 
-/-- A copy over what may not be there: as nothing wrote it, onto nothing. -/
 def SVal.overlayOpt {U : Ty} : Option (SVal U) → Option (SVal U) → Option (SVal U)
   | _, none => none
   | none, some n => some n.strip
@@ -432,7 +381,6 @@ theorem SVal.obsOpt_len_nil {E : Ty} (x : Option (SVal (.ref (.array E)))) :
   | none => rfl
   | some v => show SVal.lenOf (v.findM .nil) = _; rw [SVal.findM_nil']
 
-/-- The new elements laid over the old slots, slot by slot. -/
 theorem SVec.getElem?_overlayOn {E : Ty} : {n : Nat} → (L : List (SVal E)) → (e : SVec E n) →
     (j : Nat) → (SVec.overlayOn L e).toList[j]? = SVal.overlayOpt L[j]? e.toList[j]?
   | _, L, .nil, j => by
@@ -453,7 +401,6 @@ theorem SVec.getElem?_overlayOn {E : Ty} : {n : Nat} → (L : List (SVal E)) →
       simp only [List.getElem?_cons_succ]
       exact SVec.getElem?_overlayOn L rest j
 
-/-! ### The bridge of a delete, a strip, a copy -/
 
 theorem TVal.delR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x : Option (SVal U)) →
     (r : Path U V) → TVal.delR c (SVal.obsOpt x) r = c.ofOpt ((x.map SVal.defaultOf).bind (·.findM r))
@@ -587,8 +534,6 @@ theorem TVal.stripR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (
         rw [List.getElem?_eq_none hge]
         rfl
 
-/-- The slots of an array copy past its new length: the old elements
-deleted, then the old slots past them. -/
 theorem shadow_getElem?_lt {β : Type} (f : β → β) (oel osh : List β) {n i : Nat} (hi : n ≤ i)
     (him : i < oel.length) :
     ((oel.drop n).map f ++ osh.drop (n - oel.length))[i - n]? = (oel[i]?).map f := by
@@ -761,8 +706,6 @@ theorem SVal.obs_strip {U : Ty} (x : SVal U) : x.strip.obs = x.obs.strip :=
   TVal.eq_ofComp fun c r => by
     rw [SVal.obs, c.read_obsOpt, SVal.obs, TVal.stripR_obsOpt]; rfl
 
-/-- Stripping a fixed array and then reading a child strips that child;
-the fixed outer vector has no shadow slots of its own. -/
 theorem TVal.strip_find_atF {E : Ty} {n : Nat} (o : TVal (.ref (.fixed E n)))
     (i : PrimTy.uint.Denote) :
     o.strip.find (.atF i .nil) = (o.find (.atF i .nil)).strip := by
@@ -770,12 +713,10 @@ theorem TVal.strip_find_atF {E : Ty} {n : Nat} (o : TVal (.ref (.fixed E n)))
     simp only [Obs.find, ObsLoc.app_path, Path.append_atF, Path.append_nil,
       TVal.strip, TVal.ofComp, TVal.stripR, Comp.word, Comp.len, Comp.has]
 
-/-- The length of a converted array: source length for a dynamic target, declared length for a fixed one. -/
 def FixedCopy.targetLength {E : Ty} {n : Nat} {R : RefTy} : FixedCopy E n R → Nat
   | .dynamic _ => n
   | .fixed m _ => m
 
-/-- A converted array element, read lazily: source, padded default, or absence. The source observation is assumed defined. -/
 def FixedCopy.child {E : Ty} {n : Nat} {R : RefTy} (c : FixedCopy E n R)
     (o : TVal (.ref (.fixed E n))) (i : PrimTy.uint.Denote) : TVal E :=
   if i.1.toNat < c.targetLength then
@@ -783,7 +724,12 @@ def FixedCopy.child {E : Ty} {n : Nat} {R : RefTy} (c : FixedCopy E n R)
     else (SVal.dflt E).strip.obs
   else SVal.obsOpt none
 
-/-- The destination-shaped observations of a successful fixed-array snapshot. -/
+def FixedCopy.childOfDefined {E : Ty} {n : Nat} {R : RefTy}
+    (c : FixedCopy E n R)
+    (o : {o : TVal (.ref (.fixed E n)) // o.has .nil = true})
+    (i : PrimTy.uint.Denote) : TVal E :=
+  c.child o.1 i
+
 def FixedCopy.observe {E : Ty} {n : Nat} : {R : RefTy} → (c : FixedCopy E n R) →
     TVal (.ref (.fixed E n)) → TVal (.ref R)
   | _, .dynamic hn, o =>
@@ -795,18 +741,15 @@ def FixedCopy.observe {E : Ty} {n : Nat} : {R : RefTy} → (c : FixedCopy E n R)
      fun q => match q with | .atF i r => ((FixedCopy.fixed m hm).child o i).len r,
      fun q => match q with | .nil => true | .atF i r => ((FixedCopy.fixed m hm).child o i).has r⟩
 
-/-- A fixed array viewed as a dynamic one has its length. -/
 theorem FixedCopy.observe_len {E : Ty} {n : Nat} (c : FixedCopy E n (.array E))
     (o : TVal (.ref (.fixed E n))) : (c.observe o).len .nil = n := by
   cases c; rfl
 
-/-- An element selector at the destination's array shape. -/
 def FixedCopy.index {E : Ty} {n : Nat} {R : RefTy} : FixedCopy E n R →
     PrimTy.uint.Denote → Path (.ref R) E
   | .dynamic _, i => .at i .nil
   | .fixed _ _, i => .atF i .nil
 
-/-- A converted array element has exactly the lazy observation of its source or padded default. -/
 theorem FixedCopy.child_apply {E : Ty} {n : Nat} {R : RefTy}
     (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n))) (i : PrimTy.uint.Denote) :
     c.child v.obs i = (c.apply v).obs.find (c.index i) := by
@@ -831,14 +774,12 @@ theorem FixedCopy.child_apply {E : Ty} {n : Nat} {R : RefTy}
       · split <;> rfl
       · rfl
 
-/-- Every component below a converted element agrees with the actual converted snapshot. -/
 theorem FixedCopy.child_apply_read {E : Ty} {n : Nat} {R : RefTy} {V : Ty} {α : Type}
     (k : Comp V α) (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n)))
     (i : PrimTy.uint.Denote) (r : Path E V) :
     k.read (c.child v.obs i) r = k.read (c.apply v).obs ((c.index i).append r) := by
   rw [FixedCopy.child_apply, k.read_find]
 
-/-- The converted snapshot agrees with its lazy observation for all word, length and presence reads. -/
 theorem FixedCopy.observe_apply {E : Ty} {n : Nat} {R : RefTy}
     (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n))) :
     (c.apply v).obs = c.observe v.obs := by
