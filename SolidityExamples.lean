@@ -3,6 +3,7 @@
 import Solidity.Examples.AliasConstraints
 import Solidity.Examples.AutoComplete
 import Solidity.Examples.Backend.BytesFullMachine.FixedLayout
+import Solidity.Examples.Backend.BytesFullMachine.Intrinsic
 import Solidity.Examples.Benchmark.Algorithms.BinarySearch
 import Solidity.Examples.Benchmark.Algorithms.FastExponentiation
 import Solidity.Examples.Benchmark.Algorithms.Fibonacci
