@@ -57,4 +57,13 @@ example {ps : Ctx} {as : Args C Γ ps} (w : Thin Γ Δ) (ha : ArgsOk as) :
     ArgsOk (as.wk w) := args_wk_ok w ha
 
 example {p : PrimTy} {l : OpLoc C Γ p} (w : Thin Γ Δ) (h : OpLocOk l) : OpLocOk (l.wk w) := opLoc_wk_ok w h
+
+-- Every accepted program can move into an arbitrary larger context.
+example {Θ : Ctx} (hP : ProgOk [] P) (w : Thin Γ Θ) :
+    Evm.Prog.pushes (P.wk w).2.2 = 0 ∧
+      ∃ G, inFragP (Frag.init Θ) (P.wk w).2.2 = some G := by
+  have hQ := prog_wk_ok hP w (KindsWk.empty w)
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Θ) (Matches.init Θ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
 end Solidity.Backend.CompilerOptimizerDomain.Controls
