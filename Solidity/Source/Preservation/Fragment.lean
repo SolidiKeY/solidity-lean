@@ -1,10 +1,7 @@
 import Solidity.Source.Preservation.Statements
 import Solidity.Source.Preservation.ResultValidity
 
-/-! Joint all-horizon Hoare preservation for the original call value fragment.
-The existing `CallsOK` hypothesis is consumed, not replaced by a preservation
-assumption. Separate P9 admission derives it for actual elaborated programs.
--/
+
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
@@ -38,8 +35,7 @@ theorem callMem_step {A : Decl → Prop} {G : Glob E} {c : String} {n : Nat}
   exact callFrame_mem G F n d vs rs b (by rw [hc]; exact hb) hl hm
     (fun H l => ih.mods {F with checked := true} hc b l hf ho H) H
 
-/-- No recursive preservation premise remains: the same horizon induction
-closes expressions, all statements/loops, modifier-free bodies and calls. -/
+
 theorem fragMemAt {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOK A G c) :
     ∀ n, FragMemAt A G c n
   | 0 => fragMemAt_zero A G c
@@ -52,14 +48,12 @@ theorem fragMemAt {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOK A 
         (ih.stmt.execItems F hc b.ps.length none b.items l hf ho H)
       call := callMem_step hG ih }
 
-/-- Source progress and full memory preservation use the same
-fragment and call predicate. -/
+
 theorem progress_and_preservation {A : Decl → Prop} {G : Glob E} {c : String}
     (hG : CallsOK A G c) (n : Nat) : Source.FragAt A G c n ∧ FragMemAt A G c n :=
   ⟨Source.fragAt hG n, fragMemAt hG n⟩
 
-/-- Public expression triple: memory, current locals and returned references
-are valid after success; every halt retains the complete memory invariant. -/
+
 theorem evalE_fragment_mem {A : Decl → Prop} {G : Glob E} {c : String}
     (hG : CallsOK A G c) (F : Fr) (hc : F.contract = c) (n : Nat)
     {Γ : RCtx} {t : STy} (e : RExpr E Γ t) (hf : e.ValFragC A) (ho : e.OpsOK) (H : HeapTy) :
