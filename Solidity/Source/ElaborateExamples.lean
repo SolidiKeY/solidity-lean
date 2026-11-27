@@ -1,27 +1,6 @@
 import Solidity.Source.Elaborate
 import Solidity.Source.SemanticsExamples
 
-/-!
-# Controls of the elaborator
-
-Units written as syntax, elaborated by `elaborate` (no hand-written
-resolved terms), deployed and called through the semantics
-(`Solidity/Source/Semantics.lean`).  The runs are checked by `#guard`, which
-evaluates compiled code; the elaborator's output is a derivation, so each
-run is of the program the typing rules give the unit.
-
-```solidity
-contract A {
-  uint256 a;
-  constructor(uint256 v) { a = v; }
-}
-contract C is A(7) {
-  uint256 x = 3;
-  modifier pos(uint256 k) { require(k > 0); _; }
-  function g(uint256 k) public pos(k) returns (uint256) { x = x + k; return x + a; }
-}
-```
--/
 
 namespace Solidity.Source.ElaborateExamples
 
@@ -59,13 +38,8 @@ def resAC : Resolution := resolveUnit { pipeline := .legacy } unitAC
 
 def elabAC : Option Elaborated := elaborate resAC
 
--- The unit elaborates: every body, initializer and base argument has a
--- derivation.
 #guard elabAC.isSome
 
--- The program's parts, read back: `C` has one initializer (`x = 3`) and
--- gives `A` one argument; `A`'s constructor has one local; `g`'s body
--- carries one modifier invocation, `pos`.
 #guard (elabAC.map fun el => ((el.prog.inits "C").length, (el.prog.baseArgs "C").length,
   (el.prog.ctorLocals "A").length)) == some (1, 1, 1)
 #guard (elabAC.bind fun el => (el.res.env.decls.find? (·.name == "g")).bind fun d =>
@@ -74,7 +48,6 @@ def elabAC : Option Elaborated := elaborate resAC
 def thisC : Address := addr 1
 def user : Address := addr 7
 
-/-- Deploy `C` at `thisC`, then call `g(k)`: the outcome and `x`. -/
 def deployCall (el : Elaborated) (k : Nat) (h : k < 2 ^ 256 := by decide) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
     fun _ => .answer (.success []), word 0⟩
@@ -87,15 +60,10 @@ def deployCall (el : Elaborated) (k : Nat) (h : k < 2 ^ 256 := by decide) : Opti
   | .ok o => some o
   | _ => none
 
--- **`g(2)` returns `x + a = (3 + 2) + 7`**: the initializer and the base
--- argument through `A`'s constructor ran (without either, `9` or `5`).
 #guard (elabAC.bind fun el => deployCall el 2) == some (.success (wordBytes (toWord 12)))
 
--- `g(0)` reverts in the modifier's `require` (without the modifier, `7`).
 #guard (elabAC.bind fun el => deployCall el 0) == some (.revert [])
 
-/-- A unit with an ill-typed body does not elaborate: `x = true` with
-`uint256 x`. -/
 def unitBad : Syn .unit :=
   .unit (.cons (.contract false "C" .none .nil
       (.cons (.stateVar u256 none none none false "x" .none)
@@ -105,18 +73,6 @@ def unitBad : Syn .unit :=
 
 #guard (elaborate (resolveUnit { pipeline := .legacy } unitBad)).isNone
 
-/-! ## Public getters, `emit` in a static frame, value to a constructor
-
-```solidity
-contract D {
-  uint256 public x = 3;
-  mapping(uint256 => uint256) public m;
-  event E(uint256);
-  function set(uint256 k) public { m[k] = x + k; }
-  function e() public { emit E(1); }
-}
-```
--/
 
 def mapUU : Syn .typeName :=
   .mapping (.elem (.int false 256 (by decide)) (by decide)) none u256 none
@@ -140,8 +96,6 @@ def elabD : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 
 def arg (k : Nat) (h : k < 2 ^ 256 := by decide) : Bytes := wordBytes ⟨k, h⟩
 
-/-- Deploy `D` with `value`, then run each call data as a transaction: the
-deployment's outcome and each transaction's. -/
 def runD (el : Elaborated) (value : Nat) (inputs : List Bytes) (h : value < 2 ^ 256 := by decide) :
     List (Option Outcome) :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
@@ -156,19 +110,14 @@ def runD (el : Elaborated) (value : Nat) (inputs : List Bytes) (h : value < 2 ^ 
   | .ok os => os.map some
   | _ => []
 
--- **Getters**: after `set(2)`, `x()` is `3`, `m(2)` is `3 + 2`, `m(3)` is `0`.
 #guard (elabD.map fun el => runD el 0 [selOf "set(uint256)" ++ arg 2, selOf "x()",
     selOf "m(uint256)" ++ arg 2, selOf "m(uint256)" ++ arg 3]) ==
   some [some (.success []), some (.success []), some (.success (arg 3)), some (.success (arg 5)),
     some (.success (arg 0))]
 
--- **Value to a non-payable constructor** (here the default one) reverts the
--- deployment; no value deploys.
 #guard (elabD.map fun el => (runD el 1 []).head?) == some (some (some (.revert [])))
 #guard (elabD.map fun el => (runD el 0 []).head?) == some (some (some (.success [])))
 
-/-- `contract D { type W is uint8; type V is int8; uint256 public x;
-function f(W w) public { x = 1; } function g(V v) public { x = 2; } }` -/
 def unitW : Syn .unit :=
   .unit (.cons (.contract false "D" .none .nil
       (.cons (.udvt (t := false) "W" (.int false 8 (by decide)))
@@ -187,20 +136,15 @@ def elabW : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 
 #guard elabW.isSome
 
--- **A user-defined value type argument** is decoded as its underlying type: `f(7)` runs (`x` becomes 1),
--- `f(300)` is not a `uint8` and reverts with no data.
 #guard (elabW.map fun el => runD el 0 [selOf "f(uint8)" ++ arg 7, selOf "x()"]) ==
   some [some (.success []), some (.success []), some (.success (arg 1))]
 #guard (elabW.map fun el => runD el 0 [selOf "f(uint8)" ++ arg 300, selOf "x()"]) ==
   some [some (.success []), some (.revert []), some (.success (arg 0))]
--- A signed underlying type: `g(-1)` (the word `2^256 - 1`, sign-extended)
--- runs, `g(200)` (not sign-extended, out of `int8`) reverts.
 #guard (elabW.map fun el => runD el 0 [selOf "g(int8)" ++ arg (2 ^ 256 - 1), selOf "x()"]) ==
   some [some (.success []), some (.success []), some (.success (arg 2))]
 #guard (elabW.map fun el => runD el 0 [selOf "g(int8)" ++ arg 200, selOf "x()"]) ==
   some [some (.success []), some (.revert []), some (.success (arg 0))]
 
-/-- `contract D { function g(bytes memory b) public {} }` -/
 def unitB : Syn .unit :=
   .unit (.cons (.contract false "D" .none .nil
       (.cons (.function (.ident "g") (.cons (.param (.elem .bytes) (some .memory) (some "b")) .nil)
@@ -212,14 +156,6 @@ def elabB : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 
 #guard elabB.isSome
 
--- **Panic 0x41 in the decoder**: a `bytes` argument whose
--- length is `2^64` panics with `0x41` (solc's `array_allocation_size`
--- comes before its bounds check); one of length `2^32` is out of bounds and
--- reverts with no data; a length word cut short (`32` then one byte)
--- reverts with no data before any length is read, as solc's
--- `offset + 0x1f < end` check; `b = "ab"` runs. (Lengths just below `2^64`
--- also panic in solc, through `finalize_allocation`; that band is a
--- recorded deviation, `docs/solc-alignment.md`.)
 #guard (elabB.map fun el => runD el 0 [selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 64),
     selOf "g(bytes)" ++ arg 32 ++ arg (2 ^ 32),
     selOf "g(bytes)" ++ arg 32 ++ [1],
@@ -227,7 +163,6 @@ def elabB : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
   some [some (.success []), some (.revert (panicData .alloc)), some (.revert []), some (.revert []),
     some (.success [])]
 
-/-- `e()` entered in a static frame or not, after deploying `D`. -/
 def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
     fun _ => .answer (.success []), word 0⟩
@@ -238,19 +173,9 @@ def emitIn (el : Elaborated) (static : Bool) : Option Outcome :=
   | .ok o => some o
   | _ => none
 
--- **`emit` in a static frame reverts** (as `LOG` does); outside one it succeeds.
 #guard (elabD.bind fun el => emitIn el true) == some (.revert [])
 #guard (elabD.bind fun el => emitIn el false) == some (.success [])
 
-/-! ## Dynamic arguments
-
-```solidity
-contract L {
-  function len(bytes memory b) public returns (uint256) { return b.length; }
-  function sum2(uint256[] memory xs) public returns (uint256) { return xs[0] + xs[1]; }
-}
-```
--/
 
 def unitL : Syn .unit :=
   .unit (.cons (.contract false "L" .none .nil
@@ -268,7 +193,6 @@ def elabL : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 
 #guard elabL.isSome
 
-/-- Deploy `L`, then run one call: its outcome. -/
 def callL (el : Elaborated) (input : Bytes) : Option Outcome :=
   let G : Glob el.res.env := ⟨el.prog, .legacy, toyFixed, fun _ => word 0, fun _ _ => true,
     fun _ => .answer (.success []), word 0⟩
@@ -278,23 +202,17 @@ def callL (el : Elaborated) (input : Bytes) : Option Outcome :=
   | .ok o => some o
   | _ => none
 
--- **`bytes` decoded from its tail**: `len(0x010203)` is `3`.
 #guard (elabL.bind fun el => callL el (selOf "len(bytes)" ++ arg 32 ++ arg 3 ++ pad32 [1, 2, 3])) ==
   some (.success (arg 3))
 
--- **A dynamic array**: `sum2([5, 7])` is `12`.
 #guard (elabL.bind fun el => callL el (selOf "sum2(uint256[])" ++ arg 32 ++ arg 2 ++ arg 5 ++ arg 7)) ==
   some (.success (arg 12))
 
--- **Panic 0x41 for a dynamic value array**: a length word cut
--- short reverts with no data, a length of `2^64` panics with `0x41`, and a
--- length of `2^32` is out of bounds and reverts with no data.
 #guard ([selOf "sum2(uint256[])" ++ arg 32 ++ [1],
     selOf "sum2(uint256[])" ++ arg 32 ++ arg (2 ^ 64),
     selOf "sum2(uint256[])" ++ arg 32 ++ arg (2 ^ 32)].map fun i => elabL.bind fun el => callL el i) ==
   [some (.revert []), some (.revert (panicData .alloc)), some (.revert [])]
 
--- An offset past the data reverts, as solc's decoder does.
 #guard (elabL.bind fun el => callL el (selOf "len(bytes)" ++ arg 4096 ++ arg 3)) == some (.revert [])
 
 end Solidity.Source.ElaborateExamples
