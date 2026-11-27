@@ -20,8 +20,9 @@ materialized program, and actual lowering of the smoke separately. The generated
 flag declaration, condition capture, captured assignment, and flag write have
 exact elaboration receipts below. The flag and condition instructions also have
 placement and acceptance checks. The owned branch/control interfaces compose
-the condition hoisting and first primitive conditional below; preprocessing
-of that conditional and the complete loop production receipt remain outstanding.
+the condition hoisting and first conditional, including its complete
+preprocessing. The remaining guard and complete loop production receipt are
+still outstanding.
 -/
 namespace Solidity.Examples.Lowering.Sim.Coverage
 
@@ -642,6 +643,110 @@ theorem smoke_guard_primitive (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
       (CoverageBranch.Children.nil _ _)
     rfl
 
+/-- The first lowered conditional before expression preprocessing. -/
+def smokeGuardRaw : RawStmt :=
+  .ite (.unop .not (.assign (.name "i") (.name "a")))
+    [.assign (.name "brk0") (.bool true)] []
+
+/-- The first conditional after its effectful condition has been hoisted. -/
+def smokeGuardHoisted : RawStmt :=
+  .ite (.unop .not (.name "se1")) [.assign (.name "brk0") (.bool true)] []
+
+/-- Statement hoisting preserves the conditional's branches and threads the
+condition's actual capture and assignment into its emitted prefix. -/
+theorem smoke_guard_hoist (hk : Solidity.Goals.elabKernelTotal) :
+    @hoistStmt Match.C productionNames smokeGuardRaw { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), smokeGuardHoisted),
+        (smokeCapturedLocals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hh : hoistStmt Match.C = hoistStmtWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.2.2.1
+  have hc : (elabRec Match.C ()).hoist (.unop .not (.assign (.name "i") (.name "a")))
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), .unop .not (.name "se1")),
+        (smokeCapturedLocals, 2)), {}) := by
+    rw [(hk.1 Match.C).2.1.1]
+    exact smoke_condition_not_hoist hk
+  rw [hh]
+  unfold smokeGuardRaw hoistStmtWith
+  simp only [RawStmt.mapExprsM]
+  conv => lhs; whnf
+  dsimp only [StateT.run, Bind.bind, StateT.bind, ReaderT.bind, Except.bind,
+    liftM, MonadLiftT.monadLift, MonadLift.monadLift, StateT.lift]
+  rw [hc]
+  rfl
+
+private theorem guard_fn (Γ : ECtx) :
+    @fnPure Match.C productionNames Γ (.unop .not (.assign (.name "i") (.name "a"))) =
+      .ok (.unop .not (.assign (.name "i") (.name "a"))) := by
+  simp only [fnPure_unop, fnPure_assign, fnPure_other]
+  rfl
+
+private theorem guard_bytes :
+    @bytesPure Match.C productionNames (("brk0", .val .bool) :: Match.locals)
+      (.unop .not (.assign (.name "i") (.name "a"))) =
+      .ok (.unop .not (.assign (.name "i") (.name "a"))) := by
+  simp only [bytesPure_unop, bytesPure_assign, bytesPure_other]
+  rfl
+
+private theorem guard_whole :
+    @narrowWholeUse? Match.C productionNames (("brk0", .val .bool) :: Match.locals)
+      (.unop .not (.assign (.name "i") (.name "a"))) = none := by
+  rw [narrowWholeUse?_unop, narrowWholeUse?_assign]
+  have hm : @storageMappingAlias? Match.C productionNames
+      (("brk0", .val .bool) :: Match.locals) (.name "i") = false := by
+    unfold storageMappingAlias?
+    rw [synth]
+    rfl
+  simp only [hm, Bool.false_and, Bool.false_eq_true, if_false, narrowWholeUse?_name]
+  rfl
+
+private theorem guard_narrow :
+    @narrowPure Match.C productionNames false (("brk0", .val .bool) :: Match.locals)
+      (.unop .not (.assign (.name "i") (.name "a"))) =
+      .ok (.unop .not (.assign (.name "i") (.name "a"))) := by
+  simp only [narrowPure_unop, narrowPure_other]
+  rfl
+
+/-- Complete preprocessing and elaboration of the first lowered conditional,
+including its actual effectful condition and the owned primitive receipt. -/
+theorem smoke_guard (hk : Solidity.Goals.elabKernelTotal) :
+    @elabStmtP Match.C productionNames smokeGuardRaw { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok (((smokeCaptureProgram ++ smokeWriteProgram) ++ smokeGuardProgram,
+        (smokeCapturedLocals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have hh : (elabRec Match.C ()).hoistStmt smokeGuardRaw { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), smokeGuardHoisted),
+        (smokeCapturedLocals, 2)), {}) := smoke_guard_hoist hk
+  have hg : (elabRec Match.C ()).elabStmt1 smokeGuardHoisted
+      { funs := [], top := false } (smokeCapturedLocals, 2) {} =
+      .ok ((smokeGuardProgram, (smokeCapturedLocals, 2)), {}) := smoke_guard_primitive hk 2
+  dsimp only [smokeGuardRaw] at hh
+  dsimp only [smokeGuardHoisted] at hg
+  rw [hp]
+  unfold smokeGuardRaw
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, guard_fn]
+  conv => lhs; whnf
+  simp only [bytesStmt, RawStmt.mapExprsM, guard_bytes]
+  conv => lhs; whnf
+  simp only [RawStmt.exprs, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
+    Bool.false_eq_true, if_false, guard_whole]
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, guard_narrow]
+  conv => lhs; whnf
+  dsimp only
+  rw [hh]
+  conv => lhs; whnf
+  dsimp only [smokeGuardHoisted]
+  rw [hg]
+  rfl
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -678,3 +783,7 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_condition_not_hoist
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_set_flag_scope
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_guard_primitive
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_guard_hoist
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_guard
