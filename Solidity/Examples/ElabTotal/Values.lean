@@ -3,12 +3,12 @@ import Solidity.Syntax.Elab.Values
 /-!
 # Checks: the value rewrites' equations
 
-The functions of `Syntax/Elab/Values.lean` checked here are total (`abiTyExpr?`
-and `abiFnType` are still `partial`), so each unfolds by its named equations with no
-`native_decide`: structural ones (`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`)
-also reduce in the kernel (`rfl`), the well-founded ones (`narrowPure`, the
-three mutual `narrow…?`, `abiTyName`, `bytesPure`, `fnPure`) by rewriting. The `#guard`s pin the
-compiled functions.
+The functions of `Syntax/Elab/Values.lean` checked here are total, so each
+unfolds by its named equations with no `native_decide`: structural ones
+(`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`) also reduce in the kernel (`rfl`),
+the well-founded ones (`narrowPure`, the three mutual `narrow…?`, `abiTyName`,
+`bytesPure`, `fnPure`, `abiTyExpr?`, `abiFnType`) by rewriting. The `#guard`s
+pin the compiled functions.
 -/
 
 namespace Solidity.Examples.ElabTotal.Values
@@ -417,5 +417,51 @@ example (ty : String) (h : fnParts? ty = none) :
 #guard shown (fnPure C0 [] (.call "abi.encodeCall" [.name "g", .tuple [.num 1]])) ==
   "error: abi.encodeCall: the function's ABI parameter types are unavailable"
 #guard shown (fnPure C0 [] (.call "abi.encode" [.num 1, .name "a"])) == "abi.encode(1, a)"
+
+/-! ### `abiTyExpr?`, `abiFnType`: by node count and by length -/
+
+omit [FreshNames] in
+/-- A name that does not end in `[]` is the named type. -/
+theorem abiTyExpr?_plain (t : String) (h : t.endsWith "[]" = false) :
+    abiTyExpr? (.name t) = some (.named t) := by
+  rw [abiTyExpr?_name, h]; rfl
+
+omit [FreshNames] in
+/-- `T[k]` over a plain name, then under `#abiArrayType`: `T[k][]`. -/
+theorem abiTyExpr?_fixed_array (t : String) (k : Nat) (h : t.endsWith "[]" = false) :
+    abiTyExpr? (.call "#abiArrayType" [.index (.name t) (.num k)]) =
+      some (.array (.fixed (.named t) k)) := by
+  rw [abiTyExpr?_arrayType, abiTyExpr?_index, abiTyExpr?_plain t h]; rfl
+
+/-- A literal is no type. -/
+example (n : Nat) : abiTyExpr? (.num n) = none :=
+  abiTyExpr?_other _ (fun _ h => by cases h) (fun _ _ h => by cases h) (fun _ _ h => by cases h)
+
+/-- A call that is no `solcEnumBelow(…)` component is no type. -/
+example (f : String) (as : List RawExpr) (h : ∀ t, ¬ (f = "#abiArrayType" ∧ as = [t]))
+    (he : abiEnumBelow? (.call f as) = none) : abiTyExpr? (.call f as) = none := by
+  rw [abiTyExpr?_call f as h, he]; rfl
+
+omit [FreshNames] in
+/-- A spelling that is no function type, tuple or array is a leaf: `uint` and
+`int` take their widths, any other stays. -/
+theorem abiFnType_leaf (T : String) (h : fnParts? T = none)
+    (hp : (T.startsWith "(" && T.endsWith ")") = false) (hs : T.splitOn "[" = [T]) :
+    abiFnType T = if T == "uint" then "uint256" else if T == "int" then "int256" else T := by
+  rw [abiFnType_eq, h]
+  simp only [hp, hs, Bool.false_eq_true, ↓reduceIte]
+
+/-- A function type normalizes its parameters and returns. -/
+example (T : String) (ps rs : List String) (ext : Bool) (h : fnParts? T = some (ps, rs, ext)) :
+    abiFnType T = fnTyStr (ps.map abiFnType) (rs.map abiFnType) ext := by
+  rw [abiFnType_eq, h]
+
+#guard (abiTyExpr? (.name "uint8[][]")) matches some (.array (.array (.named "uint8")))
+#guard (abiTyExpr? (.index (.name "S[]") (.num 3))) matches some (.fixed (.array (.named "S")) 3)
+#guard (abiTyExpr? (.call "f" [.name "uint"])).isNone
+#guard abiFnType "uint[][3]" == "uint256[][3]"
+#guard abiFnType "(uint,int8,(int,bytes))" == "(uint256,int8,(int256,bytes))"
+#guard abiFnType "function(uint)externalreturns(int[])" ==
+  "function(uint256)externalreturns(int256[])"
 
 end Solidity.Examples.ElabTotal.Values
