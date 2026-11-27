@@ -125,6 +125,76 @@ class Fixture(unittest.TestCase):
         g("rm", "-q", "Solidity/Big.lean", "Solidity/T1.lean", "Solidity/T2.lean", cwd=self.d); self.commit("shrink")
         self.assertEqual(run().returncode, 0); self.assertEqual(run("--per-merge").returncode, 1)
 
+    def test_strict_aggregate_boundaries(self):
+        path = "Solidity/Backend/CompilerOptimizerDomain/Controls.lean"
+        for n, expected in ((50, True), (51, False)):
+            self.write(path, n); self.commit("O1\n\nLean-Budget: o1-optimizer-domain")
+            ok, rep = self.run_check(); self.assertEqual(ok, expected, rep)
+            self.assertIn(f"strict aggregate non-generated Lean lines +{n}", rep)
+
+    def test_strict_mixed_paths(self):
+        self.write("Solidity/Backend/CompilerOptimizerDomain/P.lean", 30)
+        self.write("Solidity/Theory/T.lean", 21)
+        self.commit("O1\n\nLean-Budget: o1-optimizer-domain")
+        ok, rep = self.run_check(); self.assertFalse(ok, rep)
+        self.assertIn("FAIL strict aggregate non-generated Lean lines +51", rep)
+
+    def test_strict_generated_growth(self):
+        self.write("Solidity/Backend/CompilerOptimizerDomain/P.lean", 50)
+        self.write("Solidity.lean", 1)
+        self.commit("O1\n\nLean-Budget: o1-optimizer-domain")
+        ok, rep = self.run_check(); self.assertFalse(ok, rep)
+        self.assertIn("FAIL strict aggregate including generated Lean lines +51", rep)
+
+    def test_strict_generated_shrink_cannot_offset(self):
+        self.write("Solidity.lean", 1); self.base = self.commit("root baseline")
+        self.write("Solidity.lean", 0)
+        self.write("Solidity/Backend/CompilerOptimizerDomain/P.lean", 51)
+        self.commit("O1\n\nLean-Budget: o1-optimizer-domain")
+        ok, rep = self.run_check(); self.assertFalse(ok, rep)
+        self.assertIn("FAIL strict aggregate non-generated Lean lines +51", rep)
+        self.assertIn("ok strict aggregate including generated Lean lines +50", rep)
+
+    def test_strict_keeps_other_frozen_areas(self):
+        self.write("Solidity/Lowering/L.lean", 41)
+        self.commit("O1\n\nLean-Budget: o1-optimizer-domain")
+        ok, rep = self.run_check(); self.assertFalse(ok, rep)
+        self.assertIn("FAIL frozen area Lowering", rep)
+
+    def test_strict_opt_in_absent_retains_legacy(self):
+        self.write("Solidity/Backend/CompilerOptimizerDomain/P.lean", 51)
+        self.commit("O1\n\nLean-Budget: o1-optimizer-domain")
+        cfg = dict(CFG); del cfg["strict_aggregate_steps"]
+        ok, rep = check.evaluate(self.base, "HEAD", cfg); self.assertTrue(ok, rep)
+
+    def test_strict_merge_and_per_merge(self):
+        path = "Solidity/Backend/CompilerOptimizerDomain/P.lean"
+        g("checkout", "-q", "-b", "lane", cwd=self.d)
+        self.write(path, 51); self.commit("work")
+        g("checkout", "-q", "master", cwd=self.d)
+        g("merge", "-q", "--no-ff", "lane", "-m",
+          "Merge O1\n\nLean-Budget: o1-optimizer-domain", cwd=self.d)
+        ok, rep = self.run_check(); self.assertFalse(ok, rep)
+        self.assertIn("FAIL strict aggregate", rep)
+        self.write(path, 0); self.commit("shrink")
+        ok, rep = self.run_check(); self.assertTrue(ok, rep)
+        allow = os.path.join(self.d, "allow.json")
+        with open(allow, "w") as f: json.dump(CFG, f)
+        r = subprocess.run([sys.executable, "-B", os.path.join(HERE, "check.py"),
+                            "--base", self.base, "--allow", allow, "--per-merge"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("FAIL strict aggregate", r.stdout)
+
+    def test_invalid_strict_selector(self):
+        allow = os.path.join(self.d, "allow.json")
+        for selector in ("o1-optimizer-domain", [42], ["unknown"], None):
+            with self.subTest(selector=selector):
+                with open(allow, "w") as f:
+                    json.dump(dict(CFG, strict_aggregate_steps=selector), f)
+                with self.assertRaisesRegex(ValueError, "strict_aggregate_steps"):
+                    check.load_allow(allow)
+
 
 class Globs(unittest.TestCase):
     def test_globs(self):
@@ -149,6 +219,7 @@ class Globs(unittest.TestCase):
         self.assertEqual(CFG["steps"]["finish-line"], ["Solidity/Finish/**"])
         self.assertEqual(CFG["steps"]["finish-yul-layout"], ["Solidity/Yul/Layout/**"])
         self.assertEqual(CFG["steps"]["calls-program-bridge"], ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"])
+        self.assertEqual(CFG["strict_aggregate_steps"], ["o1-optimizer-domain"])
         self.assertEqual(CFG["steps"]["o1-optimizer-domain"], ["Solidity/Backend/CompilerOptimizerDomain.lean", "Solidity/Backend/CompilerOptimizerDomain/**"])
 
 
