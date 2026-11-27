@@ -82,6 +82,16 @@ theorem inferN_compound {b : Syn .expr} {σ : STy} {l : LVal Γ a τ} {d : Typed
   cases op <;> first | exact False.elim (ho rfl) |
     (change (LVal.inferN n Γ a >>= _) = _; simp [hl, hr, hf])
 
+/-- Array reads retain index-type and static-bound checks at every location. -/
+theorem inferN_indexArray {i : Syn .expr} {l : Source.DataLoc} {len : Option Nat} {σ : STy}
+    {da : Typed Γ a (.array l τ len)} {di : Typed Γ i σ}
+    (ha : Typed.inferN n Γ a = some ⟨.array l τ len, da⟩)
+    (hi : Typed.inferN n Γ i = some ⟨σ, di⟩)
+    (hk : σ.isIndex = true) (hb : Source.inBounds σ len = true) :
+    Typed.inferN (n + 1) Γ (.index a (.some i)) = some ⟨τ, .indexArray da di hk hb⟩ := by
+  show (Typed.inferN n Γ a >>= _) = _
+  simp [ha, hi, hk, hb]
+
 /-- Inline arrays keep the inferred common type and all element-fit checks. -/
 theorem inferN_inlineArray {xs : Syn (.list .expr)} {τs : List STy} {σ : STy}
     {d : Typed Γ a τ} {ds : Source.TypedArgs Γ xs τs}
