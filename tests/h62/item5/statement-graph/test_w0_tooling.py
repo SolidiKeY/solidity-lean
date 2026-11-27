@@ -73,6 +73,7 @@ assert.throws(()=>c.parseImports('import «Hidden»'));
             with self.subTest(bad=bad),tempfile.TemporaryDirectory() as tmp:
                 root=Path(tmp);(root/'scripts/coord-tools').mkdir(parents=True);(root/'bin').mkdir();(root/'Solidity').mkdir()
                 (root/'scripts/coord-tools/gate.sh').write_bytes((ROOT/'scripts/coord-tools/gate.sh').read_bytes())
+                (root/'scripts/coord-tools/controls-classify.py').write_bytes((ROOT/'scripts/coord-tools/controls-classify.py').read_bytes())
                 for name in ('check-layers.mjs','import-fanout.mjs','core-import-closure.mjs','core-import-baseline.json','core-import-current-baseline.json','check-private-paths.sh','check-evidence-files.sh'):
                     (root/'scripts'/name).write_bytes((ROOT/'scripts'/name).read_bytes())
                 (root/'scripts/ci').mkdir();(root/'scripts/ci/checks-fast.sh').write_text('#!/usr/bin/env bash\nexit 0\n')

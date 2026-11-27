@@ -36,7 +36,10 @@ import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Tokens.ERC1155
 import Solidity.Examples.Benchmark.Tokens.ERC20
+import Solidity.Examples.Benchmark.Tokens.ERC20Burnable
+import Solidity.Examples.Benchmark.Tokens.ERC20Capped
 import Solidity.Examples.Benchmark.Tokens.ERC721
+import Solidity.Examples.Benchmark.Tokens.ERC721Burnable
 import Solidity.Examples.BooleanLinear
 import Solidity.Examples.CallReduction
 import Solidity.Examples.ChainExpand
@@ -233,6 +236,7 @@ import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.CasesV2
 import Solidity.Examples.Lowering.Sim.Coverage
 import Solidity.Examples.Lowering.Sim.Coverage.ThreadedV2
+import Solidity.Examples.Lowering.Sim.CoverageBranch
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Induction
 import Solidity.Examples.Lowering.Sim.Match
@@ -270,6 +274,7 @@ import Solidity.Examples.Lowering.Total.StructRows
 import Solidity.Examples.Lowering.Total.StructTableAgreement
 import Solidity.Examples.Lowering.Total.StructUnit
 import Solidity.Examples.Lowering.Total.StructUnitInference
+import Solidity.Examples.Lowering.Total.SuccessfulContext
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
