@@ -12,6 +12,7 @@ open Solidity.Goals
 
 variable [FreshNames] (C : Contract)
 
+omit [FreshNames] in
 /-- Sequence two successful computations, retaining both state layers. -/
 theorem bind_success {α β : Type} (x : ElabM α) (f : α → ElabM β)
     (sc : ElabScope) (s₀ s₁ s₂ : ECtx × Nat) (m₀ m₁ m₂ : CallMemo)

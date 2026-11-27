@@ -44,7 +44,7 @@ example (hk : Solidity.Goals.elabKernelTotal) (k : Nat) (m : CallMemo) :
       .ok (([.of [] (.ite (.simple (.bool true)) .nil .nil)], ([], k)), m) := by
   apply producer_ite_success C hk (.bool true) [] [] sc
     ([], k) ([], k) ([], k) ([], k) m m m m (.simple (.bool true)) ⟨[], .nil⟩ ⟨[], .nil⟩
-  · simp [checkIn, check, checkVia, synth, TExpr.toVal?, ElabM.lift]
+  · simp [checkIn, check, checkVia, synth, TExpr.toVal?]
     rfl
   · rfl
   · rfl
@@ -60,7 +60,7 @@ example (hk : Solidity.Goals.elabKernelTotal) (k : Nat) (m : CallMemo) :
     have hh : hoist C = hoistWith C (elabRec C ()) := nhoist ▸ hhoist
     rw [loopExpr, loopExprWith, hh]
     change (((checkIn C [] .bool (.bool false)).run sc).run ([], k)).run m = _
-    simp [checkIn, check, checkVia, synth, TExpr.toVal?, ElabM.lift]
+    simp [checkIn, check, checkVia, synth, TExpr.toVal?]
     rfl
   · rfl
 
