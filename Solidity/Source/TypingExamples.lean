@@ -3,10 +3,10 @@ import Solidity.Source.Resolved
 import Solidity.Source.Examples
 
 /-!
-# S01 controls: typing derivations and constructor coverage
+# Source controls: typing derivations and constructor coverage
 
 A contract with state variables of several types and a function with
-parameters, a derivation for every expression constructor S01 types
+parameters, a derivation for every expression constructor the typing judgment types
 (`exprCoverage`), the counter of `Solidity/Source/Examples.lean` proved well
 formed, and ill-typed programs refuted.
 -/
@@ -33,8 +33,7 @@ def unitC : Syn .unit :=
       .nil)))))) .nil)
 
 /-- The body context of `function f(uint256 a, bool b, address o, bytes calldata cd) returns (uint256)`
-(`cd` for the slice witness, lane FU2-B; appended outermost, so the other
-locals keep their positions). -/
+(`cd` is the slice witness). -/
 def Γ : Ctx :=
   { env := unitC.env, scope := some "C",
     locals := [("o", .address false), ("b", .bool), ("a", .int IntTy.u256), ("cd", .bytes .calldata)],
@@ -71,17 +70,17 @@ def w_index_mapping : Typed Γ (.index (.ident "m") (.some (.ident "o"))) (.int 
 def w_member : Typed Γ (.member (.ident "arr") "length") (.int IntTy.u256) := .length ty_arr rfl
 def w_call : Typed Γ (.call (.elemType (.int false 8 (by decide)) (by decide))
     (.positional (.cons a .nil))) (.int IntTy.u8) := .convElem ty_a rfl rfl
-/-- `abi.decode(hex"…", (uint8, bool))` (FU2-B): the type names are read
+/-- `abi.decode(hex"…", (uint8, bool))`: the type names are read
 as the decoder's types, not typed as values. -/
 def w_abiDecode : Typed Γ (.call (.member (.ident "abi") "decode") (.positional (.cons (.lit (.hexStr [0, 1]))
     (.cons (.tuple (.some (.elemType (.int false 8 (by decide)) (by decide)))
       (.cons (.some (.elemType .bool (by decide))) .nil)) .nil))))
     (.tuple [.int IntTy.u8, .bool]) :=
   .abiDecode (τs := [.int IntTy.u8, .bool]) rfl (.hexStr _) rfl rfl rfl
-/-- `cd[1:]` on a `bytes calldata` parameter (FU2-B). -/
+/-- `cd[1:]` on a `bytes calldata` parameter. -/
 def w_slice : Typed Γ (.slice (.ident "cd") (.some one) .none) (.bytes .calldata) :=
   .sliceFrom (.loc rfl rfl) rfl ty_one rfl
-/-- `[a, 1]` (FU2-B): a `uint256[2] memory`, `1` converting to `a`'s type. -/
+/-- `[a, 1]`: a `uint256[2] memory`, `1` converting to `a`'s type. -/
 def w_inlineArray : Typed Γ (.inlineArray a (.cons one .nil)) (.array .memory (.int IntTy.u256) (some 2)) :=
   .inlineArray ty_a (.cons ty_one .nil) rfl rfl rfl
 def w_payableConv : Typed Γ (.payableConv (.positional (.cons (.ident "o") .nil))) (.address true) :=
@@ -213,7 +212,7 @@ def r_emit : RStmt CE.env CE.rets CE.inModifier .body (tysOf LE) (tysOf LE) := w
 
 /-! ## Coverage -/
 
-/-- How S01 covers a constructor. -/
+/-- How typing covers a constructor. -/
 inductive Coverage where
   | typed
   /-- Typed only as an operand that another constructor's rule reads (not
@@ -294,7 +293,7 @@ def stmtCoverage : Ctor → Option Coverage
   | .assembly => some (.deferred "S00" "inline assembly is excluded; only the canonical rethrow is typed (rethrow)")
   | _ => none
 
-/-- `(uint256 p, ) = (a, b);` (lane FU2-B): a tuple declaration with a hole. -/
+/-- `(uint256 p, ) = (a, b);`: a tuple declaration with a hole. -/
 def w_declTuple : StmtD (k := .body) Γ Γ.locals
     (.simpleStmt (.declTuple 0 (.varDecl u256 none "p") (.cons .none .nil)
       (.tuple (.some a) (.cons (.some (.ident "b")) .nil))))
@@ -302,7 +301,7 @@ def w_declTuple : StmtD (k := .body) Γ Γ.locals
   .declTuple (slots := [some ("p", .int IntTy.u256), none]) (by
     simp only [Ctx.tupleSlots, Ctx.declSlot, Ctx.declSlots]; rfl) w_tuple rfl
 
-/-- **A hole refuses an empty component** (review fix, lane FU2-B):
+/-- **A hole refuses an empty component**:
 `(, uint a) = (g(), 1)` with `g` returning nothing fits no slots. -/
 theorem slotsFit_hole_empty (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     slotsFit B M [Option.none, Option.some (.int IntTy.u256)] [.tuple [], .int IntTy.u256] = false := rfl
