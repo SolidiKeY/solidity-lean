@@ -1553,6 +1553,14 @@ theorem Typed.unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} (d : Typed Γ e �
     τ = τ' ∧ HEq d.toR d'.toR :=
   (uniq_all Γ (sizeOf e + 1)).e e (by omega) d d'
 
+example (Γ : Ctx) :
+    ∃ d1 d2 : Typed Γ (.tuple (.some (.lit (.num (.dec 1 0 0)))) .nil)
+      (.rational (Q.ofInt 1)), d1 ≠ d2 ∧ HEq d1.toR d2.toR := by
+  refine ⟨.const rfl rfl rfl, .paren (.const rfl rfl rfl), ?_, ?_⟩
+  · intro equal
+    cases equal
+  · rfl
+
 theorem LVal.unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} (l : LVal Γ e τ) (l' : LVal Γ e τ') :
     τ = τ' ∧ HEq l.toR l'.toR :=
   (uniq_all Γ (sizeOf e + 1)).l e (by omega) l l'
