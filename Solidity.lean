@@ -171,6 +171,7 @@ import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.StmtFold
 import Solidity.Backend.CompilerOptimizerDomain.StmtWeakening
 import Solidity.Backend.CompilerOptimizerDomain.Strengthening
+import Solidity.Backend.CompilerOptimizerDomain.UnusedVar
 import Solidity.Backend.CompilerOptimizerDomain.Weakening
 import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control
