@@ -4,6 +4,7 @@ import Solidity.Backend.CompilerOptimizerDomain.DeadStore
 import Solidity.Backend.CompilerOptimizerDomain.LICM
 import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.Weakening
+import Solidity.Backend.CompilerOptimizerDomain.Inline
 
 /-! Integration controls for the proved constant-fold, simplification, removal and LICM stages only. These check both
 resource and fragment consequences against the unchanged public compiler domain;
@@ -64,6 +65,14 @@ example {Θ : Ctx} (hP : ProgOk [] P) (w : Thin Γ Θ) :
       ∃ G, inFragP (Frag.init Θ) (P.wk w).2.2 = some G := by
   have hQ := prog_wk_ok hP w (KindsWk.empty w)
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Θ) (Matches.init Θ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- The actual inlining pass accepts the unchanged whole public domain.
+example (hP : ProgOk [] P) :
+    Evm.Prog.pushes (Optimizer.ConstFold.Prog.inl P) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.inl P) = some G := by
+  have hQ := prog_inl_ok hP
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
   exact ⟨hQ.quiet.1, G, h⟩
 
 end Solidity.Backend.CompilerOptimizerDomain.Controls
