@@ -1,33 +1,12 @@
 import Solidity.Precompiles.Field
 import Solidity.Secp256k1
 
-/-!
-# Frontier's precompiles: `ECRECOVER` (0x01), `SHA256` (0x02), `RIPEMD160` (0x03), `IDENTITY` (0x04)
-
-The three hashes reuse the fixed functions (`Solidity/Hashes.lean`,
-`Solidity/Secp256k1.lean`) and add the precompiles' framing, as Osaka's
-execution specification frames them:
-
-- **`ECRECOVER`** reads 128 bytes (zero-padded) as `h, v, r, s`; it returns
-  the recovered address as a 32-byte word, or *no* bytes when `v ∉ {27, 28}`,
-  `r` or `s` is outside `[1, n)`, or recovery fails.  It never halts
-  exceptionally; 3000 gas.
-- **`SHA256`** returns the 32-byte digest; `60 + 12·words` gas.
-- **`RIPEMD160`** returns the 20-byte digest left-padded to 32;
-  `600 + 120·words` gas.
-- **`IDENTITY`** returns its input; `15 + 3·words` gas.
-
-None of the four fails on any input (`*_isSome`); the three linear gas
-formulas grow with the input (`*Gas_mono`).
--/
-
 namespace Solidity.Precompiles
 
 open Solidity.Roadmap.Evm (Bytes)
 
 def ecrecoverGas (_ : Bytes) : Nat := 3000
 
-/-- `ECRECOVER` (0x01). -/
 def ecrecover (d : Bytes) : Option Bytes :=
   some <| match Secp256k1.recover (readNat d 0 32) (readNat d 32 32) (readNat d 64 32)
       (readNat d 96 32) with
@@ -36,17 +15,14 @@ def ecrecover (d : Bytes) : Option Bytes :=
 
 def sha256Gas (d : Bytes) : Nat := 60 + 12 * words d.length
 
-/-- `SHA256` (0x02). -/
 def sha256 (d : Bytes) : Option Bytes := some ((Hashes.sha256 (d.map UInt8.toNat)).map Nat.toUInt8)
 
 def ripemd160Gas (d : Bytes) : Nat := 600 + 120 * words d.length
 
-/-- `RIPEMD160` (0x03). -/
 def ripemd160 (d : Bytes) : Option Bytes := some (word (Hashes.ripemd160Nat (d.map UInt8.toNat)))
 
 def identityGas (d : Bytes) : Nat := 15 + 3 * words d.length
 
-/-- `IDENTITY` (0x04). -/
 def identity (d : Bytes) : Option Bytes := some d
 
 theorem ecrecover_isSome (d : Bytes) : (ecrecover d).isSome := rfl
@@ -66,8 +42,6 @@ theorem ripemd160Gas_mono {d e : Bytes} (h : d.length ≤ e.length) :
 
 theorem identityGas_mono {d e : Bytes} (h : d.length ≤ e.length) : identityGas d ≤ identityGas e :=
   Nat.add_le_add_left (Nat.mul_le_mul_left 3 (words_mono h)) 15
-
-/-! ## Vectors (Osaka's execution specification) -/
 
 #guard ecrecover (ofHex "c4179c5a26cda29e689fe027ee5f5e4e085b30ad136bcc4808cf982380607110000000000000000000000000000000000000000000000000000000000000001b60a33eea03a29c01e5bf251d76ed7bd817e46666faa8ea703d95b7648da367576136d40d487f83644b470554781141106cefbdf3324e63a49b1ef6c49e2368de") == some (ofHex "0000000000000000000000002c7536e3605d9c16a7a3d7b1898e529396a65c23")
 #guard ecrecoverGas (ofHex "c4179c5a26cda29e689fe027ee5f5e4e085b30ad136bcc4808cf982380607110000000000000000000000000000000000000000000000000000000000000001b60a33eea03a29c01e5bf251d76ed7bd817e46666faa8ea703d95b7648da367576136d40d487f83644b470554781141106cefbdf3324e63a49b1ef6c49e2368de") == 3000
