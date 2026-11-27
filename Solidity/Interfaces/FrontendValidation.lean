@@ -7,7 +7,6 @@ import Solidity.SolcValidation.DataLayout
 import Solidity.SolcValidation.IrCensusUnique
 import Solidity.SolcValidation.IrCensusParse
 import Solidity.SolcValidation.IrRename
-
 /-! Fixed structural postconditions, separated from external compiler execution.
 These are specification propositions, not proofs or execution assumptions. -/
 namespace Solidity.Interfaces.FrontendValidation
@@ -19,7 +18,6 @@ def JsonFields : Prop :=
   (∀ j i, J.ref? j = some i → j.getObjValAs? Int "referencedDeclaration" = .ok i) ∧ (∀ j i, J.id? j = some i → j.getObjValAs? Int "id" = .ok i) ∧
   (∀ j k i, TryPanicSourcePlan.intField j k = some i → j.getObjValAs? Int k = .ok i) ∧ (∀ j k b, TryPanicSourcePlan.boolField j k = some b → j.getObjValAs? Bool k = .ok b) ∧
   (∀ j k i v, TryPanicSourcePlan.memberAt j k i = some v → ∃ xs, J.arr? j k = some xs ∧ xs[i]? = some v)
-
 /-- Accepted byte spellings: printable ASCII or the explicit supported escapes; surrogates are not excluded. -/
 inductive DecodedBytes : List Char → List Nat → Prop where
   | nil : DecodedBytes [] []
