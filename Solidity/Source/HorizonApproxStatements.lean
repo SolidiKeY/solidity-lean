@@ -1,8 +1,5 @@
 import Solidity.Source.HorizonApproxExpressions
 
-/-! Event-prefix statement proofs and the shared induction. Guards the same
-per-module checking-cost regression without changing Source statements,
-observations or proof budgets. Source.Horizon remains the public facade. -/
 
 namespace Solidity.Source
 open EM

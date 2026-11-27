@@ -1,10 +1,6 @@
 import Solidity.Source.Preservation.NewArrayFragment
 import Solidity.Lowering.P9.FunctionCatalog
 
-/-! Non-stuck dynamic allocation for explicit ready memory types. Array
-readiness retains the evaluator's element-default requirement; allocation panic
-and timeout remain possible. Length progress and memory preservation are derived
-from the existing checked call fragment, without changing its syntax. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env} {Γ : RCtx}
@@ -87,8 +83,6 @@ theorem new_fragment_all_ns {A : Decl → Prop} {G : Glob E} {c : String}
   | 0 => NS.halt' (fun _ h => by cases h)
   | n+1 => new_fragment_ns calls F contract n ready len indexable fragment operations
 
-/-- Successful elaboration and the executable P9 call-graph check derive
-length progress; the source allocation parent needs no assumed CallsOK. -/
 theorem new_from_elaborate (res : Resolution) (elaborated : (Source.elaborate res).isSome = true)
     (G : Glob res.env) (program : G.prog = Source.progOf res.env) (c : String) (values : List Decl)
     (checked : Solidity.Lowering.P9.WholeProgram.check res G c values = true)

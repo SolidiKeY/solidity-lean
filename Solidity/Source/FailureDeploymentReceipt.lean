@@ -1,9 +1,6 @@
 import Solidity.Source.FailureDeploymentHorizon
 import Solidity.Source.Session
 
-/-! Actual enabled-plan deployment receipt transport. Receipt emission is
-outside the body-event budget, as in Source.deployRun. No deployment fate
-ordinal or post-fee session installation is implemented by these laws. -/
 namespace Solidity.Source.FailureExecution.PlannedDeploy
 open EM
 open Solidity.Roadmap (Address SessionEnv)

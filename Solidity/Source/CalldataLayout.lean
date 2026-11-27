@@ -1,7 +1,6 @@
 import Solidity.Source.Types
 
-/-! ABI head dimensions for the owned calldata aggregate subset. The existing
-Source values and judgments are retained. Dynamic or unmodelled shapes use an
+/-! ABI head dimensions for the owned calldata aggregate subset. Dynamic or unmodelled shapes use an
 offset head; static arrays occupy their complete inline head span. -/
 namespace Solidity.Source
 

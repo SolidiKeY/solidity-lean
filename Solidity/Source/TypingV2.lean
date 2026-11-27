@@ -1,19 +1,25 @@
 import Solidity.Source.Typing
 
-/-! H57/H125 additive environment-aware statement typing.
-Regression: a nameable mapping-bearing struct must be refused as a memory or
-calldata local, while an initialized storage reference remains admissible.
-V1 StmtD/ItemsD and its intentionally negative refusal statements are frozen.
-A generic fold over the original derivation checks only declaration locations;
-all other premises and resolved typing evidence are reused without a rule copy.
-No Lowering import, global admission change or v1 retirement is introduced. -/
 namespace Solidity.Source
 
-/-- V2 local declaration location policy; equivalent to the published H24
-environment-aware formula, without importing the Lowering consumer. -/
 def envLocOK (E : Env) (ty : STy) (loc : Option DataLoc) (initialized : Bool) : Bool :=
   locOK ty loc initialized &&
     (loc.isNone || loc == some .storage || !E.hasMapping (E.structCount + 1) ty)
+
+example (E : Env) (ty : STy) (initialized : Bool) :
+    envLocOK E ty (some .storage) initialized = locOK ty (some .storage) initialized := by
+  simp [envLocOK]
+
+example (E : Env) (ty : STy) (initialized : Bool)
+    (mapping : E.hasMapping (E.structCount + 1) ty = true) :
+    envLocOK E ty (some .memory) initialized = false ∧
+      envLocOK E ty (some .calldata) initialized = false := by
+  simp [envLocOK, mapping]
+
+example (E : Env) (ty : STy)
+    (allowed : locOK ty (some .storage) true = true) :
+    envLocOK E ty (some .storage) true = true := by
+  simpa [envLocOK] using allowed
 
 theorem envLocOK_implies_locOK {E : Env} {ty : STy} {loc : Option DataLoc}
     {initialized : Bool} (ok : envLocOK E ty loc initialized = true) :
@@ -21,7 +27,6 @@ theorem envLocOK_implies_locOK {E : Env} {ty : STy} {loc : Option DataLoc}
   simp only [envLocOK, Bool.and_eq_true] at ok
   exact ok.1
 
-/-- An explicit v2 location is storage or contains no mapping. -/
 theorem envLocOK_sound :
  ∀ (E : Solidity.Source.Env) (ty : Solidity.Source.STy) (loc : Solidity.Source.DataLoc)
 (initialized : Bool), Solidity.Source.envLocOK E ty (some loc) initialized = true →
@@ -38,7 +43,6 @@ loc = .storage ∨ E.hasMapping (E.structCount + 1) ty = false := by
 namespace V2
 
 mutual
-/-- The reusable declaration-policy fold, with generalized indexed elimination. -/
 def checkStmt (rule : STy → Option DataLoc → Bool → Bool)
     {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt k)}
     (d : Source.StmtD C L s L') : Bool := by
@@ -80,7 +84,6 @@ def checkStmt (rule : STy → Option DataLoc → Bool → Bool)
   all_goals (intros; exact true)
 termination_by structural d
 
-/-- Unchecked and catch traversal uses the same generalized policy elimination. -/
 def checkItems (rule : STy → Option DataLoc → Bool → Bool)
     {C : Ctx} {k : SCtx} {L L' : List (String × STy)}
     {s : Syn (.list (.item k))} (d : Source.ItemsD C L s L') : Bool := by
@@ -95,8 +98,6 @@ def checkItems (rule : STy → Option DataLoc → Bool → Bool)
 termination_by structural d
 end
 
-/-- Additive v2 judgment: the original derivation, with the stronger policy
-checked at exactly its declVar/declInit nodes, recursively. -/
 structure StmtD (C : Ctx) {k : SCtx} (L : List (String × STy))
     (s : Syn (.stmt k)) (L' : List (String × STy)) where
   toV1 : Source.StmtD C L s L'
@@ -107,7 +108,6 @@ structure ItemsD (C : Ctx) {k : SCtx} (L : List (String × STy))
   toV1 : Source.ItemsD C L s L'
   locations : checkItems (envLocOK C.env) toV1 = true
 
-/-- V2 declaration formation has exactly v1's premises except envLocOK. -/
 def StmtD.declVar {C : Ctx} {k : SCtx} {L : List (String × STy)}
     {t : Syn .typeName} {loc : Option DataLoc} {name : String} {ty : STy}
     (typed : t.ty C.env C.scope (loc.getD .memory) = some ty)
@@ -115,7 +115,6 @@ def StmtD.declVar {C : Ctx} {k : SCtx} {L : List (String × STy)}
     StmtD C (k := k) L (.simpleStmt (.declVar (.varDecl t loc name) .none)) ((name, ty) :: L) :=
   ⟨.declVar typed (envLocOK_implies_locOK location), location⟩
 
-/-- V2 initialized declarations retain expression typing and conversion exactly. -/
 def StmtD.declInit {C : Ctx} {k : SCtx} {L : List (String × STy)}
     {t : Syn .typeName} {loc : Option DataLoc} {name : String}
     {e : Syn .expr} {ty sourceTy : STy}
@@ -127,9 +126,6 @@ def StmtD.declInit {C : Ctx} {k : SCtx} {L : List (String × STy)}
   ⟨.declInit typed (envLocOK_implies_locOK location) expression conversion, location⟩
 
 
-/-- The environment condition is restricted to types actually named in a scope,
-rather than arbitrary unrelated type values. It states the precise premise
-needed by the v1-to-v2 bridge; v2 admission itself requires no such assumption. -/
 def CompatibleAt (C : Ctx) : Prop :=
   ∀ (t : Syn .typeName) ty loc initialized,
     t.ty C.env C.scope (loc.getD .memory) = some ty →
@@ -178,7 +174,6 @@ def checkItems_valid (rule : STy → Option DataLoc → Bool → Bool)
       Bool.and_eq_true_iff.mpr ⟨checkItems_valid rule respects body, checkItems_valid rule respects rest⟩
 end
 
-/-- V1 derivations lift exactly under the named-type compatibility premise. -/
 def StmtD.ofV1 {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt k)}
     (d : Source.StmtD C L s L') (compatible : CompatibleAt C) : StmtD C L s L' :=
   ⟨d, checkStmt_valid (envLocOK C.env) compatible d⟩
@@ -188,7 +183,6 @@ def ItemsD.ofV1 {C : Ctx} {k : SCtx} {L L' : List (String × STy)}
     (compatible : CompatibleAt C) : ItemsD C L s L' :=
   ⟨d, checkItems_valid (envLocOK C.env) compatible d⟩
 
-/-- Inversion retains the actual initialized/uninitialized declaration check. -/
 theorem declaration_location :
  ∀ (C : Solidity.Source.Ctx) (k : Solidity.Source.SCtx)
 (L L' : List (String × Solidity.Source.STy)) (t : Solidity.Source.Syn .typeName)
@@ -210,8 +204,6 @@ Solidity.Source.V2.StmtD C (k := k) L
     cases typed'
     exact ⟨true, checked⟩
 
-/-- Positive H24 local declaration admission for v2, in every environment.
-No compatibility assumption is needed for this direction. -/
 theorem declaration_admissible :
  ∀ (C : Solidity.Source.Ctx) (k : Solidity.Source.SCtx)
 (L L' : List (String × Solidity.Source.STy)) (t : Solidity.Source.Syn .typeName)

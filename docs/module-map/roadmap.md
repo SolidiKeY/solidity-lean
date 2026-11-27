@@ -34,6 +34,10 @@
 | `Examples/Backend/BytesFullMachine/Intrinsic.lean` | Negative intrinsic outcome controls: source divergence cannot have intrinsic success, and success cannot retain a positive pending skip. |
 | `Goals/ElabTotal.lean` | The elaborator-kernel totalization goal `elabKernelTotal` (et3-elab-knot-total), open: the knot of `Syntax/Elab/Stmt.lean` satisfies its defining equations (`ElabKernelFix`, `ElabKernelNames`), admits induction over its successful runs (`ElabKernelInduction`), and the helpers it reaches keep theirs (`ElabKernelHelpers`). |
 | `Examples/Goals/ElabTotal.lean` | Pinned `#roadmap_goal` open check for `elabKernelTotal`, with failing-knot controls. |
+| `Goals/FrontendValidation.lean` | `frontendValidatorsExercised`: external solc execution assumptions and compositional structural acceptance guarantees; frozen inventory of 269 resolving validator names. |
+| `Examples/Goals/FrontendValidation.lean` | Pinned open roadmap status for `frontendValidatorsExercised` and validator inventory length 269. |
+| `Interfaces/FrontendExecution.lean` | External exact compiler artifact, successful invocation, faithful JSON and selected IR boundary; no compiler semantic correctness assumption. |
+| `Interfaces/FrontendValidation.lean` | Fixed structural contracts for reader refusals and identities, JSON/arithmetic, call attachment, Yul static/safety/reference checks, and IR/data admission. |
 | `Goals/{Headline,Endpoint,Loops,Hash,Panic,Taclets,Total}.lean` | One finish-line component goal per module, each owned by the lane that states or proves it. |
 | `Goals/Plan.lean`, `Goals/Finish.lean` | The plan goals outside the finish line, and `projectFinished`, the conjunction of the seven components. |
 | `Examples/Goals/*` | One pinned `#roadmap_goal` status check per goal module; `Finish.lean` checks the finish line's structure instead of its shrinking `blocked by` list. |

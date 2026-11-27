@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.ReadyReturns
 import Solidity.Source.Preservation.MemoryProgramControls
 
-/-! Actual source-elaborated alias and allocating reference returns. Default
-return-slot allocation persists through success, allocation panic and body
-timeout. These kernel source controls do not assert compiler refinement. -/
 namespace Solidity.Source.Progress.ReadyReturnControls
 open EM Preservation.MemoryProgramControls
 

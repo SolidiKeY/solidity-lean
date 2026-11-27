@@ -2,10 +2,6 @@ import Solidity.Source.Progress.ReadyBodyCalls
 import Solidity.Source.Progress.ReadyProgram
 import Solidity.Source.Preservation.MemoryProgram
 
-/-! Ready memory-call catalogues over actual elaborated programs. Elaboration
-derives selected-body parameter, return and local-frame metadata. Catalogue
-entries retain signatures, default readiness and syntactic statement admission;
-they carry no semantic progress/preservation oracle or frame equation. -/
 namespace Solidity.Source.Progress
 open EM Solidity.Lowering.P9
 variable {E : Env}

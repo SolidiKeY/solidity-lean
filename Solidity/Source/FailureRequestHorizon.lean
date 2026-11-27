@@ -1,9 +1,6 @@
 import Solidity.Source.FailureFrameHorizon
 import Solidity.Source.FailureRequest
 
-/-! Event growth and horizon approximation of the actual request scope.
-These are combinator laws, not whole evaluator coherence, fee installation,
-fixed-plan session consistency or a P8 realization inhabitant. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env} {Γ : RCtx} {α : Type}

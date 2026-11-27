@@ -2,9 +2,6 @@ import Solidity.Source.Progress.ReadyBodyCalls
 import Solidity.Lowering.P9.InferenceCuts
 import Solidity.Roadmap.Controls
 
-/-! Actual elaborated declarations, a nested allocation scope and a reference
-return. Locals leave scope while every reached allocation remains in the heap.
-Both evaluator pipelines retain their actual panic and horizon behavior. -/
 namespace Solidity.Source.Progress.ReadyBodyControls
 open EM Solidity.Lowering.P9
 

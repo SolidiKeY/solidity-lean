@@ -1,10 +1,10 @@
 import Solidity.Source.State
 
 /-!
-# Source values and observations (S04.02)
+# Source values and observations
 
 What a source execution shows at the transaction boundary, independently
-of the compiler, under the approved interpretations (G01 Q5: the full
+of the compiler, under the interpretations (the full
 revert bytes, `Panic` codes included; opaque hashes are the fixed
 Keccak-256, `Solidity.Roadmap.Evm.keccakWord`):
 
@@ -17,11 +17,11 @@ Keccak-256, `Solidity.Roadmap.Evm.keccakWord`):
 - `selector`: the first four bytes of the Keccak-256 of a signature;
 - `PanicCode` and `panicData`: `Panic(uint256)` with solc's codes;
   `errorData`: `Error(string)`;
-- `revertOutcome`: the `Outcome` (G01's shared observation) of a revert
+- `revertOutcome`: the `Outcome` (shared observation) of a revert
   with those bytes.
 
 Environment observations (`msg.sender`, `msg.value`, `block.timestamp`,
-`this`, balances) are the session environment's (G01 `SessionEnv`,
+`this`, balances) are the session environment's (`SessionEnv`,
 `Request`): a source semantics reads them, it does not choose them.
 -/
 
@@ -189,7 +189,7 @@ theorem errorData_prefix (msg : Bytes) : (errorData msg).take 4 = errorSelector 
   simp only [errorData, errorSelector, List.append_assoc, List.cons_append, List.nil_append,
     List.take_succ_cons, List.take_zero]
 
-/-- A source revert's outcome: its data, verbatim (G01 Q5). -/
+/-- A source revert's outcome: its data, verbatim. -/
 def revertOutcome (data : Bytes) : Outcome := .revert data
 
 /-- A failed `assert` and an arithmetic overflow are distinct outcomes. -/
