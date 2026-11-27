@@ -8,6 +8,10 @@ open Solidity.Roadmap (Address Word)
 variable {D : Layout} {L T : Address → SPath → STy}
 
 
+example (balance : Monetary.Balance) :
+    (Monetary.wordView balance).val = balance ↔ Monetary.Fits balance :=
+  ⟨fun equal => equal ▸ (Monetary.wordView balance).isLt, Monetary.wordView_exact balance⟩
+
 theorem ExecState.apply_account_balancesFit (state : ExecState D L T) (address : Address)
     (update : Account D (L address) → Account D (L address)) (fit : state.BalancesFit)
     (new : Monetary.Fits (update (state.world.accounts address)).balance) :
