@@ -1,34 +1,12 @@
 import Solidity.Optimizer.StmtFold
 import Solidity.Semantics.RunWk
 
-/-!
-# O02 unused-variable elimination over lowering programs
-
-`T x = e; P` at the head of a block, where `P` never reads `x` and `e` cannot
-fail, is the block `P` without the declaration. "Never reads `x`" is decided
-by strengthening: `Prog.str? (.drop .refl) P` returns a program `P'` over the
-context without `x` whose weakening is exactly `P` (`Prog.str?_wk`). The run
-of the declaration-and-`P` is then the run of `P'` with one more local kept
-alongside (`Prog.run_wk`, the existing weakening lemma of the typed run), and
-the block's end pops it, so both blocks run alike (`blockDecl_runC`).
-
-The initialiser must not fail (none, or a simple value: literal, local or
-environment read), since dropping a failing initialiser would hide its halt.
-Strengthening covers local assignments and declarations, `require`, `assert`,
-`revert`, `assume(false)`, `transfer`, conditionals and blocks over value
-expressions without storage or memory paths; a body using any other form is
-left as written. Only an explicit `{ … }` block's first statement is a
-candidate (not `if` branches, loop bodies, call bodies or the top level); one
-declaration is removed per block per run of the pass.
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract}
 
-/-! ## Strengthening -/
 
-/-- The index a weakening sent to `j`, if `j` is one it keeps. -/
 def Idx.str? : {Γ Δ : Ctx} → {t : LTy} → Thin Γ Δ → Idx Δ t → Option (Idx Γ t)
   | _, _, _, .refl, j => some j
   | _, _, _, .keep _, .here => some .here
@@ -78,7 +56,6 @@ theorem Simple.str?_wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {p : PrimTy} → (s : Si
       subst e
       exact congrArg Simple.local (Idx.str?_wk h i i' hi)
 
-/-- Strengthen a value expression without storage or memory paths. -/
 def Val.str? {Γ Δ : Ctx} (h : Thin Γ Δ) : {p : PrimTy} → Val C Δ p → Option (Val C Γ p)
   | _, .simple s => (Simple.str? h s).map .simple
   | _, .binop op ha hq a b =>
@@ -135,11 +112,9 @@ theorem Val.str?_wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {p : PrimTy} → (v : Val C
   | _, .read _, _, e | _, .readMem _, _, e | _, .len .., _, e | _, .mlen .., _, e
   | _, .hash .., _, e => by simp only [Val.str?, reduceCtorEq] at e
 
-/-- A strengthened program: its context, the thinning to the original's, and it. -/
 abbrev Str (C : Contract) (Γ Δ' : Ctx) := (Γ' : Ctx) × Thin Γ' Δ' × Prog C Γ Γ'
 
 mutual
-/-- Strengthen a statement of the covered fragment. -/
 def Stmt.str? {Γ Δ : Ctx} (h : Thin Γ Δ) : {Δ' : Ctx} → Stmt C Δ Δ' →
     Option ((Γ' : Ctx) × Thin Γ' Δ' × Stmt C Γ Γ')
   | _, .assignLocal i r =>
@@ -172,7 +147,6 @@ def Stmt.str? {Γ Δ : Ctx} (h : Thin Γ Δ) : {Δ' : Ctx} → Stmt C Δ Δ' →
   | _, .pushOpAssign .. | _, .pushIncDec .. | _, .callReceiver .. | _, .callReceiverPush ..
   | _, .callRec .. | _, .revertData .. | _, .catchData .. => none
 
-/-- Strengthen a sequence of the covered fragment. -/
 def Prog.str? {Γ Δ : Ctx} (h : Thin Γ Δ) : {Δ' : Ctx} → Prog C Δ Δ' → Option (Str C Γ Δ')
   | _, .nil => some ⟨_, h, .nil⟩
   | _, .cons s P =>
@@ -301,18 +275,15 @@ theorem Prog.str?_wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Δ' : Ctx} → (P : Prog 
         rw [hP]
 end
 
-/-! ## Dropping an unused declaration -/
 
 section Drop
 variable {Γ : Ctx}
 
-/-- An expression whose evaluation cannot fail. -/
 def Val.isSimple {p : PrimTy} : Val C Γ p → Bool
   | .simple _ => true
   | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen .. | .modular ..
   | .hash .. => false
 
-/-- A declaration's initialiser that cannot fail. -/
 def initSafe {p : PrimTy} : Option (Val C Γ p) → Bool
   | none => true
   | some v => Val.isSimple v
@@ -332,7 +303,6 @@ theorem drop_trans {H : HTy} {Γ Δ : Ctx} (a : Ext Γ Δ) : {Ε : Ctx} → (b :
   | _, .refl, _ => rfl
   | _, .push b, e => drop_trans a b e.2
 
-/-- A weakening by one dropped local, its scope ended, is the original outcome. -/
 theorem TWkRel.pop {H : HTy} {t : LTy} {o : List ((u : LTy) × u.TDenote C H)}
     {Y : TRes (Out C H Γ)} {Z : TRes (Out C H (t :: Γ))}
     (hr : TWkRel (.drop .refl) o Y Z) : Z.map (Out.drop (.push .refl)) = Y := by
@@ -349,7 +319,6 @@ theorem TWkRel.pop {H : HTy} {t : LTy} {o : List ((u : LTy) × u.TDenote C H)}
       obtain ⟨d, _, rfl⟩ := hr
       rfl
 
-/-- **A block whose first declaration is unused runs as the block without it.** -/
 theorem blockDecl_runC {Γ₁ Γ' : Ctx} {p : PrimTy} (x : Var) (init : Option (Val C Γ p))
     (hi : initSafe init = true) (P : Prog C (.val p :: Γ) Γ₁) (P' : Prog C Γ Γ')
     (h' : Thin Γ' Γ₁) (hw : P'.wk (.drop .refl) = ⟨Γ₁, h', P⟩) :
@@ -379,9 +348,7 @@ theorem blockDecl_runC {Γ₁ Γ' : Ctx} {p : PrimTy} (x : Var) (init : Option (
 
 end Drop
 
-/-! ## The pass -/
 
-/-- A block of `s; P`, without `s` when it is an unused safe declaration. -/
 def blockCons : {Γ Γ₁ Γ₂ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Γ₂ → Stmt C Γ Γ
   | _, _, _, .declLocal p x init, P =>
     if initSafe init then
@@ -425,7 +392,6 @@ def blockCons : {Γ Γ₁ Γ₂ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Γ�
   | _, _, _, s@(.revertData ..), P => .block (.cons s P)
   | _, _, _, s@(.catchData ..), P => .block (.cons s P)
 
-/-- A block, its first declaration dropped when unused. -/
 def blockUve {Γ Γ₁ : Ctx} : Prog C Γ Γ₁ → Stmt C Γ Γ
   | .nil => .block .nil
   | .cons s P => blockCons s P
@@ -483,8 +449,6 @@ theorem blockUve_runC {Γ Γ₁ : Ctx} (P : Prog C Γ Γ₁) :
   | cons s P => exact blockCons_runC s P
 
 mutual
-/-- Unused-variable elimination at the head of every explicit `{ … }` block of a
-statement (not `if` branches, loop bodies or call bodies). -/
 def Stmt.uve : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, .ite c thn els => .ite c (Prog.uve thn) (Prog.uve els)
   | _, _, .block body => blockUve (Prog.uve body)
@@ -523,7 +487,6 @@ def Stmt.uve : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- Unused-variable elimination at the head of every explicit block of a sequence. -/
 def Prog.uve : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
   | _, _, .cons s P => .cons (Stmt.uve s) (Prog.uve P)

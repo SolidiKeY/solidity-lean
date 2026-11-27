@@ -1,6 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-! New obligations from the pinned SolKey migration source, derived in source order. -/
 
 open Solidity
 open scoped Scoped
