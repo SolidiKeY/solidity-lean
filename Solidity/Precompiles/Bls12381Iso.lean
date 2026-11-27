@@ -1,11 +1,4 @@
-/-!
-# BLS12-381 hash-to-curve constants (RFC 9380, section 8.8)
 
-The isogeny maps of the simplified SWU maps to BLS12-381's (11-isogeny)
-and (3-isogeny), their isogenous curves' `A`, `B` (and `Z`), and
-effective cofactor, as data: coefficients lowest degree first, each
-`Fp2` constant `(c₀, c₁)` for `c₀ + c₁·u`.
--/
 
 namespace Solidity.Precompiles.Bls12381.Iso
 
