@@ -17,7 +17,7 @@ data, or runs out of fuel (`Ends`, `Theory/Progress/Outcome.lean`).
 * `tuple_stmt_progress`: no extension and no calls, so no program premise:
   the existing value fragment with tuple declarations.
 * `elaborated_call_progress`, `elaborated_stmt_progress`: for an actually
-  elaborated program whose complete function catalogue P9 checks
+  elaborated program whose complete function catalogue is checked
   (`WholeProgram.checkFunctions`), the premise is derived
   (`WholeProgram.functions_from_elaborate`, `CallsOK.toX`); the statement
   itself may contain tuple declarations and admitted extension nodes;
@@ -119,7 +119,7 @@ open Solidity.Lowering.P9
 variable {res : Resolution} {G : Glob res.env} {c : String}
 
 /-- **Elaborated programs**: for an elaborated program whose complete
-function catalogue P9 checks, every internal call of a catalogued function
+function catalogue is checked, every internal call of a catalogued function
 ends. -/
 theorem elaborated_call_progress (ha : (Source.elaborate res).isSome = true)
     (hg : G.prog = Source.progOf res.env) (hc : WholeProgram.checkFunctions res G c = true)
