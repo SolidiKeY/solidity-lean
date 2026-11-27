@@ -3,8 +3,8 @@ import Solidity.Syntax.Elab.Values
 /-!
 # Checks: the value rewrites' equations
 
-The functions of `Syntax/Elab/Values.lean` checked here are total (`abiTyExpr?`
-and `abiFnType` are still `partial`), so each unfolds by its named equations with no
+The functions of `Syntax/Elab/Values.lean` checked here are total,
+so each unfolds by its named equations with no
 `native_decide`: structural ones (`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`)
 also reduce in the kernel (`rfl`), the well-founded ones (`narrowPure`, the
 three mutual `narrow…?`, `abiTyName`, `bytesPure`, `fnPure`) by rewriting. The `#guard`s pin the
@@ -417,5 +417,55 @@ example (ty : String) (h : fnParts? ty = none) :
 #guard shown (fnPure C0 [] (.call "abi.encodeCall" [.name "g", .tuple [.num 1]])) ==
   "error: abi.encodeCall: the function's ABI parameter types are unavailable"
 #guard shown (fnPure C0 [] (.call "abi.encode" [.num 1, .name "a"])) == "abi.encode(1, a)"
+
+section AbiTotal
+omit [FreshNames]
+
+/-- ABI type expressions retain dynamic and fixed array nesting. -/
+theorem abiTyExpr?_nested (t : RawExpr) (n : Nat) :
+    abiTyExpr? (.call "#abiArrayType" [.index t (.num n)]) =
+      ((abiTyExpr? t).map (.fixed · n)).map .array := by
+  rw [abiTyExpr?_array, abiTyExpr?_index]
+
+/-- A suffix-bearing name follows the same recursive array equation. -/
+theorem abiTyExpr?_name_array (t : String) (h : t.endsWith "[]" = true) :
+    abiTyExpr? (.name t) = (abiTyExpr? (.name (t.dropRight 2))).map .array := by
+  rw [abiTyExpr?_name, if_pos h]
+
+/-- Empty enum metadata still delegates to the wrapped type. -/
+theorem abiTyExpr?_enum (t : RawExpr) :
+    abiTyExpr? (.call "solcEnumBelow" [t]) = abiTyExpr? t := by
+  rw [abiTyExpr?_call]
+  · rfl
+  · intro x; exact Or.inl (by decide)
+
+/-- Booleans cannot denote ABI types. -/
+theorem abiTyExpr?_refused : abiTyExpr? (.bool true) = none := by
+  apply abiTyExpr?_other <;> simp
+
+/-- Tuple components retain their order in the named normalization equation. -/
+theorem abiFnType_tuple (T : String) (hn : fnParts? T = none)
+    (ht : (T.startsWith "(" && T.endsWith ")") = true) :
+    abiFnType T = "(" ++ ",".intercalate
+      ((splitTopCommas ((T.drop 1).dropRight 1)).map abiFnType) ++ ")" := by
+  rw [abiFnType_eq, hn, if_pos ht]
+
+/-- Both parameter and return lists are mapped, retaining the external flag. -/
+theorem abiFnType_function (T : String) (ps rs : List String) (ext : Bool)
+    (h : fnParts? T = some (ps, rs, ext)) :
+    abiFnType T = fnTyStr (ps.map abiFnType) (rs.map abiFnType) ext := by
+  rw [abiFnType_eq, h]
+
+#guard abiFnType "(uint,int[2],uint8)" == "(uint256,int256[2],uint8)"
+#guard abiFnType "function(uint)externalreturns(int)" == "function(uint256)externalreturns(int256)"
+#guard reprStr (abiTyExpr? (.name "uint[][]")) ==
+  reprStr (some (.array (.array (.named "uint"))) : Option RawTy)
+#guard (abiTyExpr? (.call "solcEnumBelow" [.name "uint", .num 1])).isNone
+#guard abiFnType "function((uint,int[]))returns(uint8)" == "function((uint256,int256[]))returns(uint8)"
+#guard abiFnType "" == ""
+#guard abiFnType "function(" == "function("
+#guard abiFnType "λ[2]" == "λ[2]"
+
+end AbiTotal
 
 end Solidity.Examples.ElabTotal.Values
