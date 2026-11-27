@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.AllocationBodyCalls
 import Solidity.Source.Progress.AggregateDefaults
 
-/-! Allocation parents bound to new locals before an unchanged ready suffix.
-Progress follows the actual declaration, growing local frame and scope exit;
-preservation derives from MemoryItems. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
