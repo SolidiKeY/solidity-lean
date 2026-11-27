@@ -978,6 +978,7 @@ import Solidity.Backend.Passes.AxiomPins
 import Solidity.Backend.Passes.BitwiseValueContext
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.Bytes.Coverage
+import Solidity.Backend.Passes.Bytes.FullMachine.Intrinsic
 import Solidity.Backend.Passes.Bytes.Stage
 import Solidity.Backend.Passes.CaptureAliases
 import Solidity.Backend.Passes.CaptureCases
@@ -2083,6 +2084,7 @@ import Solidity.Correctness.Lowering.Sim.Match.CompositionV2
 import Solidity.Correctness.Lowering.Sim.Match.DiagramV2
 import Solidity.Correctness.Lowering.Sim.Match.Relations
 import Solidity.Correctness.Lowering.Sim.Match.StatementV2
+import Solidity.Correctness.Lowering.Sim.PassList
 import Solidity.Correctness.Lowering.Sim.Session.Backward
 import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
@@ -3963,6 +3965,7 @@ import Solidity.Syntax.Quote
 import Solidity.Syntax.Raw
 import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
+import Solidity.Syntax.StringLaws
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
 import Solidity.Theory.CallerModel.Static
