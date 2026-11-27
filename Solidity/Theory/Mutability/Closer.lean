@@ -12,9 +12,7 @@ the transient layer's `Holds`) and adds, at every successful end state,
 that the globals (storage with its transient roots, ledger, balance) and,
 on the transient layer, the transient cells are the entry's.  No program
 analysis is repeated: the premise is the decidable `Prog.within`, and the
-fact is `Prog.committed_readOnly` / `Transient.Program.readOnly_preserves`
-
-
+fact is `Prog.committed_readOnly` / `Transient.Program.readOnly_preserves`.
 -/
 
 namespace Solidity.Theory.Mutability

@@ -91,8 +91,7 @@ theorem Prog.run_canon {Γ Γ' : Ctx} (P : Prog C Γ Γ') {σ : State C Γ} {o :
 /-- A storage is reachable when a scoped program runs, by the typed
 interpreter (`Prog.run`, `Semantics/Run.lean`), from the contract's initial
 state (`State.init`: every root at its default, no locals, no memory) to a
-state with that storage.  A `bool` mapping key is hashed as `0`/`1`
-(decisions 10 and 14). -/
+state with that storage.  A `bool` mapping key is hashed as `0`/`1`. -/
 def Reachable (C : Contract) (st : Storage C) : Prop :=
   ∃ (Γ' : Ctx) (P : Prog C [] Γ') (o : Out C (State.init C).H Γ'),
     P.run (State.init C) = .ok o ∧ o.st.storage = st
