@@ -2,34 +2,11 @@ import Solidity.Optimizer.StmtFold
 import Solidity.Optimizer.CSE
 import Solidity.Optimizer.UnusedVar
 
-/-!
-# O02 dead-code elimination after a halting statement
-
-Inside a scope (a block, an `if` branch or a loop body), the statements after
-one that always halts — `revert;`, `revert` with data, `assume(false);`,
-`require(false);`, `assert(false);` (conditions already literal, e.g. after `Prog.cfold`) — never
-run, so they are removed (`Prog.cut`). The scope pops whatever the removed tail
-would have declared, so its run is unchanged: `cut_scope` states that the run
-of a cut sequence, its scope ended, is the run of the original, its scope
-ended. The halt itself (revert or Panic) is kept.
-
-`Prog.dce` cuts every block, `if` branch and loop body of a program (call,
-`try`/`catch` and receiver-call bodies are left as written); `Prog.dce_runC` is equality of the
-typed run. A top-level sequence is not cut (its output context is the
-program's type).
-
-Dead local stores: `x = e₁; x = e₂;` becomes `x = e₂;` when `e₁` is a simple
-value (it cannot fail, so dropping it hides no halt) and `e₂` does not read `x`
-and has no storage/memory read (both checked by `Val.indep`), in every sequence
-reached through blocks, `if` branches and loop bodies (`Prog.dse`, `Prog.dse_runC`). Storage and
-memory stores are not touched (they wait for X06's aliasing facts).
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract}
 
-/-- A statement that halts in every state. -/
 def alwaysHalts {Γ Γ₁ : Ctx} : Stmt C Γ Γ₁ → Bool
   | .revert => true
   | .assumeFalse => true
@@ -67,13 +44,11 @@ theorem alwaysHalts_runC {Γ Γ₁ : Ctx} (s : Stmt C Γ Γ₁) (h : alwaysHalts
   | pushOpAssign | pushIncDec | callReceiver | callReceiverPush | callRec
   | catchData => simp only [alwaysHalts, Bool.false_eq_true] at h
 
-/-- A sequence cut after its first halting statement. -/
 def Prog.cut {Γ : Ctx} : {Δ : Ctx} → Prog C Γ Δ → (Δ' : Ctx) × Prog C Γ Δ'
   | _, .nil => ⟨_, .nil⟩
   | _, .cons s P =>
     if alwaysHalts s then ⟨_, .cons s .nil⟩ else ⟨_, .cons s (Prog.cut P).2⟩
 
-/-- A run with its scope ended. -/
 abbrev scopeRun {Γ Δ : Ctx} (P : Prog C Γ Δ) (σ : State C Γ) : TRes (Out C σ.H Γ) :=
   (Prog.runC P σ).map fun o => ⟨o.st.drop P.ext, o.ext⟩
 
@@ -97,7 +72,6 @@ theorem scopeRun_cons {Γ Γ₁ Δ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ�
       show o'.st.drop ((Stmt.ext s).trans P.ext) = (o'.st.drop P.ext).drop s.ext
       simp only [State.drop, State.withEnv, drop_trans]
 
-/-- **A cut sequence, its scope ended, runs as the original.** -/
 theorem cut_scope {Γ : Ctx} : {Δ : Ctx} → (P : Prog C Γ Δ) → (σ : State C Γ) →
     scopeRun (Prog.cut P).2 σ = scopeRun P σ
   | _, .nil, _ => rfl
@@ -112,7 +86,6 @@ theorem cut_scope {Γ : Ctx} : {Δ : Ctx} → (P : Prog C Γ Δ) → (σ : State
       | error e => rfl
       | ok o => simp only [cut_scope P o.st]
 
-/-! ## The pass -/
 
 theorem scopeRun_congr {Γ Δ : Ctx} {P Q : Prog C Γ Δ} (h : Prog.runC P = Prog.runC Q) :
     scopeRun P = scopeRun Q := by
@@ -144,7 +117,6 @@ theorem loop_scope {Γ Δ Δ' : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (P 
   cases Prog.runC P o.st <;> cases Prog.runC Q o.st <;> exact id
 
 mutual
-/-- Cut every scope of a statement after its first halting statement. -/
 def Stmt.dce : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, .ite c thn els => .ite c (Prog.cut (Prog.dce thn)).2 (Prog.cut (Prog.dce els)).2
   | _, _, .block body => .block (Prog.cut (Prog.dce body)).2
@@ -183,7 +155,6 @@ def Stmt.dce : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- Cut every scope of a sequence. -/
 def Prog.dce : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
   | _, _, .cons s P => .cons (Stmt.dce s) (Prog.dce P)
@@ -249,14 +220,12 @@ theorem dce_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.dce : Lowering.Pass C Γ Γ') :=
   fun P => (Prog.dce_runC P).symm
 
-/-! ## Dead local stores -/
 
 theorem tenv_set_set {H : HTy} : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → (v w : t.TDenote C H) →
     (e : TEnv C H Γ) → TEnv.set i w (TEnv.set i v e) = TEnv.set i w e
   | _, _, .here, _, _, _ => rfl
   | _, _, .there i, v, w, e => congrArg (Prod.mk e.1) (tenv_set_set i v w e.2)
 
-/-- A local assignment's target and value. -/
 def stmtAssign? {Γ Γ₁ : Ctx} : Stmt C Γ Γ₁ → Option ((q : PrimTy) × Idx Γ (.val q) × Val C Γ q)
   | .assignLocal j e => some ⟨_, j, e⟩
   | .assign .. | .rebind .. | .declLocal .. | .declStorage .. | .opAssign .. | .incDec ..
@@ -266,14 +235,11 @@ def stmtAssign? {Γ Γ₁ : Ctx} : Stmt C Γ Γ₁ → Option ((q : PrimTy) × I
   | .tryCall .. | .loop .. | .block .. | .pushOpAssign .. | .pushIncDec .. | .callReceiver ..
   | .callReceiverPush .. | .callRec .. | .revertData .. | .catchData .. => none
 
-/-- The first local assignment of a sequence. -/
 def headAssign? {Γ : Ctx} : {Δ : Ctx} → Prog C Γ Δ →
     Option ((q : PrimTy) × Idx Γ (.val q) × Val C Γ q)
   | _, .nil => none
   | _, .cons s _ => stmtAssign? s
 
-/-- `x = e₁;` before a sequence: dropped when the sequence starts with `x = e₂;`,
-`e₁` cannot fail and `e₂` does not read `x`. -/
 def dseCons : {Γ Γ₁ Δ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Δ → Prog C Γ Δ
   | _, _, _, .assignLocal (p := p) i e₁, P =>
     match headAssign? P with
@@ -408,7 +374,6 @@ theorem dseCons_runC : {Γ Γ₁ Δ : Ctx} → (s : Stmt C Γ Γ₁) → (P : Pr
   | _, _, _, .catchData .., _ => rfl
 
 mutual
-/-- Dead local stores removed in every sequence of a statement. -/
 def Stmt.dse : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, .ite c thn els => .ite c (Prog.dse thn) (Prog.dse els)
   | _, _, .block body => .block (Prog.dse body)
@@ -447,7 +412,6 @@ def Stmt.dse : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- Dead local stores removed in a sequence. -/
 def Prog.dse : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
   | _, _, .cons s P => dseCons (Stmt.dse s) (Prog.dse P)
