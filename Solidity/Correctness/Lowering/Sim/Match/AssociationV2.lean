@@ -10,15 +10,18 @@ The callee branch binds the original declared body using P2's actual producer;
 it does not use plain spelling. Ordinary here means non-constructor, as in P2.
 
 The proposed relation extends frozen `Assoc`; it agrees with it on loops.
-The converse is intentionally only a loop statement. Separate existential
-coverage obligations require actual callee and recursive witnesses, including
-successful P2 production. They do not assert successful lowering: `Production`
-remains separate, as in frozen `Assoc`. No totality over all production runs,
-execution simulation, modifier execution or recursive-frame provenance is
-claimed. In particular `Reads` observes items, not `RBody.mods`. P2 preserves
-the complete body but does not prove storage or local alignment; those remain
-explicit requirements here. Recursive scope must be linked separately before
-using P2's recursive endpoint in a simulation proof.
+The converse is intentionally only a loop statement. H2012 requires witnesses
+with successful production and actual recursive caller provenance. Coverage
+retains `Production` and `Accepted`; its recursive witness also retains the
+full caller success equation and canonical first-frame protocol. The witness
+has no parameters or returns; this does not restrict the association itself.
+
+No obligation is proved here. The public `elabCallRet` and `elabStmtP` remain
+partial; their closed success equations need upstream kernel bridges, not
+axioms or external execution relabelled as proof. `Reads` still observes items,
+not `RBody.mods`; no execution simulation is claimed. P2 retains the complete
+body but storage and local alignment remain explicit requirements.
+
 -/
 namespace Solidity.Correctness.Lowering.Sim.AssociationV2
 
@@ -42,12 +45,15 @@ def program (s : BindingOutput) : Total.SourceProgram :=
 /-- New branch: selected first-match alias, original raw input, successful
 fixed producer, exact P2 binding, exact resolved items and storage typing.
 No `Total.Spells` hypothesis appears in this branch. -/
-def Callee (b : Body) (u : Emitted) : Prop :=
-  ∃ (site : BindingSite) (c : Total.CalleeRequest) (s : BindingOutput) (alias : Name),
+def CalleeAt (b : Body) (u : Emitted) (alias : Name) : Prop :=
+  ∃ (site : BindingSite) (c : Total.CalleeRequest) (s : BindingOutput),
     produce site (request b u) = some s ∧
     Total.Version.CalleeBinding.AliasBound site (request b u) c s alias ∧
     b.input.raw = c.declaration.body ∧
     Reads b (program s) ∧ StorageTyped b.E u.C
+
+/-- Forget only the alias; recursive provenance retains it via `CalleeAt`. -/
+def Callee (b : Body) (u : Emitted) : Prop := ∃ alias, CalleeAt b u alias
 
 /-- Proposed additive association. Both branches retain context/name alignment
 and total local liftability. The old branch is preserved verbatim. -/
@@ -68,19 +74,52 @@ def InitialMatching : Prop :=
     ∀ src : Source.EMState b.E b.ctx, ∃ tgt : State u.C u.Γ,
       m.Related (fun τ v => valRel τ v) src.1 tgt.env ∧ globRel src.2 tgt
 
-/-- Genuine association inhabitants at both non-loop site constructors.
-Existentials require producer success through `Callee`; a conditional theorem
-from an assumed binding is insufficient. This is not production totality. -/
+/-- A no-argument/no-return recursive witness retains an actual successful
+caller on the body's full input snapshot. First-match selection, recursive
+classification and absence of an older frame identify the new-frame branch.
+No header slots are allocated, so k₀ is the initial counter. The frame is the
+first checked frame of `elabCallRetCore`, over `Prog.recBase`, with the same
+alias, contract and empty context. These equations remain proof obligations;
+field shape alone or an unrelated successful caller would not suffice. -/
+def RecursiveOrigin (b : Body) (u : Emitted) (alias : Name) : Prop :=
+  letI : FreshNames := productionNames
+  ∃ (d : FunDecl) (i : Nat),
+    b.input.scope.funs.findIdx? (fun entry => entry.1 == alias) = some i ∧
+    b.input.scope.funs[i]? = some (alias, d) ∧
+    d.params = [] ∧ d.rets = [] ∧
+    isRecursiveC (C := u.C) alias = true ∧
+    b.input.scope.recs.find? (fun frame => frame.name == alias) = none ∧
+    u.Γ = [] ∧ u.output.names = [] ∧
+    b.site = .recursive d [] false b.input.scope.selfFrame []
+      (u.C.funs.take ((u.C.funs.findIdx? (fun entry => entry.1 == alias)).getD 0) ++
+        (u.C.funs.drop ((u.C.funs.findIdx? (fun entry => entry.1 == alias)).getD 0)).filter
+          (fun entry => (recPartnersC (C := u.C) alias).contains entry.1))
+      b.input.before.locals.2 b.input.scope
+      { name := alias, params := [], rets := [], depth := recDepth - 1,
+        below := ⟨u.C, [], fun _ => Prog.recBase⟩ } ∧
+    ∃ (after : Solidity.Correctness.Lowering.Checker.Snapshot), ∃ result,
+      (((elabCallRet (C := u.C) alias [] none).run b.input.scope).run
+        b.input.before.locals).run b.input.before.memo =
+        .ok ((result, after.locals), after.memo)
+
+/-- Actual successful accepted production at both non-loop sites. Recursive
+coverage retains the same alias's actual caller and canonical first frame.
+These are existential obligations, not assumed production receipts. -/
 def Coverage : Prop :=
+  letI : FreshNames := productionNames
   (∃ (b : Body) (u : Emitted) (m : ContextMap b.ctx u.Γ),
     (∃ d ρ ctor selfFrame Γf funs k₀,
-      b.site = .callee d ρ ctor selfFrame Γf funs k₀) ∧ AssocV2 b u m ∧ Callee b u) ∧
-  (∃ (b : Body) (u : Emitted) (m : ContextMap b.ctx u.Γ),
-    (∃ d ρ ctor selfFrame Γf funs k₀ outer rf,
-      b.site = .recursive d ρ ctor selfFrame Γf funs k₀ outer rf) ∧
-    AssocV2 b u m ∧ Callee b u)
+      b.site = .callee d ρ ctor selfFrame Γf funs k₀) ∧
+    AssocV2 b u m ∧ Callee b u ∧ Production b u ∧ Accepted u) ∧
+  (∃ (b : Body) (u : Emitted) (m : ContextMap b.ctx u.Γ) (alias : Name),
+    AssocV2 b u m ∧ CalleeAt b u alias ∧ Production b u ∧ Accepted u ∧
+      RecursiveOrigin b u alias)
 
-/-- Reviewable obligations; no inhabitant is asserted before approval. -/
+/-- Draft obligations after H2012, not the final delivery contract. In addition
+to these same-input caller and canonical-frame conditions, the exact bridge
+from the caller result/state to the checked frame output must be stated and
+proved against the upstream producer interface. No inhabitant here alone
+completes that missing provenance obligation or P3. -/
 def Contract : Prop := Compatibility ∧ InitialMatching ∧ Coverage
 
 end Solidity.Correctness.Lowering.Sim.AssociationV2
