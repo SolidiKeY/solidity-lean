@@ -1,8 +1,7 @@
 import Solidity.Calculus.MemoryLoopReplay
 import Solidity.TestSuite.ScopedProblems
 
-/-! Kernel admission, collision and rollback controls for fallback sibling certificates.
-The fixed replay timing roster is unchanged. -/
+
 
 open Lean Meta Solidity Solidity.Seq Solidity.Seq.MemoryReplay
 
