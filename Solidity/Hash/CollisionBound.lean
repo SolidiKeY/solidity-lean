@@ -1,10 +1,6 @@
 /-!
 # Hash collisions: the per-run premise and the birthday bound
 
-The user's decision on hash collisions (G01 Q3 / G04 Q1,
-`docs/solidity-scope.md`, "User decisions (2026-10-29)") has two halves, and
-this module states both, dependency-free:
-
 * **The per-run premise.** `CollisionFree f xs` says that the hash `f` does not
   collide on the preimages `xs` an execution prefix hashed. It is closed under
   sublists, prefixes and `[]`, so a premise about a whole run gives one about
@@ -22,8 +18,7 @@ this module states both, dependency-free:
   `q(q-1)/(2N) ≤ q²/(2N)` (`collision_prob_le`, `collision_prob_le_sq`), that is
   `q²/2²⁵⁷` for a 256-bit hash (`keccak_collision_prob_le`).
 
-* **The region premise.** The second-round decision extends the premise to
-  the regions above hashed slots: `RegionsDisjoint N L f roots xs` says the
+* **The region premise.** The regions above hashed slots: `RegionsDisjoint N L f roots xs` says the
   length-`L` regions at the hashes of `xs` pairwise do not overlap modulo `N`
   and cover no root slot (`Near`, `Covers`, read by `near_of_overlap` and
   `covers_of_hit`). It implies `CollisionFree` for `L > 0`. Its bound,
@@ -54,8 +49,7 @@ namespace Solidity.Hash
 /-! ## The per-run premise -/
 
 /-- `f` does not collide on the preimages `xs`: equal images on `xs` come from
-equal preimages. This is the shape assigned to the G01 contract revision for
-the per-run hash premise. -/
+equal preimages. -/
 def CollisionFree {α β : Type _} (f : α → β) (xs : List α) : Prop :=
   ∀ x ∈ xs, ∀ y ∈ xs, f x = f y → x = y
 
@@ -157,8 +151,7 @@ end Premise
 
 /-! ## The region premise
 
-The second-round decision extends the per-run premise from preimages to the
-regions above hashed slots: an array's elements or a struct's members sit at
+The regions above hashed slots: an array's elements or a struct's members sit at
 `keccak(p) + i`, `i < L`, modulo the word size `N`. Words are values below
 `N`; a region is `[a, a + L)` read modulo `N`. -/
 
@@ -288,8 +281,7 @@ theorem hasDup_eq_false_iff {t : List Nat} : hasDup t = false ↔ t.Nodup := by
     simp only [hasDup, ← ih, List.nodup_cons, Bool.eq_false_iff, ne_eq, Bool.or_eq_true, not_or,
       List.contains_iff_mem]
 
-/-- Sum of `g` over a list. Kept local so the counting below needs no
-library sum lemmas. -/
+/-- Sum of `g` over a list. -/
 def sumOver {γ : Type _} (l : List γ) (g : γ → Nat) : Nat := (l.map g).sum
 
 section Counting

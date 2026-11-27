@@ -648,7 +648,7 @@ theorem keccak_eager_region_prob_le (hs : ∀ t, s t ∈ dom) (L : Nat) {roots :
 
 end Eager
 
-/-- **Proved child obligation.** The adaptive birthday bound for an eagerly
+/-- The adaptive birthday bound for an eagerly
 sampled oracle, as stated in `CollisionBound.lean`. -/
 theorem eagerAdaptiveBound : EagerAdaptiveBound.{u} := by
   intro β _ dom _ s hs N q

@@ -1,7 +1,7 @@
 import Solidity.Goals.Hash
 import Solidity.Storage.Representation.Transport
 
-/-! Operational producers and encoding facts for the frozen E4A contract. -/
+/-! Operational producers and encoding facts. -/
 namespace Solidity.Hash.CompilerCorrect
 
 open Solidity.Evm Solidity.Goals.HashContract
@@ -162,7 +162,7 @@ theorem representation_regions (F : Roadmap.Fixed) (slots : List Slot)
   · intro p hp r hroot
     exact hr.2 (encoded p) (List.mem_map_of_mem hp) r hroot
 
-/-- E4A's explicit footprint supplies the existing finite transport conditions. -/
+/-- The explicit footprint supplies the existing finite transport conditions. -/
 theorem representation_run (F : Roadmap.Fixed) (slots : List Slot)
     (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
     (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)

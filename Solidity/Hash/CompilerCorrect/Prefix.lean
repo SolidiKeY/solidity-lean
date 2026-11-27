@@ -1,6 +1,6 @@
 import Solidity.Hash.CompilerCorrect
 
-/-! Finite-prefix transport and divergence-safe composition for the frozen E4A contract. -/
+/-! Finite-prefix transport and divergence-safe composition. -/
 namespace Solidity.Hash.CompilerCorrect
 
 open Solidity.Evm Solidity.Goals.HashContract
@@ -126,7 +126,7 @@ theorem safe_tick_related (F : Roadmap.Fixed) (slots : List Slot)
         exact safe
 
 /-- Prefix induction uses the full reached footprint, then permits observation
-restriction separately. Safety will be discharged by the checked compiler. -/
+restriction separately. -/
 theorem finite_related_of_safe (F : Roadmap.Fixed) (n : Nat)
     (c : List Instr) (m : Machine) (v : Numeric) (observed : List Slot)
     (safe : CodeSafe c m)
@@ -1310,7 +1310,7 @@ theorem compiler_bridge : CompilerBridge producer :=
 end Solidity.Hash.CompilerCorrect
 
 namespace Solidity.Hash
-/-- The frozen E4A compiler collision-free contract, with actual operational prefixes. -/
+/-- The compiler collision-free contract, with actual operational prefixes. -/
 theorem compiler_correct_collisionFree : Solidity.Goals.compilerCorrectCollisionFree :=
   ⟨Backend.compiler_endpoint_correct, CompilerCorrect.producer,
     CompilerCorrect.producer_produces, CompilerCorrect.producer_idealAdequacy,

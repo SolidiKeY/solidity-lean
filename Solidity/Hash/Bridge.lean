@@ -2,7 +2,7 @@ import Solidity.Hash.CollisionBound
 import Solidity.Roadmap.Contracts
 
 /-!
-# H112: the ideal and per-run hash readings
+# the ideal and per-run hash readings
 
 The ideal machine still stores symbolic slots. These lemmas apply existing
 hash-parametric guarded statements to concrete runs; they do not assert a

@@ -2,7 +2,7 @@ import Solidity.Hash.Adaptive
 import Solidity.Hash.Bridge
 
 /-!
-# The adaptive random-oracle bridge (H112)
+# The adaptive random-oracle bridge
 
 Oracles are uniformly counted as tuples on a finite domain containing every
 query the strategy can produce. The query budget includes offline attacker
@@ -103,7 +103,7 @@ theorem zero_queries (s : List Nat → α) (dom : List α) (N L : Nat) (roots : 
   exact (of_decide_eq_true hg) ⟨CollisionFree.nil, RegionsDisjoint.nil⟩
 
 /-- One query: collision failure has zero oracles, without discarding roots
-from the region event. Coordinator correction E4-Q1 (#168). -/
+from the region event. -/
 theorem one_query_collision (s : List Nat → α) (dom : List α) (N : Nat) :
     (tuples N dom.length).countP (eagerCollides s dom 1) = 0 := by
   apply List.countP_eq_zero.mpr
@@ -257,7 +257,7 @@ def runRegionsFail (F : Fixed) (dom : List Bytes)
     (fun b => ((oracleFixed F dom g).hash b).val) (List.range F.rootSlots) (ys g))
 
 /-- Region-only actual-run bound. The root-hit contribution remains present
-at q=1, as required by the corrected controls. -/
+at q=1. -/
 theorem run_regions_le (F : Fixed) {s : List Nat → Bytes} {dom : List Bytes}
     (hs : ∀ t, s t ∈ dom) (hroots : ∀ r ∈ List.range F.rootSlots, r < 2 ^ 256)
     (q : Nat) (ys : List Nat → List Bytes)
