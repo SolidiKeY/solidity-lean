@@ -978,6 +978,7 @@ import Solidity.Backend.Passes.AxiomPins
 import Solidity.Backend.Passes.BitwiseValueContext
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.Bytes.Coverage
+import Solidity.Backend.Passes.Bytes.FullMachine.Intrinsic
 import Solidity.Backend.Passes.Bytes.Stage
 import Solidity.Backend.Passes.CaptureAliases
 import Solidity.Backend.Passes.CaptureCases
@@ -2069,6 +2070,7 @@ import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Correctness.Lowering.Sim.CoverageBranch
+import Solidity.Correctness.Lowering.Sim.CoverageControl
 import Solidity.Correctness.Lowering.Sim.Expr.Capture
 import Solidity.Correctness.Lowering.Sim.Expr.Frame
 import Solidity.Correctness.Lowering.Sim.Expr.Operand
@@ -2082,6 +2084,7 @@ import Solidity.Correctness.Lowering.Sim.Match.CompositionV2
 import Solidity.Correctness.Lowering.Sim.Match.DiagramV2
 import Solidity.Correctness.Lowering.Sim.Match.Relations
 import Solidity.Correctness.Lowering.Sim.Match.StatementV2
+import Solidity.Correctness.Lowering.Sim.PassList
 import Solidity.Correctness.Lowering.Sim.Session.Backward
 import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding
@@ -2224,6 +2227,10 @@ import Solidity.Docs.ProseCalibrated
 import Solidity.Docs.ProseCalibrated.Allowance
 import Solidity.Docs.ProseCalibrated.Classification
 import Solidity.Docs.ProseCalibrated.Policy
+import Solidity.Docs.ProseRatio
+import Solidity.Docs.ProseRatio.Allowance
+import Solidity.Docs.ProseRatio.Classification
+import Solidity.Docs.ProseRatio.Policy
 import Solidity.ERC7201
 import Solidity.Eqns
 import Solidity.Evm.Compile
@@ -3958,6 +3965,7 @@ import Solidity.Syntax.Quote
 import Solidity.Syntax.Raw
 import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
+import Solidity.Syntax.StringLaws
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
 import Solidity.Theory.CallerModel.Static
