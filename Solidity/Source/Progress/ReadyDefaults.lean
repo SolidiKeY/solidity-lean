@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.ReadyArguments
 
-/-! Default return-slot progress for explicit ready types. Empty memory bytes,
-strings and dynamic arrays allocate through the existing zeroData/zeroVal path;
-other types retain an explicit existing Val.default witness. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env} {Γ : RCtx}
@@ -24,6 +21,12 @@ theorem ZeroReady.boundary {τ : STy} (ready : ZeroReady E τ) :
   cases ready with
   | value defaults => exact .inl defaults
   | memory empty => exact .inr empty.location
+
+example : ¬ ZeroReady E (.bytes .storage) := by
+  intro ready
+  rcases ready.boundary with absent | location
+  · cases absent
+  · cases location
 
 theorem empty_zeroData_ns {τ : STy} (ready : EmptyMemoryType τ) :
     ∀ n, NS (zeroData (E := E) (Γ := Γ) n τ)
