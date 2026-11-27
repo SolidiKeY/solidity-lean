@@ -3,9 +3,6 @@ import Solidity.Source.Progress.ReadyReturnControls
 import Solidity.Lowering.P9.InferenceCuts
 import Solidity.Roadmap.Controls
 
-/-! Actual source allocation forwarded through an initialized memory local.
-The primitive parameter avoids function-value reference-argument elaboration.
-Both pipelines preserve the caller and reached heap on success and panic. -/
 namespace Solidity.Source.Progress.InitializedControls
 open EM Solidity.Lowering.P9
 open ReadyFreshReturnControls (uintType arrayType)

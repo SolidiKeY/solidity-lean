@@ -2,9 +2,6 @@ import Solidity.Source.Progress.NewArray
 import Solidity.Source.Preservation.NewArrayFragmentControls
 import Solidity.Source.Preservation.MemoryProgramControls
 
-/-! Inhabited allocation progress and exact observations. A compound length
-keeps allocation panic and timeout; a missing enum default retains its named
-stuck outcome outside readiness. A separate client consumes real elaboration. -/
 namespace Solidity.Source.Progress.NewArrayControls
 open EM
 open Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls (E Γ seed state small huge frame globals initial_mem)

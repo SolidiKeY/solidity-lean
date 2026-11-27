@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.EffectCatalogue
 import Solidity.Lowering.P9.InferenceCuts
 
-/-! Actual elaborated source functions with an emit in the leaf, a require
-that calls the leaf, and an assert-failing callee. The complete finite
-catalogue is inhabited; observations execute both source pipelines. -/
 namespace Solidity.Source.Progress.EffectCatalogueControls
 open EM Solidity.Lowering.P9
 
@@ -179,7 +176,6 @@ theorem derived_progress (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (n : Nat
     declarations (certificate p fixed) coverage frame rfl n entryDecl entry_signature (by decide +kernel) .nil
 
 
-/-- Exact body sharing for reduction only: proved equal to the actual program. -/
 def replayBody (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (d : Decl) : Option (RBody E) :=
   if d = leafDecl then some flatLeaf
   else if d = entryDecl then some flatEntry

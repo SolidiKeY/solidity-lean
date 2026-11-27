@@ -1,18 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-!
-# solkey's `TestSuite`, derived (12 of 12)
-
-`⊢` of each obligation the copies between storage and memory added, in
-the order of the source; the replays are what `#solkey_derive? … pending`
-(`Frontend/Problems.lean`) prints.  First the copies from storage into
-memory (`memoryStorageCopy`, then `readFromCopyToStorage`: a later write to
-the storage is not seen), from `storageToMemory` to `memoryAssignForms`;
-then the copies from memory into storage (`memoryToStorage*CopyRoot`, read
-through the view by `findOnCopy` and `selectOnCopyMem*`: a later write to
-memory is not seen), from `storageNewIntoField` to
-`mappingEntryThroughMemoryToMappingEntry`.
--/
 
 open Solidity
 open scoped Scoped

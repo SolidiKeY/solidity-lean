@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.RecoveryBuiltin
 
-/-! Progress for the builtins whose arguments are string literals: hashing
-(`keccak256`, `sha256`, `ripemd160`) and the `require`/`revert` messages. A
-literal is allocated fresh and read back, so any starting state works. -/
 
 namespace Solidity.Source.Progress
 open EM
@@ -14,8 +11,6 @@ theorem literal_value (bs : Roadmap.Bytes) (v : RVal E.layout (.stringLit bs)) :
   | strLit => rfl
   | val v => cases v <;> contradiction
 
-/-- Fresh literal allocation followed by the actual heap read. This works on
-any starting state: the allocated object supplies its own witness. -/
 theorem literalHashInput_run (F : Fr) (n : Nat) (bs : Roadmap.Bytes)
     (l : Locals E.layout Γ) (s : St E) :
     ((do bytesOfRV F n (← convRV F n (.bytes .memory) (.strLit bs)) : EM E Γ _).run (l,s)) =
@@ -38,8 +33,6 @@ theorem literalHashInput_ns (F : Fr) (n : Nat) (bs : Roadmap.Bytes)
   rw [literalHashInput_run] at h
   cases h
 
-/-- Hash builtins on source string/hex-string literals. Precompile failure
-still returns the evaluator's empty digest; no concrete hash axiom is added. -/
 theorem evalBuiltin_hashLiteral_ns (G : Glob E) (F : Fr) (n : Nat) (bs : Roadmap.Bytes)
     (b : Builtin) (hb : b = .keccak256 ∨ b = .sha256 ∨ b = .ripemd160)
     (args : RArgs E Γ [.stringLit bs]) (k : Nat) (hk : 0 < k ∧ k ≤ 32)

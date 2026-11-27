@@ -1,11 +1,6 @@
 import Solidity.Lowering.P9.FunctionCatalog
 import Solidity.Source.Preservation.Fragment
 
-/-! Whole-program call-fragment progress for actually elaborated and checked
-complete function catalogues. `CallsOK` and recursive preservation are derived,
-not user premises. Existing fragment, operation and frame conditions remain.
-No world/ABI entrypoint, SourceSpec, termination or compiler claim follows.
--/
 namespace Solidity.Source.Progress
 open Solidity.Lowering.P9
 open Preservation
