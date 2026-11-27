@@ -2,3 +2,4 @@
 |---|---|
 | `Examples/FrontendValidation/SolcJson.lean` | Accepted and rejected literal controls for `J.get`, `J.opt`, `J.str`, `J.arr`, `J.str?`, `J.arr?`, `J.ref?`, `J.id?`, `J.hasOperatorFunction`, `J.operatorFunction?`, and `J.typeRef?`. |
 | `Examples/FrontendValidation/SolcJson/Ir.lean` | Literal accepting/rejecting controls for IR channel selection, source/contract paths, lookup, and extracted text. |
+| `Examples/FrontendValidation/SolcJson/CallMetadata.lean` | Literal profile, call-shape, static-target, location and attachment controls; structural metadata only. |
