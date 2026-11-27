@@ -1,10 +1,6 @@
 import Solidity.Source.Progress.InitializedChain
 import Solidity.Source.Progress.InitializedControls
 
-/-! Whole-unit consumers for an actual source initialized-local relay.
-The ready allocating leaf is embedded through the existing forwarding chain;
-the relay is a fresh initialized-prefix extension. Exact evaluator observations
-come from InitializedControls, and are consumed by the whole-program proof. -/
 namespace Solidity.Source.Progress.InitializedChainControls
 open EM Solidity.Lowering.P9 InitializedControls
 

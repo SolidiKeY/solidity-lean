@@ -3,10 +3,6 @@ import Solidity.Source.Progress.ReadyReturnControls
 import Solidity.Lowering.P9.InferenceCuts
 import Solidity.Roadmap.Controls
 
-/-! A real source relay with primitive arguments and a memory return. Its body
-calls a ready allocating function, so body-level forwarding is exercised without
-function-value reference-argument elaboration. Both evaluator pipelines retain
-the actual caller and reached heap on success and allocation failure. -/
 namespace Solidity.Source.Progress.ForwardingControls
 open EM Solidity.Lowering.P9
 open ReadyFreshReturnControls (uintType arrayType)
