@@ -1,6 +1,5 @@
 import Solidity.Source.PowerV2
 
-/-! Guard the 301-bit cutoff regression while preserving V1. V2 modular correctness and unchecked wrapping quantify over every natural exponent, with no production-domain premise; checked behavior is exactly V1. The bounded V1 bridge is only a comparison law, not a restriction on V2. No live evaluator, model endpoint, admission or external-solc equivalence is asserted. -/
 namespace Solidity.Source.PowerV2
 
 private theorem mul_congr (a b c d m : Int) (left : a % m = b % m)

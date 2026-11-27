@@ -1,13 +1,9 @@
 import Solidity.Source.MonetaryAuthority
 import Solidity.Source.FailureRequest
 
-/-! Actual Source adapters for the H25 authority. This owner-held extension
-requires H16 request cursors and H19 natural Source accounts; not standalone
-master evidence. Fee settlement and session wiring remain pending G01 review. -/
 namespace Solidity.Source.Monetary
 open Solidity.Roadmap (Address Word Request)
 
-/-- Exact account bookkeeping via the existing real Source journal operation. -/
 def Authority.writeSource {D L T} (authority : Authority) (state : ExecState D L T)
     (address : Address) : ExecState D L T :=
   state.apply (.account address (fun account => account.withBalance (authority.balance address)))
@@ -21,9 +17,6 @@ theorem Authority.source_undo {D L T} (authority : Authority) (state : ExecState
     (address : Address) : (authority.writeSource state address).undo = state :=
   state.undo_apply _
 
-/-- Actual Source request scope transports the entire post-fee Nat into the
-authority while preserving every other Source field and the real cursor exit.
-This does not claim that session funding/fee settlement already uses it. -/
 theorem Authority.request_postFee {E : Env} {Γ : RCtx} (authority : Authority) (sender : Address)
     (amount : Balance) (locals : Locals E.layout Γ) (state : St E) :
     (FailureExecution.requestScope

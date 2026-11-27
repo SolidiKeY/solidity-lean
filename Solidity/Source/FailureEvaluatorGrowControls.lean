@@ -1,8 +1,6 @@
 import Solidity.Source.FailureEvaluatorGrow
 import Solidity.Source.FailureRuntimeControls
 
-/-! Inhabited use of the closed planned evaluator induction. Full Source
-fixture states remain independent frozen controls, not native comparisons. -/
 namespace Solidity.Source.FailureExecution.PlannedGrow.Controls
 open EM SemanticsExamples
 open RuntimeControls (Ctx caller input glob data points priorEvent endState)
@@ -26,7 +24,6 @@ theorem fixture_prefix (pipeline : Roadmap.Pipeline) (cut : Option Nat) (horizon
     input.events <+: (RuntimeControls.run pipeline cut horizon).2.2.events :=
   action_grow pipeline (points cut) horizon (caller,input)
 
-/-- Growth is not equality of completed outcomes across different plans. -/
 theorem growth_does_not_fix_outcome (pipeline : Roadmap.Pipeline) :
     ((action pipeline (points none) 20).run (caller,input)).1 ≠
       ((action pipeline (points (some 0)) 20).run (caller,input)).1 := by
@@ -34,7 +31,6 @@ theorem growth_does_not_fix_outcome (pipeline : Roadmap.Pipeline) :
   intro impossible
   cases impossible
 
-/-- Arbitrary EM mutation is not justified by the actual AST induction. -/
 theorem erase_prefix_not_grow :
     ¬ Grow (modSt (fun state => { state with events := [] }) : EM EB RuntimeControls.Ctx Unit) := by
   intro claimed
