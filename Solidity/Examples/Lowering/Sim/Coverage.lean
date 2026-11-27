@@ -15,8 +15,8 @@ The second checks that versioned production retains the v1 receipt; the third
 shows that caller placement alone does not repair the frozen spelling relation.
 The final checks establish decoding, alignment, acceptance of the existing
 materialized program, and actual lowering of the smoke separately. The generated
-flag declaration, condition capture, and post-capture flag write have exact
-elaboration receipts below; the complete loop production receipt is still outstanding.
+flag declaration, condition capture, captured assignment, and flag write have
+exact elaboration receipts below; the complete loop production receipt is still outstanding.
 -/
 namespace Solidity.Examples.Lowering.Sim.Coverage
 
@@ -352,6 +352,140 @@ theorem smoke_capture :
   rw [synth_capture_a]
   rfl
 
+private theorem hoist_assign_names_run [FreshNames] (C : Contract)
+    (H : RawExpr → ElabM (SProg C × RawExpr)) (x y : String)
+    (hx : H (.name x) = pure ([], .name x))
+    (hy : H (.name y) = pure ([], .name y))
+    (sc : ElabScope) (st : ECtx × Nat) (memo : CallMemo)
+    (v : Val C (ECtx.toNCtx st.1).ctx .bool)
+    (hs : synth C (ECtx.toNCtx st.1) (.name x) = .ok (.val .bool v)) :
+    hoistAssignWith C H (.name x) (.name y) sc st memo =
+      .ok ((([], .assign (.name x) (.name y)), st), memo) := by
+  have expand : hoistAssignWith C H (.name x) (.name y) = (show ElabM (SProg C × RawStmt) from do
+    let (P, l, r) ← (do
+      let (P, r) ← hoistTopWith C H (.name y)
+      let (P, r) ← do
+        let Γ ← nctx
+        match synth C Γ (.name x), synth C Γ r with
+        | .ok (.mpath (.ref _) (.loc _)), .ok (.path (.ref R) sp) =>
+          match hm : (Ty.ref R).mapFree with
+          | true =>
+            let v ← captureRef C "mv" (.mem R) r
+            pure (P ++ [SStmt.of Γ (.declMem R v (some (.copy sp hm)) rfl hm)], RawExpr.name (toString v))
+          | false => throw "a copy into memory of a type that holds a mapping"
+        | _, _ => pure (P, r)
+      let (Pc, r) ← if (RawExpr.name x).hasIncDec then captureExpr C r else pure ([], r)
+      let (Q, l) ← H (.name x)
+      pure (P ++ Pc ++ Q, l, r))
+    pure (P, RawStmt.assign l r)) := by rfl
+  have htop : hoistTopWith C H (.name y) = H (.name y) := rfl
+  have hi : (RawExpr.name x).hasIncDec = false := by
+    unfold RawExpr.hasIncDec
+    rw [RawExpr.any]
+    rfl
+  rw [expand, htop, hy]
+  simp only [pure_bind, hx, hi, Bool.false_eq_true, if_false,
+    List.nil_append, List.append_nil]
+  conv => lhs; whnf
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  rw [nctx_run]
+  dsimp only
+  rw [hs]
+  rfl
+
+private theorem synth_smoke_i :
+    @synth Match.C productionNames (@ECtx.toNCtx productionNames smokeCapturedLocals) (.name "i") =
+      .ok (.val .bool (.simple (.local (.there (.there .here))))) := by
+  rw [synth]
+  rfl
+
+private theorem synth_smoke_se :
+    @synth Match.C productionNames (@ECtx.toNCtx productionNames smokeCapturedLocals) (.name "se1") =
+      .ok (.val .bool (.simple (.local .here))) := by
+  rw [synth]
+  rfl
+
+private theorem smoke_hoist_write (hk : Solidity.Goals.elabKernelTotal)
+    (sc : ElabScope) (k : Nat) (memo : CallMemo) :
+    @hoistAssign Match.C productionNames (.name "i") (.name "se1") sc
+      (smokeCapturedLocals, k) memo =
+      .ok ((([], .assign (.name "i") (.name "se1")), (smokeCapturedLocals, k)), memo) := by
+  letI : FreshNames := productionNames
+  have hn (x : String) : hoist Match.C (.name x) = pure ([], .name x) := by
+    have hh : hoist Match.C = hoistWith Match.C (elabRec Match.C ()) :=
+      (hk.1 Match.C).1.2.2.2.2.2
+    rw [hh]
+    exact Solidity.Correctness.Lowering.Sim.hoist_name Match.C (elabRec Match.C ()) x
+  exact hoist_assign_names_run Match.C (hoist Match.C) "i" "se1"
+    (hn "i") (hn "se1") sc (smokeCapturedLocals, k) memo _ synth_smoke_i
+
+private theorem check_smoke_se :
+    @check Match.C productionNames (@ECtx.toNCtx productionNames smokeCapturedLocals)
+      .bool (.name "se1") = .ok (.simple (.local .here)) := by
+  rw [check, checkVia, synth_smoke_se]
+  all_goals first | rfl | (intros; contradiction)
+
+private theorem narrow_smoke_write (sc : ElabScope) (k : Nat) (memo : CallMemo) :
+    @narrowPost Match.C productionNames (.name "i") (.name "se1") sc (smokeCapturedLocals, k) memo =
+      .ok (([], (smokeCapturedLocals, k)), memo) := rfl
+
+/-- The generated assignment reads the condition capture and writes `i`. -/
+def smokeWriteProgram : SProg Match.C :=
+  letI : FreshNames := productionNames
+  [.of (ECtx.toNCtx smokeCapturedLocals)
+    (.assignLocal (.there (.there .here)) (.simple (.local .here)))]
+
+/-- Exact elaboration of `i = se1;` after the smoke condition capture. -/
+theorem smoke_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabStmtP Match.C productionNames (.assign (.name "i") (.name "se1"))
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((smokeWriteProgram, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have ha : (elabRec Match.C ()).hoistAssign (.name "i") (.name "se1")
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((([], .assign (.name "i") (.name "se1")), (smokeCapturedLocals, k)), {}) :=
+    smoke_hoist_write hk _ k _
+  rw [hp]
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, fnPure_other]
+  conv => lhs; whnf
+  simp only [bytesStmt, RawStmt.mapExprsM, bytesPure_other]
+  conv => lhs; whnf
+  simp only [RawStmt.exprs, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
+    Bool.false_eq_true, if_false, narrowWholeUse?_other, narrowWholeUse?_name]
+  conv => lhs; whnf
+  simp only [narrowPure_other]
+  conv => lhs; whnf
+  rw [(hk.1 Match.C).1.2.2.2.2.1]
+  unfold hoistStmtWith
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  dsimp only [Pure.pure, ReaderT.pure, StateT.pure, Except.pure]
+  rw [nctx_run]
+  dsimp only
+  rw [ha]
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind, Pure.pure,
+    ReaderT.pure, StateT.pure, Except.pure]
+  conv => lhs; whnf
+  dsimp only
+  rw [(hk.1 Match.C).1.2.2.2.1]
+  unfold elabStmt1With
+  dsimp only
+  conv => lhs; whnf
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  rw [narrow_smoke_write]
+  dsimp only
+  unfold synthM
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  rw [nctx_run]
+  dsimp only
+  rw [synth_smoke_i]
+  dsimp only [ElabM.lift, StateT.lift, Bind.bind, ReaderT.bind, StateT.bind,
+    Pure.pure, ReaderT.pure, StateT.pure, Except.bind, Except.pure]
+  simp only [checkIn, check_smoke_se]
+  rfl
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -373,3 +507,5 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_set_flag
 
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_capture
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_write
