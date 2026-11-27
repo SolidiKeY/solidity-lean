@@ -1,14 +1,11 @@
 import Solidity.Source.Preservation.Fragment
 import Solidity.Roadmap.V16.SSCP2.NewAllocation
 
-/-! Dynamic-new consumer of published allocation preservation. The child triple
-is discharged by the existing checked call fragment, not assumed. -/
+
 namespace Solidity.Source.Preservation
 open EM
 
-/-- New-array allocation after any indexable length expression in the existing
-call fragment. Current/caller references and the full MemOK invariant survive
-success AND every actual halt; no progress or universal fragment extension. -/
+
 theorem eval_new_fragment_mem {E : Env} {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (n : Nat) (H : HeapTy)
     {Γ : RCtx} {τ σ : STy} (newable : τ.newable = true) (len : RExpr E Γ σ)
