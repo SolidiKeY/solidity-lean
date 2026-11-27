@@ -15,8 +15,8 @@ The second checks that versioned production retains the v1 receipt; the third
 shows that caller placement alone does not repair the frozen spelling relation.
 The final checks establish decoding, alignment, acceptance of the existing
 materialized program, and actual lowering of the smoke separately. The generated
-flag declaration and post-capture flag write have exact elaboration receipts
-below; the complete loop production receipt is still outstanding.
+flag declaration, condition capture, and post-capture flag write have exact
+elaboration receipts below; the complete loop production receipt is still outstanding.
 -/
 namespace Solidity.Examples.Lowering.Sim.Coverage
 
@@ -323,6 +323,35 @@ theorem smoke_set_flag (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
   simp only [checkIn, check_bool]
   rfl
 
+
+/-- The condition captures `a` before assigning it to `i`. -/
+def smokeCaptureProgram : SProg Match.C :=
+  letI : FreshNames := productionNames
+  [.of (ECtx.toNCtx (("brk0", .val .bool) :: Match.locals))
+    (.declLocal .bool (Var.ofName "se1")
+      (some (.simple (.local (.there (.there .here))))))]
+
+private theorem synth_capture_a :
+    @synth Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals)) (.name "a") =
+      .ok (.val .bool (.simple (.local (.there (.there .here))))) := by
+  rw [synth]
+  rfl
+
+/-- Exact capture of `a` in the lowered smoke, including the fresh counter. -/
+theorem smoke_capture :
+    @captureExpr Match.C productionNames (.name "a")
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok (((smokeCaptureProgram, .name "se1"), (smokeCapturedLocals, 2)), {}) := by
+  unfold captureExpr
+  conv => lhs; whnf
+  unfold synthM
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  rw [nctx_run]
+  dsimp only
+  rw [synth_capture_a]
+  rfl
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -342,3 +371,5 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_flag
 
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_set_flag
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_capture
