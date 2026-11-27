@@ -5,8 +5,10 @@ import Solidity.Backend.CompilerOptimizerDomain.LICM
 import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.Weakening
 import Solidity.Backend.CompilerOptimizerDomain.Inline
+import Solidity.Backend.CompilerOptimizerDomain.CSE
 
-/-! Integration controls for the proved constant-fold, simplification, removal and LICM stages only. These check both
+/-! Integration controls for the proved folding, simplification, removal, LICM,
+weakening, inlining and CSE results. These check both
 resource and fragment consequences against the unchanged public compiler domain;
 they do not assert preservation by the remaining optimizer stages or iteration. -/
 namespace Solidity.Backend.CompilerOptimizerDomain.Controls
@@ -72,6 +74,14 @@ example (hP : ProgOk [] P) :
     Evm.Prog.pushes (Optimizer.ConstFold.Prog.inl P) = 0 ∧
       ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.inl P) = some G := by
   have hQ := prog_inl_ok hP
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- CSE preserves the domain even for an arbitrary availability table.
+example (hP : ProgOk [] P) (A : List (Optimizer.ConstFold.Avail C Γ)) :
+    Evm.Prog.pushes (Optimizer.ConstFold.Prog.cse A P) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.cse A P) = some G := by
+  have hQ := prog_cse_ok hP A
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
   exact ⟨hQ.quiet.1, G, h⟩
 

@@ -160,6 +160,7 @@ import Solidity.Backend.CompilerEndpointScalarBoundary
 import Solidity.Backend.CompilerEndpointV2
 import Solidity.Backend.CompilerEndpointWitnesses
 import Solidity.Backend.CompilerOptimized
+import Solidity.Backend.CompilerOptimizerDomain.CSE
 import Solidity.Backend.CompilerOptimizerDomain.ConstFold
 import Solidity.Backend.CompilerOptimizerDomain.DeadCode
 import Solidity.Backend.CompilerOptimizerDomain.DeadStore
