@@ -2,60 +2,20 @@ import Solidity.Optimizer.StmtFold
 import Solidity.Semantics.RunWk
 import Solidity.Optimizer.UnusedVar
 
-/-!
-# O03 inlining of internal function calls
-
-`f(e₁, …, eₙ);` for an internal function with no return value (`CallRet.none`)
-runs its body in a frame of its own: the arguments evaluated in order, the body
-run over them, the caller's locals restored. Inlining writes it as a block of the
-caller:
-
-`{ T₁ x₁ = e₁; …; Tₙ xₙ = eₙ; body' }`
-
-with a value parameter declared as a value local, a storage parameter as the
-storage alias `R storage xᵢ = eᵢ;` (`declStorage … (some (.path eᵢ))`, the
-identity the call shares) and a memory parameter as the memory alias
-`R memory xᵢ = eᵢ;` (`declMem … (some (.alias eᵢ))`, the object by identity, no
-copy, as the call binds it), where each `eᵢ` is read past the parameters declared before it
-(`Val.wk (thinUnder _)`) and `body'` is the body weakened into the caller's
-context (`Prog.wk (thinTop Γ ps)`), so it reads only its parameters. The
-block runs as the call (`inlineBlock_runC`; `inlineCall_runC` dispatches):
-the declarations evaluate the arguments in the call's order with the same
-halts (`bindArgs_runC`), the weakened body runs as the body with the caller's
-locals kept alongside (`Prog.run_wk`, `TWkRel.drop`), and the block's end pops the parameters and
-the body's locals, which leaves the caller's locals exactly as the call
-restores them (`drop_put_top`, `off_bot_inj`).
-
-Covered: calls with `CallRet.none` or one value return (`CallRet.val`, assigned
-to a caller local or discarded), with value, storage and memory parameters.
-A value-returning call becomes `{ params; T r; { body' } x = r; }`
-(`inlineBlockVal_runC`, through `frame_runC`). Calls with several returns,
-memory or storage returns,
-recursive calls (`callRec`), receiver calls and external calls are left as
-written. The pass inlines every covered call, including calls inside `if`
-branches, blocks and loop bodies, once (a body's own calls are not inlined),
-and not inside `try`, receiver-call or non-inlined call bodies. Only
-`Stmt.runC` is preserved: the call's name, and whatever printers or automation
-read from it, are gone, and gas and code size are not modelled.
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract}
 
-/-! ## Thinnings into a frame -/
 
-/-- No local kept: the whole of `Γ` dropped. -/
 def thinBot : (Γ : Ctx) → Thin [] Γ
   | [] => .refl
   | _ :: Γ => .drop (thinBot Γ)
 
-/-- The frame `ps` kept, the caller's `Γ` dropped below it. -/
 def thinTop (Γ : Ctx) : (ps : Ctx) → Thin ps (ps ++ Γ)
   | [] => thinBot Γ
   | _ :: ps => .keep (thinTop Γ ps)
 
-/-- The caller's `Γ` kept, the parameters `ps` dropped above it. -/
 def thinUnder {Γ : Ctx} : (ps : Ctx) → Thin Γ (ps ++ Γ)
   | [] => .refl
   | _ :: ps => .drop (thinUnder ps)
@@ -90,7 +50,6 @@ theorem off_top (Γ : Ctx) : (ps : Ctx) → (d : TEnv C H (ps ++ Γ)) →
 theorem drop_append_append {Γ : Ctx} : (ps : Ctx) → (a : TEnv C H ps) → (e : TEnv C H Γ) →
     TEnv.drop (Ext.append Γ ps) (TEnv.append ps a e) = e := Solidity.TEnv.drop_append
 
-/-- An environment is determined by the list of all its values. -/
 theorem off_bot_inj : (Γ : Ctx) → (x y : TEnv C H Γ) →
     TEnv.off (thinBot Γ) x = TEnv.off (thinBot Γ) y → x = y
   | [], _, _, _ => rfl
@@ -105,9 +64,7 @@ theorem off_bot_inj : (Γ : Ctx) → (x y : TEnv C H Γ) →
 
 end Env
 
-/-! ## Binding the arguments -/
 
-/-- The parameters declared in order, each argument read past the ones before. -/
 def bindArgs {Γ Δ : Ctx} : {ps : Ctx} → (as : Args C Γ ps) → Prog C (ps ++ Γ) Δ → Prog C Γ Δ
   | _, .nil, k => k
   | _, .snoc (ps := ps) as p x e, k =>
@@ -201,13 +158,10 @@ theorem bindArgs_runC {Γ Δ : Ctx} (σ : State C Γ) : {ps : Ctx} → (as : Arg
           Except.map _ (Prog.runC k (σ.withEnv (TEnv.append (.mem R :: ps) (some v, a) σ.env)))
         cases Prog.runC k (σ.withEnv (TEnv.append (.mem R :: ps) (some v, a) σ.env)) <;> rfl
 
-/-! ## The inlined call -/
 
-/-- A void call with value arguments, as a block of the caller. -/
 def inlineBlock {Γ ps Γf : Ctx} (args : Args C Γ ps) (body : Prog C ps Γf) : Stmt C Γ Γ :=
   .block (bindArgs args (body.wk (thinTop Γ ps)).2.2)
 
-/-- **An inlined void call runs as the call.** -/
 theorem inlineBlock_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
     (body : Prog C ([] ++ ps) Γf) :
     Stmt.runC (inlineBlock args body) = Stmt.runC (.call f args .none body) := by
@@ -263,15 +217,12 @@ theorem inlineBlock_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
         rw [e1, hst]
         simp only [State.drop, State.lift, State.withEnv, drop_put_top, key]
 
-/-- `put_top` for any background: the frame on top of what `d` holds below it. -/
 theorem put_top_gen (Γ : Ctx) : (ps : Ctx) → {H : HTy} → (x : TEnv C H ps) →
     (d : TEnv C H (ps ++ Γ)) →
     TEnv.put (thinTop Γ ps) x d = TEnv.append ps x (TEnv.drop (Ext.append Γ ps) d)
   | [], _, _, d => put_bot Γ d
   | _ :: ps, _, x, d => congrArg (Prod.mk x.1) (put_top_gen Γ ps x.2 d.2)
 
-/-- **The weakened body, its scope ended, leaves its frame's final locals on top
-of the caller's locals as the call restores them.** -/
 theorem frame_runC {Γ qs Γf : Ctx} (σ : State C Γ) (body : Prog C qs Γf) (x : TEnv C σ.H qs) :
     ((body.wk (thinTop Γ qs)).2.2.runC (σ.withEnv (TEnv.append qs x σ.env))).map
         (Out.drop (body.wk (thinTop Γ qs)).2.2.ext) =
@@ -323,15 +274,11 @@ theorem drop_append_set {H : HTy} {Γ : Ctx} {p : PrimTy} (i : Idx Γ (.val p)) 
   | [], X => by simp only [thinUnder, Idx.wk_refl]; rfl
   | _ :: qs, X => drop_append_set i v qs X.2
 
-/-- After the body: the return local, assigned to the caller's local when one
-receives it. -/
 def retTail {Γ qs : Ctx} {p : PrimTy} :
     Option (Idx Γ (.val p)) → Prog C (.val p :: qs ++ Γ) (.val p :: qs ++ Γ)
   | some i => .cons (.assignLocal (i.wk (thinUnder (.val p :: qs))) (.simple (.local .here))) .nil
   | none => .nil
 
-/-- A call with one value return and value arguments, as a block of the caller:
-`{ params; T r; { body' } (x = r;) }`. -/
 def inlineBlockVal {Γ ps Γf : Ctx} (args : Args C Γ ps) (p : PrimTy)
     (r : Var) (res : Option (Idx Γ (.val p))) (body : Prog C ([.val p] ++ ps) Γf) :
     Stmt C Γ Γ :=
@@ -378,7 +325,6 @@ theorem inlineBlockVal_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
         rw [drop_append_set, drop_append_append]
         rfl
 
-/-- A call, inlined when it is void or returns one value. -/
 def inlineCall {Γ Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) :
     (ret : CallRet Γ rs Γ') → (body : Prog C (rs ++ ps) Γf) → Stmt C Γ Γ'
   | .none, body => inlineBlock args body
@@ -394,7 +340,6 @@ theorem inlineCall_runC {Γ Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps
   | .rets .., _ | .mem .., _ | .storage .., _ => rfl
 
 mutual
-/-- Inline every covered call of a statement (in branches, blocks and loop bodies). -/
 def Stmt.inl : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, .ite c thn els => .ite c (Prog.inl thn) (Prog.inl els)
   | _, _, .block body => .block (Prog.inl body)
@@ -433,7 +378,6 @@ def Stmt.inl : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- Inline every covered call of a sequence. -/
 def Prog.inl : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
   | _, _, .cons s P => .cons (Stmt.inl s) (Prog.inl P)

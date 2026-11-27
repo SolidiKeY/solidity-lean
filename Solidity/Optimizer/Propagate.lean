@@ -1,43 +1,15 @@
 import Solidity.Optimizer.StmtFold
 
-/-!
-# O02 constant and copy propagation over lowering programs
-
-A forward pass over `Prog C Γ Δ` that tracks, for value locals, a simple
-value known to equal them: a literal (constant propagation) or another local
-(copy propagation). A read of such a local is replaced by that value, then the
-expression is folded (`Val.cfold`), so a propagated constant feeds folding.
-
-Facts are created only by `x = e;` and `T x = e;` whose folded right-hand
-side is a literal or a local. They survive local assignments (minus the ones
-an assignment kills: the fact for the assigned local and every fact reading
-it), declarations, `require`, `assert`, and the storage statements `assign`,
-`delete` and `pop`, which leave every local and environment value as it was
-(`KeepsLocals`); the value an `assign` stores is propagated into. Any other statement, and the exit
-of a branch, block or loop, forgets every fact; a loop body and its condition
-are processed with no facts, since they run in states the entry facts need not
-describe. `transfer`/`send` operands are not rewritten here (they are folded
-by `Prog.cfold`).
-Environment values (`msg.sender`, …) are never recorded.
-
-The invariant is `Facts.Holds F σ`: each recorded local holds its value in
-`σ`. Preservation (`Prog.cprop_runC`) is equality of the typed run in every
-state where the entry facts hold, so with no entry facts the whole run is
-unchanged (`cprop_preserves`).
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract}
 
-/-! ## Simple values under local changes -/
 
-/-- Does this simple value read the local at position `n`? -/
 def readsAt {Γ : Ctx} {p : PrimTy} (n : Nat) : Simple C Γ p → Bool
   | .local k => k.toNat == n
   | .lit .. | .bool _ | .env .. => false
 
-/-- A simple value read one local deeper. -/
 def shiftS {Γ : Ctx} {t : LTy} : {p : PrimTy} → Simple C Γ p → Simple C (t :: Γ) p
   | _, .lit n h => .lit n h
   | _, .bool b => .bool b
@@ -51,7 +23,6 @@ theorem shiftS_evalT {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.
   | _, .local _ => rfl
   | _, .env _ hp => by cases hp; rfl
 
-/-- Two indices at one position are one index. -/
 theorem Idx.eq_of_toNat : {Γ : Ctx} → {p q : PrimTy} → (i : Idx Γ (.val p)) →
     (j : Idx Γ (.val q)) → j.toNat = i.toNat → ∃ e : p = q, j = e ▸ i
   | _, _, _, .here, .here, _ => ⟨rfl, rfl⟩
@@ -88,23 +59,24 @@ theorem evalT_setLocal_of_not_reads {Γ : Ctx} {p q : PrimTy} (σ : State C Γ)
     simp only [readsAt, beq_eq_false_iff_ne] at hs
     exact get_set_ne i k v σ.env (Ne.symm hs)
 
-/-! ## Facts -/
 
-/-- For each value local, a simple value known to equal it. -/
 structure Facts (C : Contract) (Γ : Ctx) where
   get : (p : PrimTy) → Idx Γ (.val p) → Option (Simple C Γ p)
 
 def Facts.empty {Γ : Ctx} : Facts C Γ := ⟨fun _ _ => none⟩
 
-/-- Every recorded fact holds in `σ`. -/
 def Facts.Holds {Γ : Ctx} (F : Facts C Γ) (σ : State C Γ) : Prop :=
   ∀ (p : PrimTy) (j : Idx Γ (.val p)) (s : Simple C Γ p), F.get p j = some s →
     TEnv.get j σ.env = s.evalT σ
 
+theorem Facts.get_of_holds {Γ : Ctx} {F : Facts C Γ} {σ : State C Γ}
+    (hF : F.Holds σ) {p : PrimTy} (j : Idx Γ (.val p)) (s : Simple C Γ p)
+    (hs : F.get p j = some s) : TEnv.get j σ.env = s.evalT σ :=
+  hF p j s hs
+
 theorem Facts.holds_empty {Γ : Ctx} (σ : State C Γ) : (Facts.empty : Facts C Γ).Holds σ :=
   fun _ _ _ h => nomatch h
 
-/-- Facts after `i = e;`, where `s?` is the simple value of `e`, if any. -/
 def Facts.set {Γ : Ctx} {p : PrimTy} (F : Facts C Γ) (i : Idx Γ (.val p))
     (s? : Option (Simple C Γ p)) : Facts C Γ := ⟨fun q j =>
   if j.toNat = i.toNat then
@@ -116,21 +88,18 @@ def Facts.set {Γ : Ctx} {p : PrimTy} (F : Facts C Γ) (i : Idx Γ (.val p))
     | some t => if readsAt i.toNat t then none else some t
     | none => none⟩
 
-/-- Facts after a declaration with simple initial value `s?`. -/
 def Facts.push {Γ : Ctx} {p : PrimTy} (F : Facts C Γ) (s? : Option (Simple C Γ p)) :
     Facts C (.val p :: Γ) := ⟨fun _ j =>
   match j with
   | .here => s?.map shiftS
   | .there j => (F.get _ j).map shiftS⟩
 
-/-- A simple value that is a literal or a local (not an environment read). -/
 def Simple.asPure? {Γ : Ctx} : {p : PrimTy} → Simple C Γ p → Option (Simple C Γ p)
   | _, .lit n h => some (.lit n h)
   | _, .bool b => some (.bool b)
   | _, .local k => some (.local k)
   | _, .env .. => none
 
-/-- The simple value an expression is, if it is a literal or a local. -/
 def _root_.Solidity.Val.asSimple? {Γ : Ctx} {p : PrimTy} : Val C Γ p → Option (Simple C Γ p)
   | .simple s => Simple.asPure? s
   | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len ..
@@ -225,10 +194,7 @@ theorem Facts.holds_push {Γ : Ctx} {p : PrimTy} {F : Facts C Γ} {σ : State C 
       rw [shiftS_evalT]
       exact hF q j t hFj
 
-/-! ## Substitution -/
 
-/-- Replace each read of a local with a recorded fact by that fact. Reads
-inside storage and memory paths are left as written. -/
 def _root_.Solidity.Val.subst {Γ : Ctx} (F : Facts C Γ) : {p : PrimTy} → Val C Γ p → Val C Γ p
   | _, .simple (.local k) =>
     match F.get _ k with
@@ -263,7 +229,6 @@ theorem _root_.Solidity.Val.subst_evalT {Γ : Ctx} {F : Facts C Γ} {σ : State 
       Val.subst_evalT hF k]
   | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. | _, .hash .. => rfl
 
-/-- Propagate, then fold. -/
 def _root_.Solidity.Val.opt {Γ : Ctx} {p : PrimTy} (F : Facts C Γ) (v : Val C Γ p) : Val C Γ p :=
   (v.subst F).cfold
 
@@ -271,9 +236,7 @@ theorem _root_.Solidity.Val.opt_evalT {Γ : Ctx} {F : Facts C Γ} {σ : State C 
     {p : PrimTy} (v : Val C Γ p) : (v.opt F).evalT σ = v.evalT σ := by
   rw [Val.opt, Val.cfold_evalT, Val.subst_evalT hF]
 
-/-! ## Statements that keep the locals -/
 
-/-- A step that leaves every value-typed local and every environment value as it was. -/
 def KeepsLocals {Γ : Ctx} (f : TStep C Γ Γ) : Prop :=
   ∀ σ o, f σ = .ok o →
     (∀ (q : PrimTy) (k : Idx Γ (.val q)), TEnv.get k o.st.env = TEnv.get k σ.env) ∧
@@ -315,7 +278,6 @@ theorem keeps_pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : KeepsLocals 
     | exact absurd ho (by simp only [reduceCtorEq, not_false_eq_true])
     | (cases ho; exact ⟨fun _ _ => rfl, fun _ => rfl⟩)
 
-/-- Propagate into a storage source's value. -/
 def _root_.Solidity.Src.opt {Γ : Ctx} (F : Facts C Γ) : {T : Ty} → Src C Γ T → Src C Γ T
   | _, .val v => .val (v.opt F)
   | _, s@(.copy ..) | _, s@(.fixedCopy ..) | _, s@(.copyMem ..) | _, s@(.fixedCopyMem ..) => s
@@ -325,11 +287,8 @@ theorem _root_.Solidity.Src.opt_valueT {Γ : Ctx} {F : Facts C Γ} {σ : State C
   | _, .val v => by simp only [Src.opt, Src.valueT, Val.opt_evalT hF]
   | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
 
-/-! ## The pass -/
 
 mutual
-/-- Propagate through one statement: the rewritten statement and the facts
-after it. -/
 def Stmt.cprop : {Γ Γ' : Ctx} → Facts C Γ → Stmt C Γ Γ' → Stmt C Γ Γ' × Facts C Γ'
   | _, _, F, .assignLocal i r =>
     let r' := r.opt F
@@ -358,7 +317,6 @@ def Stmt.cprop : {Γ Γ' : Ctx} → Facts C Γ → Stmt C Γ Γ' → Stmt C Γ �
   | _, _, _, s@(.callRec ..) | _, _, _, s@(.revertData ..) | _, _, _, s@(.catchData ..) =>
     (s, Facts.empty)
 
-/-- Propagate through a sequence. -/
 def Prog.cprop : {Γ Γ' : Ctx} → Facts C Γ → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, _, .nil => .nil
   | _, _, F, .cons s P =>
@@ -366,11 +324,8 @@ def Prog.cprop : {Γ Γ' : Ctx} → Facts C Γ → Prog C Γ Γ' → Prog C Γ �
     .cons r.1 (Prog.cprop r.2 P)
 end
 
-/-! ## Preservation -/
 
 mutual
-/-- A statement's rewrite runs as it does where the entry facts hold, and
-the exit facts hold in each state it leaves. -/
 theorem Stmt.cprop_runC : {Γ Γ' : Ctx} → (F : Facts C Γ) → (s : Stmt C Γ Γ') →
     (σ : State C Γ) → F.Holds σ →
       Stmt.runC (Stmt.cprop F s).1 σ = Stmt.runC s σ ∧
@@ -472,7 +427,6 @@ theorem Stmt.cprop_runC : {Γ Γ' : Ctx} → (F : Facts C Γ) → (s : Stmt C Γ
   | _, _, _, .revertData .., _, _ | _, _, _, .catchData .., _, _ =>
     ⟨rfl, fun _ _ => Facts.holds_empty _⟩
 
-/-- A sequence's rewrite runs as it does where the entry facts hold. -/
 theorem Prog.cprop_runC : {Γ Γ' : Ctx} → (F : Facts C Γ) → (P : Prog C Γ Γ') →
     (σ : State C Γ) → F.Holds σ → Prog.runC (Prog.cprop F P) σ = Prog.runC P σ
   | _, _, _, .nil, _, _ => rfl
@@ -486,7 +440,6 @@ theorem Prog.cprop_runC : {Γ Γ' : Ctx} → (F : Facts C Γ) → (P : Prog C Γ
       rw [Prog.cprop_runC _ P o.st (hout o ho)]
 end
 
-/-- **Propagation with no entry facts preserves the typed run.** -/
 theorem Prog.cprop_empty_runC {Γ Γ' : Ctx} (P : Prog C Γ Γ') :
     Prog.runC (Prog.cprop Facts.empty P) = Prog.runC P :=
   funext fun σ => Prog.cprop_runC Facts.empty P σ (Facts.holds_empty σ)
