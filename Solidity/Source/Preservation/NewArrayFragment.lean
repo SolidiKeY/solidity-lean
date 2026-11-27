@@ -2,8 +2,7 @@ import Solidity.Source.Preservation.Fragment
 import Solidity.Roadmap.V16.SSCP2.NewAllocation
 
 /-! Dynamic-new consumer of published allocation preservation. The child triple
-is discharged by the existing checked call fragment, not assumed. This adds a
-standalone allocating expression rule without changing ValFragC or CallsOK. -/
+is discharged by the existing checked call fragment, not assumed. -/
 namespace Solidity.Source.Preservation
 open EM
 

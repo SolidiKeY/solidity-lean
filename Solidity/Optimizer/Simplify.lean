@@ -1,47 +1,12 @@
 import Solidity.Optimizer.Propagate
 import Solidity.Optimizer.StmtFold
 
-/-!
-# O02 expression simplification
-
-Algebraic identities from solc's simplification rule list
-(`libevmasm/RuleList.h`, used by the legacy and Yul `ExpressionSimplifier`),
-restricted to the ones that hold under *checked* Solidity arithmetic and keep
-every halt. solc applies a rule that drops an operand only when that operand
-is movable; here an operand may revert (a storage read through an unset alias,
-a checked operation), so a rule that drops `X` requires `X` to be a simple
-value (`Val.simple`), whose evaluation never fails.
-
-| rule | types | solc rule |
-|---|---|---|
-| `X + 0 → X`, `0 + X → X` | `uint`, `int` | `ADD(X, 0)` |
-| `X - 0 → X` | `uint`, `int` | `SUB(X, 0)` |
-| `X * 1 → X`, `1 * X → X` | `uint`, `int` | `MUL(X, 1)` |
-| `X / 1 → X` | `uint`, `int` | `DIV(X, 1)` |
-| `X && true → X`, `true && X → X` | `bool` | `AND(X, 1)` on booleans |
-| `X \|\| false → X`, `false \|\| X → X` | `bool` | `OR(X, 0)` on booleans |
-| `X ** 1 → X` | `uint` | `EXP(X, 1)` |
-| `X >> 0 → X` | `uint`, `int` | `SHR(0, X)` / `SAR(0, X)` |
-| `s * 0 → 0` (s simple) | `uint`, `int` | `MUL(X, 0)` |
-| `s - s → 0` (s simple) | `uint`, `int` | `SUB(X, X)` |
-| `s == s → true`, `s != s → false` (s simple) | any | `EQ(X, X)` |
-| `s < s`, `s > s → false`; `s <= s`, `s >= s → true` (s simple) | `uint`, `int` | `LT(X, X)` |
-
-A rule that would hide a failure is absent: `X * 0 → 0` and `X - X → 0` for a
-compound `X` (it may revert). Not implemented although valid: the bitwise and
-`<<` identities, `X % 1`, `X ** 0`, `!!X`, and the identities of the wrapping
-operators (`addW`, …), which hold exactly but are not yet proved here.
-Preservation is `Val.simp_evalT`:
-equal results (value or halt) in every typed state.
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract} {Γ : Ctx}
 
-/-! ## Recognisers -/
 
-/-- The integer of an integer literal. -/
 def litInt? {p : PrimTy} : Val C Γ p → Option Int
   | .simple (.lit n _) => some n
   | .simple (.bool _) | .simple (.local _) | .simple (.env ..) | .read _ | .binop .. | .unop ..
@@ -60,7 +25,6 @@ theorem litInt?_eq {p : PrimTy} {v : Val C Γ p} {n : Int} (h : litInt? v = some
   | read | binop | unop | ternary | readMem | len | mlen | modular | hash =>
     simp only [litInt?, reduceCtorEq] at h
 
-/-- The Boolean of a Boolean literal. -/
 def litBool? {p : PrimTy} : Val C Γ p → Option Bool
   | .simple (.bool b) => some b
   | .simple (.lit ..) | .simple (.local _) | .simple (.env ..) | .read _ | .binop .. | .unop ..
@@ -80,7 +44,6 @@ theorem litBool?_eq {v : Val C Γ .bool} {b : Bool} (h : litBool? v = some b) :
   | read | binop | unop | ternary | readMem | len | mlen | hash =>
     simp only [litBool?, reduceCtorEq] at h
 
-/-- Syntactic equality of simple values, decided without a classical oracle. -/
 def Simple.beq : {p : PrimTy} → Simple C Γ p → Simple C Γ p → Bool
   | _, .lit n _, .lit m _ => n == m
   | _, .bool a, .bool b => a == b
@@ -116,7 +79,6 @@ theorem Simple.beq_eq : {p : PrimTy} → (s t : Simple C Γ p) → Simple.beq s 
   | _, .env .., .lit .., h | _, .env .., .bool _, h | _, .env .., .local _, h => by
     simp only [Simple.beq, Bool.false_eq_true] at h
 
-/-- The simple value an expression is. -/
 def simple? {p : PrimTy} : Val C Γ p → Option (Simple C Γ p)
   | .simple s => some s
   | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen .. | .modular ..
@@ -129,7 +91,6 @@ theorem simple?_eq {p : PrimTy} {v : Val C Γ p} {s : Simple C Γ p} (h : simple
   | read | binop | unop | ternary | readMem | len | mlen | modular | hash =>
     simp only [simple?, reduceCtorEq] at h
 
-/-- Both operands are the same simple value. -/
 def sameSimple {p : PrimTy} (a b : Val C Γ p) : Bool :=
   match simple? a, simple? b with
   | some s, some t => Simple.beq s t
@@ -147,7 +108,6 @@ theorem sameSimple_eq {p : PrimTy} {a b : Val C Γ p} (h : sameSimple a b = true
       simp only [ha, hb] at h
       exact ⟨s, simple?_eq ha, by rw [simple?_eq hb, Simple.beq_eq s t h]⟩
 
-/-! ## Arithmetic facts -/
 
 theorem add_zero_r_uint (σ : State C Γ) (a : Val C Γ .uint) (h : BinOp.add.accepts .uint = true)
     (hq : BinOp.add.ret .uint = .uint) (hn : PrimTy.uint.inRange 0 = true) :
@@ -441,9 +401,7 @@ theorem ge_self (σ : State C Γ) {p : PrimTy} (s : Simple C Γ p) (h : BinOp.ge
     | simp only [Val.evalT, bind, Except.bind, Simple.evalT, BinOp.shortT, TRes.ofOpt,
         BinOp.evalT, BinOp.evalNum, Int.le_refl, decide_true]
 
-/-! ## The rewriter -/
 
-/-- Retype along an equation of primitive types. -/
 def castV {r q : PrimTy} (h : r = q) (v : Val C Γ r) : Val C Γ q := h ▸ v
 
 def isLitI {p : PrimTy} (n : Int) (v : Val C Γ p) : Bool := litInt? v == some n
@@ -465,7 +423,6 @@ theorem isSimp_true {p : PrimTy} {v : Val C Γ p} (h : isSimp v = true) : ∃ s,
   | none => simp only [hv, Option.isSome_none, Bool.false_eq_true] at h
   | some s => exact ⟨s, simple?_eq hv⟩
 
-/-- One binary node, operands already simplified. -/
 def simpBin : (op : BinOp) → (p : PrimTy) → {q : PrimTy} → op.accepts p = true →
     op.ret p = q → Val C Γ p → Val C Γ p → Val C Γ q
   | .add, .uint, _, h, hq, a, b =>
@@ -566,7 +523,6 @@ theorem simpBin_evalT (σ : State C Γ) (op : BinOp) (p : PrimTy) {q : PrimTy}
           | exact (le_self σ s _ _).symm
           | exact (ge_self σ s _ _).symm)
 
-/-- Bottom-up simplification. -/
 def _root_.Solidity.Val.simp : {p : PrimTy} → Val C Γ p → Val C Γ p
   | _, .binop op h hq a b => simpBin op _ h hq a.simp b.simp
   | _, .unop op h hq a => .unop op h hq a.simp
@@ -579,7 +535,6 @@ def _root_.Solidity.Val.simp : {p : PrimTy} → Val C Γ p → Val C Γ p
   | _, .mlen b hp => .mlen b hp
   | _, .hash k b hp => .hash k b hp
 
-/-- **Simplification preserves every result**, value or halt. -/
 theorem _root_.Solidity.Val.simp_evalT (σ : State C Γ) : {p : PrimTy} → (v : Val C Γ p) →
     v.simp.evalT σ = v.evalT σ
   | _, .binop op h hq a b => by
@@ -598,11 +553,9 @@ theorem _root_.Solidity.Val.simp_evalT (σ : State C Γ) : {p : PrimTy} → (v :
   | _, .mlen _ _ => rfl
   | _, .hash _ _ _ => rfl
 
-/-- Simplify, then fold. -/
 def simpFoldPass : ValPass C :=
   ⟨fun v => (Val.simp v).cfold, fun σ v => by rw [Val.cfold_evalT, Val.simp_evalT]⟩
 
-/-- Simplification, folding and dead-code elimination over a program. -/
 abbrev _root_.Solidity.Prog.simplify {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' :=
   Prog.vopt simpFoldPass P
 
