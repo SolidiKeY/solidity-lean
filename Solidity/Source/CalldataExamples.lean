@@ -1,7 +1,7 @@
 import Solidity.Source.DecodeExamples
 
 /-!
-# Controls of `calldata` references (lane FU2-B)
+# Controls of `calldata` references
 
 A unit written as syntax, elaborated by `elaborate`, deployed and called
 through the semantics. Its external functions take `calldata` parameters,

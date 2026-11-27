@@ -5,7 +5,7 @@ import Solidity.Source.StmtProgress
 import Solidity.Source.SemanticsExamples
 
 /-!
-# Controls of the soundness lane (V04b)
+# Soundness controls
 
 Witnesses and negative controls for `Solidity/Source/ValueProgress.lean`
 and `Solidity/Source/WellTyped.lean`: each progress lemma's domain is
@@ -18,17 +18,17 @@ it the operation is `stuck`).
 | `add_bool_stuck`, `add_bool_outside` | `+` on booleans is `stuck`, and outside `BinOp.FitsAt` |
 | `cmp_add_stuck` | `cmpVal` with a non-comparison operator is `stuck` |
 | `shift_bool_stuck` | `shiftVal` on a boolean is `stuck` |
-| `addSub_opsOK`, `order_opsOK`, `shift_opsOK` | elaborated `a + a`, `a < 1`, `a << 1` (S01's controls) are `OpsOK` |
+| `addSub_opsOK`, `order_opsOK`, `shift_opsOK` | elaborated `a + a`, `a < 1`, `a << 1` (controls) are `OpsOK` |
 | `badBinary_not_opsOK` | a resolved `true + false`, which no derivation elaborates to, is not `OpsOK` |
 | `refOK_wrong_heap` | a memory reference to an address the heap typing does not give its type does not agree |
-| `addSub_ns` | the elaboration of S01's `a + a` is in the value fragment and never `stuck` (`evalE_valFrag_ns`) |
+| `addSub_ns` | the elaboration of `a + a` is in the value fragment and never `stuck` (`evalE_valFrag_ns`) |
 | `badBinary_stuck` | evaluating the out-of-domain `true + false` is `stuck`: `OpsOK` is needed |
 | `cond_ns`, `cond_value` | `true ? 1 + 2 : 0` at `uint8` is never `stuck` and evaluates to `3` |
 | `loop_ns`, `loop_value` | `uint8 i; while (i < 3) { i += 1; }` is never `stuck` (`itemsNS`) and ends with `i = 3` |
-| `cb_ns`, `cb_value` | `x = x + 1;` on a storage variable (S05's callback body) is never `stuck`, and takes `x` from 3 to 4 |
+| `cb_ns`, `cb_value` | `x = x + 1;` on a storage variable (the callback body) is never `stuck`, and takes `x` from 3 to 4 |
 | `ret_unframed_stuck`, `ret_unframed_no_frame` | a `return 1;` run outside a coherent frame (no return slot) is `stuck`, and those locals are not a `BodyFrame`: the frame hypothesis is needed |
 | `ret_framed_ns` | the same `return 1;` with a return slot is never `stuck` |
-| `indexMapping_ns` | the elaboration of S01's `m[o]` (a mapping value, read through an implicit key conversion) is in the value fragment and never `stuck` |
+| `indexMapping_ns` | the elaboration of `m[o]` (a mapping value, read through an implicit key conversion) is in the value fragment and never `stuck` |
 | `incBody_ns` | the elaboration of the counter's typed body `count++;` (`TypingExamples.incBody`, an `ItemsD` derivation) is in the statement fragment and never `stuck` in its frame (`ItemsD.toR_ns`) |
 | `retPair_ns`, `retPair_unframed_stuck` | `return (1, 2);` with two return slots is never `stuck`; over locals without them it is |
 | `callF_ns`, `callF_value`, `callF_badFrame_stuck` | the call expression `f()` (a function implemented by `return 1;`) is never `stuck` (`evalE_callFrag_ns`) and evaluates to `1`; with a body outside the call's frame it is `stuck` |
@@ -71,7 +71,7 @@ theorem cmp_add_stuck : cmpVal (D := D) .add one8 two8 = .error (.stuck "not a c
 theorem shift_bool_stuck : shiftVal (D := D) true .shl 1 (.bool true) = .error (.stuck "shift operand") := rfl
 
 open TypingExamples in
-/-- **Witnesses**: S01's own derivations elaborate into the domains. -/
+/-- **Witnesses**: typing derivations elaborate into the domains. -/
 theorem addSub_opsOK : w_addSub.toR.OpsOK := Typed.toR_opsOK _
 
 open TypingExamples in
@@ -105,7 +105,7 @@ theorem refOK_heap {E : Env} :
 
 
 open TypingExamples in
-/-- **Witness**: the elaboration of S01's `a + a` is in the value fragment,
+/-- **Witness**: the elaboration of `a + a` is in the value fragment,
 so its evaluation is never `stuck` (at any horizon, in any state). -/
 theorem addSub_ns (G : Glob Γ.env) (F : Fr) (n : Nat) : NS (evalE G F n w_addSub.toR) :=
   evalE_valFrag_ns G F n _ ⟨⟨rfl, rfl, .inl rfl⟩, ⟨rfl, rfl, .inl rfl⟩, rfl⟩ (Typed.toR_opsOK _)
@@ -193,7 +193,7 @@ theorem cb_ns (n : Nat) (F : Fr) (s : Option (Ph EB)) :
   itemsNS _ F n 0 s _ .nil cbItems_frag cbItems_ops ⟨[], [], rfl, rfl⟩
 
 open SemanticsExamples in
-/-- ... and takes `x` from 3 to 4 in S05's deployed state. -/
+/-- ... and takes `x` from 3 to 4 in the deployed state. -/
 theorem cb_value :
     (match (execItems (GB answerOnly) FC 10 0 none cbBody.items .nil).run (.nil, sB) with
     | (.ok _, (_, s)) => readX s
@@ -249,7 +249,7 @@ theorem retLocalPair_ns (n : Nat)
 /-! ## Elaborated witnesses: a statement and a mapping -/
 
 open TypingExamples in
-/-- **Witness**: the elaboration of S01's `m[o]` (a mapping value, read)
+/-- **Witness**: the elaboration of `m[o]` (a mapping value, read)
 is in the value fragment, so its evaluation is never `stuck`. -/
 theorem indexMapping_ns (G : Glob Γ.env) (F : Fr) (n : Nat) : NS (evalE G F n w_index_mapping.toR) :=
   evalE_valFrag_ns G F n _ (by
@@ -447,7 +447,7 @@ open SemanticsExamples in
 theorem callG_value : intOf ((evalE progFG F0 12 callG).run (.nil, s0)) = some 1 := by
   rfl
 
-/-! ## The census's semantic bug, fixed -/
+
 
 /-- `string memory s = "abc"; bytes(s)[0] = 0x78; bytes1 b = bytes(s)[0];` -/
 def strItems : RItems SemanticsExamples.E0 [] false .body []
@@ -459,8 +459,8 @@ def strItems : RItems SemanticsExamples.E0 [] false .body []
     (.stmt (.declInit (.indexBytes (.convExplicit (.local .here) (τ := .bytes .memory) (by decide))
         (.const (Q.ofInt 0)) (by decide)) (by decide)) .nil))
 
-/-- **Semantic fix**: writing a byte of `bytes(s)` for a `string memory s`
-updates the string (it was `stuck`, "not bytes"): `b` is `0x78`. -/
+/-- Writing a byte of `bytes(s)` for a `string memory s`
+updates the string: `b` is `0x78`. -/
 theorem stringByte_write :
     (match ((execItems (SemanticsExamples.G0 .viaIR) SemanticsExamples.F0 20 0 none strItems .nil).run
       (.nil, SemanticsExamples.s0)).1 with

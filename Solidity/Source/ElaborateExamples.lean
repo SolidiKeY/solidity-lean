@@ -2,7 +2,7 @@ import Solidity.Source.Elaborate
 import Solidity.Source.SemanticsExamples
 
 /-!
-# Controls of the elaborator (S02 item 1b)
+# Controls of the elaborator
 
 Units written as syntax, elaborated by `elaborate` (no hand-written
 resolved terms), deployed and called through the semantics
@@ -187,8 +187,7 @@ def elabW : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 
 #guard elabW.isSome
 
--- **A user-defined value type argument** (lane V04b, a run-time gap
--- closed) is decoded as its underlying type: `f(7)` runs (`x` becomes 1),
+-- **A user-defined value type argument** is decoded as its underlying type: `f(7)` runs (`x` becomes 1),
 -- `f(300)` is not a `uint8` and reverts with no data.
 #guard (elabW.map fun el => runD el 0 [selOf "f(uint8)" ++ arg 7, selOf "x()"]) ==
   some [some (.success []), some (.success []), some (.success (arg 1))]
@@ -213,7 +212,7 @@ def elabB : Option Elaborated := elaborate (resolveUnit { pipeline := .legacy } 
 
 #guard elabB.isSome
 
--- **Panic 0x41 in the decoder** (lane V04b): a `bytes` argument whose
+-- **Panic 0x41 in the decoder**: a `bytes` argument whose
 -- length is `2^64` panics with `0x41` (solc's `array_allocation_size`
 -- comes before its bounds check); one of length `2^32` is out of bounds and
 -- reverts with no data; a length word cut short (`32` then one byte)
@@ -287,7 +286,7 @@ def callL (el : Elaborated) (input : Bytes) : Option Outcome :=
 #guard (elabL.bind fun el => callL el (selOf "sum2(uint256[])" ++ arg 32 ++ arg 2 ++ arg 5 ++ arg 7)) ==
   some (.success (arg 12))
 
--- **Panic 0x41 for a dynamic value array** (lane V04b): a length word cut
+-- **Panic 0x41 for a dynamic value array**: a length word cut
 -- short reverts with no data, a length of `2^64` panics with `0x41`, and a
 -- length of `2^32` is out of bounds and reverts with no data.
 #guard ([selOf "sum2(uint256[])" ++ arg 32 ++ [1],

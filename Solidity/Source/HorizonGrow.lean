@@ -3,8 +3,7 @@ import Solidity.Source.HorizonFuel
 /-!
 # Horizons: events only grow
 
-Split from `Solidity/Source/Horizon.lean` for checking cost (each module
-stays under the per-module memory bound). `grow_go` and `growAt`: every
+`grow_go` and `growAt`: every
 interpreter function only appends events.
 -/
 

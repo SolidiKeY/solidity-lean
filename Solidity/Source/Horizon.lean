@@ -3,14 +3,10 @@ import Solidity.Source.HorizonApproxStatements
 /-!
 # Horizons: timed-out runs show a prefix of the events
 
-The last part of the horizon results (S05 item 2), whose overview is in
+The last part of the horizon results, whose overview is in
 `Solidity/Source/HorizonFuel.lean`: fuel monotonicity and horizon
 independence there, events only grow in `HorizonGrow`, helpers keep the
-events in `HorizonConst`, and here `approxAt` and `runTx_events_mono`. The
-module was split for checking cost; importers of `Solidity.Source.Horizon`
-see every part. Expression and statement proof stages are imported through
-HorizonApproxExpressions and HorizonApproxStatements; qualified theorem names
-and the frozen record remain unchanged.
+events in `HorizonConst`, and here `approxAt` and `runTx_events_mono`.
 -/
 
 namespace Solidity.Source

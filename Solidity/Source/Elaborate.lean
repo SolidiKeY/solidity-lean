@@ -2,7 +2,7 @@ import Solidity.Source.Infer
 import Solidity.Source.Elaborated
 
 /-!
-# The elaborator: a resolution to its program (S02 item 1b)
+# The elaborator: a resolution to its program
 
 `elaborate r` infers a derivation for every body, initializer, constant,
 modifier invocation and base-constructor argument of `r`'s unit

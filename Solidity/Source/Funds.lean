@@ -1,10 +1,10 @@
 import Solidity.Source.Session
 
 /-!
-# Sender-funds validity at the actual request boundary (S04.04)
+# Sender-funds validity at the actual request boundary
 
-The raw runTx body is unchanged. The real session drivers test requestFunded
-before reaching it. This API exposes the same validation with the complete
+The real session drivers test requestFunded
+before reaching runTx. This API exposes the same validation with the complete
 actual Source state/result: invalid requests are absent, not reverts or stuck.
 No gas/fee/nonce validity, deployment validity or new execution semantics.
 -/

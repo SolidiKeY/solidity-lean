@@ -1,11 +1,9 @@
 import Solidity.Source.Typing
 
 /-!
-# Overloads across bases (G12)
+# Overloads across bases
 
-S01's `Env.lookup` takes the first scope of a contract's linearization that
-declares a name, so a function overloaded between a contract and its base
-was not one overload set ("What S01 does not do").  solc imports every
+solc imports every
 inherited member into the derived contract's scope; a base function is
 hidden only by a more derived function with the same parameter types (its
 override), and `private` members of bases are not inherited.
@@ -17,10 +15,9 @@ types.  The checker is `Env.inheritedFns` in
 `Solidity/Frontend/Static/Overloads.lean`.
 
 Not modelled: a public state variable overriding a base function (its
-getter) and a non-function member do not hide base functions here; S01's
-`WellFormed` does not yet check overrides (G14).
+getter) and a non-function member do not hide base functions here; `WellFormed` does not check overrides.
 
-Parameter types are compared with S01's structural `STy.sameList`; a
+Parameter types are compared with structural `STy.sameList`; a
 function whose signature does not elaborate is never the same as another
 (it is refused by `WellFormed` anyway).
 -/
@@ -31,7 +28,7 @@ namespace Solidity.Source
 def Env.chain (E : Env) (c : String) : List String := (E.linearize c).getD [c]
 
 /-- The functions named `x` declared in scope `b`, visible from `c` and
-callable there by name (not `external`; S01's `Decl.callableFrom`). -/
+callable there by name (not `external`; `Decl.callableFrom`). -/
 def Env.visibleFns (E : Env) (c b x : String) : List Decl :=
   (E.visible (Option.some c) (Option.some b) x).filter fun d =>
     d.kind == .function && d.callableFrom (Option.some c)

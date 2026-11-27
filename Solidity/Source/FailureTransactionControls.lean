@@ -2,7 +2,7 @@ import Solidity.Source.FailureRuntimeControls
 
 /-! Actual explicit-plan transaction/root dispatch controls. The same registered
 intrinsic program, Fixed hash and strategy as RuntimeControls are used. No
-request-fate scope, post-fee balance installation or P8 realization is claimed.
+request-fate scope, post-fee balance installation or compiler realization is claimed.
 Completed reverts finalize transient state; propagated resource stops and
 horizon exhaustion retain their exceptional state and emit no receipt. -/
 namespace Solidity.Source.FailureExecution.TransactionControls

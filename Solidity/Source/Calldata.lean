@@ -1,7 +1,7 @@
 import Solidity.Source.Decode
 
 /-!
-# `calldata` references in the source semantics (lane FU2-B)
+# `calldata` references in the source semantics
 
 Dispatch keeps a `calldata` parameter (`bytes`, `string`, or a dynamic
 array of one-word values) as a reference into the frame's call data
@@ -25,8 +25,8 @@ This module proves, for that fragment:
   (`readLoc_cd_ok`, `cdByte_ok`, `sliceR_ok`);
 - **copies keep the memory invariant** (`cdToMem_ok`), including the
   statically encoded element copies at the head stride (`cdStaticToMem_ok`,
-  `cdToMem_static_ok`, G18.05);
-- **the evaluation arms on `calldata` locals** (closed):
+  `cdToMem_static_ok`);
+- **the evaluation arms on `calldata` locals**:
   `evalE_cdLength_ok` (`x.length`), `evalE_cdIndex_ok` (`x[j]`),
   `evalE_cdSlice_ok` (`x[s:e]`) keep `MemOK` and halt only without `stuck`.
 
@@ -40,7 +40,7 @@ strings and represented inline static-array elements; its layout predicates
 also admit string slices and statically encoded reference-element slices.
 Direct static-array entry parameters, structs and unrepresented fixed shapes
 remain open. Constructor calldata and slices of dynamically encoded base
-elements remain refused. Memory-copy generalisation is separate G18.05 work.
+elements remain refused.
 -/
 
 namespace Solidity.Source
@@ -188,7 +188,7 @@ theorem cdToMem_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
   · simp only [cdToMem, dif_pos hc]
     exact Hoare.pure' fun _ h => ⟨h, trivial⟩
 
-/-- **A statically encoded element `cdStaticToMem` copies** (G18.05): a
+/-- **A statically encoded element `cdStaticToMem` copies**: a
 one-word value the decoder reads, or a static memory array of such
 elements with a statically encoded element. -/
 def STy.cdCopyElem (E : Env) : STy → Bool
@@ -227,7 +227,7 @@ theorem cdElems_ok {σ : STy} {go : Nat → EM E Γ (Val E.layout σ)} (stride :
       y (MemOK.self hy)
 
 /-- **A static element copy keeps the memory invariant** and is never
-`stuck` (G18.05). -/
+`stuck`. -/
 theorem cdStaticToMem_ok (F : Fr) (σ : STy) (hσ : σ.cdCopyElem E = true) (H : HeapTy) (off : Nat) :
     Hoare (MemOK E H) (cdStaticToMem F σ off : EM E Γ (Val E.layout σ))
       (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun e y => MemOK E H y ∧ NotStuck e) := by
@@ -251,7 +251,7 @@ theorem cdStaticToMem_ok (F : Fr) (σ : STy) (hσ : σ.cdCopyElem E = true) (H :
 
 /-- **A copy of statically encoded elements keeps the memory invariant**
 and is never `stuck`: a dynamic array of static arrays, or a static
-array (G18.05). -/
+array. -/
 theorem cdToMem_static_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
     (hτ : (∃ e m, τ = .array .memory (.array .memory e (some m)) none ∧
         (STy.array .memory e (some m)).cdCopyElem E = true) ∨

@@ -1,9 +1,7 @@
 import Solidity.Source.WellFormed
 
 /-!
-# Compile-time constants (G13)
-
-Two relations S01 lacks ("What S01 does not do", Constants):
+# Compile-time constants
 
 **Compile-time initializers.**  solc requires the initializer of a
 `constant` to be *pure* (`TypeChecker`: "Initial value for constant variable
@@ -16,9 +14,8 @@ assignment is not.  `PureS Γ .expr e` is that judgment (over every category
 so that argument lists and tuple slots are covered by the same family);
 `ConstInitsPure r` requires it of every constant of a resolved unit.
 
-**Named constants as values.**  S01's `arrayLen` folds literal lengths
-only.  `TEval`/`NamedConst` are solc's `ConstantEvaluator` (0.8.x): a
-literal-only expression folds exactly by S01's `Syn.const`; a named integer
+**Named constants as values.**  `TEval`/`NamedConst` are solc's `ConstantEvaluator` (0.8.x): a
+literal-only expression folds exactly by `Syn.const`; a named integer
 constant has its declared type and its initializer's value converted to it;
 an operation with a typed operand takes solc's result type, folds exactly
 and converts, so `uint256 constant A = 7;` gives `A / 2 = 3`, and
@@ -32,8 +29,7 @@ namespace Solidity.Source
 
 /-! ## Pure expressions -/
 
-/-- The builtins whose calls are pure (solc's `FunctionType::isPure`), among
-those S01 types. -/
+/-- The builtins whose calls are pure (solc's `FunctionType::isPure`). -/
 def Builtin.pure : Builtin → Bool
   | .keccak256 | .sha256 | .ripemd160 | .ecrecover | .addmod | .mulmod | .erc7201 => true
   | _ => false
@@ -157,8 +153,7 @@ def ConstOp.resultTy : ConstOp → TVal → TVal → Option IntTy
 mutual
 
 /-- **Compile-time evaluation** of a constant expression in a scope, solc's
-`ConstantEvaluator`: a literal-only expression folds exactly (S01's
-`Syn.const`); a named integer constant has its declared type; an operation
+`ConstantEvaluator`: a literal-only expression folds exactly (`Syn.const`); a named integer constant has its declared type; an operation
 with a typed operand takes the result type, folds exactly, then converts
 (`Q.toIntTy?`: out of range is no value, a fraction is truncated). -/
 inductive TEval (E : Env) : Option String → Syn .expr → TVal → Prop where

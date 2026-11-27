@@ -2,7 +2,7 @@ import Solidity.Source.Session
 import Solidity.Source.ElaborateExamples
 
 /-!
-# Controls of sessions with unfinished transactions (S05 item 2)
+# Controls of sessions with unfinished transactions
 
 ```solidity
 contract C {

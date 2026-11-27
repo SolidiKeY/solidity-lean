@@ -1,15 +1,14 @@
 import Solidity.Source.Typing
 
-/-! H57/H125 additive environment-aware statement typing.
+/-! Additive environment-aware statement typing.
 Regression: a nameable mapping-bearing struct must be refused as a memory or
 calldata local, while an initialized storage reference remains admissible.
-V1 StmtD/ItemsD and its intentionally negative refusal statements are frozen.
 A generic fold over the original derivation checks only declaration locations;
 all other premises and resolved typing evidence are reused without a rule copy.
-No Lowering import, global admission change or v1 retirement is introduced. -/
+-/
 namespace Solidity.Source
 
-/-- V2 local declaration location policy; equivalent to the published H24
+/-- V2 local declaration location policy; equivalent to the
 environment-aware formula, without importing the Lowering consumer. -/
 def envLocOK (E : Env) (ty : STy) (loc : Option DataLoc) (initialized : Bool) : Bool :=
   locOK ty loc initialized &&
@@ -210,7 +209,7 @@ Solidity.Source.V2.StmtD C (k := k) L
     cases typed'
     exact ⟨true, checked⟩
 
-/-- Positive H24 local declaration admission for v2, in every environment.
+/-- Positive local declaration admission for v2, in every environment.
 No compatibility assumption is needed for this direction. -/
 theorem declaration_admissible :
  ∀ (C : Solidity.Source.Ctx) (k : Solidity.Source.SCtx)

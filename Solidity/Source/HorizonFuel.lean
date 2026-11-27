@@ -1,7 +1,7 @@
 import Solidity.Source.Semantics
 
 /-!
-# Horizons: the interpreter is monotone in its fuel (S05 item 2)
+# Horizons: the interpreter is monotone in its fuel
 
 `Below m m'`: on every state, `m` times out or runs exactly as `m'`.  Every
 function of the interpreter at horizon `n` is `Below` itself at `n + 1`
@@ -426,8 +426,8 @@ macro_rules
 
 
 
-/-! The shared horizon family below covers both calldata modes and the new
-delegated library entry. The shared schema also accepts the existing failure plan; ordinary-mode records and statements stay unchanged. -/
+/-! The shared horizon family below covers both calldata modes and the delegated
+library entry. The shared schema accepts a failure plan. -/
 
 theorem Below.withLibraryCalldata {Γ : RCtx} {α : Type}
     (known : Bool) (ty : STy) {a b : EM E Γ α} (h : Below a b) :

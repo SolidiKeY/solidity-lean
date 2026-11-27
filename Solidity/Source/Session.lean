@@ -1,7 +1,7 @@
 import Solidity.Source.HorizonDeploy
 
 /-!
-# Sessions that show the events of unfinished transactions (S05 item 2)
+# Sessions that show the events of unfinished transactions
 
 `sessionAt` (`Solidity/Source/Semantics.lean`) ends a session's prefix at a
 transaction that completes within no horizon up to `n`, showing none of its
@@ -12,7 +12,7 @@ when it is stuck.  The family is still consistent
 (`sessionAtEvents_consistent`), because a run that has not completed at
 `n` shows a prefix of its events at every larger horizon
 (`runTx_events_mono`, `Solidity/Source/Horizon.lean`), so
-`sourceLangEvents` has the type of G01's `Lang Event Outcome`.
+`sourceLangEvents` has the type of `Lang Event Outcome`.
 
 An unfinished deployment shows its run's events at `n` as well
 (`deployRun_events_mono`, from `deploy_approx`,
@@ -144,8 +144,7 @@ theorem sessionGoEvents_mono (P : SrcProg E) (env : SessionEnv) :
 
 /-- The deployment as a session runs it: its completed outcome recorded as an
 event. An explicit failure plan reaches actual initcode execution; an exceptional
-request/ancestor stop propagates without a deployment receipt. The default path
-and its horizon laws below remain unchanged. This does not install a post-fee
+request/ancestor stop propagates without a deployment receipt. This does not install a post-fee
 balance or consume the deployment transaction-fate ordinal. The terminal
 receipt is deliberately outside the body-event budget, as in FailureCursor. -/
 def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat)
@@ -246,13 +245,13 @@ theorem sessionFromEvents_consistent (P : SrcProg E) (env : SessionEnv) (addr : 
       exact hm
     · exact deployRun_events_mono P env addr (St.init E) hnm
 
-/-- **Consistent** (G01 `Prefixes.Consistent`). -/
+/-- **Consistent** (`Prefixes.Consistent`). -/
 theorem sessionAtEvents_consistent (P : SrcProg E) (env : SessionEnv) :
     Prefixes.Consistent (sessionAtEvents P env) :=
   sessionFromEvents_consistent P env _
 
 /-- **The source language with the events of unfinished transactions**
-(G01 `Lang Event Outcome`), as `sourceLang` otherwise. -/
+(`Lang Event Outcome`), as `sourceLang` otherwise. -/
 def sourceLangEvents (E : Env) : Lang Event Outcome where
   Prog := SrcProg E
   Env := SessionEnv

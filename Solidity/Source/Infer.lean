@@ -1,7 +1,7 @@
 import Solidity.Source.Typing
 
 /-!
-# Type inference: derivations computed (S02 item 1b)
+# Type inference: derivations computed
 
 `Typed.infer Γ e` returns a type and a derivation `Typed Γ e τ`, or `none`;
 `StmtD.infer` and `ItemsD.infer` do the same for statements and blocks.

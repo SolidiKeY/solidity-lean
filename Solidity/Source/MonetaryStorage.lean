@@ -1,6 +1,6 @@
 import Solidity.Source.MonetaryExecution
 
-/-! H19 invariant transport through actual mutable storage operations.
+/-! invariant transport through actual mutable storage operations.
 These laws retain the current-and-saved-account bound explicitly. They are
 not a full evaluator reachability proof and introduce no new write cases. -/
 namespace Solidity.Source

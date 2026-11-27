@@ -2,7 +2,7 @@ import Solidity.Source.ElaborateExamples
 import Solidity.Source.Decode
 
 /-!
-# Controls of `abi.decode` (lane FU2-B)
+# Controls of `abi.decode`
 
 A unit written as syntax, elaborated by `elaborate` (the typing rule
 `Typed.abiDecode`, found by the checker), deployed and called through the
@@ -154,7 +154,7 @@ example : TypingExamples.Γ.decodeTys (one (ty .address)) = some [.address true]
 example : TypingExamples.Γ.decodeTys (one (.index (ty .address) .none)) =
     some [.array .memory (.address false) none] := rfl
 
--- **Tuple declarations** (lane FU2-B, checkpoint 4): `(uint8 a, ) =
+-- **Tuple declarations**: `(uint8 a, ) =
 -- abi.decode(b, (uint8, bool)); x = a;` stores 7 (the hole is decoded and
 -- validated, then discarded: `(7, 2)` reverts); `(, , uint8 z) =
 -- abi.decode(b, (bool, bool, uint8)); x = z;` stores 9.

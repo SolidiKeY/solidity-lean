@@ -2,7 +2,7 @@ import Solidity.Source.FailureEvaluatorApprox
 import Solidity.Source.FailureTransactionGrowth
 
 /-! Fixed-plan actual root event approximation at every larger horizon,
-including timeouts. No fee/session, deployment or P8 realization is asserted. -/
+including timeouts. No fee/session, deployment or compiler realization is asserted. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env}

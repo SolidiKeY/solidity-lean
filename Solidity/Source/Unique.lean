@@ -2,25 +2,23 @@ import Solidity.Source.Resolved
 import Solidity.Source.Elaborated
 
 /-!
-# Uniqueness of meaning for constants (Q1)
+# Uniqueness of meaning for constants
 
 With solc's literal typing (a number literal is always a constant; a
 hexadecimal literal's type `STy.hexConst` records its compatible bytes
 length, `Typed.litBytes`; a checksummed address literal folds into no
-constant), literals no longer give an expression several types.
+constant), literals give an expression one type.
 
 `Typed.constShape` proves it for every constant expression (`Syn.const`):
 each derivation has its rational type, or, for a bare or parenthesized
 hexadecimal literal, its `hexConst` type, and elaborates to that constant.
 Operators, shifts and comparisons on two constants fold and are never typed
 as operations (`Syn.const_binOp`, `STy.common?_const`).
-`zeroLength_illTyped` is the negative control: `0.length`, which had 32
-derivations before, has none.
+`zeroLength_illTyped` is the negative control: `0.length` has no derivation.
 
 Uniqueness for every expression (`Typed.unique`: any two derivations have one
 type and one elaboration) builds on these literal cases with a
-per-constructor case analysis, recorded in
-`docs/feature-work/source-s02.md`, "Uniqueness".
+per-constructor case analysis.
 -/
 
 namespace Solidity.Source
@@ -1284,7 +1282,7 @@ theorem uniqE_callMember {Γ : Ctx} {c : Syn .expr} {n : String} {A : Syn .callA
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- `[x, xs…]` (lane FU2-B): the elements' types fix the common type. -/
+/-- `[x, xs…]`: the elements' types fix the common type. -/
 theorem uniqE_inline {Γ : Ctx} {x : Syn .expr} {xs : Syn (.list .expr)}
     (ih : Uniq Γ (sizeOf (Syn.inlineArray x xs))) : UniqE Γ (.inlineArray x xs) := by
   intro τ τ' d d'
@@ -1309,7 +1307,7 @@ theorem uniqE_inline {Γ : Ctx} {x : Syn .expr} {xs : Syn (.list .expr)}
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **Slices** (`a[s:e]`, FU2-B). -/
+/-- **Slices** (`a[s:e]`). -/
 theorem uniqE_slice {Γ : Ctx} {a : Syn .expr} {o o' : Syn (.opt .expr)}
     (ih : Uniq Γ (sizeOf (Syn.slice a o o'))) : UniqE Γ (.slice a o o') := by
   intro τ τ' d d'
@@ -1396,7 +1394,7 @@ theorem uniqE_callElem {Γ : Ctx} {el : Elem} {hel : el ≠ .addressPayable} {A 
     | exact (no_const hce ‹_›).elim
     | (exfalso; apply no_binOp hbo; assumption)
 
-/-- **`new T[](n)`** (lane FU2-B): the type name fixes the type. -/
+/-- **`new T[](n)`**: the type name fixes the type. -/
 theorem uniqE_callNew {Γ : Ctx} {t : Syn .typeName} {A : Syn .callArgs}
     (ih : Uniq Γ (sizeOf (Syn.call (.new t) A))) : UniqE Γ (.call (.new t) A) := by
   intro τ τ' d d'
@@ -1621,7 +1619,7 @@ theorem uniq_all (Γ : Ctx) : ∀ n, Uniq Γ n
     ⟨fun _ h => uniqE_of (ih.mono (by omega)), fun _ h => uniqL_of (ih.mono (by omega)),
       fun _ h => uniqA_of (ih.mono (by omega)), fun _ h => uniqS_of (ih.mono (by omega))⟩
 
-/-- **Typing derivations agree** (Q1): any two derivations of one
+/-- **Typing derivations agree**: any two derivations of one
 expression have one type and elaborate to one resolved term, so a unit's
 meaning does not depend on the derivation an elaboration carries. -/
 theorem Typed.unique {Γ : Ctx} {e : Syn .expr} {τ τ' : STy} (d : Typed Γ e τ) (d' : Typed Γ e τ') :
@@ -1675,7 +1673,7 @@ theorem argsFit_single {B : DeclName → DeclName → Bool} {M : DeclName → Bo
   | nil => exact hne rfl
   | cons _ _ => simp only [argsFit, List.length_cons, List.length_nil, Bool.and_eq_true, beq_iff_eq] at h; omega
 
-/-- A `catch` clause fixes its binding and block (lane FU2-B). -/
+/-- A `catch` clause fixes its binding and block. -/
 theorem CatchD.unique {k : SCtx} {cl : Syn (.catchClause k)} {x x' : Option String} {cb cb' : Syn (.list (.item k))}
     (h : CatchD cl x cb) (h' : CatchD cl x' cb') : x = x' ∧ cb = cb' := by
   cases h <;> cases h' <;> exact ⟨rfl, rfl⟩
@@ -1934,8 +1932,7 @@ theorem address_like_refused :
   decide
 
 /-- **`0.length` is ill typed** (solc refuses it): `0` is a constant,
-never a `bytesN`, and a constant has no `length`.  Under S01's former
-literal typing it had a derivation at every `bytesN`, with lengths 1 to 32. -/
+never a `bytesN`, and a constant has no `length`. -/
 theorem zeroLength_illTyped (Γ : Ctx) (τ : STy) :
     ¬ HasType Γ (.member (.lit (.num (.dec 0 0 0))) "length") τ := by
   intro ⟨d⟩

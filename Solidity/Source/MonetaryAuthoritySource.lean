@@ -1,9 +1,8 @@
 import Solidity.Source.MonetaryAuthority
 import Solidity.Source.FailureRequest
 
-/-! Actual Source adapters for the H25 authority. This owner-held extension
-requires H16 request cursors and H19 natural Source accounts; not standalone
-master evidence. Fee settlement and session wiring remain pending G01 review. -/
+/-! Actual Source adapters for the authority, with request cursors and
+natural Source accounts. -/
 namespace Solidity.Source.Monetary
 open Solidity.Roadmap (Address Word Request)
 

@@ -1,7 +1,7 @@
 import Solidity.Source.Horizon
 
 /-!
-# Deployments show a prefix of their events (S05 item 2)
+# Deployments show a prefix of their events
 
 `Horizon.lean` proves that a transaction not completed at a horizon shows a
 prefix of its events at every larger one (`runTx_events_mono`).  The same

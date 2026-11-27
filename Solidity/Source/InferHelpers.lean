@@ -4,8 +4,7 @@ import Solidity.Source.Types
 Guarded regression: source and static inference must agree on the shallow mapping
 check, address/contract payable arguments, and bytes/string conversion locations.
 The common definitions retain the memory fallback and the original rule shapes.
-The original inferencer definitions remain unchanged, including their generated
-equations. Pointwise agreement lemmas provide the canonical migration interface.
+Pointwise agreement lemmas provide the agreement interface.
 -/
 
 namespace Solidity.H62.InferHelpers.Shared

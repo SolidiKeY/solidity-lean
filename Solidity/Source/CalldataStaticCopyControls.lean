@@ -2,14 +2,13 @@ import Solidity.Source.Calldata
 import Solidity.Source.SemanticsExamples
 
 /-!
-# Controls of the static-element `calldata` copies (G18.05)
+# Controls of the static-element `calldata` copies
 
 `cdToMem` copies a `uint256[2][] calldata` and a `uint256[2] calldata` into
 memory element by element at the element's head stride (`cdStaticToMem`),
 inner arrays allocated before the outer one, as `zeroData` allocates. Every
 element is validated (a dirty `bool` reverts with no data); an element that
-is not statically encoded is not inline, so its copy is `stuck`. The one-word
-copy of a `uint256[] calldata` is unchanged.
+is not statically encoded is not inline, so its copy is `stuck`.
 
 The copies are exercised here by calling `cdToMem` directly; the nested
 conversion from typed source is in `CalldataNestedCopyControls.lean`.

@@ -1,7 +1,7 @@
 import Solidity.Source.FailurePrimitives
 
 /-! Structural no-cut invariants of the actual typed cursor. These are not
-full evaluator coherence, NoFail execution, balance installation or P8 facts. -/
+full evaluator coherence, NoFail execution, balance installation or compiler facts. -/
 namespace Solidity.Source.FailureExecution
 open EM
 

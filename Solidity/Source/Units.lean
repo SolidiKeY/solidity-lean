@@ -1,10 +1,10 @@
 import Solidity.Source.Resolve
 
 /-!
-# Source units, imports and the file-level scope (G12)
+# Source units, imports and the file-level scope
 
-S00 and S01 read one source unit.  A compilation input is a set of units
-named by their source unit names; this module gives, as relations over S00's
+A compilation input is a set of units
+named by their source unit names; this module gives, as relations over the
 syntax, how their `import` directives connect them and which declarations a
 file-level name denotes in each unit.  The checker that decides them is
 `Solidity/Frontend/Static/Units.lean`.
@@ -19,7 +19,7 @@ sanitizing (duplicate slashes, a trailing `/`) is not modelled: the inputs
 are source unit names, which are already normalized.
 
 **Identity.**  A declaration's identity is its unit and its position among
-the unit's declarations (`DeclId`, extending S00's `Syn.graph` across
+the unit's declarations (`DeclId`, extending `Syn.graph` across
 units).  A name imported along two routes denotes one identity, so a diamond
 of imports is no clash (`ScopeOK`).
 
@@ -155,7 +155,7 @@ def UnitSet.target (R : List Remapping) (u p : String) : String :=
   Remapping.apply R u (Path.absolute p u)
 
 /-- **A declaration's identity**: its unit and its position among the unit's
-declarations (S00's `Syn.graph`, across units). -/
+declarations (`Syn.graph`, across units). -/
 structure DeclId where
   unit : String
   idx : Nat
@@ -216,7 +216,7 @@ def ScopeOK (P : UnitSet) (R : List Remapping) : Prop :=
 /-- The source unit names are distinct. -/
 def UnitSet.Distinct (P : UnitSet) : Prop := (P.units.map Prod.fst).Nodup
 
-/-- **G12's resolution judgment** of a program: distinct unit names, every
+/-- **Resolution judgment** of a program: distinct unit names, every
 import and imported symbol found, no clash in any file-level scope. -/
 structure UnitsOK (P : UnitSet) (R : List Remapping) : Prop where
   distinct : P.Distinct

@@ -3,7 +3,7 @@ import Solidity.Source.MonetaryWorld
 
 /-! Actual Source monetary-operation range transport. These laws require an
 explicit current-and-saved-account invariant. They do not prove whole-program
-reachability, G01 authority agreement, or alter refusal behavior. -/
+reachability, authority agreement, or alter refusal behavior. -/
 namespace Solidity.Source.MonetaryExecution
 open Solidity.Roadmap (Address Word)
 variable {E : Env} {Γ : RCtx}

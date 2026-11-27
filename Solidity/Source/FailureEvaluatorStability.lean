@@ -3,7 +3,7 @@ import Solidity.Source.FailureScopeStability
 /-! Closed equality-or-timeout induction for the actual enabled-plan
 mutual evaluator. Full results include locals, state and cursor. No external
 execution oracle, NoFail or fragment premise. This does not establish event
-prefix approximation on timeout or fixed-plan session/P8 adequacy.
+prefix approximation on timeout or fixed-plan session/compiler adequacy.
 Both calldata modes instantiate the shared HorizonAt schema at the same fixed plan. -/
 namespace Solidity.Source.FailureExecution.PlannedBelow
 open EM

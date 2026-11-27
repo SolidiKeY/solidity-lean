@@ -26,10 +26,7 @@ The writers of an account balance and where each is covered:
 | rollback (`undo`, `undoN`, `rollbackTo`), `endTx` | `ExecState.undoN_balancesFit`, `endTx_balancesFit` |
 | `Authority.writeSource` (unchecked Nat) | `Authority.writeSource_balancesFit` with the explicit premise, or the guarded `Authority.writeSourceChecked?` |
 
-`Authority.writeSource` has no caller in the library, so its range premise
-stays on the preservation theorem (and on its guarded variant) rather than
-being moved into a caller; the existing `Authority.source_amount` and
-`source_undo` are unchanged.  The EIP-6780 lifecycle writers are covered in
+The EIP-6780 lifecycle writers are covered in
 `Yul/World/LifecycleBalancesFit.lean`, and the evaluator's `BALANCE` read in
 `Yul/Views/SourceBalanceExact.lean`.
 

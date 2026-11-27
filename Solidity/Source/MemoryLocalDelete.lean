@@ -1,7 +1,6 @@
 import Solidity.Source.CalldataCopyAccess
 
-/-! G18.05 consumers of actual Source local memory conversion/deletion.
-No heap-copy/delete implementation, semantics or fuel policy is replaced. -/
+/-! Consumers of actual Source local memory conversion/deletion. -/
 namespace Solidity.Source
 open EM
 variable {E : Env} {Γ : RCtx}

@@ -2,14 +2,11 @@ import Solidity.Source.WellFormed
 import Solidity.Source.Overloads
 
 /-!
-# Inheritance checks (G14)
+# Inheritance checks
 
 The relations of solc 0.8.38's `ContractLevelChecker`/`OverrideChecker` and
-`NameAndTypeResolver` for one source unit, over S01's environment and C3
-linearization (`Env.linearize`, `Env.chain`).  S01 checks none of them
-("What S01 does not do": override, `virtual`, visibility of overriding
-functions, modifier invocations, base-constructor arguments, unimplemented
-functions in non-abstract contracts, `using for`).  Each field names the
+`NameAndTypeResolver` for one source unit, over the environment and C3
+linearization (`Env.linearize`, `Env.chain`).  Each field names the
 solc error it is.
 
 - **Base functions** (`Env.baseFns E c d`): for each direct base `B` of the
@@ -378,7 +375,7 @@ def CallableId (E : Env) (d d' : Decl) : Prop :=
 duplicate-free, holding some C3-consistent linearization of every base and
 the direct bases (most derived first) as ordered sublists, and nothing
 else.  It does not fix C3's leftmost-head choice, so it need not be unique;
-`Solidity/Frontend/Static/C3.lean` proves S01's `Env.linearize` meets it. -/
+`Solidity/Frontend/Static/C3.lean` proves `Env.linearize` meets it. -/
 inductive C3Lin (E : Env) : String → List String → Prop where
   | mk {c : String} {Ls : List (List String)} {M : List String} :
       Ls.length = (E.bases c).reverse.length →
@@ -389,9 +386,9 @@ inductive C3Lin (E : Env) : String → List String → Prop where
       (∀ x, x ∈ M → ∃ l, l ∈ Ls ++ [(E.bases c).reverse] ∧ x ∈ l) →
       C3Lin E c (c :: M)
 
-/-- **G14's inheritance judgment** of a unit.  Every relation reads
+/-- **Inheritance judgment** of a unit.  Every relation reads
 `Env.chain`, which falls back to `[c]` when C3 fails, so the judgment
-requires every contract to linearize (`linearizes`, as S01's `WellFormed`
+requires every contract to linearize (`linearizes`, as `WellFormed`
 does) rather than pass such a contract vacuously. -/
 structure InheritanceOK (r : Resolution) : Prop where
   linearizes : ∀ c ∈ r.env.contractNames, (r.env.linearize c).isSome = true

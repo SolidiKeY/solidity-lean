@@ -1,7 +1,7 @@
 import Solidity.Source.ExprProgress
 
 /-!
-# Progress of the interpreter on value statements (lane V04b)
+# Progress of the interpreter on value statements
 
 `NSP m Q`: from every state, `m` returns a result satisfying `Q` or halts
 other than `stuck`. For the **statement value fragment**

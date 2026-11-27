@@ -3,7 +3,7 @@ import Solidity.Source.FailureEvaluatorGrow
 /-! Closed event-prefix approximation for the actual fixed-plan mutual
 Source evaluator. All seventeen functions execute the same explicit plan.
 No NoFail, execution oracle or supplied evaluator agreement is assumed.
-This is not a fixed-plan session, deployment or P8 realization theorem.
+This is not a fixed-plan session, deployment or compiler realization theorem.
 The shared HorizonAt induction covers both calldata modes and the library operation at the same fixed plan. -/
 namespace Solidity.Source.FailureExecution.PlannedApprox
 open EM

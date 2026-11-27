@@ -12,7 +12,7 @@ budget on every result; it does not roll back world state or emit a receipt.
 
 The scope has no Request/value argument and cannot enforce affordability.
 The root/session driver must check request value against the exact sender
-balance (dropping invalid requests), apply the passed balance using H19's exact monetary
+balance (dropping invalid requests), apply the passed balance using exact monetary
 representation, execute actual deployment/request code with the same plan, and
 emit receipts outside this scope. Those integrations and consistency are open.
 As with frame, arbitrary EM code can forge the cursor: this operation does not

@@ -1,7 +1,7 @@
 import Solidity.Source.CalldataExamples
 
 /-!
-# Controls of inline arrays and `new` of memory arrays (lane FU2-B)
+# Controls of inline arrays and `new` of memory arrays
 
 A unit written as syntax, elaborated by `elaborate`, deployed and called
 through the semantics:

@@ -3,7 +3,7 @@ import Solidity.Source.HorizonGrow
 /-!
 # Horizons: helpers keep the events
 
-Split from `Solidity/Source/Horizon.lean` for checking cost. `const_go`:
+`const_go`:
 the helpers that leave the event log as it is.
 -/
 

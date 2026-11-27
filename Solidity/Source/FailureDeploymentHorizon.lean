@@ -3,8 +3,7 @@ import Solidity.Source.HorizonDeploy
 
 /-! Actual fixed-plan initializer, base-argument, modifier-body and deployment
 horizon transport. No alternate semantics or execution oracle. This does not
-consume the deployment transaction-fate ordinal or prove session/P8 adequacy.
-Proof basis: Source/HorizonDeploy.lean SHA256 ea72b085442795d463b71d315c3af764e4fd6170329febb94e2d6906b7ec8d34. -/
+consume the deployment transaction-fate ordinal or prove session/compiler adequacy. -/
 namespace Solidity.Source.FailureExecution.PlannedDeploy
 open EM
 open Solidity.Roadmap (Address Word Bytes)

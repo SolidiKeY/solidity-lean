@@ -2,7 +2,7 @@ import Solidity.Source.SemanticsExamples
 import Solidity.Source.FailureEventLaws
 import Solidity.Source.Session
 
-/-! H16 actual initcode-frame controls. The intrinsic constructor's state
+/-! actual initcode-frame controls. The intrinsic constructor's state
 initializer calls an explicit environment receiver, receives an ABI word and
 writes the decoded value. Fixed hash and strategy are explicit fixture inputs;
 no compiler/EVM, root transaction ordinal or post-fee funding theorem is claimed. -/
@@ -111,7 +111,7 @@ theorem cut0_world_rollback (pipeline : Roadmap.Pipeline) :
   exact ExecState.undo_apply input.ex _
 
 /-- A separate nonempty constructor body exercises runCtorBody/runMods, not
-just the initializer hook. The explicit initializer is now in its body. -/
+just the initializer hook.  -/
 def body : RBody E := ⟨[],[],false,[],[],
   .stmt (.expr (.assign (.state stateDecl variable_type rfl) initializer)) .nil,[]⟩
 def bodyProgram : Program E := { program with
@@ -169,7 +169,7 @@ theorem request_stop_propagates (pipeline : Roadmap.Pipeline) :
       result.2.2.ex.journal.length = 1 ∧ (result.2.2.ex.world.accounts thisC).nonce = 0 := by
   cases pipeline <;> decide +kernel
 
-/-- Same registered constructor and host strategy, now through the actual
+/-- Same registered constructor and host strategy, through the actual
 session deployment-receipt operation. No request-fate scope is fabricated. -/
 def sessionProgram (pipeline : Roadmap.Pipeline) : SrcProg E :=
   ⟨program,pipeline,toyFixed,"C"⟩

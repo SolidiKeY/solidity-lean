@@ -1,6 +1,6 @@
 import Solidity.Source.Value
 
-/-! Versioned correction for the fixed 300-step power cutoff: an exponent-derived progress counter permits every natural exponent. Existing Source.powMod/intPow and evaluator remain V1. The typed shift dispatcher delegates all non-power/non-integer cases to V1. This operator API selects no production endpoint or admission domain. -/
+/-! An exponent-derived progress counter permits every natural exponent. The typed shift dispatcher delegates all non-power/non-integer cases to V1. This operator API selects no production endpoint or admission domain. -/
 namespace Solidity.Source.PowerV2
 
 def powMod (base : Int) (exponent modulus : Nat) : Int :=

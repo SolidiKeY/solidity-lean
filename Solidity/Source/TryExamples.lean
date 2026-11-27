@@ -1,7 +1,7 @@
 import Solidity.Source.InlineExamples
 
 /-!
-# Controls of `try`/`catch` (lane FU2-B)
+# Controls of `try`/`catch`
 
 Two contracts written as syntax, elaborated by `elaborate`, deployed and
 called through the semantics:

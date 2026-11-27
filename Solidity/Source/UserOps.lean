@@ -1,11 +1,9 @@
 import Solidity.Source.Typing
 
 /-!
-# User-defined value types: operators, `wrap`, `unwrap` (G13)
+# User-defined value types: operators, `wrap`, `unwrap`
 
-S01 types no operation on a user-defined value type (`type T is V;`):
-`STy.isNumeric (.udvt _)` is false, and `T.wrap`/`T.unwrap` have no rule.
-This module states them as relations over a unit's syntax.
+This module states these operations as relations over a unit's syntax.
 
 **Operators** (solc 0.8.19+).  A file-level `using {f as op, …} for T
 global;` binds the operator `op` on `T` to the free function `f`

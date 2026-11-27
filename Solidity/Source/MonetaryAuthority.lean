@@ -1,7 +1,6 @@
 import Solidity.Source.Monetary
 
-/-! H25 exact-money authority adapter draft for G01 review. The shared Word
-ledger is unchanged. Session wiring, actual fee settlement and EVM-reachable
+/-! Exact-money authority adapter. Session wiring, actual fee settlement and EVM-reachable
 range are NOT supplied. Funding saturation is not a balance observation. -/
 namespace Solidity.Source.Monetary
 open Solidity.Roadmap (Address Word Request)
@@ -16,7 +15,7 @@ theorem Authority.set_at (authority : Authority) (address : Address) (amount : B
     (authority.set address amount).balance address = amount := by
   simp only [Authority.set, if_true]
 
-/-- Exact funding authority, separate from the unchanged shared ledger. -/
+/-- Exact funding authority. -/
 def Authority.funded (authority : Authority) (request : Request) : Prop :=
   request.value.val ≤ authority.balance request.sender
 
@@ -39,7 +38,7 @@ theorem Authority.funding_iff (authority : Authority) (request : Request) :
 def Authority.balanceWord? (authority : Authority) (address : Address) : Option Word :=
   checkedWord (authority.balance address)
 
-/-- This includes the exact post-fee value required by H19/H25. -/
+
 def wideAuthority : Authority := ⟨fun _ => 2^256⟩
 
 theorem wide_authority_control (address : Address) :

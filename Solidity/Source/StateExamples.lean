@@ -2,7 +2,7 @@ import Solidity.Source.World
 import Solidity.Source.Observe
 
 /-!
-# S04.01–S04.03 controls: inhabited state, observations and frames
+# Controls: inhabited state, observations and frames
 
 Each relation of `Solidity/Source/State.lean`, `Observe.lean` and
 `World.lean` on concrete data: a memory copy independent of its source,
