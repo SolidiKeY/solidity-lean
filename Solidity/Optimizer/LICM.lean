@@ -413,7 +413,7 @@ theorem hoist_runC {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body :
     split
     · next hl =>
       rw [splitAssign?_eq hs]
-      exact licm_runC a c x e rest (licmB_ok (Bool.and_eq_true _ _ ▸ hl).2)
+      exact licm_runC_of_licmB a c x e rest (Bool.and_eq_true _ _ ▸ hl).2
     · rfl
   · rfl
 

@@ -277,7 +277,7 @@ theorem LEnt.find?_evalT {E : List (LEnt C Γ)} {σ : State C Γ} (hE : LEnt.Hol
   induction E with
   | nil => simp only [LEnt.find?, reduceCtorEq] at hf
   | cons a E ih =>
-    have ha := hE a List.mem_cons_self
+    have ha := LEnt.evalT_of_holds hE (a := a) List.mem_cons_self
     have hE' : LEnt.Holds E σ := fun b hb => hE b (List.mem_cons_of_mem a hb)
     obtain ⟨q, l', s'⟩ := a
     simp only [LEnt.find?] at hf

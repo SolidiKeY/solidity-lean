@@ -221,7 +221,7 @@ theorem Avail.find?_evalT {A : List (Avail C Γ)} {σ : State C Γ} (hA : Avail.
   induction A with
   | nil => simp only [Avail.find?, reduceCtorEq] at hf
   | cons a A ih =>
-    have ha := hA a List.mem_cons_self
+    have ha := Avail.evalT_of_holds hA (a := a) List.mem_cons_self
     have hA' : Avail.Holds A σ := fun b hb => hA b (List.mem_cons_of_mem a hb)
     obtain ⟨q, k, e⟩ := a
     simp only [Avail.find?] at hf

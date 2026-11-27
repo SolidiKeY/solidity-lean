@@ -214,7 +214,7 @@ theorem _root_.Solidity.Val.subst_evalT {Γ : Ctx} {F : Facts C Γ} {σ : State 
     simp only [Val.subst]
     cases hk : F.get _ k with
     | none => rfl
-    | some s => exact congrArg Except.ok (hF _ k s hk).symm
+    | some s => exact congrArg Except.ok (Facts.get_of_holds hF k s hk).symm
   | _, .simple (.lit ..) | _, .simple (.bool _) | _, .simple (.env ..) => by
     simp only [Val.subst]
   | _, .binop op h hq a b => by
