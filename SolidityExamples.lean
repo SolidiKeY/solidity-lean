@@ -237,6 +237,7 @@ import Solidity.Examples.Lowering.Sim.CasesV2
 import Solidity.Examples.Lowering.Sim.Coverage
 import Solidity.Examples.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Examples.Lowering.Sim.CoverageBranch
+import Solidity.Examples.Lowering.Sim.CoverageControl
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Induction
 import Solidity.Examples.Lowering.Sim.Match

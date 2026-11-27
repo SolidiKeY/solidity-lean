@@ -138,6 +138,8 @@ an explicit kernel-totality hypothesis. Source acceptance, capture receipts,
 assignment receipts, and the surrounding coverage theorem remain with LS3B.
 These helpers assert neither unrestricted `Diagram.Total` nor external EVM
 correctness.
+| `Solidity/Correctness/Lowering/Sim/CoverageControl.lean` | Exact condition/then/else and default lowered-loop condition/body run-success composition toward `loweringBySimulation`, with entry contexts, fresh counters, reader and memos explicit; actual-producer specialization requires `elabKernelTotal`. LS3B supplies individual child receipts after capture/assignment/branch proofs. Emits `LoopAnn.auto`; arbitrary annotations, raw-loop lowering, remaining grammar, capture reachability, placement, acceptance, concrete nonvacuity and final coverage remain with LS3B. No `Diagram.Total` claim. |
+| `Solidity/Examples/Lowering/Sim/CoverageControl.lean` | Concrete helper applications under explicit kernel totality, plus actual recursive-producer execution assertions with nonempty branches/body, preserved counters and seeded memo. Executable checks do not discharge kernel totality or coverage. |
 | `Solidity/Correctness/Lowering/Sim/Coverage/ThreadedV2.lean` | Additive caller-context threading contract, v1 projection and association bridge for `loweringBySimulation`. |
 | `Solidity/Examples/Lowering/Sim/Coverage/ThreadedV2.lean` | Existing standalone-loop vocabulary exercises the bridge with explicit threading and placement receipts. |
 | `Correctness/Lowering/Sim/Coverage/Obstruction.lean` | Exact accepted empty production run under `elabKernelTotal` refuting frozen v1 diagram coverage: placement may use an unrelated context. |

@@ -2069,6 +2069,7 @@ import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.ThreadedV2
 import Solidity.Correctness.Lowering.Sim.CoverageBranch
+import Solidity.Correctness.Lowering.Sim.CoverageControl
 import Solidity.Correctness.Lowering.Sim.Expr.Capture
 import Solidity.Correctness.Lowering.Sim.Expr.Frame
 import Solidity.Correctness.Lowering.Sim.Expr.Operand
@@ -2224,6 +2225,10 @@ import Solidity.Docs.ProseCalibrated
 import Solidity.Docs.ProseCalibrated.Allowance
 import Solidity.Docs.ProseCalibrated.Classification
 import Solidity.Docs.ProseCalibrated.Policy
+import Solidity.Docs.ProseRatio
+import Solidity.Docs.ProseRatio.Allowance
+import Solidity.Docs.ProseRatio.Classification
+import Solidity.Docs.ProseRatio.Policy
 import Solidity.ERC7201
 import Solidity.Eqns
 import Solidity.Evm.Compile
