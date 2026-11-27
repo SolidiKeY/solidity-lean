@@ -1,47 +1,11 @@
 import Solidity.Language.FixedPoint.Laws
 
-/-!
-# Fixed-point ABI encoding
-
-The ABI specification encodes `fixed<M>x<N>` / `ufixed<M>x<N>` as the
-value `v / 10^N` through its scaled integer `v`, a 32-byte big-endian
-two's-complement word as for `int256` / `uint256` (`abi-spec.rst:213–221`
-at `v0.8.38`), and names a type in a selector by its canonical name, the
-aliases `fixed` / `ufixed` as `fixed128x18` / `ufixed128x18`
-(`abi-spec.rst:71–72`).  solc 0.8.38 generates no ABI code for these types
-(its cleanup and validation functions are unimplemented for them), so the
-coder behaviour below is a proposal by analogy with `intM` / `uintM`,
-not compiler behaviour; `docs/feature-work/fixed-point-semantics.md`, §6.3,
-records the reading.
-
-* `Fx.encode` — the word; `Fx.abiEncode` — its 32 big-endian bytes.
-* `Fx.decodeV2` — ABI coder v2 decoding: a word whose upper bits are not
-  the sign- or zero-extension of an `M`-bit integer reverts (`none`), as
-  solc's v2 validator does for `intM` / `uintM` (`decodeV2_isSome_iff`).
-  Decoding is exactly the inverse of `encode`: `Fx.decodeV2_encode`,
-  `Fx.encode_of_decodeV2`, `Fx.decodeV2_eq_none_iff`.
-* `Fx.decodeV1` — ABI coder v1 (the legacy pipeline's pragma may select
-  it): no validation, the low `M` bits cleaned as v1 cleans `intM`;
-  `Fx.decodeV1_of_decodeV2` (the coders agree on clean words).
-* `Fx.encodePacked` — `abi.encodePacked` of a top-level argument: the
-  `M/8`-byte two's complement, unpadded (`abi-spec.rst:755`); there is no
-  packed decoder in Solidity, and `Fx.ofPackedBytes` only witnesses that
-  the encoding loses nothing.
-* The type names include `N = 0` (`fixedMx0`), which the ABI
-  specification excludes (`0 < N`, `abi-spec.rst:66–67`): a deliberate
-  extension, since solc's scanner admits the types.
--/
-
 namespace Solidity.Language.FixedPoint
 
-/-! ### Big-endian bytes -/
-
-/-- `n` modulo `256^k` as `k` big-endian bytes. -/
 def beBytes : Nat → Nat → List UInt8
   | 0, _ => []
   | k + 1, n => beBytes k (n / 256) ++ [UInt8.ofNat (n % 256)]
 
-/-- Bytes read big-endian. -/
 def beNat (bs : List UInt8) : Nat := bs.foldl (fun a b => a * 256 + b.toNat) 0
 
 theorem beBytes_length : ∀ k n, (beBytes k n).length = k
@@ -99,7 +63,6 @@ theorem beBytes_foldl : ∀ (bs : List UInt8) (k acc : Nat),
     simp only [List.foldl_cons, hk, ih, beBytes, hd, hm, UInt8.ofNat_toNat, List.append_assoc,
       List.singleton_append]
 
-/-- Bytes read and written back are the bytes. -/
 theorem beBytes_beNat (bs : List UInt8) : beBytes bs.length (beNat bs) = bs := by
   have h : beBytes (0 + bs.length) (bs.foldl (fun a b => a * 256 + b.toNat) 0) =
       beBytes 0 0 ++ bs := beBytes_foldl bs 0 0
@@ -109,7 +72,6 @@ theorem beBytes_beNat (bs : List UInt8) : beBytes bs.length (beNat bs) = bs := b
 theorem pow_256 : (256 : Nat) ^ 32 = 2 ^ 256 := by
   rw [show (256 : Nat) = 2 ^ 8 by decide, ← Nat.pow_mul]
 
-/-- `2^M = 256^(M/8)`. -/
 theorem pow_bits_bytes (t : FxTy) : (2 : Nat) ^ t.bits = 256 ^ (t.bits / 8) := by
   have h : (decide (8 ≤ t.bits) && decide (t.bits ≤ 256) && t.bits % 8 == 0 &&
       decide (t.digits ≤ 80)) = true := t.valid
@@ -137,31 +99,23 @@ theorem ofInt?_isSome (t : FxTy) (v : Int) : (ofInt? t v).isSome = t.inRange v :
   · rw [show ofInt? t v = none from dif_neg h]
     exact (Bool.eq_false_iff.mpr h).symm
 
-/-! ### Words -/
-
 theorem toWord_toNat_lt (a : Fx t) : (toWord a).toNat < 2 ^ 256 := by
   have h : 0 ≤ toWord a ∧ toWord a < 2 ^ 256 := toWord_range a
   have hc : ((2 ^ 256 : Nat) : Int) = (2 : Int) ^ 256 := Int.natCast_pow 2 256
   have he : ((toWord a).toNat : Int) = toWord a := Int.toNat_of_nonneg h.1
   omega
 
-/-- The ABI word of a value: its scaled integer, two's complement modulo
-`2^256`. -/
 def encode (a : Fx t) : Fin (2 ^ 256) := ⟨(toWord a).toNat, toWord_toNat_lt a⟩
 
 theorem encode_val (a : Fx t) : ((encode a).val : Int) = toWord a :=
   Int.toNat_of_nonneg (toWord_range a).1
 
-/-- ABI coder v2 decoding: the word read as `int256` where signed, then
-range-checked; `none` (the decoder reverts) for dirty upper bits. -/
 def decodeV2 (t : FxTy) (w : Fin (2 ^ 256)) : Option (Fx t) := ofWord? t (w.val : Int)
 
-/-- Decoding the encoding gives the value back. -/
 theorem decodeV2_encode (a : Fx t) : decodeV2 t (encode a) = some a := by
   simp only [decodeV2, encode_val]
   exact ofWord_toWord a
 
-/-- Only the canonical word of a value decodes to it. -/
 theorem encode_of_decodeV2 {w : Fin (2 ^ 256)} {a : Fx t} (h : decodeV2 t w = some a) :
     encode a = w := by
   have hw0 : (0 : Int) ≤ w.val := Int.natCast_nonneg _
@@ -180,7 +134,6 @@ theorem encode_of_decodeV2 {w : Fin (2 ^ 256)} {a : Fx t} (h : decodeV2 t w = so
   have he : ((encode a).val : Int) = (w.val : Int) := by rw [encode_val]; exact hm
   exact Int.ofNat_inj.mp he
 
-/-- Every word that is not a value's encoding is rejected. -/
 theorem decodeV2_eq_none_iff {w : Fin (2 ^ 256)} :
     decodeV2 t w = none ↔ ∀ a : Fx t, encode a ≠ w := by
   constructor
@@ -192,9 +145,6 @@ theorem decodeV2_eq_none_iff {w : Fin (2 ^ 256)} :
     | none => rfl
     | some a => exact absurd (encode_of_decodeV2 hd) (h a)
 
-/-- The upper-bit condition: an unsigned word must be below `2^M`; a
-signed word must be the sign extension of its low `M` bits (below
-`2^(M-1)`, or at least `2^256 - 2^(M-1)`). -/
 theorem decodeV2_isSome_iff (w : Fin (2 ^ 256)) :
     (decodeV2 t w).isSome = true ↔
       (if t.signed then w.val < 2 ^ (t.bits - 1) ∨ 2 ^ 256 - 2 ^ (t.bits - 1) ≤ w.val
@@ -219,15 +169,10 @@ theorem decodeV2_isSome_iff (w : Fin (2 ^ 256)) :
   · simp only [true_and, ite_true]
     split <;> omega
 
-/-! ### ABI coder v1 -/
-
-/-- Wrapping depends only on the low `M` bits. -/
 theorem wrapInt_emod_eq (t : FxTy) (v : Int) : wrapInt t (v % 2 ^ t.bits) = wrapInt t v := by
   unfold wrapInt
   simp only [Int.emod_emod]
 
-/-- ABI coder v1 decoding: no validation; the low `M` bits are cleaned
-(sign-extended where signed), as v1 cleans `intM` / `uintM`. -/
 def decodeV1 (t : FxTy) (w : Fin (2 ^ 256)) : Fx t := wrap t (w.val : Int)
 
 theorem decodeV1_eq_ofBits (w : Fin (2 ^ 256)) :
@@ -235,7 +180,6 @@ theorem decodeV1_eq_ofBits (w : Fin (2 ^ 256)) :
   apply Subtype.ext
   simp only [decodeV1, ofBits, wrap, wrapInt_emod_eq]
 
-/-- The two coders agree on every word v2 accepts. -/
 theorem decodeV1_of_decodeV2 {w : Fin (2 ^ 256)} {a : Fx t} (h : decodeV2 t w = some a) :
     decodeV1 t w = a := by
   have he : encode a = w := encode_of_decodeV2 h
@@ -249,22 +193,20 @@ theorem decodeV1_of_decodeV2 {w : Fin (2 ^ 256)} {a : Fx t} (h : decodeV2 t w = 
     rw [← wrapInt_emod_eq t (a.1 % 2 ^ 256), hm, wrapInt_emod_eq]
   simp only [decodeV1, wrap, encode_val, toWord, hw, wrapInt_of_inRange a.2]
 
-/-- v1 decodes the encoding back too. -/
 theorem decodeV1_encode (a : Fx t) : decodeV1 t (encode a) = a :=
   decodeV1_of_decodeV2 (decodeV2_encode a)
 
-/-! ### Bytes -/
-
-/-- `abi.encode(a)`: the word's 32 big-endian bytes. -/
 def abiEncode (a : Fx t) : List UInt8 := beBytes 32 (encode a).val
 
 theorem abiEncode_length (a : Fx t) : (abiEncode a).length = 32 := beBytes_length 32 _
 
-/-- An isolated 32-byte head decoded at the type with coder v2 (solc's
-decoder reads a head at an offset and ignores trailing data). -/
 def abiDecodeV2 (t : FxTy) (bs : List UInt8) : Option (Fx t) :=
   if bs.length = 32 then decodeV2 t ⟨beNat bs % 2 ^ 256, Nat.mod_lt _ (Nat.two_pow_pos 256)⟩
   else none
+
+example (t : FxTy) (bs : List UInt8) (h : bs.length ≠ 32) :
+    abiDecodeV2 t bs = none := by
+  simp only [abiDecodeV2, h, if_false]
 
 theorem beNat_mod_of_length {bs : List UInt8} (h : bs.length = 32) :
     beNat bs % 2 ^ 256 = beNat bs := by
@@ -283,8 +225,6 @@ theorem abiDecodeV2_abiEncode (a : Fx t) : abiDecodeV2 t (abiEncode a) = some a 
   simp only [abiDecodeV2, hl, ite_true, hw]
   exact decodeV2_encode a
 
-/-- Only the canonical bytes of a value decode to it: every other 32-byte
-head is rejected. -/
 theorem abiEncode_of_abiDecodeV2 {bs : List UInt8} {a : Fx t}
     (h : abiDecodeV2 t bs = some a) : abiEncode a = bs := by
   unfold abiDecodeV2 at h
@@ -299,17 +239,17 @@ theorem abiEncode_of_abiDecodeV2 {bs : List UInt8} {a : Fx t}
   · simp only [hl, ite_false] at h
     exact nomatch h
 
-/-- `abi.encodePacked(a)`: the `M/8`-byte two's complement, unpadded. -/
 def encodePacked (a : Fx t) : List UInt8 := beBytes (t.bits / 8) (toBits a).toNat
 
 theorem encodePacked_length (a : Fx t) : (encodePacked a).length = t.bits / 8 :=
   beBytes_length _ _
 
-/-- Packed bytes read back at the type, as their bit pattern: not an ABI
-operation (Solidity has no packed decoder), only the inverse that shows
-`encodePacked` loses nothing. -/
 def ofPackedBytes (t : FxTy) (bs : List UInt8) : Option (Fx t) :=
   if bs.length = t.bits / 8 then some (ofBits t (beNat bs : Int)) else none
+
+example (t : FxTy) (bs : List UInt8) (h : bs.length ≠ t.bits / 8) :
+    ofPackedBytes t bs = none := by
+  simp only [ofPackedBytes, h, if_false]
 
 theorem ofPackedBytes_encodePacked (a : Fx t) : ofPackedBytes t (encodePacked a) = some a := by
   have hl : (encodePacked a).length = t.bits / 8 := encodePacked_length a
@@ -326,17 +266,10 @@ theorem ofPackedBytes_encodePacked (a : Fx t) : ofPackedBytes t (encodePacked a)
     exact Int.toNat_of_nonneg h0
   simp only [ofPackedBytes, hl, ite_true, hn, ofBits_toBits]
 
-/-! ### Canonical type names -/
-
-/-- Canonical type names (as selectors spell them): the aliases are spelled
-out, and `N = 0` keeps its `x0`. -/
 example : FxTy.fixed.name = "fixed128x18" ∧ FxTy.ufixed.name = "ufixed128x18" ∧
     fixed8x1.name = "fixed8x1" ∧ (⟨false, 256, 0, by decide⟩ : FxTy).name = "ufixed256x0" := by
   decide +kernel
 
-/-- `-1.0` at `fixed8x1` is the all-ones word; the word `0xff` (no sign
-extension) is rejected by v2 and cleaned to `-0.1` by v1; at `ufixed8x2`,
-`2.55` is the word `255` and `256` is rejected. -/
 example : (encode (⟨-10, by decide⟩ : Fx fixed8x1)).val = 2 ^ 256 - 10 ∧
     (decodeV2 fixed8x1 ⟨255, by decide⟩).isNone ∧
     (decodeV1 fixed8x1 ⟨255, by decide⟩).1 = -1 ∧
@@ -345,8 +278,6 @@ example : (encode (⟨-10, by decide⟩ : Fx fixed8x1)).val = 2 ^ 256 - 10 ∧
   decide +kernel
 
 end Fx
-
-/-! ### Axiom pins -/
 
 /--
 info: 'Solidity.Language.FixedPoint.Fx.decodeV2_eq_none_iff' depends on axioms: [propext, Quot.sound]
