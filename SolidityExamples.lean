@@ -273,6 +273,7 @@ import Solidity.Examples.Lowering.Total.StructRows
 import Solidity.Examples.Lowering.Total.StructTableAgreement
 import Solidity.Examples.Lowering.Total.StructUnit
 import Solidity.Examples.Lowering.Total.StructUnitInference
+import Solidity.Examples.Lowering.Total.SuccessfulContext
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation

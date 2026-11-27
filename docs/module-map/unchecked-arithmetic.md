@@ -196,3 +196,5 @@
 | `Correctness/Lowering/Unchecked/VersionedPowerWitness.lean` | V2 operator migration controls; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/SourceSpelling.lean` | Total raw/typed/named/model update association and actual original-context paired execution; partial producer, full state/resources and pass remain unproved. |
 | `Correctness/Lowering/Unchecked/WordUpdateWitness.lean` | Actual-output word-association controls; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Total/Decode/SuccessfulContext.lean` | Unrestricted empty-body production, enum representability obstruction, and conditional P2 request/body binding; complete request-context decoding remains open. |
+| `Examples/Lowering/Total/SuccessfulContext.lean` | Successful-production versus enum-component coverage regression checks. |
