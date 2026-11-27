@@ -1,10 +1,6 @@
 import Solidity.Source.Progress.AllocationBodyCalls
 import Solidity.Source.Progress.AggregateDefaults
 
-/-! Exact direct-call arguments may be ready expressions or allocation
-parents with ready children. This additive certificate derives actual
-left-to-right argument evaluation and keeps earlier references valid through
-later heap growth. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
