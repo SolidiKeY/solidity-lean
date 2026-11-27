@@ -4,8 +4,13 @@ import Solidity.Backend.CompilerOptimizerDomain.DeadStore
 import Solidity.Backend.CompilerOptimizerDomain.LICM
 import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.Weakening
+import Solidity.Backend.CompilerOptimizerDomain.Inline
+import Solidity.Backend.CompilerOptimizerDomain.CSE
+import Solidity.Backend.CompilerOptimizerDomain.Propagate
+import Solidity.Backend.CompilerOptimizerDomain.Strengthening
 
-/-! Integration controls for the proved constant-fold, simplification, removal and LICM stages only. These check both
+/-! Integration controls for the proved folding, simplification, removal, LICM,
+weakening/strengthening, inlining, CSE and constant-propagation results. These check both
 resource and fragment consequences against the unchanged public compiler domain;
 they do not assert preservation by the remaining optimizer stages or iteration. -/
 namespace Solidity.Backend.CompilerOptimizerDomain.Controls
@@ -57,4 +62,45 @@ example {ps : Ctx} {as : Args C Γ ps} (w : Thin Γ Δ) (ha : ArgsOk as) :
     ArgsOk (as.wk w) := args_wk_ok w ha
 
 example {p : PrimTy} {l : OpLoc C Γ p} (w : Thin Γ Δ) (h : OpLocOk l) : OpLocOk (l.wk w) := opLoc_wk_ok w h
+
+-- Every accepted program can move into an arbitrary larger context.
+example {Θ : Ctx} (hP : ProgOk [] P) (w : Thin Γ Θ) :
+    Evm.Prog.pushes (P.wk w).2.2 = 0 ∧
+      ∃ G, inFragP (Frag.init Θ) (P.wk w).2.2 = some G := by
+  have hQ := prog_wk_ok hP w (KindsWk.empty w)
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Θ) (Matches.init Θ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- The actual inlining pass accepts the unchanged whole public domain.
+example (hP : ProgOk [] P) :
+    Evm.Prog.pushes (Optimizer.ConstFold.Prog.inl P) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.inl P) = some G := by
+  have hQ := prog_inl_ok hP
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- CSE preserves the domain even for an arbitrary availability table.
+example (hP : ProgOk [] P) (A : List (Optimizer.ConstFold.Avail C Γ)) :
+    Evm.Prog.pushes (Optimizer.ConstFold.Prog.cse A P) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.cse A P) = some G := by
+  have hQ := prog_cse_ok hP A
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- The actual initial facts table needs no new premise on accepted programs.
+example (hP : ProgOk [] P) :
+    Evm.Prog.pushes (Optimizer.ConstFold.Prog.cprop Optimizer.ConstFold.Facts.empty P) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.cprop Optimizer.ConstFold.Facts.empty P) = some G := by
+  have hQ := prog_cprop_ok hP facts_empty_ok
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- Successful strengthening carries the original input acceptance proof.
+example {Θ : Ctx} (hP : ProgOk [] P) (w : Thin Θ Γ)
+    {Q : Optimizer.ConstFold.Str C Θ Δ} (he : Optimizer.ConstFold.Prog.str? w P = some Q) :
+    Evm.Prog.pushes Q.2.2 = 0 ∧ ∃ G, inFragP (Frag.init Θ) Q.2.2 = some G := by
+  have hQ := prog_str_ok hP w he []
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Θ) (Matches.init Θ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
 end Solidity.Backend.CompilerOptimizerDomain.Controls
