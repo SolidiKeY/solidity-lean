@@ -1,13 +1,5 @@
 import Solidity.Source.HorizonApproxStatements
 
-/-!
-# Horizons: timed-out runs show a prefix of the events
-
-The last part of the horizon results, whose overview is in
-`Solidity/Source/HorizonFuel.lean`: fuel monotonicity and horizon
-independence there, events only grow in `HorizonGrow`, helpers keep the
-events in `HorizonConst`, and here `approxAt` and `runTx_events_mono`.
--/
 
 namespace Solidity.Source
 
@@ -19,8 +11,6 @@ variable {E : Env}
 section
 variable (G : Glob E)
 
-/-- **The induction hypothesis**: every interpreter function at horizon `n`
-approximates itself at `n + 1`. -/
 structure ApproxAt (n : Nat) : Prop where
   evalE : ∀ (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), Approx (evalE G F n e) (evalE G F (n + 1) e)
   evalPair : ∀ (F : Fr) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ),
@@ -297,7 +287,6 @@ theorem dispatch_astep (ih : ApproxAt G n) (F : Fr) (input : Solidity.Roadmap.By
     Approx (dispatch G F (n + 1) input) (dispatch G F (n + 1 + 1) input) := by
   exact (approxAtKnown G (n + 1)).dispatch F input
 
-/-- **Every interpreter function is monotone in its horizon.** -/
 theorem approxAt (G : Glob E) : ∀ n, ApproxAt G n
   | 0 => approxAt_zero G
   | n + 1 =>
@@ -310,7 +299,6 @@ theorem approxAt (G : Glob E) : ∀ n, ApproxAt G n
 
 end
 
-/-! ### Transactions show a prefix of their events -/
 
 theorem runTx_grow (G : Glob E) (n : Nat) (q : Request) : Grow (runTx G n q) := by
   have gn := growAt { G with timestamp := q.timestamp } n
@@ -336,9 +324,6 @@ theorem Approx.mono {Γ : RCtx} {α : Type} {f : Nat → EM E Γ α} (h : ∀ n,
   | zero => exact Approx.refl (hg n)
   | succ d ih => exact (ih (by omega)).trans (h _)
 
-/-- **A transaction's events grow with its horizon**: a run that has not
-completed at horizon `k` shows a prefix of the events of the run at every
-`k' ≥ k`. -/
 theorem runTx_events_mono (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (hk : k ≤ k')
     (hd : Done (runAt (fun f => runTx G f q) s k) = false) :
     (runAt (fun f => runTx G f q) s k).2.events <+: (runAt (fun f => runTx G f q) s k').2.events := by
@@ -348,7 +333,6 @@ theorem runTx_events_mono (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (hk
   · exact he
   · rw [he]; exact List.prefix_refl _
 
-/-- A transaction's events extend the events before it. -/
 theorem runTx_extends (G : Glob E) (q : Request) (s : St E) (k : Nat) :
     s.events <+: (runAt (fun f => runTx G f q) s k).2.events := runTx_grow G k q (L0 E, s)
 

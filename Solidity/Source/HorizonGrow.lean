@@ -1,11 +1,5 @@
 import Solidity.Source.HorizonFuel
 
-/-!
-# Horizons: events only grow
-
-`grow_go` and `growAt`: every
-interpreter function only appends events.
--/
 
 namespace Solidity.Source
 
@@ -14,7 +8,6 @@ open Solidity.Roadmap (Address Word Bytes Request Outcome Event)
 
 variable {E : Env}
 
-/-! ## Events only grow -/
 
 theorem run_st {Γ : RCtx} (x : Locals E.layout Γ × St E) : (st : EM E Γ (St E)).run x = (.ok x.2, x) := rfl
 
@@ -56,8 +49,6 @@ theorem alloc_grow {Γ : RCtx} {τ : STy} (x : Data E.layout τ) : Grow (alloc (
   rw [run_bind, run_st]
   exact List.prefix_refl _
 
-/-- Close `Grow body`: through binds, `match`es and `if`s, by the given
-lemmas at the calls; a `modSt` keeps or appends events. -/
 syntax "grow_go" "[" ident,* "]" : tactic
 macro_rules
   | `(tactic| grow_go [$ls,*]) => `(tactic| repeat' (first
@@ -420,9 +411,7 @@ theorem Grow.map {Γ : RCtx} {α β : Type} (f : α → β) {m : EM E Γ α} (h 
   show x.2.events <+: ((m >>= fun a => (Pure.pure (f a) : EM E Γ β)).run x).2.2.events
   exact Grow.bind h (fun _ => Grow.pure _) x
 
-/-! ### Every interpreter function only appends events -/
 
-/-- Both calldata modes share the generic interpreter horizon schema. -/
 abbrev GrowAtKnown (G : Glob E) (n : Nat) : Prop :=
   HorizonAt (fun {Γ} {α} (m _ : EM E Γ α) => Grow m) G n
 

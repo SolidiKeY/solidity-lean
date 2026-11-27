@@ -1,23 +1,5 @@
 import Solidity.Source.HorizonDeploy
 
-/-!
-# Sessions that show the events of unfinished transactions
-
-`sessionAt` (`Solidity/Source/Semantics.lean`) ends a session's prefix at a
-transaction that completes within no horizon up to `n`, showing none of its
-events.  `sessionAtEvents` shows them: at horizon `n` the prefix ends with
-the events the transaction's run at horizon `n` produced (calls to the
-environment, callbacks, their answers), and with a `stuck` run's events
-when it is stuck.  The family is still consistent
-(`sessionAtEvents_consistent`), because a run that has not completed at
-`n` shows a prefix of its events at every larger horizon
-(`runTx_events_mono`, `Solidity/Source/Horizon.lean`), so
-`sourceLangEvents` has the type of `Lang Event Outcome`.
-
-An unfinished deployment shows its run's events at `n` as well
-(`deployRun_events_mono`, from `deploy_approx`,
-`Solidity/Source/HorizonDeploy.lean`).
--/
 
 namespace Solidity.Source
 
@@ -35,10 +17,6 @@ theorem firstDone_none_le {α σ : Type} {f : Nat → Except Halt α × σ} {n :
   · rfl
   · simp only [hd, if_true, reduceCtorEq] at e
 
-/-- **A session with the events of unfinished transactions** after the
-deployment: as `sessionGo`, except that a transaction which completes
-within no horizon up to `n` shows its run's events at `n`, and a stuck one
-its events when stuck. -/
 def sessionGoEvents (P : SrcProg E) (env : SessionEnv) (n : Nat) : Nat → Nat → St E → Outcome →
     Prefix Event Outcome
   | 0, _, s, _ => ⟨s.events, none⟩
@@ -81,14 +59,11 @@ theorem sessionGoEvents_extends (P : SrcProg E) (env : SessionEnv) (n : Nat) :
         · exact runTx_extends (P.glob env) q s n
       · exact sessionGoEvents_extends P env n k (i + 1) s last
 
-/-- The events a completed transaction leaves are its run's. -/
 theorem events_drop {s s' : St E} (h : s.events <+: s'.events) :
     s.events ++ s'.events.drop s.events.length = s'.events := by
   obtain ⟨t, ht⟩ := h
   rw [← ht, List.drop_left]
 
-/-- **Consistent**: a larger horizon (more transaction horizon, more
-actions) extends the prefix, and a completed prefix is final. -/
 theorem sessionGoEvents_mono (P : SrcProg E) (env : SessionEnv) :
     ∀ k k' n n' i (s : St E) last, k ≤ k' → n ≤ n' →
       (sessionGoEvents P env n k i s last).Le (sessionGoEvents P env n' k' i s last)
@@ -142,11 +117,6 @@ theorem sessionGoEvents_mono (P : SrcProg E) (env : SessionEnv) :
           · exact runTx_events_mono (P.glob env) q s hn hdn
       · exact sessionGoEvents_mono P env k k' n n' (i + 1) s last (by omega) hn
 
-/-- The deployment as a session runs it: its completed outcome recorded as an
-event. An explicit failure plan reaches actual initcode execution; an exceptional
-request/ancestor stop propagates without a deployment receipt. This does not install a post-fee
-balance or consume the deployment transaction-fate ordinal. The terminal
-receipt is deliberately outside the body-event budget, as in FailureCursor. -/
 def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat)
     (plan : FailureExecution.RuntimePlan := none) : EM E [] Outcome := do
   let o ← deploy (plan := plan) (P.glob env) f P.main addr env.deployer env.deployValue env.deployArgs
@@ -154,9 +124,6 @@ def deployRun (P : SrcProg E) (env : SessionEnv) (addr : Address) (f : Nat)
     (match o with | .success _ => some addr | .revert _ => none))
   pure o
 
-/-- Exact full-state receipt boundary: completion appends only the terminal
-event; every exceptional halt retains the entire resulting state without a
-receipt. In particular receipt emission does not tick body-event budgets. -/
 theorem deployRun_run {E : Env} (P : SrcProg E) (env : Roadmap.SessionEnv)
     (addr : Roadmap.Address) (f : Nat) (plan : FailureExecution.RuntimePlan)
     (l : Locals E.layout []) (s : St E) :
@@ -197,16 +164,12 @@ theorem deployRun_events_mono (P : SrcProg E) (env : SessionEnv) (addr : Address
   · exact he
   · rw [he]; exact List.prefix_refl _
 
-/-- **A session with unfinished transactions' events**, from the
-deployment at `addr`; an unfinished deployment shows its run's events at
-`n`, and a halted one its events when halted. -/
 def sessionFromEvents (P : SrcProg E) (env : SessionEnv) (addr : Address) (n : Nat) : Prefix Event Outcome :=
   match firstDone (runAt (deployRun P env addr) (St.init E)) n with
   | some (_, (.ok o, s)) => sessionGoEvents P env n n 0 s o
   | some (_, (.error _, s)) => ⟨s.events, none⟩
   | none => ⟨(runAt (deployRun P env addr) (St.init E) n).2.events, none⟩
 
-/-- The session at the deployment's creation address. -/
 def sessionAtEvents (P : SrcProg E) (env : SessionEnv) (n : Nat) : Prefix Event Outcome :=
   sessionFromEvents P env (P.fixed.createAddress env.deployer env.deployNonce) n
 
@@ -245,13 +208,10 @@ theorem sessionFromEvents_consistent (P : SrcProg E) (env : SessionEnv) (addr : 
       exact hm
     · exact deployRun_events_mono P env addr (St.init E) hnm
 
-/-- **Consistent** (`Prefixes.Consistent`). -/
 theorem sessionAtEvents_consistent (P : SrcProg E) (env : SessionEnv) :
     Prefixes.Consistent (sessionAtEvents P env) :=
   sessionFromEvents_consistent P env _
 
-/-- **The source language with the events of unfinished transactions**
-(`Lang Event Outcome`), as `sourceLang` otherwise. -/
 def sourceLangEvents (E : Env) : Lang Event Outcome where
   Prog := SrcProg E
   Env := SessionEnv
@@ -262,21 +222,7 @@ def sourceLangEvents (E : Env) : Lang Event Outcome where
   sem := sessionAtEvents
   consistent := sessionAtEvents_consistent
 
-/-! ## Stuck is not divergence
 
-A transaction's **fate** within horizon `n`: it completes, halts (stuck at a
-run-time mismatch), or is pending (it times out at every horizon up to
-`n`).  A pending fate can still change; a completed or halted one is the
-fate at every larger horizon (`txFate_mono`).  Divergence is pending at
-every horizon; it is a timeout at every horizon (`diverges_iff`).  A
-stuck fate within some horizon is a run stuck at some horizon
-(`stuck_iff`, by `runTx_stable`: the least completing horizon has the
-same result), and from then on the fate is that halt at every horizon
-(`stuck_eventually`), so a stuck transaction never reads as a divergent
-one (`stuck_not_diverges`).  `runTx` turns a revert into a completed
-outcome, so `halted` is in practice `stuck`. -/
-
-/-- The fate of a transaction within horizon `n`. -/
 inductive TxFate where
   | done (o : Outcome)
   | halted (h : Halt)
@@ -289,7 +235,6 @@ def txFate (G : Glob E) (q : Request) (s : St E) (n : Nat) : TxFate :=
   | some (_, (.error h, _)) => .halted h
   | none => .pending
 
-/-- A fate that is not pending is the fate at every larger horizon. -/
 theorem txFate_mono (G : Glob E) (q : Request) (s : St E) {n n' : Nat} (hn : n ≤ n')
     (h : txFate G q s n ≠ .pending) : txFate G q s n' = txFate G q s n := by
   simp only [txFate] at h ⊢
@@ -307,7 +252,6 @@ theorem not_done_iff {α σ : Type} (r : Except Halt α × σ) : Done r = false 
     | revert _ => exact ⟨(fun h => nomatch h), (fun h => nomatch h)⟩
     | stuck _ => exact ⟨(fun h => nomatch h), (fun h => nomatch h)⟩
 
-/-- Pending within `n` is a timeout at every horizon up to `n`. -/
 theorem txFate_pending_iff (G : Glob E) (q : Request) (s : St E) (n : Nat) :
     txFate G q s n = .pending ↔ ∀ k ≤ n, (runAt (fun f => runTx G f q) s k).1 = .error .timeout := by
   simp only [txFate]
@@ -323,7 +267,6 @@ theorem txFate_pending_iff (G : Glob E) (q : Request) (s : St E) (n : Nat) :
       rw [← not_done_iff, hd] at this
       cases this
 
-/-- A run that is done at a horizon within `n` is the fate within `n`. -/
 theorem txFate_of_done (G : Glob E) (q : Request) (s : St E) {n k : Nat} (hk : k ≤ n)
     (hd : Done (runAt (fun f => runTx G f q) s k) = true) :
     txFate G q s n = match (runAt (fun f => runTx G f q) s k).1 with
@@ -340,10 +283,8 @@ theorem txFate_of_done (G : Glob E) (q : Request) (s : St E) {n k : Nat} (hk : k
     rw [e]
     rcases (runAt (fun f => runTx G f q) s k) with ⟨o | h, _⟩ <;> rfl
 
-/-- **Divergence**: pending at every horizon. -/
 def Diverges (G : Glob E) (q : Request) (s : St E) : Prop := ∀ n, txFate G q s n = .pending
 
-/-- **Stuck**: halted at a run-time mismatch within some horizon. -/
 def Stuck (G : Glob E) (q : Request) (s : St E) : Prop := ∃ n msg, txFate G q s n = .halted (.stuck msg)
 
 theorem diverges_iff (G : Glob E) (q : Request) (s : St E) :
@@ -370,15 +311,12 @@ theorem stuck_iff (G : Glob E) (q : Request) (s : St E) :
     refine ⟨k, msg, ?_⟩
     rw [txFate_of_done G q s (Nat.le_refl k) hd, h]
 
-/-- **Stuck is not divergence**: a run stuck at some horizon does not time
-out there. -/
 theorem stuck_not_diverges (G : Glob E) (q : Request) (s : St E) (h : Stuck G q s) : ¬ Diverges G q s := by
   intro hd
   obtain ⟨k, msg, hk⟩ := (stuck_iff G q s).1 h
   rw [(diverges_iff G q s).1 hd k] at hk
   cases hk
 
-/-- A stuck transaction's fate is the same halt at every larger horizon. -/
 theorem stuck_stable (G : Glob E) (q : Request) (s : St E) {n n' : Nat} (hn : n ≤ n') {msg : String}
     (h : txFate G q s n = .halted (.stuck msg)) : txFate G q s n' = .halted (.stuck msg) := by
   rw [txFate_mono G q s hn (by rw [h]; exact fun h' => nomatch h'), h]
@@ -395,8 +333,6 @@ theorem stuck_stable (G : Glob E) (q : Request) (s : St E) {n n' : Nat} (hn : n 
 #guard_msgs in
 #print axioms runTx_events_mono
 
-/-- **A stuck transaction is eventually always stuck**: from some horizon
-on, its fate is the same `stuck` halt. -/
 theorem stuck_eventually (G : Glob E) (q : Request) (s : St E) (h : Stuck G q s) :
     ∃ n msg, ∀ n', n ≤ n' → txFate G q s n' = .halted (.stuck msg) := by
   obtain ⟨n, msg, hn⟩ := h
