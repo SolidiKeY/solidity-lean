@@ -4,6 +4,7 @@ import Solidity.Source.Machine
 /-!
 # Primitive local-state correspondence
 
+This is a value/local-state interface, not a simulation.
 Contexts are intrinsic on both sides. Recursion is on the list of primitive
 types; no source local is erased. Heap, storage, events, calldata and execution
 resources have no correspondence theorem here.

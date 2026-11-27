@@ -1,6 +1,7 @@
 import Solidity.Source.Agreement.BoolSlotAssign
 
-/-! Actual primitive local-read initialization through the paired indices. -/
+/-! Actual primitive local-read initialization through the paired indices.
+This is not a full-state correspondence judgment. -/
 namespace Solidity.Source.Agreement
 variable {E : Env} {C : Contract} {R : List STy} {M : Bool} {k : SCtx}
 

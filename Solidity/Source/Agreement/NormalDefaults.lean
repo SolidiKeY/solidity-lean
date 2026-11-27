@@ -1,7 +1,8 @@
 import Solidity.Source.Agreement.NormalComposition
 
 /-! Concrete normal-step producers for existing primitive declarations without
-initializers. Only the bool/uint256/int256 defaults are related. -/
+initializers. Only the bool/uint256/int256 defaults are related; the contract
+does not assert full-state simulation. -/
 namespace Solidity.Source.Agreement
 
 variable {E : Env} {C : Contract} {R : List STy} {M : Bool} {k : SCtx}
