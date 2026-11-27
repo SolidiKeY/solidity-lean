@@ -166,6 +166,7 @@ import Solidity.Backend.CompilerOptimizerDomain.DeadStore
 import Solidity.Backend.CompilerOptimizerDomain.LICM
 import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.StmtFold
+import Solidity.Backend.CompilerOptimizerDomain.Weakening
 import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control
 import Solidity.Backend.Creation.Artifact

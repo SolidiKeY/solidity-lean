@@ -1,1 +1,1 @@
-| `Backend/CompilerOptimizerDomain/{ConstFold,StmtFold,DeadCode,DeadStore,LICM,Simplify,Controls}.lean` | Accepted-domain preservation for constant folding, simplification and statement/store removal and LICM, with resource/fragment integration controls. |
+| `Backend/CompilerOptimizerDomain/{ConstFold,StmtFold,DeadCode,DeadStore,LICM,Simplify,Weakening,Controls}.lean` | Accepted-domain preservation for constant folding, simplification and statement/store removal and LICM, plus expression weakening, with resource/fragment integration controls. |

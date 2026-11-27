@@ -3,6 +3,7 @@ import Solidity.Backend.CompilerOptimizerDomain.DeadCode
 import Solidity.Backend.CompilerOptimizerDomain.DeadStore
 import Solidity.Backend.CompilerOptimizerDomain.LICM
 import Solidity.Backend.CompilerOptimizerDomain.Simplify
+import Solidity.Backend.CompilerOptimizerDomain.Weakening
 
 /-! Integration controls for the proved constant-fold, simplification, removal and LICM stages only. These check both
 resource and fragment consequences against the unchanged public compiler domain;
@@ -47,5 +48,9 @@ example (hP : ProgOk [] P) :
   have hQ := prog_simplify_ok hP
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
   exact ⟨hQ.quiet.1, G, h⟩
+
+-- Expression-domain weakening accepts every extension of the original context.
+example {p : PrimTy} {v : Val C Γ p} (w : Thin Γ Δ) (hv : ValOk v) :
+    ValOk (v.wk w) := val_wk_ok w hv
 
 end Solidity.Backend.CompilerOptimizerDomain.Controls
