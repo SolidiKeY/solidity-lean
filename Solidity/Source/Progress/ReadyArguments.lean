@@ -1,15 +1,14 @@
 import Solidity.Source.Progress.ReadyExpressions
 import Solidity.Source.Preservation.ReferenceArguments
 
-/-! Exact-type ready arguments combine non-stuck extraction with the existing
-reference-preserving argument evaluator. Primitive values and memory references
-are plain; constants needing conversion and other reference locations are not
-silently added to this certificate. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
 
 def PlainResultType (τ : STy) : Prop := τ.isValue = true ∨ τ.loc? = some .memory
+
+example : PlainResultType (.int IntTy.u256) := Or.inl rfl
+example : PlainResultType (.bytes .memory) := Or.inr rfl
 
 theorem getV_plain_ns {Γ : RCtx} {τ : STy} (plain : PlainResultType τ) (v : RVal E.layout τ) :
     NS (getV (Γ := Γ) v) := by

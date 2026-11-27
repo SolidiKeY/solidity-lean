@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.AllocationReturns
 import Solidity.Lowering.P9.InferenceCuts
 
-/-! Inhabited finite defaults and actual frontend-elaborated fixed-array
-returns. The Source call runs in both evaluator pipelines over a live heap;
-the caller node is intrinsic. Default/type exclusions and timeouts are retained. -/
 namespace Solidity.Source.Progress.AggregateReturnControls
 open EM Solidity.Lowering.P9
 

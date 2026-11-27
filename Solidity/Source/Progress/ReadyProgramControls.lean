@@ -3,9 +3,6 @@ import Solidity.Lowering.P9.InferenceCuts
 import Solidity.Roadmap.Controls
 import Solidity.Source.Progress.ReadyReturnControls
 
-/-! A real mixed source unit: a scalar helper supplies the allocation length
-of a memory-returning function. Both functions are accounted for; exact nested
-runs retain a live memory prefix. Omission and old-checker refusals remain. -/
 namespace Solidity.Source.Progress.ReadyProgramControls
 open EM Solidity.Lowering.P9
 
