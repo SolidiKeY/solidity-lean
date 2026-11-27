@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.ReadyBodyCalls
 
-/-! Progress for same-type local rebinding with a ready RHS. Finite rebinding
-prefixes lead into the existing ready-body admission. The preservation proof
-uses BodyExpr.rebind and its local-reference writer; no evaluator is changed.
-These are Source-only results, with explicit call/body/default premises. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
@@ -37,8 +33,6 @@ theorem ready_rebind_progress_and_memory {A : Decl → Prop} {G : Glob E} {c : S
   ⟨eval_ready_rebind_ns calls F contract n i e plain ready,
     Preservation.eval_body_expr_mem calls F contract n _ (.rebind i ready.allocating) H⟩
 
-/-- A finite prefix certificate over the existing indexed items. The tail is
-an unchanged ReadyItems body; this adds no arbitrary nested assignment RHS. -/
 inductive RebindingItems (A : Decl → Prop) (R : List STy) (M : Bool) :
     {k : SCtx} → {Γ Δ : RCtx} → RItems E R M k Γ Δ → Prop
   | ready {k Γ Δ} {items : RItems E R M k Γ Δ} :
