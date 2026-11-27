@@ -277,6 +277,67 @@ elab "agree_run" inl:(num)* : tactic => do
 
 end Engine
 
+section StatePassing
+
+variable {σ : Type}
+
+/-- Agreement of two state-passing computations at a scope, from every state. -/
+def AgreeS {α : Type} (sc : ElabScope) (x y : StateT σ ElabM α) : Prop :=
+  ∀ P, Agree sc (x.run P) (y.run P)
+
+theorem agreeS_refl {α : Type} (sc : ElabScope) (x : StateT σ ElabM α) : AgreeS sc x x :=
+  fun _ => agree_refl _ _
+
+theorem agreeS_bind {α β : Type} {sc : ElabScope} {x y : StateT σ ElabM α}
+    {f g : α → StateT σ ElabM β} (hx : AgreeS sc x y) (hf : ∀ a, AgreeS sc (f a) (g a)) :
+    AgreeS sc (x >>= f) (y >>= g) := by
+  intro P
+  simp only [StateT.run_bind]
+  exact agree_bind (hx P) fun a _ => hf a.1 a.2
+
+theorem agreeS_map {α β : Type} {sc : ElabScope} {x y : StateT σ ElabM α} (k : α → β)
+    (hx : AgreeS sc x y) : AgreeS sc (k <$> x) (k <$> y) := by
+  rw [← bind_pure_comp, ← bind_pure_comp]
+  exact agreeS_bind hx fun _ => agreeS_refl _ _
+
+theorem agreeS_listMapM {α β : Type} {sc : ElabScope} (f g : α → StateT σ ElabM β)
+    (as : List α) (h : ∀ e ∈ as, AgreeS sc (f e) (g e)) :
+    AgreeS sc (as.mapM f) (as.mapM g) := by
+  induction as with
+  | nil => exact agreeS_refl _ _
+  | cons a as ih =>
+    simp only [List.mapM_cons]
+    exact agreeS_bind (h a (by simp)) fun _ =>
+      agreeS_bind (ih fun e he => h e (by simp [he])) fun _ => agreeS_refl _ _
+
+theorem agreeS_optMapM {α β : Type} {sc : ElabScope} (f g : α → StateT σ ElabM β)
+    (i : Option α) (h : ∀ e ∈ i, AgreeS sc (f e) (g e)) :
+    AgreeS sc (i.mapM f) (i.mapM g) := by
+  cases i with
+  | none => exact agreeS_refl _ _
+  | some e => exact agreeS_map _ (h e rfl)
+
+/-- **A statement's own expressions**: the statement map invokes its callback at
+`RawStmt.exprs`, and at the target of a declaring `send`. -/
+theorem mapExprsM_agree {sc : ElabScope} (f g : RawExpr → StateT σ ElabM RawExpr) (s : RawStmt)
+    (h : ∀ e ∈ s.exprs, AgreeS sc (f e) (g e))
+    (hs : ∀ T x r a b, s = .send (some T) x r a b → AgreeS sc (f x) (g x)) :
+    AgreeS sc (s.mapExprsM f) (s.mapExprsM g) := by
+  cases s <;> try cases ‹Option RawTy›
+  all_goals simp only [RawStmt.mapExprsM, RawLoopSpec.mapM, bind_pure_comp, RawStmt.exprs] at h ⊢
+  all_goals repeat' first
+    | exact agreeS_refl _ _
+    | exact hs _ _ _ _ _ rfl
+    | exact h _ (Option.mem_toList.mpr ‹_›)
+    | (apply h; simp [RawLoopSpec.exprs, *]; done)
+    | (apply h; simp_all [RawLoopSpec.exprs, Option.mem_def]; done)
+    | (apply h; simp only [List.mem_append, List.mem_filterMap, id]; exact Or.inl ⟨_, ‹_ ∈ _›, ‹_›⟩)
+    | (refine agreeS_bind ?_ fun _ => ?_)
+    | (refine agreeS_map _ ?_)
+    | (refine agreeS_listMapM _ _ _ fun e he => ?_)
+    | (refine agreeS_optMapM _ _ _ fun e he => ?_)
+end StatePassing
+
 variable (C : Contract) [FreshNames]
 
 omit [FreshNames] in
