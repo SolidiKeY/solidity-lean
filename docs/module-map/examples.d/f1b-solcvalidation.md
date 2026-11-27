@@ -1,1 +1,1 @@
-| `Examples/FrontendValidation/SolcValidation.lean` | Accepted and rejected literal decoding and lexer boundary controls for the frozen solc validator inventory. |
+| `Examples/FrontendValidation/SolcValidation.lean` | Inline accepted and rejected controls for the frozen solc literal, lexer, parser, data lookup, structural and renaming validators. |
