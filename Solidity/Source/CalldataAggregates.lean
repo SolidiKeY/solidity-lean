@@ -1,9 +1,5 @@
 import Solidity.Source.Calldata
 
-/-! Consumers of actual nested calldata operations. These
-are Source execution/progress/layout facts; compiler/NEWBackend and EVM
-correspondence are separate obligations. Dynamic-base range slices remain
-refused, as pinned solc 0.8.38 error2148 requires. -/
 namespace Solidity.Source
 open EM
 
@@ -29,8 +25,6 @@ theorem cdNested_ok (F : Fr) (base index stride : Nat) : NotStuckR (cdNested F b
     cases pair
     cases impossible
 
-/-- The complete nested read retains the actual Source caller state on
-success and error; no execution or preservation premise is supplied. -/
 theorem readLoc_cdBytes_run (F : Fr) (base index : Nat) (before : EMState E Γ) :
     (readLoc F (.cdBytes base index)).run before =
       ((cdNested F base index 1).map fun pair => Val.cdRef rfl pair.1 pair.2,before) := by
@@ -62,8 +56,6 @@ theorem readLoc_cdFixedArray_run (F : Fr) (offset length : Nat) (σ : STy) (befo
     (readLoc F (.cdFixedArray (σ := σ) length offset)).run before =
       (.ok (.cdRef rfl offset length),before) := rfl
 
-/-- Exact region and length facts follow from the actual successful producer;
-the origin adjustment is derived, not assumed as a relocation oracle. -/
 theorem cdNested_region (F : Fr) (base index stride : Nat) {offset length : Nat}
     (result : cdNested F base index stride = .ok (offset,length)) :
     ∃ relative, offset = base+relative+32 ∧ length < 2^64 ∧
@@ -85,7 +77,6 @@ theorem cdNested_region (F : Fr) (base index stride : Nat) {offset length : Nat}
           omega
       · cases result
 
-/-- This native refusal remains outside the admitted typed slice constructor. -/
 theorem dynamic_array_base_slice_refused (σ : STy) :
     STy.sliceable (.array .calldata (.array .calldata σ none) none) = false := rfl
 
@@ -104,8 +95,6 @@ theorem decodeArg_cdArray_run (data : Roadmap.Bytes) (index : Nat) (σ : STy)
   simp only [decodeArg,if_pos supported]
   cases cdArg E.layout data index σ.cdHeadBytes (τ := .array .calldata σ none) rfl <;> rfl
 
-/-- Execute the existing typed local-array index expression. The remaining
-index/read program is actual Source code, with its real exceptions. -/
 theorem eval_cdIndex_run {caller : RCtx} (G : Glob E) (F : Fr) (n : Nat) (σ : STy)
     (offset length index : Nat) (typed : IntTy.u256.lo ≤ (index : Int) ∧ (index : Int) ≤ IntTy.u256.hi)
     (tail : Locals E.layout caller) (state : St E) :
