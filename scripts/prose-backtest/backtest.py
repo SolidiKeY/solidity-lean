@@ -31,7 +31,7 @@ import subprocess
 import sys
 
 METRICS = ("docs_lines", "comment_lines", "docstring_lines", "process_ids")
-REGISTRY_ROOTS = ("Solidity.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean",
+REGISTRY_ROOTS = ("Solidity.lean", "SolidityControls.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean",
                   "Bridge/SolidityBridge.lean")
 CHECKER_PATH = "scripts/check-prose-budget"
 BASELINE_PATH = "scripts/prose-baseline.json"

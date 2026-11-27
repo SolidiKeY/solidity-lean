@@ -3,12 +3,9 @@ HashedKeccak	10803
 HashedLayout	19771
 HashedLayoutEvm	1658
 HashedSeparation	13187
-Representation.ArrayControls	9906
 Representation.Arrays	4670
-Representation.Controls	4084
 Representation.Frames	1952
 Representation.GraphCompatibility	2710
-Representation.GraphControls	16352
 Representation.GraphFrames	5332
 Representation.GraphLayout	2483
 Representation.GraphRepresentation	3119
@@ -16,7 +13,5 @@ Representation.Members	2516
 Representation.Model	2000
 Representation.Reads	2013
 Representation.Transport	2750
-Representation.TransportControls	11685
-Representation.UpdateControls	10309
 Representation.Updates	1561
 Representation.Words	4223

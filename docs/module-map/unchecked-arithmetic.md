@@ -127,6 +127,17 @@
 | `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
 | `Correctness/Lowering/Sim/Induction/Knot.lean` | The actual elaborator record satisfies the frozen case predicates by `elabKernelTotal` induction, conditional on the three case hypotheses and the explicit loop-arm bridge; an intermediate step toward `loweringBySimulation`. |
 | `Examples/Lowering/Sim/Induction.lean` | Uses the intermediate knot-closure theorem with production fresh names and its loop-arm bridge hypothesis. |
+| `Correctness/Lowering/Sim/CoverageBranch.lean` | Exact child execution receipts compose through lists, branch reader isolation and local restoration, and typed scope chaining; actual block-arm specialization requires `Goals.elabKernelTotal`. |
+| `Examples/Lowering/Sim/CoverageBranch.lean` | Two effectful child executions retain fresh indices and memo updates, restore entry locals, observe the branch reader, and chain into a typed block. |
+
+`Children` supplies individual executions with intermediate locals, counters
+and memos. `chain_cons` checks placement at each exact context and outgoing
+name list; `actual_scope` consumes a successful chain, not a coverage claim.
+`actual_block` derives the `elabStmt1` block arm from producer equations with
+an explicit kernel-totality hypothesis. Source acceptance, capture receipts,
+assignment receipts, and the surrounding coverage theorem remain with LS3B.
+These helpers assert neither unrestricted `Diagram.Total` nor external EVM
+correctness.
 | `Solidity/Correctness/Lowering/Sim/Coverage/ThreadedV2.lean` | Additive caller-context threading contract, v1 projection and association bridge for `loweringBySimulation`. |
 | `Solidity/Examples/Lowering/Sim/Coverage/ThreadedV2.lean` | Existing standalone-loop vocabulary exercises the bridge with explicit threading and placement receipts. |
 | `Correctness/Lowering/Sim/Coverage/Obstruction.lean` | Exact accepted empty production run under `elabKernelTotal` refuting frozen v1 diagram coverage: placement may use an unrelated context. |
@@ -198,3 +209,5 @@
 | `Correctness/Lowering/Unchecked/WordUpdateWitness.lean` | Actual-output word-association controls; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Total/Decode/SuccessfulContext.lean` | Unrestricted empty-body production, enum representability obstruction, and conditional P2 request/body binding; complete request-context decoding remains open. |
 | `Examples/Lowering/Total/SuccessfulContext.lean` | Successful-production versus enum-component coverage regression checks. |
+| `Correctness/Lowering/Total/Decode/SuccessfulExpr.lean` | One-step equations for actual Source inference of numeric prefix/suffix and assignment effects, deletion, arrays, tuples and builtin environment members and self address/balance; registered bytes-literal spelling/inference; actual capture/callback spelling composition and named-hoister guard/run extraction; explicit recursive child obligations and retained refusal guards. |
+| `Examples/Lowering/Total/SuccessfulExpr.lean` | Source model checks for numeric and assignment effects, storage copy, nonnumeric/rvalue refusal, deletion, arrays, tuples, environment reads, registered bytes and concrete callback composition and named effect-order refusals. |
