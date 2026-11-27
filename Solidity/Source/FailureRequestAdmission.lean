@@ -1,27 +1,18 @@
 import Solidity.Source.FailureRequest
 import Solidity.Source.FailureMachineControls
 
-/-! Exact-Nat value admission controls on the actual request scope. This is
-not balance installation, a transaction/session driver, or native evidence. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env} {Γ : RCtx}
-/-- Admission is not a new resource choice: the TxFate contract already
-requires value to fit the exact post-fee balance before code may run. -/
 def admitRequestFate (value : Roadmap.Word) : Roadmap.Evm.TxFate → Roadmap.Evm.TxFate
   | .dropped => .dropped
   | .runs balance cut => if balance < value.val then .dropped else .runs balance cut
 
-/-- Only the currently issued request is normalized; every frame choice and
-all other request choices remain the original immutable plan's. -/
 def admitRequestAt (points : Roadmap.Evm.FailurePoints) (index : Nat)
     (value : Roadmap.Word) : Roadmap.Evm.FailurePoints :=
   { points with tx := fun i => if i = index then admitRequestFate value (points.tx i)
       else points.tx i }
 
-/-- Exact value admission around the EXISTING actual request scope. The body
-receives its original full Nat balance and keeps its original plan closure.
-No balance is installed or projected; no evaluator/session is replaced. -/
 def requestValueScope {α : Type} (points : Roadmap.Evm.FailurePoints)
     (q : Roadmap.Request) (body : Nat → EM E Γ α) : EM E Γ (Option α) := do
   let cursor := (← st).resource
@@ -35,8 +26,6 @@ theorem admission_other (points : Roadmap.Evm.FailurePoints) (index i : Nat)
     (admitRequestAt points index value).tx i = points.tx i := by
   simp only [admitRequestAt, other, if_false]
 
-/-- Exact invalid-value suppression for arbitrary typed callers/states and
-arbitrary bodies. The initial cursor is explicit, not a general Session law. -/
 theorem request_value_unfunded {α : Type} (balance : Nat) (cut : Option Nat) (q : Roadmap.Request)
     (bad : balance < q.value.val) (body : Nat → EM E Γ α)
     (l : Locals E.layout Γ) (s : St E) :
@@ -47,8 +36,6 @@ theorem request_value_unfunded {α : Type} (balance : Nat) (cut : Option Nat) (q
     constantRequestPlan, bad, if_true]
   rfl
 
-/-- A genuinely affordable constant fate executes exactly the old scope,
-including every body halt/state effect and resource-cut behavior. -/
 theorem request_value_admitted {α : Type} (balance : Nat) (cut : Option Nat)
     (q : Roadmap.Request) (good : q.value.val ≤ balance) (body : Nat → EM E Γ α) :
     requestValueScope (constantRequestPlan (.runs balance cut)) q body =

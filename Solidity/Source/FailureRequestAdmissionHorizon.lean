@@ -2,10 +2,6 @@ import Solidity.Source.FailureRequestAdmission
 import Solidity.Source.FailureRequestHorizon
 import Solidity.Source.FailureScopeStability
 
-/-! Horizon transport of the existing exact-Nat admission API. This extends
-requestValueScope rather than installing another admission/runtime operation.
-The original plan remains closed over by the body; only its current request
-fate is normalized by the existing operation. Session/fee wiring stays open. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env} {Γ : RCtx} {α : Type}

@@ -9,6 +9,9 @@ Counts come from tree contents (per-file line totals at base vs head), not diff 
 a rename into a frozen area grows it, a move out shrinks it. Generated library roots
 (read from scripts/coord-tools/register.sh and fragments.py) are not counted.
 
+Optional strict_aggregate_steps additionally enforces the cap including registered
+paths, both excluding and including generated roots, when a selected trailer occurs.
+
 Base (computed, never committed):
   --base REV                   explicit (CI: github.event.before on a push to master,
                                the PR base's merge base on a pull request)
@@ -101,6 +104,10 @@ def deltas(base, head, roots):
 def load_allow(path=ALLOW):
     with open(path) as f: cfg = json.load(f)
     if not isinstance(cfg.get("cap"), int) or cfg["cap"] <= 0: raise ValueError("allow.json: cap must be a positive int")
+    strict = cfg.get("strict_aggregate_steps", [])
+    if (not isinstance(strict, list) or any(not isinstance(s, str) for s in strict)
+            or any(s not in cfg["steps"] for s in strict)):
+        raise ValueError("allow.json: strict_aggregate_steps must list registered step ids")
     return cfg
 
 
@@ -147,6 +154,15 @@ def evaluate(base, head, cfg, roots=None):
         rep.append(f"  to allow: a commit trailer `{TRAILER}: <step-id>` for a step in allow.json whose globs cover "
                    f"the growth ({hint(cfg, counted)})")
     else: rep.append(f"ok net Lean lines {total:+d} (cap {cap}) over {len(counted)} changed file(s)")
+    if steps.intersection(cfg.get("strict_aggregate_steps", [])):
+        # Preserve the original aggregate independently: shrinking generated roots
+        # must not offset excess growth in non-generated files.
+        for label, changes in (("non-generated", d), ("including generated", deltas(base, head, set()))):
+            net = sum(changes.values())
+            passed = net <= cap
+            ok = ok and passed
+            rep.append(f"{'ok' if passed else 'FAIL'} strict aggregate {label} Lean lines "
+                       f"{net:+d} (cap {cap}; registered paths included)")
     return ok, rep
 
 

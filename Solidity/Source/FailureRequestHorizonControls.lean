@@ -1,8 +1,6 @@
 import Solidity.Source.FailureRequestHorizon
 import Solidity.Source.FailureMachineControls
 
-/-! Actual request-scope horizon controls with full caller state and bytes.
-The exact post-fee Nat is a body argument, not installed money or a receipt. -/
 namespace Solidity.Source.FailureExecution.RequestHorizonControls
 open EM Controls
 
@@ -71,8 +69,6 @@ theorem heap_alias_retained :
     (heapBytes 0 : EM E [.bytes .memory,.bool] Roadmap.Bytes).run (caller,finished) =
       (.ok [0xDE,0xAD],(caller,finished)) := by rfl
 
-/-- Fixed plans are essential: successful completed scopes with different
-post-fee inputs are distinct, even though both have no scheduled failures. -/
 theorem changed_plan_not_approx :
     ¬ Approx
       (requestScope (constantRequestPlan (.runs 257 none)) (fun b => pure b) : EM E [.bytes .memory,.bool] (Option Nat))
