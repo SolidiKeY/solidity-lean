@@ -1,52 +1,16 @@
 import Solidity.Optimizer.Loads
 import Solidity.Semantics.RunFrame
 
-/-!
-# O03/X06 loop-invariant code motion
-
-`while (c) { x = e; rest }` becomes `if (c) { x = e; while (c) { rest } }`
-when the assignment is loop-invariant: the guarded hoist (`Stmt.licm`).
-
-The guard is what makes the zero-iteration case exact: hoisting `x = e` in
-front of a loop that never runs would evaluate `e` (which may revert, e.g. an
-overflow) and write `x` where the loop does neither. Under `if (c)`, `e` is
-evaluated exactly when the loop's first iteration evaluates it, in the same
-state (evaluating `c` changes no state), and fails exactly when that iteration
-fails, with the same halt. The side conditions (`licmB`), each used in
-`licm_runC`:
-
-* `e` and `c` are invariant expressions (`Val.invB`): literals, locals,
-  environment values, operators, and reads of primitive state variables (an
-  invariant `sload`); no memory read, no path with an index;
-* neither `e` nor `c` reads `x`, so `x = e` changes neither (the hoisted `c`
-  is evaluated after `x = e`); `c` is *not* required to be loop-invariant: it is
-  re-evaluated every iteration exactly as in the original loop, and `Val.invB c`
-  is only what lets it move past `x = e`;
-* the loop annotation is an unwind bound or automatic (`LoopAnn.plainB`): a
-  written invariant is stated for the original entry state, so annotated loops
-  are left as written;
-* `rest` is within `nonpayable` (`Prog.within`: no memory statement, no
-  allocation; `Prog.run_frame`), writes no local `e` reads and not `x`
-  (`Prog.writesAt`, positions), and writes only state variables outside the
-  ones `e` reads (`Prog.storeAt = some L`, `Prog.run_keeps`): so every
-  iteration leaves `e`'s value and `x` unchanged, and the hoisted `x = e` is
-  then a no-op in each later iteration (`TLoop.run_congr_inv`).
-
-Preservation is equality of the typed run in every state (`Prog.licm_runC`),
-diverging loops included (`TLoop.run` is the same limit on both sides).
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract}
 
-/-! ## Loops that agree on an invariant -/
 
 namespace TLoop
 
 variable {α : Type}
 
-/-- Bounded iterations of two bodies that agree on an invariant the second keeps. -/
 theorem iterN_congr_inv {body body' : α → TRes α} {c : α → TRes Bool} {P : α → Prop}
     (hb : ∀ τ, P τ → c τ = .ok true → body τ = body' τ)
     (hinv : ∀ τ τ', P τ → c τ = .ok true → body' τ = .ok τ' → P τ') :
@@ -66,8 +30,6 @@ theorem iterN_congr_inv {body body' : α → TRes α} {c : α → TRes Bool} {P 
         | error e => rfl
         | ok τ' => exact iterN_congr_inv hb hinv n τ' (hinv τ τ' hp hc hbd)
 
-/-- Two loops whose bodies agree on states satisfying an invariant that the
-second body keeps run alike from such a state. -/
 theorem run_congr_inv {body body' : α → TRes α} {c : α → TRes Bool} {P : α → Prop} {σ : α}
     (hb : ∀ τ, P τ → c τ = .ok true → body τ = body' τ)
     (hinv : ∀ τ τ', P τ → c τ = .ok true → body' τ = .ok τ' → P τ') (h0 : P σ) :
@@ -80,7 +42,6 @@ theorem run_congr_inv {body body' : α → TRes α} {c : α → TRes Bool} {P : 
       hex ⟨r, n, (hit n).trans hn⟩
     simp only [TLoop.run, hex, hex', dite_false]
 
-/-- A loop that goes on from `σ` to `τ` runs as from `τ`. -/
 theorem run_of_step {body : α → TRes α} {c : α → TRes Bool} {σ τ : α}
     (h : TLoop.step body c σ = .inl τ) : TLoop.run body c σ = TLoop.run body c τ := by
   have hit : ∀ n, TLoop.iterN body c (n + 1) σ = TLoop.iterN body c n τ := fun n => by
@@ -94,11 +55,6 @@ theorem run_of_step {body : α → TRes α} {c : α → TRes Bool} {σ τ : α}
       | succ n => exact hex ⟨r, n, (hit n).symm.trans hn⟩
     simp only [TLoop.run, hex, hex', dite_false]
 
-/-- **The hoist on loops.** The original loop's first iteration from `σ` is
-the hoisted loop's first iteration from `σ'` (the state after the hoisted
-assignment, where the condition still holds); afterwards the two bodies agree
-on states satisfying `P`, which the hoisted body keeps and its first iteration
-establishes. -/
 theorem hoist_run {body body' : α → TRes α} {c : α → TRes Bool} {P : α → Prop} {σ σ' : α}
     (hc : c σ = .ok true) (hc' : c σ' = .ok true) (hfirst : body σ = body' σ')
     (hb : ∀ τ, P τ → c τ = .ok true → body τ = body' τ)
@@ -120,14 +76,11 @@ theorem hoist_run {body body' : α → TRes α} {c : α → TRes Bool} {P : α �
 
 end TLoop
 
-/-! ## Invariant expressions -/
 
 section Inv
 
 variable {Γ : Ctx}
 
-/-- Literals, locals, environment values, operators over them, and reads of
-primitive state variables. -/
 def _root_.Solidity.Val.invB : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple _ => true
   | _, .read (.root _ _) => true
@@ -138,8 +91,6 @@ def _root_.Solidity.Val.invB : {p : PrimTy} → Val C Γ p → Bool
   | _, .read (.field ..) | _, .read (.index ..) | _, .readMem _ | _, .len .. | _, .mlen ..
   | _, .hash .. => false
 
-/-- Does the expression read the local at position `n` (conservatively `true`
-outside the fragment)? -/
 def _root_.Solidity.Val.readsPos (n : Nat) : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple s => readsAt n s
   | _, .read (.root _ _) => false
@@ -150,7 +101,6 @@ def _root_.Solidity.Val.readsPos (n : Nat) : {p : PrimTy} → Val C Γ p → Boo
   | _, .read (.field ..) | _, .read (.index ..) | _, .readMem _ | _, .len .. | _, .mlen ..
   | _, .hash .. => true
 
-/-- The state variables the expression reads. -/
 def _root_.Solidity.Val.roots : {p : PrimTy} → Val C Γ p → List Name
   | _, .simple _ => []
   | _, .read (.root r _) => [r]
@@ -161,7 +111,6 @@ def _root_.Solidity.Val.roots : {p : PrimTy} → Val C Γ p → List Name
   | _, .read (.field ..) | _, .read (.index ..) | _, .readMem _ | _, .len .. | _, .mlen ..
   | _, .hash .. => []
 
-/-- What an invariant expression reads agrees in two states. -/
 structure InvAgree {p : PrimTy} (v : Val C Γ p) (σ τ : State C Γ) : Prop where
   locals : ∀ (q : PrimTy) (k : Idx Γ (.val q)), v.readsPos k.toNat = true →
     TEnv.get k τ.env = TEnv.get k σ.env
@@ -221,7 +170,6 @@ theorem _root_.Solidity.Val.evalT_invAgree {σ τ : State C Γ} : {p : PrimTy} �
   | _, .len .., hv, _ | _, .mlen .., hv, _ | _, .hash .., hv, _ => by
     simp only [Val.invB, Bool.false_eq_true] at hv
 
-/-- Setting a local an invariant expression does not read leaves its value. -/
 theorem _root_.Solidity.Val.evalT_setLocal_inv {p q : PrimTy} (σ : State C Γ) (i : Idx Γ (.val q)) (x : q.Denote)
     (v : Val C Γ p) (hv : v.invB = true) (hi : v.readsPos i.toNat = false) :
     v.evalT (σ.setLocal i x) = v.evalT σ := by
@@ -231,25 +179,21 @@ theorem _root_.Solidity.Val.evalT_setLocal_inv {p q : PrimTy} (σ : State C Γ) 
 
 end Inv
 
-/-! ## What the rest of the body leaves -/
 
 section Frame
 
 variable {Γ : Ctx}
 
-/-- `Prog.run_frame` at the compiled run (`rest` within `nonpayable`). -/
 theorem runC_frame {Γ₁ : Ctx} (rest : Prog C Γ Γ₁) (hw : rest.within .nonpayable = true)
     {σ : State C Γ} {o : Out C σ.H Γ₁} (h : Prog.runC rest σ = .ok o) :
     TGFrame .nonpayable σ o.st ∧
       TLocAgree 0 (Prog.writesAt 0 rest) σ.env (TEnv.drop rest.ext o.st.env) :=
   Prog.run_frame rest hw 0 (by show Prog.runR rest σ = _; rw [Prog.runR_eq]; exact h)
 
-/-- `Prog.run_keeps` at the compiled run: roots outside `rest.storeAt` kept. -/
 theorem runC_keeps {Γ₁ : Ctx} (rest : Prog C Γ Γ₁) {σ : State C Γ} {o : Out C σ.H Γ₁}
     (h : Prog.runC rest σ = .ok o) : FrameKeeps (Prog.storeAt rest) σ o.st :=
   Prog.run_keeps rest (by show Prog.runR rest σ = _; rw [Prog.runR_eq]; exact h)
 
-/-- A local whose position `rest` does not write reads as it did. -/
 theorem runC_local {Γ₁ : Ctx} (rest : Prog C Γ Γ₁) (hw : rest.within .nonpayable = true)
     {σ : State C Γ} {o : Out C σ.H Γ₁} (h : Prog.runC rest σ = .ok o) {q : PrimTy}
     (k : Idx Γ (.val q)) (hk : ∀ w ∈ Prog.writesAt 0 rest, w.2 ≠ k.toNat) :
@@ -257,8 +201,6 @@ theorem runC_local {Γ₁ : Ctx} (rest : Prog C Γ Γ₁) (hw : rest.within .non
   have ha := (runC_frame rest hw h).2 (.val q) k (Nat.zero_le _) (fun hm => hk _ hm (by simp only [Nat.sub_zero]))
   exact eq_of_heq ha
 
-/-- An invariant expression whose locals and state variables `rest` does not
-write evaluates as it did. -/
 theorem runC_inv {Γ₁ : Ctx} (rest : Prog C Γ Γ₁) (hw : rest.within .nonpayable = true)
     {L : List Name} (hL : rest.storeAt = some L) {p : PrimTy} (v : Val C Γ p)
     (hv : v.invB = true) (hpos : ∀ w ∈ Prog.writesAt 0 rest, v.readsPos w.2 = false)
@@ -276,13 +218,11 @@ theorem runC_inv {Γ₁ : Ctx} (rest : Prog C Γ Γ₁) (hw : rest.within .nonpa
 
 end Frame
 
-/-! ## The hoist -/
 
 section Hoist
 
 variable {Γ : Ctx}
 
-/-- `while (c) { x = e; rest }` may become `if (c) { x = e; while (c) { rest } }`. -/
 def licmB {q : PrimTy} {Γ₁ : Ctx} (c : Val C Γ .bool) (x : Idx Γ (.val q)) (e : Val C Γ q)
     (rest : Prog C Γ Γ₁) : Bool :=
   c.invB && !c.readsPos x.toNat && e.invB && !e.readsPos x.toNat &&
@@ -292,7 +232,6 @@ def licmB {q : PrimTy} {Γ₁ : Ctx} (c : Val C Γ .bool) (x : Idx Γ (.val q)) 
     | some L => e.roots.all fun r => !L.contains r
     | none => false
 
-/-- The side conditions of the hoist, as propositions (`licmB_ok`). -/
 structure LicmOk {q : PrimTy} {Γ₁ : Ctx} (c : Val C Γ .bool) (x : Idx Γ (.val q))
     (e : Val C Γ q) (rest : Prog C Γ Γ₁) : Prop where
   cinv : c.invB = true
@@ -304,7 +243,6 @@ structure LicmOk {q : PrimTy} {Γ₁ : Ctx} (c : Val C Γ .bool) (x : Idx Γ (.v
   xpos : ∀ w ∈ Prog.writesAt 0 rest, w.2 ≠ x.toNat
   keeps : ∃ L, rest.storeAt = some L ∧ ∀ r ∈ e.roots, r ∉ L
 
-/-- The decided side conditions give `LicmOk`. -/
 theorem licmB_ok {q : PrimTy} {Γ₁ : Ctx} {c : Val C Γ .bool} {x : Idx Γ (.val q)}
     {e : Val C Γ q} {rest : Prog C Γ Γ₁} (h : licmB c x e rest = true) : LicmOk c x e rest := by
   unfold licmB at h
@@ -324,20 +262,17 @@ section Main
 
 variable {Γ : Ctx}
 
-/-- Setting a local to its own value changes nothing. -/
 theorem tenv_set_get {H : HTy} : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → (e : TEnv C H Γ) →
     TEnv.set i (TEnv.get i e) e = e
   | _, _, .here, _ => rfl
   | _, _, .there i, e => congrArg (Prod.mk e.1) (tenv_set_get i e.2)
 
-/-- **The guarded hoist runs as the loop**: `if (c) { x = e; while (c) { rest } }` and `while (c) { x = e; rest }` (`while (i < 3) { x = total + 1; i = i + 1; }`), in every state, including when the loop runs zero times and when `e` reverts. -/
 theorem licm_runC (a : LoopAnn C Γ) (c : Val C Γ .bool) {q : PrimTy} (x : Idx Γ (.val q))
     (e : Val C Γ q) {Γ₁ : Ctx} (rest : Prog C Γ Γ₁) (h : LicmOk c x e rest) :
     Stmt.runC (.ite c (.cons (.assignLocal x e) (.cons (.loop a c rest) .nil)) .nil) =
       Stmt.runC (.loop a c (.cons (.assignLocal x e) rest)) := by
   funext σ
   obtain ⟨hcinv, hcx, heinv, hex, hw, hepos, hxpos, L, hL, hroots⟩ := h
-  -- the hoisted loop's body, and the invariant: `x` holds `e`'s value
   let F2 : Out C σ.H Γ → TRes (Out C σ.H Γ) := fun o =>
     (Prog.runC rest o.st).map fun o' => ⟨o'.st.drop rest.ext, o.ext.trans o'.ext⟩
   let Inv : Out C σ.H Γ → Prop := fun o => e.evalT o.st = .ok (TEnv.get x o.st.env)
@@ -421,15 +356,20 @@ theorem licm_runC (a : LoopAnn C Γ) (c : Val C Γ .bool) {q : PrimTy} (x : Idx 
         · next o heq => exact Eq.trans rfl heq.symm
         · next err heq => exact Eq.trans rfl heq.symm
 
+theorem licm_runC_of_licmB (a : LoopAnn C Γ) (c : Val C Γ .bool)
+    {q : PrimTy} (x : Idx Γ (.val q)) (e : Val C Γ q) {Γ₁ : Ctx}
+    (rest : Prog C Γ Γ₁) (accepted : licmB c x e rest = true) :
+    Stmt.runC (.ite c (.cons (.assignLocal x e) (.cons (.loop a c rest) .nil)) .nil) =
+      Stmt.runC (.loop a c (.cons (.assignLocal x e) rest)) :=
+  licm_runC a c x e rest (licmB_ok accepted)
+
 end Main
 
-/-! ## The pass -/
 
 section Pass
 
 variable {Γ : Ctx}
 
-/-- A sequence that starts with a local assignment: the assignment and the rest. -/
 def splitAssign? {Δ : Ctx} : Prog C Γ Δ →
     Option ((q : PrimTy) × Idx Γ (.val q) × Val C Γ q × Prog C Γ Δ)
   | .nil => none
@@ -438,7 +378,6 @@ def splitAssign? {Δ : Ctx} : Prog C Γ Δ →
     | .assignLocal x e, P => some ⟨_, x, e, P⟩
     | .assign .., _ | .rebind .., _ | .declLocal .., _ | .declStorage .., _ | .opAssign .., _ | .incDec .., _ | .assignIncDec .., _ | .assignLocalPush .., _ | .push .., _ | .pop .., _ | .transfer .., _ | .send .., _ | .declMem .., _ | .rebindMem .., _ | .assignFromMem .., _ | .assignMem .., _ | .delete .., _ | .deleteMem .., _ | .assignNew .., _ | .ite .., _ | .require .., _ | .assert .., _ | .revert, _ | .assumeFalse, _ | .call .., _ | .tryCall .., _ | .loop .., _ | .block .., _ | .pushOpAssign .., _ | .pushIncDec .., _ | .callReceiver .., _ | .callReceiverPush .., _ | .callRec .., _ | .revertData .., _ | .catchData .., _ => none
 
-/-- A split sequence is its assignment and its rest. -/
 theorem splitAssign?_eq {Δ : Ctx} {P : Prog C Γ Δ} {q : PrimTy} {x : Idx Γ (.val q)}
     {e : Val C Γ q} {rest : Prog C Γ Δ} (h : splitAssign? P = some ⟨q, x, e, rest⟩) :
     P = .cons (.assignLocal x e) rest := by
@@ -454,16 +393,10 @@ theorem splitAssign?_eq {Δ : Ctx} {P : Prog C Γ Δ} {q : PrimTy} {x : Idx Γ (
       rfl
     | assign | rebind | declLocal | declStorage | opAssign | incDec | assignIncDec | assignLocalPush | push | pop | transfer | send | declMem | rebindMem | assignFromMem | assignMem | delete | deleteMem | assignNew | ite | require | assert | revert | assumeFalse | call | tryCall | loop | block | pushOpAssign | pushIncDec | callReceiver | callReceiverPush | callRec | revertData | catchData => simp only [splitAssign?, reduceCtorEq] at h
 
-/-- A loop annotation the hoist keeps meaningful: an unwind bound or automatic
-unwinding (the hoisted loop runs the same iterations). An invariant or variant
-(`LoopAnn.inv`, `.invLex`) is stated for the loop's entry state, which the hoist
-moves past `x = e`, so such loops are left as written. -/
 def _root_.Solidity.LoopAnn.plainB {Γ : Ctx} : LoopAnn C Γ → Bool
   | .unwind _ | .auto => true
   | .inv .. | .invLex .. => false
 
-/-- The loop `while (c) body`, its leading invariant assignment hoisted under
-the guard `if (c)` when `licmB` allows it and the annotation is plain. -/
 def hoist {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C Γ Γ₁) : Stmt C Γ Γ :=
   match splitAssign? body with
   | some ⟨_, x, e, rest⟩ =>
@@ -472,7 +405,6 @@ def hoist {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C �
     else .loop a c body
   | none => .loop a c body
 
-/-- The hoist (or the loop left as written) runs as the loop. -/
 theorem hoist_runC {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C Γ Γ₁) :
     Stmt.runC (hoist a c body) = Stmt.runC (.loop a c body) := by
   unfold hoist
@@ -488,7 +420,6 @@ theorem hoist_runC {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body :
 end Pass
 
 mutual
-/-- Loop-invariant code motion in every loop of a statement, innermost first. -/
 def Stmt.licm : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, .ite c thn els => .ite c (Prog.licm thn) (Prog.licm els)
   | _, _, .block body => .block (Prog.licm body)
@@ -527,7 +458,6 @@ def Stmt.licm : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- Loop-invariant code motion in a sequence. -/
 def Prog.licm : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
   | _, _, .cons s P => .cons (Stmt.licm s) (Prog.licm P)
@@ -590,7 +520,6 @@ theorem Prog.licm_runC : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.runC (P
     rw [Stmt.licm_runC s, Prog.licm_runC P]
 end
 
-/-- Loop-invariant code motion as an O01 pass preserving `SameRun`. -/
 theorem licm_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.licm : Lowering.Pass C Γ Γ') :=
   fun P => (Prog.licm_runC P).symm

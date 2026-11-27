@@ -1,66 +1,12 @@
 import Solidity.Optimizer.CSE
 import Solidity.Theory.Typed.Mem
 
-/-!
-# O03 redundant load elimination over lowering programs
-
-A forward pass that records, for *static loads*, a simple value known to equal
-them, and replaces a later occurrence of the load by that value: a second read
-of a storage variable or memory slot with no intervening write to it reuses the
-local the first read was assigned to, and a read after a store of a simple value
-to the same location reuses that value (store-to-load forwarding). The static
-loads (`Load`) are
-
-* `x` — a read of a primitive state variable (`Val.read (.root x _)`);
-* `v[k]` — a primitive entry of a state-variable mapping or array at a simple
-  key (`balances[msg.sender]`, `values[i]`);
-* `m.f` — a read of a primitive member of a memory local's struct
-  (`Val.readMem (.field (.var m _) f _)`);
-* `m[k]` — a read of a primitive element of a memory local's array at a simple
-  index (`Val.readMem (.index _ (.var m _) (.simple k))`).
-
-Entries (`LEnt`) are created by `x = ld;` and `T x = ld;` (the holder is the
-local `x`), and by `v = s;` / `m.f = s;` / `m[k] = s;` with `s` simple (the
-holder is `s`). Loads are replaced in the right-hand sides of local assignments
-and declarations, in `require`/`assert`/`if` conditions and in the *value* of a
-storage or memory store, not inside a store's location. The invariant is `LEnt.Holds E σ`: every recorded load
-evaluates in `σ` to its holder's value, so each replaced read evaluated to that
-value (it succeeded), and nothing that can fail is introduced or dropped.
-
-## Alias analysis
-
-The kill rules are a sound may-alias analysis on the intrinsic syntax, each
-proved against the semantics:
-
-* a local assignment `i = e` kills the entries whose holder or location reads
-  `i` (`LEnt.reads`);
-* a storage write `assign l _` kills only the storage entries (keyed ones
-  included: the granularity is the state variable) of the root `l` starts at (`Loc.root?`; a write through a storage alias kills every storage
-  entry); storage and memory are disjoint, so memory entries survive
-  (`Storage.find_write_other`);
-* a memory write `assignMem l _` kills only the memory entries it may alias
-  (`Load.apart`): a member `f` is apart from a member `g ≠ f` of *any* object
-  (two memory locals may alias the same struct, but distinct members never
-  overlap), a member from an array element, and two elements at two distinct
-  literal indices of any arrays; storage entries survive
-  (`Heap.readAddr_writeAddr_apart`).
-
-`require`, `assert` and local value declarations keep every entry; every other
-statement (storage and memory declarations, calls, pushes, deletes, allocations,
-payments, …) and the exit of a branch,
-block or loop clears them, and a loop body starts with none. The pass reads no
-gas and no memory size: the lowering IR has neither, and every rewrite here
-keeps the heap typing, so no observation changes (`Prog.rle_empty_runC`).
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract} {Γ : Ctx}
 
-/-! ## Static loads -/
 
-/-- A load whose location reads no storage and no memory beyond the slot
-itself, and only simple values. -/
 inductive Load (C : Contract) (Γ : Ctx) : PrimTy → Type where
   | sroot {p : PrimTy} (r : Name) (h : C.rootType r = some (.prim p)) : Load C Γ p
   | mfield {p : PrimTy} {s : Name} (i : Idx Γ (.mem (.struct s)))
@@ -68,42 +14,35 @@ inductive Load (C : Contract) (Γ : Ctx) : PrimTy → Type where
       (h : C.fieldType s f = some (.prim p)) : Load C Γ p
   | mindex {p : PrimTy} {R : RefTy} (a : ArrTy R (.prim p)) (i : Idx Γ (.mem R))
       (hm : (Ty.ref R).mapFree = true) (k : Simple C Γ .uint) : Load C Γ p
-  /-- `v[k]` of a state variable `v`, a mapping or an array, at a simple key. -/
   | sindex {p : PrimTy} {R : RefTy} {k : PrimTy} (it : IndexTy R k (.prim p)) (r : Name)
       (h : C.rootType r = some (.ref R)) (key : Simple C Γ k) : Load C Γ p
 
 namespace Load
 
-/-- The expression a load is. -/
 def toVal {p : PrimTy} : Load C Γ p → Val C Γ p
   | .sroot r h => .read (.root r h)
   | .mfield i hm f h => .readMem (.field (.var i hm) f h)
   | .mindex a i hm k => .readMem (.index a (.var i hm) (.simple k))
   | .sindex it r h key => .read (.index it (.loc (.root r h)) (.simple key))
 
-/-- A mapping's index (every key is in bounds), not an array's. -/
 def isMapB {R : RefTy} {k : PrimTy} {V : Ty} : IndexTy R k V → Bool
   | .map => true
   | .arr _ => false
 
-/-- A load a store of its location forwards: a state variable, or a mapping entry. -/
 def fwdOk {p : PrimTy} : Load C Γ p → Bool
   | .sroot .. => true
   | .sindex it .. => isMapB it
   | .mfield .. | .mindex .. => false
 
-/-- The state variable a storage load reads. -/
 def sroot? {p : PrimTy} : Load C Γ p → Option Name
   | .sroot r _ | .sindex _ r _ _ => some r
   | .mfield .. | .mindex .. => none
 
-/-- The memory location of a memory load. -/
 def mloc? {p : PrimTy} : Load C Γ p → Option (MLoc C Γ (.prim p))
   | .sroot .. | .sindex .. => none
   | .mfield i hm f h => some (.field (.var i hm) f h)
   | .mindex a i hm k => some (.index a (.var i hm) (.simple k))
 
-/-- A memory location as a load, if it is static. -/
 def ofMLoc? {p : PrimTy} : MLoc C Γ (.prim p) → Option (Load C Γ p)
   | .field (.var i hm) f h => some (.mfield i hm f h)
   | .index a (.var i hm) (.simple k) => some (.mindex a i hm k)
@@ -119,7 +58,6 @@ theorem ofMLoc?_eq {p : PrimTy} {m : MLoc C Γ (.prim p)} {l : Load C Γ p}
   | .field (.var i hm) f h', h => cases h; rfl
   | .index a (.var i hm) (.simple k), h => cases h; rfl
 
-/-- A storage location as a load, if it is static. -/
 def ofLoc? {p : PrimTy} : Loc C Γ (.prim p) → Option (Load C Γ p)
   | .root r h => some (.sroot r h)
   | .index it b i =>
@@ -145,7 +83,6 @@ theorem ofLoc?_eq {p : PrimTy} {l : Loc C Γ (.prim p)} {ld : Load C Γ p}
           simp only [ofLoc?, reduceCtorEq] at h
       | field | index => simp only [ofLoc?, reduceCtorEq] at h
 
-/-- An expression as a load, if it is one. -/
 def ofVal? {p : PrimTy} : Val C Γ p → Option (Load C Γ p)
   | .read l => ofLoc? l
   | .readMem m => ofMLoc? m
@@ -160,7 +97,6 @@ theorem ofVal?_eq {p : PrimTy} {v : Val C Γ p} {l : Load C Γ p} (h : ofVal? v 
   | simple | binop | unop | ternary | len | mlen | modular | hash =>
     simp only [ofVal?, reduceCtorEq] at h
 
-/-- Two loads that are syntactically the same. -/
 def beq {p : PrimTy} : Load C Γ p → Load C Γ p → Bool
   | .sroot r _, .sroot r' _ => r == r'
   | .mfield i _ f _, .mfield i' _ f' _ => i.toNat == i'.toNat && f == f'
@@ -172,7 +108,6 @@ def beq {p : PrimTy} : Load C Γ p → Load C Γ p → Bool
   | .sindex .., .sroot .. | .sindex .., .mfield .. | .sindex .., .mindex ..
   | .sroot .., .sindex .. | .mfield .., .sindex .. | .mindex .., .sindex .. => false
 
-/-- Two positions of one context at one number have one type. -/
 theorem ty_of_toNat {t u : LTy} (i : Idx Γ t) (j : Idx Γ u) (h : i.toNat = j.toNat) : t = u := by
   have hi := Idx.getElem?_toNat i
   have hj := Idx.getElem?_toNat j
@@ -235,9 +170,7 @@ theorem eq_of_beq {p : PrimTy} : (a b : Load C Γ p) → a.beq b = true → a = 
 
 end Load
 
-/-! ## Loads under local changes -/
 
-/-- A memory local's object, without the state-indexed matcher. -/
 theorem mvalT_var {R : RefTy} (σ : State C Γ) (i : Idx Γ (.mem R))
     (hm : (Ty.ref R).mapFree = true) :
     MPath.mvalT σ (.var i hm) =
@@ -247,7 +180,6 @@ theorem mvalT_var {R : RefTy} (σ : State C Γ) (i : Idx Γ (.mem R))
 
 namespace Load
 
-/-- Does the load's location read the local at position `n`? -/
 def reads {p : PrimTy} (n : Nat) : Load C Γ p → Bool
   | .sroot .. => false
   | .mfield i .. => i.toNat == n
@@ -274,7 +206,6 @@ theorem evalT_setLocal {p q : PrimTy} (σ : State C Γ) (i : Idx Γ (.val q)) (v
     rw [hk]
     rfl
 
-/-- A load read one local deeper. -/
 def shift {t : LTy} {p : PrimTy} : Load C Γ p → Load C (t :: Γ) p
   | .sroot r h => .sroot r h
   | .mfield i hm f h => .mfield i.there hm f h
@@ -294,7 +225,6 @@ theorem evalT_shift {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {p : Prim
     simp only [shift, toVal, Val.evalT, Loc.resolveT, SPath.resolveT, ok_bind, shiftS_evalT]
     rfl
 
-/-- A storage write leaves every memory load. -/
 theorem evalT_withStorage_mem {p : PrimTy} (σ : State C Γ) (st : Storage C) :
     (l : Load C Γ p) → l.mloc?.isSome = true → l.toVal.evalT (σ.withStorage st) = l.toVal.evalT σ
   | .sroot .., h | .sindex .., h => by simp only [mloc?, Option.isSome_none, Bool.false_eq_true] at h
@@ -305,7 +235,6 @@ theorem evalT_withStorage_mem {p : PrimTy} (σ : State C Γ) (st : Storage C) :
     simp only [toVal, Val.evalT, MLoc.addrT, mvalT_var]
     rfl
 
-/-- A memory write leaves every storage load. -/
 theorem evalT_withHeap_storage {p : PrimTy} (σ : State C Γ) (hp : Heap σ.H) :
     (l : Load C Γ p) → l.mloc? = none → l.toVal.evalT (σ.withHeap hp) = l.toVal.evalT σ
   | .sroot .., _ => rfl
@@ -314,17 +243,19 @@ theorem evalT_withHeap_storage {p : PrimTy} (σ : State C Γ) (hp : Heap σ.H) :
 
 end Load
 
-/-! ## Entries -/
 
-/-- The load `l` is known to evaluate to the simple value `s`. -/
 structure LEnt (C : Contract) (Γ : Ctx) where
   p : PrimTy
   l : Load C Γ p
   s : Simple C Γ p
 
-/-- Every recorded load evaluates to its holder. -/
 def LEnt.Holds (E : List (LEnt C Γ)) (σ : State C Γ) : Prop :=
   ∀ a ∈ E, a.l.toVal.evalT σ = .ok (a.s.evalT σ)
+
+theorem LEnt.evalT_of_holds {E : List (LEnt C Γ)} {σ : State C Γ}
+    (hE : LEnt.Holds E σ) {a : LEnt C Γ} (ha : a ∈ E) :
+    a.l.toVal.evalT σ = .ok (a.s.evalT σ) :=
+  hE a ha
 
 theorem LEnt.holds_nil (σ : State C Γ) : LEnt.Holds ([] : List (LEnt C Γ)) σ :=
   fun _ h => nomatch h
@@ -333,7 +264,6 @@ theorem LEnt.holds_filter {E : List (LEnt C Γ)} {σ : State C Γ} (hE : LEnt.Ho
     (f : LEnt C Γ → Bool) : LEnt.Holds (E.filter f) σ :=
   fun a ha => hE a (List.mem_filter.mp ha).1
 
-/-- The holder of a recorded load. -/
 def LEnt.find? {p : PrimTy} (l : Load C Γ p) : List (LEnt C Γ) → Option (Simple C Γ p)
   | [] => none
   | a :: E =>
@@ -363,9 +293,7 @@ theorem LEnt.find?_evalT {E : List (LEnt C Γ)} {σ : State C Γ} (hE : LEnt.Hol
       · exact ih hE' hf
     · exact ih hE' hf
 
-/-! ## Rewriting reads -/
 
-/-- Replace every recorded static load by its holder. -/
 def _root_.Solidity.Val.rle (E : List (LEnt C Γ)) : {p : PrimTy} → Val C Γ p → Val C Γ p
   | _, .binop op h hq a b => .binop op h hq (a.rle E) (b.rle E)
   | _, .unop op h hq a => .unop op h hq (a.rle E)
@@ -411,7 +339,6 @@ theorem _root_.Solidity.Val.rle_evalT {E : List (LEnt C Γ)} {σ : State C Γ}
     · rfl
   | _, .simple _ | _, .len .. | _, .mlen .. | _, .hash .. => rfl
 
-/-! ## Storage: writes leave other roots -/
 
 mutual
 theorem _root_.Solidity.SPath.resolveT_rootName {σ : State C Γ} : {T : Ty} → (b : SPath C Γ T) →
@@ -446,7 +373,6 @@ theorem _root_.Solidity.Loc.resolveT_rootName {σ : State C Γ} : {T : Ty} → (
         | (cases hr; exact SPath.resolveT_rootName b h hb)
 end
 
-/-- A save at a reference leaves every reference at another root. -/
 theorem Storage.find_save_other {st st' : Storage C} {U W : Ty} {ref : SRef C U} {v : SVal U}
     (h : st.save ref v = some st') (q : SRef C W) (hq : q.root ≠ ref.root) :
     st'.find q = st.find q := by
@@ -455,7 +381,6 @@ theorem Storage.find_save_other {st st' : Storage C} {U W : Ty} {ref : SRef C U}
   simp only [Storage.find]
   rw [SFields.get_set_ne _ ref.hroot q.hroot (Ne.symm hq)]
 
-/-- A write at a reference leaves every reference at another root. -/
 theorem Storage.find_write_other {st st' : Storage C} {U W : Ty} {ref : SRef C U} {v : SVal U}
     (h : st.write ref v = some st') (q : SRef C W) (hq : q.root ≠ ref.root) :
     st'.find q = st.find q := by
@@ -483,9 +408,6 @@ theorem Simple.evalT_withHeap (σ : State C Γ) (hp : Heap σ.H) {p : PrimTy} (s
     s.evalT (σ.withHeap hp) = s.evalT σ := by
   cases s <;> rfl
 
-/-- A storage load reads only references at its state variable: a write at
-another root leaves it (`uint a = total; age = 5;` keeps `total`, and
-`balances[k]` survives `age = 5;`). -/
 theorem Load.evalT_storage_write (σ : State C Γ) {st : Storage C} {U : Ty} {ref : SRef C U}
     {v : SVal U} (hw : σ.storage.write ref v = some st) {p : PrimTy} :
     (l : Load C Γ p) → {r : Name} → l.sroot? = some r → r ≠ ref.root →
@@ -511,11 +433,7 @@ theorem Load.evalT_storage_write (σ : State C Γ) {st : Storage C} {U : Ty} {re
   | .mfield .., _, hl, _ | .mindex .., _, hl, _ => by
     simp only [Load.sroot?, reduceCtorEq] at hl
 
-/-! ## Memory: field-sensitive apartness -/
 
-/-- Two memory locations that never share a slot, whatever objects their
-bases name: two distinct members, a member and an element, or two elements at
-distinct literal indices. -/
 def _root_.Solidity.MLoc.apartB {T U : Ty} : MLoc C Γ T → MLoc C Γ U → Bool
   | .field _ f _, .field _ g _ => f != g
   | .field .., .index .. => true
@@ -593,7 +511,6 @@ theorem _root_.Solidity.MLoc.addrT_apart {σ : State C Γ} {T U : Ty} {m : MLoc 
       intro _ he
       exact hnm (congrArg Subtype.val he)
 
-/-! ## Memory loads across a write -/
 
 namespace Load
 
@@ -607,14 +524,12 @@ theorem ofMLoc?_mloc {p : PrimTy} {m : MLoc C Γ (.prim p)} {l : Load C Γ p}
   | .field (.var i hm) f h', h => cases h; rfl
   | .index a (.var i hm) (.simple k), h => cases h; rfl
 
-/-- A static memory location's address reads no heap. -/
 theorem addrT_withHeap {p : PrimTy} (σ : State C Γ) (hp : Heap σ.H) {l : Load C Γ p}
     {m : MLoc C Γ (.prim p)} (h : l.mloc? = some m) :
     m.addrT (σ.withHeap hp) = m.addrT σ := by
   cases l <;> simp only [mloc?, Option.some.injEq, reduceCtorEq] at h <;> subst h <;>
     simp only [MLoc.addrT, mvalT_var] <;> rfl
 
-/-- A memory load apart from a written location reads as before the write (`xs[0]` after `xs[1] = 6;`). -/
 theorem evalT_write_apart (σ : State C Γ) {T : Ty} {m' : MLoc C Γ T} {a : MAddr σ.H T}
     {mv : MVal σ.H T} {hp : Heap σ.H} (ha : m'.addrT σ = .ok a)
     (hw : σ.heap.writeAddr a mv = some hp) {p : PrimTy} (l : Load C Γ p)
@@ -629,7 +544,6 @@ theorem evalT_write_apart (σ : State C Γ) {T : Ty} {m' : MLoc C Γ T} {a : MAd
     rw [show (σ.withHeap hp).heap = hp from rfl,
       Heap.readAddr_writeAddr_apart hw (MLoc.addrT_apart hap ha hb)]
 
-/-- A static memory location reads back what was written there (`xs[0] = 4;` then `xs[0]` is `4`). -/
 theorem evalT_write_same (σ : State C Γ) {p : PrimTy} {m : MLoc C Γ (.prim p)}
     {a : MAddr σ.H (.prim p)} {x : p.Denote} {hp : Heap σ.H} (ha : m.addrT σ = .ok a)
     (hw : σ.heap.writeAddr a x = some hp) {l : Load C Γ p} (hl : ofMLoc? m = some l) :
@@ -641,14 +555,11 @@ theorem evalT_write_same (σ : State C Γ) {p : PrimTy} {m : MLoc C Γ (.prim p)
 
 end Load
 
-/-! ## Entry updates -/
 
 namespace LEnt
 
-/-- Does the entry read the local at position `n`, in its holder or its location? -/
 def reads (n : Nat) (a : LEnt C Γ) : Bool := readsAt n a.s || a.l.reads n
 
-/-- Entries after `i = r;` (`r` already rewritten). -/
 def set {q : PrimTy} (E : List (LEnt C Γ)) (i : Idx Γ (.val q)) (r : Val C Γ q) :
     List (LEnt C Γ) :=
   let kept := E.filter fun a => !a.reads i.toNat
@@ -678,10 +589,8 @@ theorem holds_set {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {q 
       · exact hkept a ha
   · exact hkept
 
-/-- An entry read one local deeper. -/
 def shift {t : LTy} (a : LEnt C Γ) : LEnt C (t :: Γ) := ⟨a.p, a.l.shift, shiftS a.s⟩
 
-/-- Entries after `T x = init;` (`init` already rewritten). -/
 def decl {q : PrimTy} (E : List (LEnt C Γ)) (init : Option (Val C Γ q)) :
     List (LEnt C (.val q :: Γ)) :=
   let sh := E.map shift
@@ -708,8 +617,6 @@ theorem holds_decl {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {q
     · exact hsh a ha
   · exact hsh
 
-/-- Entries a storage write at the root `n?` leaves (every one when the
-write may reach any root). -/
 def keepS (n? : Option Name) (E : List (LEnt C Γ)) : List (LEnt C Γ) :=
   E.filter fun a =>
     match a.l.sroot? with
@@ -719,9 +626,6 @@ def keepS (n? : Option Name) (E : List (LEnt C Γ)) : List (LEnt C Γ) :=
       | none => false
     | none => true
 
-/-- The entry a store of a simple value makes at a state variable, or at a
-mapping entry of one at a simple key (`balances[k] = s;`; an array element is
-not forwarded, its bounds being the array's). -/
 def storeEnt? {T : Ty} (l : Loc C Γ T) : Src C Γ T → Option (LEnt C Γ)
   | .val v =>
     match simple? v, Load.ofLoc? l with
@@ -729,18 +633,15 @@ def storeEnt? {T : Ty} (l : Loc C Γ T) : Src C Γ T → Option (LEnt C Γ)
     | _, _ => none
   | .copy .. | .fixedCopy .. | .copyMem .. | .fixedCopyMem .. => none
 
-/-- Entries after `l = r;` (`r` already rewritten). -/
 def store {T : Ty} (E : List (LEnt C Γ)) (l : Loc C Γ T) (r : Src C Γ T) : List (LEnt C Γ) :=
   (storeEnt? l r).toList ++ keepS l.root? E
 
-/-- Entries a memory write at `m` leaves. -/
 def keepM {T : Ty} (m : MLoc C Γ T) (E : List (LEnt C Γ)) : List (LEnt C Γ) :=
   E.filter fun a =>
     match a.l.mloc? with
     | none => true
     | some m0 => m.apartB m0
 
-/-- The entry a store of a simple value at a static memory location makes. -/
 def mstoreEnt? {T : Ty} (m : MLoc C Γ T) : MSrc C Γ T → Option (LEnt C Γ)
   | .val v =>
     match v with
@@ -748,16 +649,13 @@ def mstoreEnt? {T : Ty} (m : MLoc C Γ T) : MSrc C Γ T → Option (LEnt C Γ)
     | _ => none
   | .ref _ => none
 
-/-- Entries after `m = r;` in memory (`r` already rewritten). -/
 def mstore {T : Ty} (E : List (LEnt C Γ)) (m : MLoc C Γ T) (r : MSrc C Γ T) :
     List (LEnt C Γ) :=
   (mstoreEnt? m r).toList ++ keepM m E
 
 end LEnt
 
-/-! ## Storage and memory writes, step by step -/
 
-/-- `l = r;` that returns: its value, its reference and the written storage (`total = 5;`). -/
 theorem assign_ok {T : Ty} {l : Loc C Γ T} {r : Src C Γ T} {σ : State C Γ}
     {o : Out C σ.H Γ} (ho : TRun.assign l r σ = .ok o) :
     ∃ sv ref st, r.valueT σ = .ok sv ∧ l.resolveT σ = .ok ref ∧
@@ -778,7 +676,6 @@ theorem assign_ok {T : Ty} {l : Loc C Γ T} {r : Src C Γ T} {σ : State C Γ}
         | none => simp only [hw, TRes.ofOpt, reduceCtorEq] at hst
         | some st' => simp only [hw, TRes.ofOpt, Except.ok.injEq] at hst; rw [hst]
 
-/-- `m = r;` in memory that returns: its value, address and heap (`xs[0] = 4;`). -/
 theorem assignMem_ok {T : Ty} {m : MLoc C Γ T} {r : MSrc C Γ T} {σ : State C Γ}
     {o : Out C σ.H Γ} (ho : TRun.assignMem m r σ = .ok o) :
     ∃ mv a hp, r.mvalT σ = .ok mv ∧ m.addrT σ = .ok a ∧
@@ -801,7 +698,6 @@ theorem assignMem_ok {T : Ty} {m : MLoc C Γ T} {r : MSrc C Γ T} {σ : State C 
 
 namespace LEnt
 
-/-- The entries after `l = r;` hold where it returns (`uint a = total; age = 5;` keeps `total ↦ a`). -/
 theorem holds_store {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {T : Ty}
     (l : Loc C Γ T) (r : Src C Γ T) {o : Out C σ.H Γ} (ho : TRun.assign l r σ = .ok o) :
     Holds (store E l r) o.st := by
@@ -809,7 +705,7 @@ theorem holds_store {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {
   rw [hst]
   intro a ha
   rcases List.mem_append.mp ha with ha | ha
-  · -- the forwarded store
+  ·
     cases r with
     | copy | fixedCopy | copyMem | fixedCopyMem =>
       simp only [storeEnt?, Option.toList_none, List.not_mem_nil] at ha
@@ -882,7 +778,6 @@ theorem holds_store {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {
       | sroot | sindex => simp only [Load.sroot?, reduceCtorEq] at hs
       | mfield | mindex => rw [Load.evalT_withStorage_mem σ st _ rfl]; exact hold
 
-/-- The entries after a memory store hold where it returns (`xs[1] = 6;` keeps `xs[0] ↦ 4`). -/
 theorem holds_mstore {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {T : Ty}
     (m : MLoc C Γ T) (r : MSrc C Γ T) {o : Out C σ.H Γ} (ho : TRun.assignMem m r σ = .ok o) :
     Holds (mstore E m r) o.st := by
@@ -921,9 +816,7 @@ theorem holds_mstore {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) 
 
 end LEnt
 
-/-! ## The pass -/
 
-/-- Rewrite a storage source's value. -/
 def _root_.Solidity.Src.rle (E : List (LEnt C Γ)) : {T : Ty} → Src C Γ T → Src C Γ T
   | _, .val v => .val (v.rle E)
   | _, s@(.copy ..) | _, s@(.fixedCopy ..) | _, s@(.copyMem ..) | _, s@(.fixedCopyMem ..) => s
@@ -933,7 +826,6 @@ theorem _root_.Solidity.Src.rle_valueT {E : List (LEnt C Γ)} {σ : State C Γ}
   | _, .val v => by simp only [Src.rle, Src.valueT, Val.rle_evalT hE]
   | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
 
-/-- Rewrite a memory source's value. -/
 def _root_.Solidity.MSrc.rle (E : List (LEnt C Γ)) : {T : Ty} → MSrc C Γ T → MSrc C Γ T
   | _, .val v => .val (v.rle E)
   | _, s@(.ref _) => s
@@ -944,8 +836,6 @@ theorem _root_.Solidity.MSrc.rle_mvalT {E : List (LEnt C Γ)} {σ : State C Γ}
   | _, .ref _ => rfl
 
 mutual
-/-- Eliminate redundant loads in one statement: the rewritten statement and the
-entries after it. -/
 def Stmt.rle : {Γ Γ' : Ctx} → List (LEnt C Γ) → Stmt C Γ Γ' → Stmt C Γ Γ' × List (LEnt C Γ')
   | _, _, E, .assignLocal i r =>
     let r' := r.rle E
@@ -976,7 +866,6 @@ def Stmt.rle : {Γ Γ' : Ctx} → List (LEnt C Γ) → Stmt C Γ Γ' → Stmt C 
   | _, _, _, s@(.callRec ..) | _, _, _, s@(.revertData ..) | _, _, _, s@(.catchData ..) =>
     (s, [])
 
-/-- Eliminate redundant loads in a sequence. -/
 def Prog.rle : {Γ Γ' : Ctx} → List (LEnt C Γ) → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, _, .nil => .nil
   | _, _, E, .cons s P =>
@@ -984,11 +873,8 @@ def Prog.rle : {Γ Γ' : Ctx} → List (LEnt C Γ) → Prog C Γ Γ' → Prog C 
     .cons r.1 (Prog.rle r.2 P)
 end
 
-/-! ## Preservation -/
 
 mutual
-/-- A statement's rewrite runs as it does where the entry facts hold, and the
-exit entries hold in each state it leaves. -/
 theorem Stmt.rle_runC : {Γ Γ' : Ctx} → (E : List (LEnt C Γ)) → (s : Stmt C Γ Γ') →
     (σ : State C Γ) → LEnt.Holds E σ →
       Stmt.runC (Stmt.rle E s).1 σ = Stmt.runC s σ ∧
@@ -1099,7 +985,6 @@ theorem Stmt.rle_runC : {Γ Γ' : Ctx} → (E : List (LEnt C Γ)) → (s : Stmt 
   | _, _, _, .revertData .., _, _ | _, _, _, .catchData .., _, _ =>
     ⟨rfl, fun _ _ => LEnt.holds_nil _⟩
 
-/-- A sequence's rewrite runs as it does where the entry facts hold. -/
 theorem Prog.rle_runC : {Γ Γ' : Ctx} → (E : List (LEnt C Γ)) → (P : Prog C Γ Γ') →
     (σ : State C Γ) → LEnt.Holds E σ → Prog.runC (Prog.rle E P) σ = Prog.runC P σ
   | _, _, _, .nil, _, _ => rfl
@@ -1113,12 +998,10 @@ theorem Prog.rle_runC : {Γ Γ' : Ctx} → (E : List (LEnt C Γ)) → (P : Prog 
       rw [Prog.rle_runC _ P o.st (hout o ho)]
 end
 
-/-- **Redundant load elimination preserves the typed run**, with no premise. -/
 theorem _root_.Solidity.Prog.rle_empty_runC {Γ Γ' : Ctx} (P : Prog C Γ Γ') :
     Prog.runC (Prog.rle [] P) = Prog.runC P :=
   funext fun σ => Prog.rle_runC [] P σ (LEnt.holds_nil σ)
 
-/-- Redundant load elimination as an O01 pass preserving `SameRun`. -/
 theorem rle_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ'))
       (Prog.rle [] : Lowering.Pass C Γ Γ') :=
