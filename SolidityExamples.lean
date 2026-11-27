@@ -175,6 +175,7 @@ import Solidity.Examples.Finish.Assembly
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
 import Solidity.Examples.FreshNamesLaw
+import Solidity.Examples.FrontendValidation.SolcJson
 import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
 import Solidity.Examples.Goals.BenchmarkBudgetsMet
