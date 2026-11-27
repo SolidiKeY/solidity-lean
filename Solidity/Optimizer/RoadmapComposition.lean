@@ -1,12 +1,7 @@
 import Solidity.Optimizer.Pass
 import Solidity.Roadmap.Contracts
 
-/-!
-# Composition adapter to the existing G49 certificate boundary
 
-This adapter reuses Roadmap.Cert.comp unchanged. It does not manufacture the
-optimizer certificate, compiler coverage, D6 relation or artifact linking proof.
--/
 namespace Solidity.Optimizer
 open Solidity.Roadmap
 
