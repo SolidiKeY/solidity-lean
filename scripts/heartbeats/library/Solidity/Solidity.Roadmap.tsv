@@ -18,12 +18,7 @@ V16.NativeRevertConsumer	45693
 V16.Relational	596
 V16.RelationalGuardSpec	78842
 V16.SSCP2.NewAllocation	8040
-V16.SSCP2.NewAllocationControls	16411
-V16.SourceSizeControls	21374
 V16.SourceTransactionConsumer	96663
-V16.SpecificationControls	902
 V16.Specifications	913
-V16.TransactionControls	1979
 V16.Transactions	558
 V16.Transport	885
-V16.TransportControls	1647

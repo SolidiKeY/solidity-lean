@@ -33,8 +33,8 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Solidity/Docs/ProseCalibrated/Classification.lean` | Calibrated prose classification, exclusion, locality and lexical padding laws over the frozen model. |
 | `Solidity/Docs/ProseCalibrated/Policy.lean` | Calibrated prose policy laws: acceptance decides the declarative order, rejection, unseen keys, fail-closed unavailable measurements, and the shrink, tighten and no-replacement laws. |
 | `Solidity/Docs/ProseCalibrated.lean` | Assembles `prose_calibrated_ratio_rule_sound` from the allowance, classification and policy laws; checker correspondence stays a separate obligation. |
-
-| `**/*Controls.lean` | Every `*Controls` module is in `Solidity`. `scripts/coord-tools/controls-classify.py` lists those no library module imports (candidates for a future controls library, not moved). |
+| `**/*Controls.lean` | Library membership (H627): unreachable Controls belong to the generated default-target `SolidityControls` library; reachable Controls stay in `Solidity`. `controls-classify.py --check` verifies the partition. |
+| `SolidityControls.lean` | Generated default-target root for unreachable Controls (t2b-controls-root-split). CI and the axiom audit cover this library; root readers retain library classification and heartbeat baselines. `register.sh --check` and `controls-classify.py --check` verify generated membership. |
 
 | `Tools/FastMode/Engine.lean` | Compiled JSON verdicts over exact frontend obligations, proved rule/closer execution, native open-sequent diagnostics and `#fast_export` executable definitions; no result theorem. |
 | `Tools/FastMode/Meta.lean` | Compiled extended-reading tactics over exact frontend targets; detached candidate audit/discard, native open-goal diagnostics and per-function reading discovery; no final result theorem. |
