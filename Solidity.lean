@@ -164,6 +164,7 @@ import Solidity.Backend.CompilerOptimizerDomain.ConstFold
 import Solidity.Backend.CompilerOptimizerDomain.DeadCode
 import Solidity.Backend.CompilerOptimizerDomain.DeadStore
 import Solidity.Backend.CompilerOptimizerDomain.LICM
+import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.StmtFold
 import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control

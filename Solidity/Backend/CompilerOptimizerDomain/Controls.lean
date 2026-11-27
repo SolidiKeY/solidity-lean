@@ -2,8 +2,9 @@ import Solidity.Backend.CompilerOptimizerDomain.StmtFold
 import Solidity.Backend.CompilerOptimizerDomain.DeadCode
 import Solidity.Backend.CompilerOptimizerDomain.DeadStore
 import Solidity.Backend.CompilerOptimizerDomain.LICM
+import Solidity.Backend.CompilerOptimizerDomain.Simplify
 
-/-! Integration controls for the proved constant-fold, removal and LICM stages only. These check both
+/-! Integration controls for the proved constant-fold, simplification, removal and LICM stages only. These check both
 resource and fragment consequences against the unchanged public compiler domain;
 they do not assert preservation by the remaining optimizer stages or iteration. -/
 namespace Solidity.Backend.CompilerOptimizerDomain.Controls
@@ -36,6 +37,14 @@ example (hP : ProgOk [] P) :
     Evm.Prog.pushes (Optimizer.ConstFold.Prog.licm P) = 0 ∧
       ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.licm P) = some G := by
   have hQ := prog_licm_ok hP
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- The actual simplify pass includes simplification followed by constant folding.
+example (hP : ProgOk [] P) :
+    Evm.Prog.pushes P.simplify = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) P.simplify = some G := by
+  have hQ := prog_simplify_ok hP
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
   exact ⟨hQ.quiet.1, G, h⟩
 
