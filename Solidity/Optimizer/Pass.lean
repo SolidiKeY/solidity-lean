@@ -38,18 +38,12 @@ theorem validated_of_rejected {Prog : Type u} {Related : Prog → Prog → Prop}
     validated validator proposal p = p := by
   simp [validated, rejected]
 
-theorem validated_of_accepted {Prog : Type u} {Related : Prog → Prog → Prop}
-    (validator : Validator Related) (proposal : Pass Prog) (p : Prog)
-    (accepted : validator.validate p (proposal p) = true) :
-    validated validator proposal p = proposal p := by
-  simp [validated, accepted]
-
 theorem validated_preserves {Prog : Type u} {Related : Prog → Prog → Prop}
     (refl : ∀ p, Related p p) (validator : Validator Related) (proposal : Pass Prog) :
     Preserves Related (validated validator proposal) :=
   fun p => match h : validator.validate p (proposal p) with
     | true =>
-      Eq.mpr (congrArg (Related p) (validated_of_accepted validator proposal p h))
+      Eq.mpr (congrArg (Related p) (if_pos h))
         (validator.sound p (proposal p) h)
     | false =>
       Eq.mpr (congrArg (Related p) (validated_of_rejected validator proposal p h)) (refl p)
