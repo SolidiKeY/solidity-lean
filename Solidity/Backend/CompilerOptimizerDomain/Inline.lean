@@ -1,4 +1,4 @@
-import Solidity.Backend.CompilerOptimizerDomain.Weakening
+import Solidity.Backend.CompilerOptimizerDomain.StmtWeakening
 import Solidity.Optimizer.Inline
 
 /-! Accepted-domain preservation for the actual inlining pass. -/

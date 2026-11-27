@@ -169,6 +169,7 @@ import Solidity.Backend.CompilerOptimizerDomain.LICM
 import Solidity.Backend.CompilerOptimizerDomain.Propagate
 import Solidity.Backend.CompilerOptimizerDomain.Simplify
 import Solidity.Backend.CompilerOptimizerDomain.StmtFold
+import Solidity.Backend.CompilerOptimizerDomain.StmtWeakening
 import Solidity.Backend.CompilerOptimizerDomain.Strengthening
 import Solidity.Backend.CompilerOptimizerDomain.Weakening
 import Solidity.Backend.CompilerTotal
