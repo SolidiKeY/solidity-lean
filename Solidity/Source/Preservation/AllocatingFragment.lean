@@ -3,7 +3,7 @@ import Solidity.Source.Preservation.NewArrayFragment
 /-! An additive memory-expression admission over intrinsic resolved syntax.
 It retains the original checked value fragment and admits reference locals,
 identity conversions, conditionals with reference results, and dynamic new.
-It neither changes ValFragC nor admits new reference-call bodies. -/
+It does not admit reference-call bodies. -/
 namespace Solidity.Source.Preservation
 open EM
 

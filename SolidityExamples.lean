@@ -3,6 +3,7 @@
 import Solidity.Examples.AliasConstraints
 import Solidity.Examples.AutoComplete
 import Solidity.Examples.Backend.BytesFullMachine.FixedLayout
+import Solidity.Examples.Backend.BytesFullMachine.Intrinsic
 import Solidity.Examples.Benchmark.Algorithms.BinarySearch
 import Solidity.Examples.Benchmark.Algorithms.FastExponentiation
 import Solidity.Examples.Benchmark.Algorithms.Fibonacci
@@ -160,6 +161,7 @@ import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ElabTotal.Context
 import Solidity.Examples.ElabTotal.Guard
+import Solidity.Examples.ElabTotal.HashCongruence
 import Solidity.Examples.ElabTotal.Lower
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ElabTotal.Stmts
@@ -241,6 +243,7 @@ import Solidity.Examples.Lowering.Sim.CoverageControl
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Induction
 import Solidity.Examples.Lowering.Sim.Match
+import Solidity.Examples.Lowering.Sim.PassList
 import Solidity.Examples.Lowering.Sim.Session.Backward
 import Solidity.Examples.Lowering.Sim.Session.Binding
 import Solidity.Examples.Lowering.Sim.Session.Forward
