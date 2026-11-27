@@ -45,7 +45,6 @@ theorem bool_init_step (b : Bool) (ps : List PrimTy) (name : Var)
         bool_init_model b ps name model, ?_⟩
       exact LocalsRel.cons (PrimitiveRel.bool b) related
 
-/-- The existing sequence consumer now has two concrete literal producers. -/
 theorem two_bool_inits_agree (b c : Bool) (ps : List PrimTy) (x y : Var)
     (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E)) :
     NormalLocalsObligation (C := C) (R := R) (M := M) (k := k)

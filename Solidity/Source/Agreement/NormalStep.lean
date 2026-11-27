@@ -9,8 +9,7 @@ initial relation before any producer can inhabit this particular contract. -/
 namespace Solidity.Source.Agreement
 
 /-- A separately associated single statement, with all initial worlds and
-actual source journal outputs explicit. This lane must discharge each such
-fact using the Source owner API and the real statement association. -/
+actual source journal outputs explicit. -/
 def NormalStmtObligation {E : Env} {C : Contract}
     {R : List STy} {M : Bool} {k : SCtx} (ps qs : List PrimTy)
     (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E))
