@@ -1,10 +1,10 @@
 import Solidity.Source.Decls
 
 /-!
-# Name resolution (S01)
+# Name resolution
 
 How a name in a source unit denotes a declaration, a local or a builtin,
-over S00's declaration graph (`Solidity/Source/Decls.lean`):
+over the source syntax's declaration graph (`Solidity/Source/Decls.lean`):
 
 - `Env.linearize`: solc's C3 linearization of a contract's bases
   (`L(C) = C :: merge(L(Bₙ), …, L(B₁), [Bₙ, …, B₁])` for `contract C is B₁, …,
@@ -151,7 +151,7 @@ def Builtin.all : List Builtin :=
 /-- The builtin of a name. -/
 def Builtin.ofName (x : String) : Option Builtin := Builtin.all.find? (·.name == x)
 
-/-- The profile status of a global builtin (G00's manifest). `msg`, `block`,
+/-- The profile status of a global builtin (the manifest). `msg`, `block`,
 `tx` are namespaces: their members decide (`Builtin.memberStatus`). -/
 def Builtin.status : Builtin → Status
   | .msg => .admitted "msgSender" | .block => .admitted "blockTimestamp"

@@ -1,6 +1,6 @@
 import Solidity.Source.Machine
 
-/-! Generic delegated-library calldata guard. Regression purpose: a typed
+/-! Generic delegated-library calldata guard. A typed
 entry with unavailable storage-pointer ABI bytes must refuse calldata
 observations explicitly, while ordinary entries execute the original action.
 No storage word, linked address or physical ABI adequacy is fabricated. -/
@@ -10,7 +10,7 @@ open EM
 mutual
 /-- Calldata references nested in array/tuple values. A delegated entry
 without pointer ABI bytes refuses their observation, including transitive
-internal calls; normal entries retain the existing evaluator behavior. -/
+internal calls; normal entries retain the evaluator behavior. -/
 def STy.containsCalldata : STy → Bool
   | .bytes .calldata | .string .calldata | .struct .calldata _ => true
   | .array loc element _ => loc == .calldata || element.containsCalldata

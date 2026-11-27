@@ -2,11 +2,11 @@ import Solidity.Source.WellFormed
 import Solidity.Source.Resolved
 
 /-!
-# Elaborated units: resolutions carrying their resolved bodies (S02 prerequisite)
+# Elaborated units: resolutions carrying their resolved bodies
 
-S01's `Resolution` is a unit, its environment and its settings; a typing
+`Resolution` is a unit, its environment and its settings; a typing
 derivation of each body exists (`WellFormed.bodies`) but is not part of it.
-S02's semantics is given on resolved terms, so it needs the terms
+The semantics is given on resolved terms, so it needs the terms
 themselves.  `Elaborated` is a resolution together with a `Program`:
 
 - every body (function, modifier, constructor, `receive`, `fallback`) as a
@@ -81,7 +81,7 @@ structure Program (E : Env) where
   ctorLocals : String → RCtx
   /-- The base-constructor arguments each contract gives. -/
   baseArgs : (c : String) → List (RBaseArg E (ctorLocals c))
-  /-- The contracts of the compilation input, by position (G01 `Event.create`). -/
+  /-- The contracts of the compilation input, by position (`Event.create`). -/
   contracts : List String
 
 /-- The contracts of an environment, in declaration order. -/

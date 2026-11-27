@@ -1,13 +1,9 @@
 import Solidity.Source.FailureNoCuts
 import Solidity.Source.Horizon
 
-/-! Actual event execution with clear active budgets. This does not erase
-metadata, choose receipts, install balances or prove full evaluator NoFail. -/
 namespace Solidity.Source.FailureExecution
 open EM
 
-/-- An enabled real event appends its complete event and advances every live
-budget once. All other locals/state are exact, under the real cursor invariant. -/
 theorem emitEvent_cutFree {E : Env} {Γ : RCtx} (event : Roadmap.Event)
     (points : Roadmap.Evm.FailurePoints) (locals : Locals E.layout Γ) (state : St E)
     (clear : state.resource.CutFree) :

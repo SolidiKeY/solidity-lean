@@ -1,10 +1,6 @@
 import Solidity.Source.Horizon
 import Solidity.Source.FailurePrimitives
 
-/-! Event-prefix growth and horizon approximation for the actual scheduled
-frame combinator. Body Grow/Approx are the actual Source relations; no
-interpreter agreement is assumed. In particular, attempt alone need not
-preserve Approx: its timeout continuation must rethrow without new events. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env} {Γ : RCtx} {α : Type}

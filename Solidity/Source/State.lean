@@ -2,9 +2,9 @@ import Solidity.Source.Types
 import Solidity.Roadmap.Contracts
 
 /-!
-# Source state (S04.01)
+# Source state
 
-The independent source state, intrinsic in the static types of S01
+The independent source state, intrinsic in the static types
 (`Solidity/Source/Types.lean`), over a `Layout` read off the declaration
 graph (struct fields, enum sizes, the underlying type of each user-defined
 value type):
@@ -29,7 +29,7 @@ value type):
   writes it);
 - `Storage D L`: persistent storage over a layout `L : SPath → STy` giving
   each logical path its declared type; a path holds a value of exactly that
-  type, or the default (G04 Q2: the *logical* aliasing of storage
+  type, or the default (the *logical* aliasing of storage
   references is fixed, the physical packing is not observable).
 
 **Identity and copy.**  A `memory` reference is an address: a write through
@@ -95,7 +95,7 @@ inductive Val (D : Layout) : STy → Type where
       (hs : sel.length = 4) : Val D (.fn true ps rs m)
   | memRef {τ : STy} (h : τ.loc? = some .memory) (addr : Nat) : Val D τ
   | storRef {τ : STy} (h : τ.loc? = some .storage) (p : SPath) : Val D τ
-  /-- A `calldata` reference (lane FU2-B): the absolute offset of its data in
+  /-- A `calldata` reference: the absolute offset of its data in
   the frame's call data (`Fr.cd`) and its length (elements of an array,
   bytes of `bytes`/`string`). -/
   | cdRef {τ : STy} (h : τ.loc? = some .calldata) (off len : Nat) : Val D τ
@@ -160,8 +160,7 @@ def Val.defaultElem (D : Layout) : (τ : STy) → Option (Val D τ)
 initializer, `delete`, and an unwritten storage path hold): zero, `false`,
 the zero address, zero bytes, the first enum member, the underlying
 default; `none` for reference types, whose default is a fresh zeroed
-object, and for function types, whose default is a panicking function
-(S02). -/
+object, and for function types, whose default is a panicking function. -/
 def Val.default (D : Layout) : (τ : STy) → Option (Val D τ)
   | .enum d => if h : 0 < D.enumSize d then some (.enum ⟨0, h⟩) else none
   | .udvt d => (Val.defaultElem D (D.underlying d)).map .udvt
@@ -171,8 +170,7 @@ def Val.default (D : Layout) : (τ : STy) → Option (Val D τ)
 
 /-- `calldata`: the input bytes and the decoded objects at their offsets.
 There is no write operation: calldata is read only by construction.  The
-decoding of `input` into `objects` is the ABI decoder's (S04.04 with the
-ABI work), not fixed here. -/
+decoding of `input` into `objects` is the ABI decoder's, not fixed here. -/
 structure Calldata (D : Layout) where
   input : List UInt8
   objects : Nat → Option (Σ τ, Data D τ)

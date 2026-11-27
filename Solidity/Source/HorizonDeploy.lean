@@ -1,16 +1,5 @@
 import Solidity.Source.Horizon
 
-/-!
-# Deployments show a prefix of their events (S05 item 2)
-
-`Horizon.lean` proves that a transaction not completed at a horizon shows a
-prefix of its events at every larger one (`runTx_events_mono`).  The same
-holds for a deployment (`deploy_events_mono`): construction (initializers,
-base arguments, constructor bodies under their modifiers) only appends
-events and approximates itself at the next horizon, from `growAt` and
-`approxAt`.  `Session.lean` uses it to show the events of an unfinished
-deployment.
--/
 
 namespace Solidity.Source
 
@@ -164,8 +153,6 @@ theorem deploy_approx (G : Glob E) (n : Nat) (c : String) (addr sender : Address
     refine Approx.bind (Approx.refl (decodeArgs_grow _ _ _)) fun _ => ?_ <;>
     split <;> first | exact construct_approx G _ n c _ | exact Approx.refl (Grow.halt _)
 
-/-- **A deployment's events grow with its horizon**: the events at horizon
-`k` are a prefix of those at every `k' ≥ k` (a completed run's are equal). -/
 theorem deploy_events_mono (G : Glob E) (c : String) (addr sender : Address) (value : Word) (args : Bytes)
     (s : St E) {k k' : Nat} (hk : k ≤ k') :
     (runAt (fun f => deploy G f c addr sender value args) s k).2.events <+:

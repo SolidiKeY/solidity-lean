@@ -1,7 +1,7 @@
 import Solidity.Source.Ctor
 
 /-!
-# The source syntax against the pinned grammar and the manifest (S00)
+# The source syntax against the pinned grammar and the manifest
 
 Three explicit tables relate `Syn` to its upstream sources.
 
@@ -11,9 +11,9 @@ Three explicit tables relate `Syn` to its upstream sources.
   structured syntax, with the constructors that represent it.
 - `grammarData`: each rule represented by a datatype or a field instead (a
   visibility, an operator, a literal, an identifier), with that datatype.
-- `featureCtors`: each feature of G00's manifest (`docs/solidity-features.json`)
+- `featureCtors`: each feature of the manifest (`docs/solidity-features.json`)
   that is syntax, with its constructors; `featureLexical` lists the syntax
-  features that live below the abstract syntax (G08).
+  features that live below the abstract syntax.
 
 `Ctor.grammar_covers` proves that every non-structural constructor
 represents some rule, so `Syn` has no constructor without an upstream
@@ -217,14 +217,14 @@ def featureCtors : List (String × List Ctor) := [
   ("visibility", [.function, .stateVar, .fnType, .fallback, .receive, .constructor]), ("whileStatement", [.whileStmt])]
 
 /-- Manifest syntax features below the abstract syntax: lexical classes and
-spellings (G08). -/
+spellings. -/
 def featureLexical : List String := ["comments", "invalidLexemes", "reservedKeywords"]
 
 /-- The excluded and upstream-rejected features that are not decided on
-syntax, with the stage that decides them: names and members (S01's
+syntax, with the stage that decides them: names and members (the typing judgment's
 resolution, `Builtin.status`, `addressMemberStatus`, `callOptionStatus`),
-observations and resources (the G01 contracts' observation and resource
-choices, S04.02).  The lexical exclusions are `featureLexical` (G08).  `memoryLayout` and `transientLayout` are
+observations and resources (the contracts' observation and resource
+choices).  The lexical exclusions are `featureLexical`.  `memoryLayout` and `transientLayout` are
 reachable only through assembly, which `inlineAssembly` rejects. -/
 def featureElsewhere : List (String × String) := [
   ("addressCode", "S01"), ("addressCodehash", "S01"), ("blobhashBuiltin", "S01"),

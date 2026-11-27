@@ -1,9 +1,6 @@
 import Solidity.Source.FailureEvaluatorGrow
 import Solidity.Source.Semantics
 
-/-! Actual planned root-transaction event growth from the closed evaluator
-induction. No fee installation, NoFail or desired result is assumed. This
-is not horizon approximation, fixed-plan session consistency or P8 adequacy. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env}

@@ -1,8 +1,6 @@
 import Solidity.Source.FailureTransactionStability
 import Solidity.Source.FailureTransactionControls
 
-/-! Full-state completed-horizon transport of independently frozen Source
-fixtures. No fresh native observations or cross-plan equality is claimed. -/
 namespace Solidity.Source.FailureExecution.StabilityControls
 open EM SemanticsExamples
 open RuntimeControls (input glob data points)
@@ -45,7 +43,6 @@ theorem panic_bytes_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more : 2
   rw [runTxWithPlan_stable _ _ _ _ _ more done]
   exact TransactionControls.panic_full_state pipeline
 
-/-- A reached request stop remains exceptional; no receipt is invented. -/
 theorem request_stop_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more : 20 ≤ later) :
     (runTxWithPlan (glob pipeline) later (tx data) TransactionControls.entryPoints).run
       (L0 EB,TransactionControls.entryInput) =
@@ -59,8 +56,6 @@ theorem request_stop_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more : 
   rw [runTxWithPlan_stable _ _ _ _ _ more done]
   exact TransactionControls.entry_stop_full_state pipeline
 
-/-- Removing the completed-result premise would equate a real timeout with
-an actually completed root. This control retains the original horizons. -/
 theorem timeout_not_equal_completed (pipeline : Roadmap.Pipeline) :
     (TransactionControls.run pipeline none 0).1 ≠ (TransactionControls.run pipeline none 20).1 := by
   have zero := TransactionControls.zero_horizon pipeline
@@ -69,8 +64,6 @@ theorem timeout_not_equal_completed (pipeline : Roadmap.Pipeline) :
   intro impossible
   cases impossible
 
-/-- Catching timeout turns it into a normal result; blanket Below.attempt
-transport is invalid even on an inhabited caller state. -/
 theorem attempt_not_below :
     ¬ Below (attempt (halt .timeout : EM EB [] Nat)) (attempt (pure 7)) := by
   intro claimed
