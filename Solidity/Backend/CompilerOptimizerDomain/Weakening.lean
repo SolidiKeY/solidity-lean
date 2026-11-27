@@ -33,4 +33,9 @@ theorem val_wk_ok (w : Thin Γ Δ) :
   | _, _, .len hp hb => .len hp (path_wk_ok w hb)
 end
 
+theorem args_wk_ok (w : Thin Γ Δ) :
+    {ps : Ctx} → {as : Args C Γ ps} → ArgsOk as → ArgsOk (as.wk w)
+  | _, _, .nil => .nil
+  | _, _, .snoc p x ha he => .snoc p x (args_wk_ok w ha) (val_wk_ok w he)
+
 end Solidity.Backend.CompilerOptimizerDomain

@@ -53,4 +53,7 @@ example (hP : ProgOk [] P) :
 example {p : PrimTy} {v : Val C Γ p} (w : Thin Γ Δ) (hv : ValOk v) :
     ValOk (v.wk w) := val_wk_ok w hv
 
+example {ps : Ctx} {as : Args C Γ ps} (w : Thin Γ Δ) (ha : ArgsOk as) :
+    ArgsOk (as.wk w) := args_wk_ok w ha
+
 end Solidity.Backend.CompilerOptimizerDomain.Controls
