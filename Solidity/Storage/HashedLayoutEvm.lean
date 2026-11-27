@@ -4,8 +4,7 @@ import Solidity.Storage.HashedLayout
 /-!
 # The hashed layout's slot terms and the EVM model's `Slot`
 
-A read-only correspondence: `Solidity.Evm.Slot` (`Solidity/Evm/Machine.lean`,
-not edited here) and `Solidity.Storage.Loc` have the same three shapes, with
+A read-only correspondence: `Solidity.Evm.Slot` (`Solidity/Evm/Machine.lean`) and `Solidity.Storage.Loc` have the same three shapes, with
 a `Slot`'s mapping key a word (`Fin W`) and a `Loc`'s a `Nat`. `ofSlot` is
 injective, commutes with adding to the offset, and reaches exactly the terms
 whose keys are words (`KeysBelow W`); `lmax` is the EVM model's `Lmax`.

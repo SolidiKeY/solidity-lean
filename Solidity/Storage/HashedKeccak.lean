@@ -23,9 +23,7 @@ hashes the array's slot (`abi.encode(p)`).
 * `#guard` vectors check `Loc.word W keccakH` against solc's slot formula
   for value-type keys, each entering as its ABI word (`uint`, `bool`,
   `address` left-padded; `int` sign-extended, two's complement; `bytesN`
-  left-aligned, `v · 256^(32-N)`), nested mappings and dynamic arrays. The
-  digests were computed independently with pycryptodome's keccak-256 (the
-  call is in `docs/feature-work/storage-hashed-layout.md`); the first ones
+  left-aligned, `v · 256^(32-N)`), nested mappings and dynamic arrays. The first ones
   (`keccak256(uint256(0))`, `keccak256(0 ‖ 0)`, …) are constants common
   tooling quotes.
 

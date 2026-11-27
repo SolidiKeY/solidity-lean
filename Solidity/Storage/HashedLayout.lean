@@ -4,7 +4,7 @@ import Solidity.Hash.CollisionBound
 # The hashed storage layout
 
 A dependency-free model of solc's storage layout at word granularity, for
-G27.05: slot terms are mapped to words through a hash parameter, and distinct
+slot terms are mapped to words through a hash parameter, and distinct
 slot terms of one run denote distinct words under the per-run hash premises
 (`docs/feature-work/storage-hashed-layout.md`).
 

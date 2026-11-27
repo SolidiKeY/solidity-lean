@@ -3,10 +3,6 @@ import Solidity.Storage.HashedLayout
 /-!
 # Separation of struct members, mapping entries and array elements
 
-The separation half of G27.01–G27.03 over the hashed layout of
-`Solidity/Storage/HashedLayout.lean`
-(`docs/feature-work/storage-hashed-layout.md`, "Checkpoint 4").
-
 `Occ t l x`: the slot term `x` belongs to a value of type `t` laid out at `l`
 (a word's own slot, every struct member's and static array element's terms,
 a dynamic array's length slot and every element's, every entry of a
@@ -171,7 +167,7 @@ theorem sizes_take_lt {f : STy} : ∀ {fs : List STy} {i i' : Nat}, i < i' → f
       sizes_take_lt (by omega) h
     simp only [List.take_succ_cons, STy.sizes]; omega
 
-/-- **G27.01, struct members.** Two different members of a struct occupy
+/-- **struct members.** Two different members of a struct occupy
 disjoint slot terms. -/
 theorem occ_fields_disjoint {fs : List STy} {i i' : Nat} {f f' : STy} {l x : Loc}
     (hf : fs[i]? = some f) (hf' : fs[i']? = some f') (hne : i ≠ i')
@@ -198,7 +194,7 @@ theorem index_eq_of_mul_add {s i i' j j' : Nat} (hj : j < s) (hj' : j' < s)
   · have hle : i' * s + s ≤ i * s := by rw [← Nat.succ_mul]; exact Nat.mul_le_mul_right _ gt
     omega
 
-/-- **G27.03, static arrays.** Elements at different indices occupy disjoint
+/-- **static arrays.** Elements at different indices occupy disjoint
 slot terms. -/
 theorem occ_sarr_disjoint {e : STy} {i i' : Nat} {l x : Loc} (hne : i ≠ i')
     (h : Occ e (l.add (i * e.size)) x) (h' : Occ e (l.add (i' * e.size)) x) : False := by
@@ -207,7 +203,7 @@ theorem occ_sarr_disjoint {e : STy} {i i' : Nat} {l x : Loc} (hne : i ≠ i')
   rw [Loc.add_add] at hr hr'
   exact hne (index_eq_of_mul_add hj hj' (add_eq_of_reach hr hr'))
 
-/-- **G27.03, dynamic arrays.** Elements at different indices occupy disjoint
+/-- **dynamic arrays.** Elements at different indices occupy disjoint
 slot terms. -/
 theorem occ_darr_disjoint {e : STy} {i i' : Nat} {l x : Loc} (hne : i ≠ i')
     (h : Occ e (.data l (i * e.size)) x) (h' : Occ e (.data l (i' * e.size)) x) : False := by
@@ -218,7 +214,7 @@ theorem occ_darr_disjoint {e : STy} {i i' : Nat} {l x : Loc} (hne : i ≠ i')
   simp only [Loc.data.injEq, true_and] at e'
   exact hne (index_eq_of_mul_add hj hj' e')
 
-/-- **G27.03, dynamic array header.** The length slot is not an element's. -/
+/-- **dynamic array header.** The length slot is not an element's. -/
 theorem occ_darr_len_elem {e : STy} {i : Nat} {l : Loc} (h : Occ e (.data l (i * e.size)) l) :
     False := by
   obtain ⟨j, _, hr⟩ := occ_reach h
@@ -227,7 +223,7 @@ theorem occ_darr_len_elem {e : STy} {i : Nat} {l : Loc} (h : Occ e (.data l (i *
     simp only [Loc.add, Loc.depth] at hd; omega
   · simp only [Loc.add, Loc.depth] at lt; omega
 
-/-- **G27.02, mappings.** Entries at different keys occupy disjoint slot terms,
+/-- **mappings.** Entries at different keys occupy disjoint slot terms,
 for every key (as a word) and nested paths below. -/
 theorem occ_keys_disjoint {v v' : STy} {k k' : Nat} {l x : Loc} (hne : k ≠ k')
     (h : Occ v (.hash k l 0) x) (h' : Occ v' (.hash k' l 0) x) : False := by
@@ -343,7 +339,7 @@ theorem occ_word_ne {N L R : Nat} {H : Pre → Nat} {P : List Pre} (hH : ∀ p, 
     (hne : x ≠ y) : Loc.word N H x ≠ Loc.word N H y := fun e =>
   hne (Loc.word_inj hH hL hR hRD x y (occ_bounded hx hf₁ hp₁) (occ_bounded hy hf₂ hp₂) hPx hPy e)
 
-/-- **G27.02 on words.** Under the region premise, entries of a placed mapping
+/-- Under the region premise, entries of a placed mapping
 at different keys have different words. -/
 theorem keys_word_ne {N L R : Nat} {H : Pre → Nat} {P : List Pre} (hH : ∀ p, H p < N)
     (hL : L ≤ N) (hR : R ≤ N) (hRD : RegionsDisjoint N L H (List.range R) P)
