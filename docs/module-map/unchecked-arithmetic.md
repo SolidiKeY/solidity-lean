@@ -125,6 +125,8 @@
 | `Correctness/Lowering/Sim/Session/Forward/Frames.lean` | The provisional per-frame hypothesis of the forward session diagram and the session-level match. |
 | `Correctness/Lowering/Sim/Session/Forward/Within.lean` | A reachable target session state observes a prefix of the run at every horizon above its issued actions. |
 | `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
+| `Correctness/Lowering/Sim/PassList.lean` | Packages the conditional lowering session lift as a one-pass list, preserving its environment, resource and public refinement guarantees. |
+| `Examples/Lowering/Sim/PassList.lean` | Conditional consumer of the packaged lowering session certificate. |
 | `Correctness/Lowering/Sim/Induction/Knot.lean` | The actual elaborator record satisfies the frozen case predicates by `elabKernelTotal` induction, conditional on the three case hypotheses and the explicit loop-arm bridge; an intermediate step toward `loweringBySimulation`. |
 | `Examples/Lowering/Sim/Induction.lean` | Uses the intermediate knot-closure theorem with production fresh names and its loop-arm bridge hypothesis. |
 | `Correctness/Lowering/Sim/CoverageBranch.lean` | Exact child execution receipts compose through lists, branch reader isolation and local restoration, and typed scope chaining; actual block-arm specialization requires `Goals.elabKernelTotal`. |

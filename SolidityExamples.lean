@@ -242,6 +242,7 @@ import Solidity.Examples.Lowering.Sim.CoverageControl
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Induction
 import Solidity.Examples.Lowering.Sim.Match
+import Solidity.Examples.Lowering.Sim.PassList
 import Solidity.Examples.Lowering.Sim.Session.Backward
 import Solidity.Examples.Lowering.Sim.Session.Binding
 import Solidity.Examples.Lowering.Sim.Session.Forward
