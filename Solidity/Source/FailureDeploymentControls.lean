@@ -1,9 +1,6 @@
 import Solidity.Source.FailureDeploymentReceipt
 import Solidity.Source.FailureConstructorControls
 
-/-! Actual registered initcode and nonempty constructor-body transport under
-both Source pipeline settings. Frozen fixture outcomes are reused, not replaced
-by desired execution premises. No native comparison/session-fate claim. -/
 namespace Solidity.Source.FailureExecution.PlannedDeploy.Controls
 open EM SemanticsExamples
 open ConstructorControls (E input global points prior callEvent answerEvent)
@@ -22,7 +19,6 @@ theorem completed_cut_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more :
   intro impossible
   cases impossible
 
-/-- The actual constructor body, not just initializers, invokes runMods. -/
 theorem body_cut_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more : 20 ≤ later) :
     (deploy (plan := some (points (some 1))) (ConstructorControls.bodyGlobal pipeline)
       later "C" thisC user (word 0) []).run (L0 E,input) = ConstructorControls.runBody pipeline (some 1) := by
@@ -32,8 +28,6 @@ theorem body_cut_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more : 20 �
   intro impossible
   cases impossible
 
-/-- Propagated ancestor stops retain their complete state and remain
-exceptional. Horizon stability does not turn them into completed reverts. -/
 theorem ancestor_stop_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more : 20 ≤ later) :
     (deploy (plan := some ConstructorControls.ancestorPlan) (global pipeline)
       later "C" thisC user (word 0) []).run (L0 E,ConstructorControls.ancestorInput) =
@@ -44,8 +38,6 @@ theorem ancestor_stop_stable (pipeline : Roadmap.Pipeline) (later : Nat) (more :
   intro impossible
   cases impossible
 
-/-- A real cut before the external return has a shorter trace than the
-uncut fixture. Arbitrary changing of plans is not covered by prefix transport. -/
 theorem changed_plan_not_prefix (pipeline : Roadmap.Pipeline) :
     ¬ ((ConstructorControls.run pipeline none).2.2.events <+:
       (ConstructorControls.run pipeline (some 1)).2.2.events) := by

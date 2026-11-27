@@ -1,7 +1,7 @@
 import Solidity.Roadmap.Contracts
 
 /-!
-# H19 natural monetary interface
+# Natural monetary interface
 
 Balances are exact naturals, including values outside the EVM word range.
 Fits is an explicit predicate, not a constructor field. The total wordView
@@ -10,8 +10,7 @@ an out-of-range projection, not a failure plan or transaction. Consumers
 must derive the invariant for actual EVM-reachable states before claiming
 balance agreement; a favorable modular decoder is not such a proof.
 
-This interface step does not yet change Source.Account.balance, the ledger,
-Eval.balance or root funding. Their measured migration remains open.
+
 -/
 namespace Solidity.Source.Monetary
 open Solidity.Roadmap (Address Word)
@@ -40,7 +39,7 @@ def checkedWord (balance : Balance) : Option Word :=
 def fromWords (balances : Address → Word) : Address → Balance :=
   fun address => ofWord (balances address)
 
-/-- The existing recipient-overflow refusal is retained by this primitive. -/
+/-- This primitive refuses recipient overflow. -/
 def credit? (balance : Balance) (value : Word) : Option Balance :=
   if balance + value.val < wordLimit then some (balance + value.val) else none
 

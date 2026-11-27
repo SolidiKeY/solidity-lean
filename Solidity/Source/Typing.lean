@@ -1,8 +1,6 @@
 import Solidity.Source.LibraryTyping
 
-/-! Statement typing and the public Source typing shim. Existing expression
-typing is re-exported from ExpressionTyping without changing its statements.
-Library try/Error is additive; v1 declaration premises remain frozen. -/
+/-! Statement typing and the public Source typing shim. -/
 namespace Solidity.Source
 
 /-! ## Statement typing -/
@@ -15,7 +13,7 @@ inductive OptCond (Γ : Ctx) : Syn (.opt .expr) → Type where
   | none : OptCond Γ .none
   | some {e : Syn .expr} : Typed Γ e .bool → OptCond Γ (.some e)
 
-/-! ### Tuple declarations (lane FU2-B) -/
+/-! ### Tuple declarations -/
 
 /-- A slot of a tuple declaration: a declared name with its type (solc's
 location rule for an initialized declaration), or a hole (`none`). -/
@@ -42,7 +40,7 @@ def Ctx.tupleSlots (C : Ctx) (holes : Nat) (d : Syn .varDecl) (ds : Syn (.list (
   | Option.some a, Option.some b => Option.some (List.replicate holes Option.none ++ a :: b)
   | _, _ => Option.none
 
-/-- **The success clause's locals of a `try`** (lane FU2-B): the
+/-- **The success clause's locals of a `try`**: the
 function's return types, named by the `returns` parameters (`""` when
 unnamed), left to right. -/
 def tryLocals : List (Option String) → List STy → List (String × STy)
@@ -56,7 +54,7 @@ theorem tryLocals_tys : (ns : List (Option String)) → (rs : List STy) → (try
   | _ :: _, [] => rfl
   | [], [] => rfl
 
-/-- **A `catch` clause the source semantics runs** (lane FU2-B), with the
+/-- **A `catch` clause the source semantics runs**, with the
 name it binds and its block: `catch { … }` (no binding) or
 `catch (bytes memory r) { … }` (the revert data); `Error(string)` and
 `Panic(uint)` clauses are not modelled. -/
@@ -154,7 +152,7 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
   | declVar {k : SCtx} {L : List (String × STy)} {t : Syn .typeName} {l : Option DataLoc} {x : String}
       {τ : STy} : t.ty C.env C.scope (l.getD .memory) = Option.some τ → locOK τ l false = true →
       StmtD C (k := k) L (.simpleStmt (.declVar (.varDecl t l x) .none)) ((x, τ) :: L)
-  /-- `(, T x, , U y) = e;` (lane FU2-B): `e` is a tuple whose components
+  /-- `(, T x, , U y) = e;`: `e` is a tuple whose components
   convert implicitly to the declared types; holes discard theirs. -/
   | declTuple {k : SCtx} {L : List (String × STy)} {h : Nat} {d : Syn .varDecl}
       {ds : Syn (.list (.opt .varDecl))} {e : Syn .expr} {slots : List (Option (String × STy))}
@@ -211,7 +209,7 @@ inductive StmtD (C : Ctx) : {k : SCtx} → List (String × STy) → Syn (.stmt k
       {σs : List STy} : TypedArgs (C.at L) args σs →
       ((C.at L).declsOf .error er).filter (·.fitsParams C.env C.isBase C.mapFree σs) = [d] →
       StmtD C (k := k) L (.revert (.ident er) (.positional args)) L
-  /-- `try c.f(args) returns (T₁ x₁, …) { … } catch … { … }` (lane FU2-B):
+  /-- `try c.f(args) returns (T₁ x₁, …) { … } catch … { … }`:
   an external call without value whose revert runs the one `catch` clause
   (`CatchD`); the `returns` types, when given, are the function's
   (`STy.sameList`); the returns are bound in the success block (unnamed

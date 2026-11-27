@@ -1,12 +1,11 @@
 import Solidity.Source.Const
 
 /-!
-# Source types and conversions (S01)
+# Source types and conversions
 
 The static types of Solidity 0.8.38 expressions (`STy`), their elaboration
-from S00's type names, and solc's implicit and explicit conversions
-between them, with the fixed-point readings of the second-round decisions
-(`docs/solidity-scope.md`, "Second round"):
+from the source syntax's type names, and solc's implicit and explicit conversions
+between them:
 
 - implicit fixed-point conversions only between range-contained pairs
   (`FixTy.implicitOK`: solc's test and exactness);
@@ -129,8 +128,7 @@ def solcImplicit (t t' : FixTy) : Bool :=
   decide (t.digits ≤ t'.digits) && decide (t.bits ≤ t'.bits) &&
     decide (t.maxInt ≤ t'.maxInt) && decide (t'.minInt ≤ t.minInt)
 
-/-- **The implicit fixed-point conversion** (second round: only
-range-contained pairs): solc's test, restricted to exact conversions. -/
+/-- **The implicit fixed-point conversion** (only range-contained pairs): solc's test, restricted to exact conversions. -/
 def implicitOK (t t' : FixTy) : Bool := t.solcImplicit t' && t.subsumes t'
 
 /-- solc's implicit integer-to-fixed test, for an integer range. -/
@@ -226,10 +224,9 @@ on contracts (`isBase d d'`: `d'` is `d` or one of its bases) and which
 structs hold no mapping (`mapFree d`, `Env.mapFree`). An array's element
 types are compared at the target's location (`STy.withLoc`, as
 `STy.copiesTo` does): the location change of a nested copy to `memory`
-(`uint256[2][] calldata` to `uint256[2][] memory`) is implicit, as in solc
-(user decision 2026-11-06). A copy to another location (a struct, or an
+(`uint256[2][] calldata` to `uint256[2][] memory`) is implicit, as in solc. A copy to another location (a struct, or an
 array of structs, out of `storage`) holding a mapping is refused, as solc
-refuses it (user decision 2026-11-06); a pointer at the same location is
+refuses it; a pointer at the same location is
 not a copy. -/
 def STy.implicit (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) : STy → STy → Bool
   | .int t, .int t' => t.implicit t'
@@ -257,8 +254,7 @@ def STy.implicit (isBase : DeclName → DeclName → Bool) (mapFree : DeclName �
   | _, _ => false
 
 /-- **Explicit conversion** (`T(e)`), beyond the implicit ones: at most one
-change of sign, width or category (solc 0.8); the fixed-point readings of
-the second round; addresses, contracts and enums. -/
+change of sign, width or category (solc 0.8); fixed-point conversions; addresses, contracts and enums. -/
 def STy.explicit (isBase : DeclName → DeclName → Bool) (mapFree : DeclName → Bool) (s t : STy) : Bool :=
   s.implicit isBase mapFree t ||
   match s, t with

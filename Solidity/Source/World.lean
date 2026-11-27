@@ -2,21 +2,21 @@ import Solidity.Source.State
 import Solidity.Source.Monetary
 
 /-!
-# World, transactions and frames (S04.03)
+# World, transactions and frames
 
 The state of the compiled system's own instances around an execution,
 independently of the EVM:
 
 - `Account D L`: an instance's balance, nonce, code (the contract's
-  position in the compilation input, as G01's `Event.create` names it) and
+  position in the compilation input, as `Event.create` names it) and
   storage over its layout `L`;
 - `World D L`: the instances by address.  External accounts are not here:
-  their balances are G01's ledger over the session environment
+  their balances are the ledger over the session environment
   (`SessionEnv.balance`, `Fixed.ledger`) and their code `SessionEnv.hasCode`,
   moved only by events, so the two never disagree;
 - `Transient D T`: each instance's transient storage (EIP-1153), over its
   own layout, cleared when a transaction ends (`endTx`);
-- `TxConfig`: a transaction's configuration, G01's `Request`, with
+- `TxConfig`: a transaction's configuration, `Request`, with
   `tx.origin` its sender;
 - `CallFrame`: one call — `this`, the caller, the value, the input, the
   static flag — and its journal mark.
@@ -187,7 +187,7 @@ end ExecState
 
 /-! ## Frames -/
 
-/-- A transaction's configuration: G01's request; `tx.origin` is its
+/-- A transaction's configuration: request; `tx.origin` is its
 sender. -/
 structure TxConfig where
   request : Request
@@ -323,7 +323,7 @@ theorem endTx_world (s : ExecState D L T) : s.endTx.world = s.world := rfl
 theorem endTx_transient (s : ExecState D L T) (a : Address) (p : SPath) :
     (s.endTx.transient.cells a).read p = Val.default D (T a p) := rfl
 
-/-! ## Request-boundary sender funds (S04.04)
+/-! ## Request-boundary sender funds
 
 External sender balances are the fixed ledger over opening balances and the
 actual boundary history, not the system instance balance map. Invalid requests

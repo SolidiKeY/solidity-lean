@@ -1,47 +1,5 @@
 import Solidity.Source.Decode
 
-/-!
-# `calldata` references in the source semantics (lane FU2-B)
-
-Dispatch keeps a `calldata` parameter (`bytes`, `string`, or a dynamic
-array of one-word values) as a reference into the frame's call data
-(`Val.cdRef off len`, `Fr.cd`), after solc's entry checks (`cdTail`: the
-length word within the data, a length below `2^64`, the elements within the
-data; each failure reverts with no data). The elements are read and
-validated only when accessed (`Loc.cd`, `readLoc`): an element that is no
-value of its type reverts at the read, not at entry. `x.length` reads the
-reference; `x[i]` past the length panics with `0x32`; a slice `x[s:e]`
-(`sliceR`, solc's `calldata_array_index_range_access`) reverts with no data
-on `e < s` or a length below `e`; a copy into memory (`cdToMem`) validates
-every element.
-
-This module proves, for that fragment:
-
-- **progress of entry decoding**: a `calldata` argument's reference is
-  built without `stuck` (`cdTail_ok`, `decodeArg_cd_ok`), and with
-  `decodeArg_ok` every type dispatch decodes (`STy.entryDecodable`) is
-  covered (`decodeArg_entry_ok`, `decodeArgs_entry_ok`);
-- **reads**: an element read, a byte read and a slice are never `stuck`
-  (`readLoc_cd_ok`, `cdByte_ok`, `sliceR_ok`);
-- **copies keep the memory invariant** (`cdToMem_ok`), including the
-  statically encoded element copies at the head stride (`cdStaticToMem_ok`,
-  `cdToMem_static_ok`, G18.05);
-- **the evaluation arms on `calldata` locals** (closed):
-  `evalE_cdLength_ok` (`x.length`), `evalE_cdIndex_ok` (`x[j]`),
-  `evalE_cdSlice_ok` (`x[s:e]`) keep `MemOK` and halt only without `stuck`.
-
-A `calldata` reference agrees with every heap typing (`Val.RefOK`): the
-call data is read only, and reads past its end return zeros (as
-`calldataload`); no invariant ties a reference's offset and length to
-`Fr.cd`, which entry decoding respects but the theorems do not need.
-
-The owned `CalldataAggregates.lean` extension covers nested dynamic reads,
-strings and represented inline static-array elements; its layout predicates
-also admit string slices and statically encoded reference-element slices.
-Direct static-array entry parameters, structs and unrepresented fixed shapes
-remain open. Constructor calldata and slices of dynamically encoded base
-elements remain refused. Memory-copy generalisation is separate G18.05 work.
--/
 
 namespace Solidity.Source
 
@@ -50,15 +8,26 @@ open EM
 
 variable {E : Env} {Γ : RCtx}
 
-/-! ## Entry -/
 
-/-- **The entry checks are never `stuck`**: they revert with no data or
-give the reference's offset and length. -/
 theorem cdTail_ok (data : Bytes) (i stride : Nat) : NotStuckR (cdTail data i stride) := by
   intro w hw
   simp only [cdTail] at hw
   repeat' split at hw
   all_goals cases hw
+
+example (data : Bytes) (i stride : Nat) (halt : Halt)
+    (failed : cdTail data i stride = .error halt) : halt = .revert [] := by
+  simp only [cdTail] at failed
+  repeat' split at failed
+  all_goals cases failed <;> rfl
+
+example (data : Bytes) (i stride : Nat)
+    (header : ¬ data.length < wordAt data i + 32)
+    (length : ¬ 2 ^ 64 ≤ wordAt (data.drop (wordAt data i)) 0)
+    (extent : wordAt data i + 32 + stride * wordAt (data.drop (wordAt data i)) 0 ≤ data.length) :
+    cdTail data i stride = .ok (4 + wordAt data i + 32, wordAt (data.drop (wordAt data i)) 0) := by
+  simp only [cdTail, if_neg header, if_neg length, if_pos extent]
+  rfl
 
 theorem cdArg_ok (D : Layout) (data : Bytes) (i stride : Nat) {τ : STy} (h : τ.loc? = some .calldata) :
     NotStuckR (cdArg D data i stride h) := by
@@ -68,18 +37,13 @@ theorem cdArg_ok (D : Layout) (data : Bytes) (i stride : Nat) {τ : STy} (h : τ
   | ok p => rw [hr] at hw; cases hw
   | error e => rw [hr] at hw; cases hw; exact cdTail_ok data i stride w hr
 
-/-- A `calldata` parameter type dispatch keeps as a reference. -/
 def STy.calldataArg : STy → Bool
   | .bytes .calldata | .string .calldata => true
   | .array .calldata σ none => σ.cdElement
   | _ => false
 
-/-- **The types dispatch decodes without `stuck`**: the decoder's
-(`STy.decodable`) and `calldata` references. -/
 def STy.entryDecodable (E : Env) (τ : STy) : Bool := τ.decodable E || τ.calldataArg
 
-/-- **A `calldata` argument at entry** keeps any invariant and is never
-`stuck`; its reference agrees with every heap typing. -/
 theorem decodeArg_cd_ok {P : EMState E Γ → Prop} (data : Bytes) (i : Nat) {τ : STy}
     (hτ : τ.calldataArg = true) :
     Hoare P (decodeArg data i τ : EM E Γ (Val E.layout τ))
@@ -109,8 +73,6 @@ theorem decodeArg_cd_ok {P : EMState E Γ → Prop} (data : Bytes) (i : Nat) {τ
     exact hl rfl σ.cdHeadBytes
   all_goals simp only [STy.calldataArg, reduceCtorEq] at hτ
 
-/-- **Every type dispatch decodes**: `MemOK` is kept, the value agrees, no
-halt is `stuck`. -/
 theorem decodeArg_entry_ok {H : HeapTy} (data : Bytes) (i : Nat) {τ : STy} (hτ : τ.entryDecodable E = true) :
     Hoare (MemOK E H) (decodeArg data i τ : EM E Γ (Val E.layout τ))
       (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun e y => MemOK E H y ∧ NotStuck e) := by
@@ -132,10 +94,13 @@ theorem decodeArgs_entry_ok {H : HeapTy} (data : Bytes) : ∀ (τs : List STy) (
       fun H' => decodeArgs_entry_ok (H := H') data τs (i + 1) h.2) fun vs => ?_
     exact Hoare.pure' fun _ ⟨hy, hvs, _, hv, hle⟩ => ⟨hy, hv.mono hle, hvs⟩
 
-/-! ## Reads -/
 
-/-- **An element read** at a one-word type is never `stuck`: an invalid
-word reverts with no data, at the read. -/
+example (F : Fr) (off : Nat) (outside : F.cd.length ≤ off) :
+    cdWordAt F off = 0 := by
+  unfold cdWordAt
+  rw [List.drop_eq_nil_of_le outside]
+  rfl
+
 theorem readLoc_cd_ok {P : EMState E Γ → Prop} (F : Fr) (off : Nat) {τ : STy} (hτ : τ.decodableElem E = true) :
     Hoare P (readLoc F (.cd off) : EM E Γ (Val E.layout τ))
       (fun v y => P y ∧ v.RefOK E y.2.heap.ty) (fun e y => P y ∧ NotStuck e) := by
@@ -143,14 +108,22 @@ theorem readLoc_cd_ok {P : EMState E Γ → Prop} (F : Fr) (off : Nat) {τ : STy
   exact Hoare.conseq (Hoare.lift_ns (decodeWord_ok _ hτ)) (fun _ h => h)
     (fun v _ hy => ⟨hy, Val.refOK_of_loc (STy.decodableElem_loc hτ) v⟩) (fun _ _ h => h)
 
-/-- **A byte read** is never `stuck`: past the length, Panic `0x32`. -/
+example (F : Fr) (off : Nat) {τ : STy} (before : EMState E Γ) :
+    (readLoc F (.cd off) : EM E Γ (Val E.layout τ)).run before =
+      (decodeWord E.layout (cdWordAt F off) τ, before) := by
+  simp only [readLoc, EM.lift]
+  cases decodeWord E.layout (cdWordAt F off) τ <;> rfl
+
 theorem cdByte_ok {D : Layout} (F : Fr) (off len k : Nat) : NotStuckR (cdByte (D := D) F off len k) := by
   intro w hw
   simp only [cdByte] at hw
   split at hw <;> cases hw
 
-/-- **A slice of a `calldata` reference** is never `stuck`: out of order or
-past the length, it reverts with no data. -/
+example {D : Layout} (F : Fr) (off len k : Nat) (outside : ¬ k < len) :
+    cdByte (D := D) F off len k = .error (.revert (panicData .index)) := by
+  simp only [cdByte, if_neg outside]
+  rfl
+
 theorem sliceR_ok {D : Layout} {τ : STy} (h : τ.loc? = some .calldata) (off len s e : Nat) (b : Bool) :
     NotStuckR (sliceR (D := D) (.cdRef h off len) s e b) := by
   intro w hw
@@ -158,10 +131,29 @@ theorem sliceR_ok {D : Layout} {τ : STy} (h : τ.loc? = some .calldata) (off le
   repeat' split at hw
   all_goals cases hw
 
-/-! ## Copies into memory -/
 
-/-- **A copy of `calldata` into memory keeps the memory invariant** and is
-never `stuck`, at the targets the conversions reach. -/
+example {D : Layout} {τ : STy}
+    (h : τ.loc? = some .calldata) (off len s e : Nat) (toEnd : Bool)
+    (backwards : (if toEnd then len else e) < s) :
+    sliceR (D := D) (.cdRef h off len) s e toEnd = .error (.revert []) := by
+  simp only [sliceR, if_pos backwards]
+
+example {D : Layout} {τ : STy}
+    (h : τ.loc? = some .calldata) (off len s e : Nat) (toEnd : Bool)
+    (ordered : ¬ (if toEnd then len else e) < s)
+    (outside : len < (if toEnd then len else e)) :
+    sliceR (D := D) (.cdRef h off len) s e toEnd = .error (.revert []) := by
+  simp only [sliceR, if_neg ordered, if_pos outside]
+
+example {D : Layout} {τ : STy}
+    (h : τ.loc? = some .calldata) (off len s e : Nat) (toEnd : Bool)
+    (ordered : ¬ (if toEnd then len else e) < s)
+    (inside : ¬ len < (if toEnd then len else e)) :
+    sliceR (D := D) (.cdRef h off len) s e toEnd =
+      .ok (.cdRef h (off + τ.cdStride * s) ((if toEnd then len else e) - s)) := by
+  simp only [sliceR, if_neg ordered, if_neg inside]
+  rfl
+
 theorem cdToMem_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
     (hτ : τ = .bytes .memory ∨ τ = .string .memory ∨ (∃ σ, τ = .array .memory σ none ∧ σ.decodableElem E = true) ∨
       τ.loc? = some .calldata) :
@@ -188,9 +180,6 @@ theorem cdToMem_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
   · simp only [cdToMem, dif_pos hc]
     exact Hoare.pure' fun _ h => ⟨h, trivial⟩
 
-/-- **A statically encoded element `cdStaticToMem` copies** (G18.05): a
-one-word value the decoder reads, or a static memory array of such
-elements with a statically encoded element. -/
 def STy.cdCopyElem (E : Env) : STy → Bool
   | .array .memory e (some _) => decide (0 < e.cdStaticWords) && e.cdCopyElem E
   | σ => σ.decodableElem E
@@ -205,8 +194,6 @@ theorem finCons_vals {H : HeapTy} {σ : STy} {m : Nat} {x : Val E.layout σ}
   · exact ⟨x, rfl, hx⟩
   · exact hf _
 
-/-- **The copied elements are bare values whose references are live**, for
-any element copy keeping the memory invariant. -/
 theorem cdElems_ok {σ : STy} {go : Nat → EM E Γ (Val E.layout σ)} (stride : Nat)
     (hgo : ∀ (H : HeapTy) (off : Nat), Hoare (MemOK E H) (go off)
       (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun e y => MemOK E H y ∧ NotStuck e)) :
@@ -226,8 +213,6 @@ theorem cdElems_ok {σ : STy} {go : Nat → EM E Γ (Val E.layout σ)} (stride :
       (fun _ h => h) (fun _ _ h => ⟨h.1.weaken hy.le, h.2⟩) (fun _ _ h => ⟨h.1.weaken hy.le, h.2⟩)
       y (MemOK.self hy)
 
-/-- **A static element copy keeps the memory invariant** and is never
-`stuck` (G18.05). -/
 theorem cdStaticToMem_ok (F : Fr) (σ : STy) (hσ : σ.cdCopyElem E = true) (H : HeapTy) (off : Nat) :
     Hoare (MemOK E H) (cdStaticToMem F σ off : EM E Γ (Val E.layout σ))
       (fun v y => MemOK E H y ∧ v.RefOK E y.2.heap.ty) (fun e y => MemOK E H y ∧ NotStuck e) := by
@@ -249,9 +234,6 @@ theorem cdStaticToMem_ok (F : Fr) (σ : STy) (hσ : σ.cdCopyElem E = true) (H :
     exact Hoare.conseq (Hoare.lift_ns (decodeWord_ok _ hd)) (fun _ h => h)
       (fun v _ h => ⟨h, Val.refOK_of_loc (STy.decodableElem_loc hd) v⟩) (fun _ _ h => h)
 
-/-- **A copy of statically encoded elements keeps the memory invariant**
-and is never `stuck`: a dynamic array of static arrays, or a static
-array (G18.05). -/
 theorem cdToMem_static_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
     (hτ : (∃ e m, τ = .array .memory (.array .memory e (some m)) none ∧
         (STy.array .memory e (some m)).cdCopyElem E = true) ∨
@@ -268,9 +250,7 @@ theorem cdToMem_static_ok {H : HeapTy} (F : Fr) (off len : Nat) {τ : STy}
       (X := fun e y => MemOK E H y ∧ NotStuck e) y
       ⟨hy.1, .array fun j => by obtain ⟨v, hv, hr⟩ := hy.2 j; rw [hv]; exact .val hr⟩
 
-/-! ## The evaluation arms on `calldata` locals -/
 
-/-- Every value of a `calldata` reference type is a reference. -/
 theorem Val.cd_shape {τ : STy} (hτ : τ.loc? = some .calldata) (v : Val E.layout τ) :
     ∃ h off len, v = .cdRef h off len := by
   cases v with
@@ -279,7 +259,6 @@ theorem Val.cd_shape {τ : STy} (hτ : τ.loc? = some .calldata) (v : Val E.layo
   | cdRef h off len => exact ⟨h, off, len, rfl⟩
   | _ => simp only [STy.loc?, reduceCtorEq] at hτ
 
-/-- **`x.length` on a `calldata` local** keeps `MemOK` and is never stuck. -/
 theorem evalE_cdLength_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {σ : STy}
     (x : Idx Γ (.array .calldata σ none)) (hl : STy.lengthTy (.array .calldata σ none) = some (.int IntTy.u256)) :
     Hoare (MemOK E H) (evalE G F (n + 1 + 1) (.length (.local x) hl))
@@ -292,9 +271,6 @@ theorem evalE_cdLength_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {σ : STy
     simp only [getV, RVal.get, lengthOf]
     exact Hoare.pure' fun _ hy => ⟨hy.1, trivial⟩
 
-/-- **`x[j]` on a `calldata` local by an index local** keeps `MemOK` and is
-never stuck: past the length, Panic `0x32`; an invalid element reverts at
-the read. -/
 theorem evalE_cdIndex_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {σ : STy} {t : IntTy}
     (x : Idx Γ (.array .calldata σ none)) (j : Idx Γ (.int t)) (h : STy.isIndex (.int t) = true)
     (hσ : σ.decodableElem E = true) :
@@ -333,7 +309,6 @@ theorem STy.sliceable_loc {τ : STy} (h : τ.sliceable = true) : τ.loc? = some 
   case string l => cases l <;> simp only [reduceCtorEq] at h; rfl
   case array l σ k => cases l <;> cases k <;> simp only [reduceCtorEq] at h; rfl
 
-/-- An index local's value as a number. -/
 theorem index_local_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {t : IntTy} {β : Type}
     (j : Idx Γ (.int t)) {k : Nat → EM E Γ β} {Q : β → EMState E Γ → Prop}
     (hk : ∀ i, Hoare (MemOK E H) (k i) Q (fun e y => MemOK E H y ∧ NotStuck e)) :
@@ -353,9 +328,6 @@ theorem index_local_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {t : IntTy} 
     | storRef h _ => cases h
     | cdRef h _ _ => cases h
 
-/-- **`x[s:e]` on a `calldata` local by index locals** keeps `MemOK` and is
-never stuck: a start past the end or an end past the length reverts with no
-data. -/
 theorem evalE_cdSlice_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {τ : STy} {t u : IntTy}
     (x : Idx Γ τ) (hτ : τ.sliceable = true) (s : Idx Γ (.int t)) (hs : STy.isIndex (.int t) = true)
     (e : Idx Γ (.int u)) (he : STy.isIndex (.int u) = true) (toEnd : Bool) :
