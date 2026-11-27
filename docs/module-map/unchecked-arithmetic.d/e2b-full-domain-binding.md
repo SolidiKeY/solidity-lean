@@ -1,0 +1,1 @@
+| `Examples/Lowering/Total/FullDomain.lean` | Frozen decoder refusal-boundary regressions for callee requests, return slots, unchecked/overflow caller scopes, checked blocks and missing function metadata; no full-domain coverage claim. |
