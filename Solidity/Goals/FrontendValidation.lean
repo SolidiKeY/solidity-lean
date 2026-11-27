@@ -7,16 +7,12 @@ import Solidity.SolcValidation.IrCensusParse
 import Solidity.Interfaces.FrontendExecution
 import Solidity.Interfaces.FrontendValidation
 import Solidity.Tools.Goal
-
 /-! The public accepting/rejecting entry points of the solc JSON and IR readers.
 Private checks are represented by their public caller. Execution evaluators and
 total rendering/collection helpers are not acceptance checks. -/
-
 namespace Solidity.Goals.FrontendValidation
-
 /-- Frozen validator inventory for the frontend validation and connection goals. -/
-def validators : List Lean.Name :=
-  [
+def validators : List Lean.Name := [
     ``Frontend.Source.ScopeScan.ensure, ``Frontend.J.get, ``Frontend.J.opt, ``Frontend.J.str,
     ``Frontend.J.arr, ``Frontend.J.str?, ``Frontend.J.arr?, ``Frontend.J.ref?,
     ``Frontend.J.id?, ``Frontend.J.hasOperatorFunction, ``Frontend.J.operatorFunction?, ``Frontend.J.typeRef?,
@@ -86,12 +82,9 @@ def validators : List Lean.Name :=
     ``SolcValidation.IrSyntax.Items.ren, ``SolcValidation.IrSyntax.Block.ren, ``SolcValidation.IrSyntax.Bodies.ren, ``SolcValidation.IrSyntax.parsesTo,
     ``SolcValidation.IrSyntax.namesNodup
   ]
-
 end Solidity.Goals.FrontendValidation
-
 namespace Solidity.Goals
 open Solidity.Goal Interfaces.FrontendExecution Interfaces.FrontendValidation
-
 /-- Authenticated external execution, followed by structural acceptance guarantees.
 Exercise coverage of the frozen entry-point list is the separate f1b obligation. -/
 @[goal Solidity.Frontend.validators_exercised "f1a-frontend-validation-goal"]
@@ -99,6 +92,6 @@ def frontendValidatorsExercised : Prop :=
   ∀ (env : Environment) (compiler : Frontend.Source.Compiler) (artifact : ByteArray)
     (inputText outputText : String) (input output : Lean.Json),
     Faithful env compiler artifact inputText outputText input output →
-    JsonFields ∧ IrAtoms ∧ RationalChecks ∧ ReaderChecks ∧ CallChecks ∧ YulChecks ∧
+    JsonFields ∧ IrAtoms ∧ RationalChecks ∧ SourceLiterals ∧ ReaderChecks ∧ CallChecks ∧ YulChecks ∧
     ∀ source contract mode text, SelectedIr output source contract mode text → IrChecks text
 end Solidity.Goals
