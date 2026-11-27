@@ -2,13 +2,13 @@ import Solidity.Source.WellTyped
 import Solidity.Source.ValueProgress
 
 /-!
-# `abi.decode` in the source semantics (lane FU2-B)
+# `abi.decode` in the source semantics
 
-S01 types `abi.decode(data, (T₁, …, Tₙ))` (`Typed.abiDecode`): the data is
+The typing judgment types `abi.decode(data, (T₁, …, Tₙ))` (`Typed.abiDecode`): the data is
 `bytes` in memory or storage or a string literal (`STy.decodeSrc`), the
 second argument a parenthesized list of type expressions or a single one
 (`Ctx.decodeTys`: elementary type names, user-defined types by name, arrays
-of them, in `memory`), each a type the ABI decoder of S02/S04 reads
+of them, in `memory`), each a type the ABI decoder reads
 (`STy.decodable`: one-word value types, enums at their member count,
 user-defined value types at their underlying type, `bytes`/`string` and
 dynamic arrays of one-word values in memory). The interpreter evaluates it
@@ -37,7 +37,7 @@ This module proves, for that fragment:
 Named refusals outside the fragment (no derivation): static arrays,
 structs, nested arrays, fixed point, external function types, qualified
 type names (`L.S`), `abi.decode(data, ())`. (`bytes calldata` data is
-read through its reference since item 2, `Solidity/Source/Calldata.lean`;
+read through its reference in `Solidity/Source/Calldata.lean`;
 no arm theorem covers it.)
 -/
 
@@ -51,7 +51,7 @@ variable {E : Env} {Γ : RCtx}
 /-! ## The decodable types -/
 
 /-- `Env.layout` reads a user-defined value type's underlying type as
-`Env.udvtUnderlying`, which S01's `STy.decodable` consults. -/
+`Env.udvtUnderlying`, which `STy.decodable` consults. -/
 theorem Env.layout_underlying (E : Env) (d : DeclName) : E.layout.underlying d = E.udvtUnderlying d := rfl
 
 theorem STy.wordElem_loc {τ : STy} (h : τ.wordElem = true) : τ.loc? = none := by
