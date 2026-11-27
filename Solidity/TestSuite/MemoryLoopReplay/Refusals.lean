@@ -1,12 +1,10 @@
 import Solidity.TestSuite.MemoryLoopReplay.Discover09
 open scoped Solidity.Scoped
--- A real fully discovered checkpoint is not yet an assembled proof.
 resume_memory_replay Solkey.TestSuite.returnLeavesNestedLoops.problem
 example : Solidity.Proves Solkey.TestSuite .all [] .nil .tt := by
   fail_if_success finish_memory_replay
   exact .closeTrue rfl
 
--- Nonempty residual leaves have no replay rule in this helper.
 resume_memory_replay Solkey.TestSuite.returnLeavesNestedLoops.problem
 run_elab do
   let some j ← Solidity.Seq.MemoryReplay.job.get | throwError "missing test checkpoint"
@@ -20,8 +18,6 @@ run_elab do
 
 open Lean Meta Solidity Solidity.Seq Solidity.Seq.MemoryReplay
 
--- Only genuine kernel type mismatches count as negative proof controls.
--- Heartbeat, memory, recursion or interruption errors propagate as failures.
 private def kernelTypingRefusal (action : MetaM Unit) : MetaM Bool := withOptions (fun o => o.setBool `pp.raw true) do
   try
     action
@@ -57,14 +53,12 @@ run_elab do
   unless rejected do throwError "disabled-kernel preflight accepted"
   logInfo "checked distinct components, false first/middle/last, and preflight refusal"
 
--- A wrong reached fresh literal must fail the production save transaction.
 resume_memory_replay Solkey.TestSuite.returnLeavesNestedLoops.problem
 run_elab do
   let some base ← job.get | throwError "missing checkpoint"
   let originalInputs ← base.inputs.get
   let hints := base.hints.map fun h => {h with fresh := h.fresh+1}
   let mut selected := false
-  -- Recorded by the actual default-budget discovery: the first literalized node.
   for id in [973] do
     unless selected do
       let env ← getEnv
@@ -94,7 +88,6 @@ run_elab do
   logInfo "wrong reached fresh literal rejected; production save rolled back"
 
 
--- The same terminal result must NOT hide incorrect quoted inputs.
 private def rejectFlatHint (formula : Bool) : MetaM Unit := do
   let some base ← job.get | throwError "missing tiny job"
   unless base.hints.size==1 do throwError "not a one-node control"
@@ -120,7 +113,6 @@ run_elab rejectFlatHint true
 prepare_memory_replay (.tt : Solidity.Fml Solkey.TestSuite [])
 run_elab rejectFlatHint false
 
--- Untampered quotation traverses the same save/resume/assembly path.
 prepare_memory_replay (.tt : Solidity.Fml Solkey.TestSuite [])
 discover_memory_replay
 save_memory_replay
@@ -230,12 +222,9 @@ run_elab do
   logInfo "foreign-context quotation rejected by actual typed data declaration"
 
 
--- A true first projection cannot mask a false SECOND component of the pair.
 resume_memory_replay Solkey.TestSuite.returnLeavesNestedLoops.problem
 run_elab rejectSelectedGuard 1 true
 
--- Missing proposal metadata uses the original evaluator path, with the
--- same original guard observations and a kernel-checked layer equation.
 resume_memory_replay Solkey.TestSuite.returnLeavesNestedLoops.problem
 run_elab do
   let some base ← job.get | throwError "missing original checkpoint"

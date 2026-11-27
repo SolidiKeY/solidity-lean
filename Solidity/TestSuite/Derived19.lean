@@ -1,8 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-! Obligations new at solkey `473da8944c`: `&`'s operand order, loop jumps
-under invariants, modifier continuations, the dangling-storage claims (an
-empty push saves only the length) and shifts. -/
 
 open Solidity
 open scoped Scoped

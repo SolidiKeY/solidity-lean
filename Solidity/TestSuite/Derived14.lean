@@ -1,25 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-!
-# solkey's `TestSuite`, derived: `send`, internal calls, `return`, tuples
-
-`⊢` of each obligation solkey `1b4341a303` added, in the order of the
-source; the replays are what `#solkey_derive? … pending`
-(`Frontend/Problems.lean`) prints.  A `send` (and
-the `call{value}` form, a send with all the gas; all four are box)
-splits into solkey's goals "send succeeded" and "send failed"
-(`sendNoCallbackBox`); an internal
-call is inlined (`internalCallExpand`, `functionBodyExpand` for a call with
-targets), its `return`s lowered at elaboration (`lowerReturns`); a tuple
-declaration or assignment writes its components in order.
-
-`returnEarly` (three calls of `returnSign`, three exits each) and
-`tupleReturnDiscardsComponents` (`returnStats`' four conditionals and its
-`&&`) run their callees on literals: each split's condition is ground under
-its updates, and the strategy keeps only the branch it takes
-(`Seq.refuteS`, closed by `Proves.closeFalse`), so one path each
-is run, not 27 and 32.
--/
 
 open Solidity
 open scoped Scoped

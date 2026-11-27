@@ -1,59 +1,27 @@
 import Solidity.Optimizer.Simplify
 import Solidity.Semantics.RunWk
 
-/-!
-# O03 common-subexpression elimination over lowering programs
-
-After `x = e;` (recorded when `e` is pure and does not read `x`) or `T x = e;`
-(always recorded; an impure `e` is never matched) succeeds, `x` holds `e`'s value; while neither
-`x` nor a local `e` reads is assigned, a later occurrence of `e` is replaced
-by a read of `x`, as solc's `CommonSubexpressionEliminator` replaces an
-expression by a variable known to hold it. A recorded `e` evaluated
-successfully (its statement completed), and the state it reads is unchanged
-while the entry lives, so the occurrence it replaces evaluates to the same
-value: a failing expression is never replaced. An entry survives an
-assignment only when `e` is pure (literals, locals, environment reads and
-operators over them) and does not read the assigned local (`Val.indep`); the
-pure entries also survive the storage statements `assign`, `delete` and `pop`
-(`Avail.keep`, via `KeepsLocals`), and an `assign`'s stored value is rewritten.
-
-Only pure expressions are compared: equality is syntactic on the typed IR
-(`Val.pbeq`, `false` outside the pure fragment, sound by `Val.pbeq_eq`),
-decided without a classical oracle. The invariant is `Avail.Holds A σ`: each
-recorded expression evaluates in `σ` to its local's value. Entries are kept
-across `x = e`, `T x = e`, `require` and `assert` (and, pure ones only, across
-`assign`, `delete`, `pop`), as in propagation; any other statement clears them;
-assigning a local drops every entry that reads it or is held by it; a branch,
-block or loop exit forgets them, and a loop body starts with none.
-Preservation: `Prog.cse_runC` (exact typed run where the entries hold) and
-`Prog.cse_empty_runC` (no premise).
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract} {Γ : Ctx}
 
-/-! ## Typed syntactic equality on the pure fragment -/
 
-/-- A binary node's operator and operands. -/
 def asBin? {q : PrimTy} : Val C Γ q → Option ((p : PrimTy) × BinOp × Val C Γ p × Val C Γ p)
   | .binop (p := p) op _ _ a b => some ⟨p, op, a, b⟩
   | .simple _ | .read _ | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen .. | .modular ..
   | .hash .. => none
 
-/-- A unary node's operator and operand. -/
 def asUn? {q : PrimTy} : Val C Γ q → Option ((p : PrimTy) × UnOp × Val C Γ p)
   | .unop (p := p) op _ _ a => some ⟨p, op, a⟩
   | .simple _ | .read _ | .binop .. | .ternary .. | .readMem _ | .len .. | .mlen .. | .modular ..
   | .hash .. => none
 
-/-- A conditional's parts. -/
 def asTern? {q : PrimTy} : Val C Γ q → Option (Val C Γ .bool × Val C Γ q × Val C Γ q)
   | .ternary c a b => some (c, a, b)
   | .simple _ | .read _ | .binop .. | .unop .. | .readMem _ | .len .. | .mlen .. | .modular ..
   | .hash .. => none
 
-/-- A modular node's parts. -/
 def asMod? {q : PrimTy} : Val C Γ q → Option (ModOp × Val C Γ .uint × Val C Γ .uint × Val C Γ .uint)
   | .modular op a b k => some (op, a, b, k)
   | .simple _ | .read _ | .binop .. | .unop .. | .ternary .. | .readMem _ | .len .. | .mlen ..
@@ -104,7 +72,6 @@ theorem asMod?_eq {q : PrimTy} {v : Val C Γ q} {op : ModOp} {a b k : Val C Γ .
   | simple | read | binop | unop | ternary | readMem | len | mlen | hash =>
     simp only [asMod?, reduceCtorEq] at h
 
-/-- Syntactic equality of pure expressions (`false` outside the fragment). -/
 def Val.pbeq : {p : PrimTy} → Val C Γ p → Val C Γ p → Bool
   | _, .simple s, b =>
     match simple? b with
@@ -191,9 +158,7 @@ theorem Val.pbeq_eq : {p : PrimTy} → (a b : Val C Γ p) → Val.pbeq a b = tru
   | _, .hash .., _, h => by simp only [Val.pbeq, Bool.false_eq_true] at h
   termination_by structural _ a => a
 
-/-! ## Independence of an assigned local -/
 
-/-- `v` is pure and does not read the local at position `n`. -/
 def Val.indep (n : Nat) : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple s => !readsAt n s
   | _, .binop _ _ _ a b => Val.indep n a && Val.indep n b
@@ -226,22 +191,23 @@ theorem Val.evalT_setLocal_indep {q : PrimTy} (σ : State C Γ) (i : Idx Γ (.va
   | _, .read _, h | _, .readMem _, h | _, .len .., h | _, .mlen .., h | _, .hash .., h => by
     simp only [Val.indep, Bool.false_eq_true] at h
 
-/-! ## Available expressions -/
 
-/-- Local `j` holds the value of the pure expression `e`. -/
 structure Avail (C : Contract) (Γ : Ctx) where
   p : PrimTy
   j : Idx Γ (.val p)
   e : Val C Γ p
 
-/-- Each recorded expression evaluates to its local's value. -/
 def Avail.Holds (A : List (Avail C Γ)) (σ : State C Γ) : Prop :=
   ∀ a ∈ A, a.e.evalT σ = .ok (TEnv.get a.j σ.env)
+
+theorem Avail.evalT_of_holds {A : List (Avail C Γ)} {σ : State C Γ}
+    (hA : Avail.Holds A σ) {a : Avail C Γ} (ha : a ∈ A) :
+    a.e.evalT σ = .ok (TEnv.get a.j σ.env) :=
+  hA a ha
 
 theorem Avail.holds_nil (σ : State C Γ) : Avail.Holds ([] : List (Avail C Γ)) σ :=
   fun _ h => nomatch h
 
-/-- The local holding `v`, if one is recorded. -/
 def Avail.find? {p : PrimTy} (v : Val C Γ p) : List (Avail C Γ) → Option (Idx Γ (.val p))
   | [] => none
   | a :: A =>
@@ -255,7 +221,7 @@ theorem Avail.find?_evalT {A : List (Avail C Γ)} {σ : State C Γ} (hA : Avail.
   induction A with
   | nil => simp only [Avail.find?, reduceCtorEq] at hf
   | cons a A ih =>
-    have ha := hA a List.mem_cons_self
+    have ha := Avail.evalT_of_holds hA (a := a) List.mem_cons_self
     have hA' : Avail.Holds A σ := fun b hb => hA b (List.mem_cons_of_mem a hb)
     obtain ⟨q, k, e⟩ := a
     simp only [Avail.find?] at hf
@@ -271,7 +237,6 @@ theorem Avail.find?_evalT {A : List (Avail C Γ)} {σ : State C Γ} (hA : Avail.
       · exact ih hA' hf
     · exact ih hA' hf
 
-/-- Replace each recorded subexpression by a read of the local holding it. -/
 def _root_.Solidity.Val.cse (A : List (Avail C Γ)) : {p : PrimTy} → Val C Γ p → Val C Γ p
   | _, v@(.simple _) => v
   | _, v@(.binop op h hq a b) =>
@@ -317,17 +282,14 @@ theorem _root_.Solidity.Val.cse_evalT {A : List (Avail C Γ)} {σ : State C Γ}
     · simp only [Val.evalT, Val.cse_evalT hA a, Val.cse_evalT hA b, Val.cse_evalT hA k]
   | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. | _, .hash .. => by simp only [Val.cse]
 
-/-- Entries after `i = r;` (`r` the original right side). -/
 def Avail.set {p : PrimTy} (A : List (Avail C Γ)) (i : Idx Γ (.val p)) (r : Val C Γ p) :
     List (Avail C Γ) :=
   let kept := A.filter fun a => a.j.toNat != i.toNat && Val.indep i.toNat a.e
   if Val.indep i.toNat r then ⟨p, i, r⟩ :: kept else kept
 
-/-- Entries read one local deeper. -/
 def Avail.push {t : LTy} (A : List (Avail C Γ)) : List (Avail C (t :: Γ)) :=
   A.map fun a => ⟨a.p, a.j.there, a.e.wk (.drop .refl)⟩
 
-/-- Entries after `T x = e;`. -/
 def Avail.decl {p : PrimTy} (A : List (Avail C Γ)) :
     Option (Val C Γ p) → List (Avail C (.val p :: Γ))
   | none => Avail.push A
@@ -377,9 +339,7 @@ theorem Avail.holds_decl {A : List (Avail C Γ)} {σ : State C Γ} (hA : Avail.H
       exact hv e rfl
     · exact Avail.holds_push (t := .val p) hA v a ha
 
-/-! ## Across statements that keep the locals -/
 
-/-- The pure fragment: literals, locals, environment reads and operators. -/
 def Val.isPure : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple _ => true
   | _, .binop _ _ _ a b => Val.isPure a && Val.isPure b
@@ -415,7 +375,6 @@ theorem Val.evalT_keep {σ τ : State C Γ}
   | _, .read _, h | _, .readMem _, h | _, .len .., h | _, .mlen .., h | _, .hash .., h => by
     simp only [Val.isPure, Bool.false_eq_true] at h
 
-/-- The pure entries, which survive a step that keeps the locals. -/
 def Avail.keep (A : List (Avail C Γ)) : List (Avail C Γ) := A.filter fun a => Val.isPure a.e
 
 theorem Avail.holds_keep {A : List (Avail C Γ)} {f : TStep C Γ Γ} (hk : KeepsLocals f)
@@ -426,7 +385,6 @@ theorem Avail.holds_keep {A : List (Avail C Γ)} {f : TStep C Γ Γ} (hk : Keeps
   obtain ⟨hmem, hp⟩ := List.mem_filter.mp ha
   rw [Val.evalT_keep hl he a.e hp, hA a hmem, hl]
 
-/-- CSE inside a storage source's value. -/
 def _root_.Solidity.Src.cse (A : List (Avail C Γ)) : {T : Ty} → Src C Γ T → Src C Γ T
   | _, .val v => .val (v.cse A)
   | _, s@(.copy ..) | _, s@(.fixedCopy ..) | _, s@(.copyMem ..) | _, s@(.fixedCopyMem ..) => s
@@ -436,10 +394,8 @@ theorem _root_.Solidity.Src.cse_valueT {A : List (Avail C Γ)} {σ : State C Γ}
   | _, .val v => by simp only [Src.cse, Src.valueT, Val.cse_evalT hA]
   | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
 
-/-! ## The pass -/
 
 mutual
-/-- CSE through one statement: the rewritten statement and the entries after it. -/
 def Stmt.cse : {Γ Γ' : Ctx} → List (Avail C Γ) → Stmt C Γ Γ' → Stmt C Γ Γ' × List (Avail C Γ')
   | _, _, F, .assignLocal i r => (.assignLocal i (r.cse F), Avail.set F i r)
   | _, _, F, .declLocal p x init =>
@@ -465,7 +421,6 @@ def Stmt.cse : {Γ Γ' : Ctx} → List (Avail C Γ) → Stmt C Γ Γ' → Stmt C
   | _, _, _, s@(.callRec ..) | _, _, _, s@(.revertData ..) | _, _, _, s@(.catchData ..) =>
     (s, [])
 
-/-- CSE through a sequence. -/
 def Prog.cse : {Γ Γ' : Ctx} → List (Avail C Γ) → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, _, .nil => .nil
   | _, _, F, .cons s P =>
@@ -473,11 +428,8 @@ def Prog.cse : {Γ Γ' : Ctx} → List (Avail C Γ) → Prog C Γ Γ' → Prog C
     .cons r.1 (Prog.cse r.2 P)
 end
 
-/-! ## Preservation -/
 
 mutual
-/-- A statement's rewrite runs as it does where the entry facts hold, and
-the exit facts hold in each state it leaves. -/
 theorem Stmt.cse_runC : {Γ Γ' : Ctx} → (F : List (Avail C Γ)) → (s : Stmt C Γ Γ') →
     (σ : State C Γ) → Avail.Holds F σ →
       Stmt.runC (Stmt.cse F s).1 σ = Stmt.runC s σ ∧
@@ -578,7 +530,6 @@ theorem Stmt.cse_runC : {Γ Γ' : Ctx} → (F : List (Avail C Γ)) → (s : Stmt
   | _, _, _, .revertData .., _, _ | _, _, _, .catchData .., _, _ =>
     ⟨rfl, fun _ _ => Avail.holds_nil _⟩
 
-/-- A sequence's rewrite runs as it does where the entry facts hold. -/
 theorem Prog.cse_runC : {Γ Γ' : Ctx} → (F : List (Avail C Γ)) → (P : Prog C Γ Γ') →
     (σ : State C Γ) → Avail.Holds F σ → Prog.runC (Prog.cse F P) σ = Prog.runC P σ
   | _, _, _, .nil, _, _ => rfl
@@ -592,7 +543,6 @@ theorem Prog.cse_runC : {Γ Γ' : Ctx} → (F : List (Avail C Γ)) → (P : Prog
       rw [Prog.cse_runC _ P o.st (hout o ho)]
 end
 
-/-- **CSE with no entry facts preserves the typed run.** -/
 theorem Prog.cse_empty_runC {Γ Γ' : Ctx} (P : Prog C Γ Γ') :
     Prog.runC (Prog.cse [] P) = Prog.runC P :=
   funext fun σ => Prog.cse_runC [] P σ (Avail.holds_nil σ)
