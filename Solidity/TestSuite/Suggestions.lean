@@ -1,19 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-!
-# The suggestions `#solkey_derive?` prints, pinned
-
-Each runs the search, so this module imports only the statements and no
-`Derived` module imports it: the searches run beside the theorems, not
-before them.  A statement is picked by name (`only`), so a function added
-to `TestSuite.sol` does not move a pin.
-
-A statement the closer proves in the residue is `sol_prove` with its selected step budget; a leaf
-it leaves would be closed on its scoped form (`sol_leaf`, then a closer:
-`Derive.searchLeaf`), and several leaves each under their `case`.  Since
-W10.4 every statement closes in the residue, the member written through the
-alias a nested `push` returns included.
--/
 
 /--
 info: theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
@@ -33,12 +19,6 @@ testStorageNestedPushReturnAlias: derived
 #guard_msgs in
 #solkey_derive? Solkey.TestSuite only testStorageNestedPushReturnAlias
 
-/-! `returnEarly` calls `returnSign` (three exits) three times, and
-`tupleReturnDiscardsComponents` runs `returnStats` (four conditionals and an
-`&&`) on literals: a split whose condition is ground under its updates keeps
-only the branch it takes (`Seq.refuteS`, closed by
-`Proves.closeFalse`), so each replay fits one
-declaration (`Derive.replayFits`). -/
 
 /--
 info: theorem Solkey.TestSuite.returnEarly.proved : ⊢ Solkey.TestSuite.returnEarly.problem := by
