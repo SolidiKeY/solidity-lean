@@ -262,6 +262,7 @@ import Solidity.Examples.Lowering.Total.ConstructorDecode
 import Solidity.Examples.Lowering.Total.ConstructorPlacement
 import Solidity.Examples.Lowering.Total.EnumDecode
 import Solidity.Examples.Lowering.Total.EnumUseDecode
+import Solidity.Examples.Lowering.Total.FullDomain
 import Solidity.Examples.Lowering.Total.FunctionTypeDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws
