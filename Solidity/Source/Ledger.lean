@@ -2,14 +2,14 @@ import Solidity.Source.TypingExamples
 import Solidity.Source.Semantics
 
 /-!
-# The source-constructor ledger (S05)
+# The source-constructor ledger
 
 Every expression and statement constructor of the source syntax
-(`Syn`, S00) with its semantic status, checked mechanically against S01's
+(`Syn`) with its semantic status, checked mechanically against the typing
 coverage (`TypingExamples.exprCoverage`, `stmtCoverage`, which classify
 every constructor without a wildcard):
 
-- a constructor S01 types has an interpreter arm: its derivations
+- a constructor the typing judgment types has an interpreter arm: its derivations
   elaborate to `RExpr`/`RStmt` (`Typed.toR`, `StmtD.toR`, total), and the
   interpreter (`evalE`, `execS`, `Solidity/Source/Eval.lean`) matches every
   constructor of `RExpr`, `RLVal`, `RStmt` and `RItems` without a
@@ -18,11 +18,11 @@ every constructor without a wildcard):
   `bytes`/`string`/one-word arrays, `fallback` signatures solc refuses,
   nested-array copies): `semExprCoverage_of_typed` is a
   classification, not a progress theorem;
-- a constructor S01 defers stays a recorded gap with its stage, never an
-  exclusion (G00's profile still contains it);
-- a constructor S01 reads as another rule's operand (`Coverage.operand`:
+- a deferred constructor is a recorded gap with its stage, never an
+  exclusion (the profile contains it);
+- a constructor read as another rule's operand (`Coverage.operand`:
   `elemType`, the callee of a conversion and a type expression of
-  `abi.decode`, lane FU2-B) is evaluated inside that rule's node
+  `abi.decode`) is evaluated inside that rule's node
   (`semExprCoverage_of_operand`); the types `abi.decode` refuses (static
   arrays, structs, nested arrays, fixed point, external function types)
   have no derivation and are recorded in
@@ -39,9 +39,9 @@ open Solidity.Source Solidity.Source.TypingExamples
 
 /-- A constructor's semantic status. -/
 inductive SemStatus where
-  /-- Typed by S01 and evaluated by S02/S03. -/
+  /-- Typed and evaluated. -/
   | evaluated
-  /-- Not yet typed, so not yet evaluated: a gap with its stage. -/
+  /-- Untyped and unevaluated: a gap with its stage. -/
   | gap (stage reason : String)
   deriving DecidableEq, Repr
 
@@ -94,13 +94,13 @@ theorem semExprCoverage_of_operand (k p : Ctor) (r : String) (h : exprCoverage k
 def semExprGaps : List Ctor :=
   [.callOptions, .metaType, .new]
 
-/-- Whether S01 defers a constructor. -/
+/-- Whether the typing coverage defers a constructor. -/
 def deferred (k : Ctor) : Bool :=
   match exprCoverage k with
   | some (.deferred _ _) => true
   | _ => false
 
-/-- The gaps are exactly the constructors S01 defers. -/
+/-- The gaps are exactly the constructors the typing coverage defers. -/
 theorem semExprGaps_spec (k : Ctor) : semExprGaps.contains k = deferred k := by
   cases k <;> rfl
 

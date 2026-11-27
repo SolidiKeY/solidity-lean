@@ -4,10 +4,10 @@ import Solidity.Source.Elaborated
 import Solidity.Source.FailureCursor
 
 /-!
-# The source machine: state, locals and storage access (S02)
+# The source machine: state, locals and storage access
 
-What S02's expression semantics and S03's statement semantics run on,
-over S04.01–S04.03's state:
+What expression semantics and statement semantics run on,
+over the source state:
 
 - `Env.layout`: the declaration layout read off the environment (struct
   members in memory, enum sizes, underlying types);
@@ -17,10 +17,10 @@ over S04.01–S04.03's state:
   `index` steps below; a struct its members at `field` steps; a mapping
   its values at `key` steps (the key's contents).  Paths that name an
   aggregate hold nothing (`tuple []`, which has no value).  This is the
-  logical aliasing of G04 Q2; the physical packing is not observable;
+  logical aliasing; the physical packing is not observable;
 - `Locals D Γ`: the values of a body's locals, intrinsic in their types;
 - `St E`: the journaled world and transient storage (`ExecState`), the
-  frame's memory (`Heap`), the observable events so far (G01 `Event`), the
+  frame's memory (`Heap`), the observable events so far (`Event`), the
   logs (an excluded observation, kept so that they roll back), and the
   function frame whose modifiers are running;
 - `EM E Γ`: the evaluation monad, locals and state threaded, a `Halt`
@@ -158,10 +158,10 @@ structure St (E : Env) where
   heap : Heap E.layout
   /-- The observable events, oldest first. -/
   events : List Event
-  /-- Emitted logs (an excluded observation, G00), newest first. -/
+  /-- Emitted logs (an excluded observation), newest first. -/
   logs : List (Address × Bytes)
   fnLocals : Σ Γ : RCtx, Locals E.layout Γ
-  /-- Monotone H16 request/frame execution metadata. Legacy evaluation ignores
+  /-- Monotone request/frame execution metadata. Legacy evaluation ignores
   this field; enabled operations take an immutable RuntimePlan explicitly. -/
   resource : FailureExecution.Cursor := FailureExecution.Cursor.empty
 
@@ -175,7 +175,7 @@ structure Fr where
   contract : String
   checked : Bool := true
   depth : Nat := 0
-  /-- The frame's call data, which `calldata` references read (lane FU2-B);
+  /-- The frame's call data, which `calldata` references read;
   read only. -/
   cd : Bytes := []
 
