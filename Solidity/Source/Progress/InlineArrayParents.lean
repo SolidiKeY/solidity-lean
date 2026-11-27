@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.ReadyArguments
 import Solidity.Source.Preservation.MemoryBodies
 
-/-! Progress for inline-array allocation parents with syntactically ready
-exact arguments. Preservation is derived from the existing memory-body rule;
-no child execution premise, evaluator change or new call graph is introduced. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

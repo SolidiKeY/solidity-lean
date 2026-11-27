@@ -2,9 +2,6 @@ import Solidity.Source.Progress.CheckedPrograms
 import Solidity.Source.Preservation.FragmentControls
 import Solidity.Lowering.P9.ProgramControls
 
-/-! Actual contract-backed admission, inhabited memory-prefix consumer and
-refusal controls. Existing exact source runs are reused, not re-proved.
--/
 namespace Solidity.Source.Progress.Controls
 open Solidity.Lowering.P9 Preservation
 

@@ -54,6 +54,7 @@
 | `Correctness/Lowering/Total/Decode/Self.lean` | Self-aware decoder tables: `address(this)` and its balance spelled; the environment table has no gap. |
 | `Correctness/Lowering/Total/Versions/Self.lean` | Self-aware version: soundness, boundary, Source typing/evaluation of the two reads and value faithfulness under related globals. |
 | `Correctness/Lowering/Total/Decode/Casts.lean` | Casts written as calls read as Source explicit conversions: cast equation, conservativity over the registered-call decoder, typing and integer value faithfulness. |
+| `Examples/Lowering/Total/FullDomain.lean` | Frozen decoder refusal-boundary regressions for callee requests, return slots, unchecked/overflow caller scopes, checked blocks and missing function metadata, plus the frozen final relation’s refusal of exhaustion; no full-domain coverage claim. |
 | `Correctness/Lowering/Total/Main.lean` | The loop contract composed with the production and family theorems: it is interpretation faithfulness and `Residual` (unproved); `production_correct` derives the consumer from `Residual` and `FullDomain`. |
 | `Correctness/Lowering/Total/Decode.lean` | The stage-1 raw-to-Source decoder `Decode.decode`: a chosen Source spelling of the raw input, then Source inference and resolution; every other input is a gap. |
 | `Correctness/Lowering/Total/Spells.lean` | The inductive spelling relation `Spells`; the decoder is sound for it and complete if Source inference is (`InferComplete`, unproved). |
@@ -125,8 +126,23 @@
 | `Correctness/Lowering/Sim/Session/Forward/Frames.lean` | The provisional per-frame hypothesis of the forward session diagram and the session-level match. |
 | `Correctness/Lowering/Sim/Session/Forward/Within.lean` | A reachable target session state observes a prefix of the run at every horizon above its issued actions. |
 | `Examples/Lowering/Sim/Session/Forward.lean` | Type-level uses of the forward session diagram and its resource record on the session of `spin`, under the unmet hypothesis of matched frames. |
+| `Correctness/Lowering/Sim/PassList.lean` | Packages the conditional lowering session lift as a one-pass list, preserving its environment, resource and public refinement guarantees. |
+| `Examples/Lowering/Sim/PassList.lean` | Conditional consumer of the packaged lowering session certificate. |
 | `Correctness/Lowering/Sim/Induction/Knot.lean` | The actual elaborator record satisfies the frozen case predicates by `elabKernelTotal` induction, conditional on the three case hypotheses and the explicit loop-arm bridge; an intermediate step toward `loweringBySimulation`. |
 | `Examples/Lowering/Sim/Induction.lean` | Uses the intermediate knot-closure theorem with production fresh names and its loop-arm bridge hypothesis. |
+| `Correctness/Lowering/Sim/CoverageBranch.lean` | Exact child execution receipts compose through lists, branch reader isolation and local restoration, and typed scope chaining; actual block-arm specialization requires `Goals.elabKernelTotal`. |
+| `Examples/Lowering/Sim/CoverageBranch.lean` | Two effectful child executions retain fresh indices and memo updates, restore entry locals, observe the branch reader, and chain into a typed block. |
+
+`Children` supplies individual executions with intermediate locals, counters
+and memos. `chain_cons` checks placement at each exact context and outgoing
+name list; `actual_scope` consumes a successful chain, not a coverage claim.
+`actual_block` derives the `elabStmt1` block arm from producer equations with
+an explicit kernel-totality hypothesis. Source acceptance, capture receipts,
+assignment receipts, and the surrounding coverage theorem remain with LS3B.
+These helpers assert neither unrestricted `Diagram.Total` nor external EVM
+correctness.
+| `Solidity/Correctness/Lowering/Sim/CoverageControl.lean` | Exact condition/then/else and default lowered-loop condition/body run-success composition toward `loweringBySimulation`, with entry contexts, fresh counters, reader and memos explicit; actual-producer specialization requires `elabKernelTotal`. LS3B supplies individual child receipts after capture/assignment/branch proofs. Emits `LoopAnn.auto`; arbitrary annotations, raw-loop lowering, remaining grammar, capture reachability, placement, acceptance, concrete nonvacuity and final coverage remain with LS3B. No `Diagram.Total` claim. |
+| `Solidity/Examples/Lowering/Sim/CoverageControl.lean` | Concrete helper applications under explicit kernel totality, plus actual recursive-producer execution assertions with nonempty branches/body, preserved counters and seeded memo. Executable checks do not discharge kernel totality or coverage. |
 | `Solidity/Correctness/Lowering/Sim/Coverage/ThreadedV2.lean` | Additive caller-context threading contract, v1 projection and association bridge for `loweringBySimulation`. |
 | `Solidity/Examples/Lowering/Sim/Coverage/ThreadedV2.lean` | Existing standalone-loop vocabulary exercises the bridge with explicit threading and placement receipts. |
 | `Correctness/Lowering/Sim/Coverage/Obstruction.lean` | Exact accepted empty production run under `elabKernelTotal` refuting frozen v1 diagram coverage: placement may use an unrelated context. |
@@ -196,3 +212,7 @@
 | `Correctness/Lowering/Unchecked/VersionedPowerWitness.lean` | V2 operator migration controls; unchecked-lowering component, full production endpoint remains unproved. |
 | `Correctness/Lowering/Unchecked/SourceSpelling.lean` | Total raw/typed/named/model update association and actual original-context paired execution; partial producer, full state/resources and pass remain unproved. |
 | `Correctness/Lowering/Unchecked/WordUpdateWitness.lean` | Actual-output word-association controls; unchecked-lowering component, full production endpoint remains unproved. |
+| `Correctness/Lowering/Total/Decode/SuccessfulContext.lean` | Unrestricted empty-body production, enum representability obstruction, and conditional P2 request/body binding; complete request-context decoding remains open. |
+| `Examples/Lowering/Total/SuccessfulContext.lean` | Successful-production versus enum-component coverage regression checks. |
+| `Correctness/Lowering/Total/Decode/SuccessfulExpr.lean` | One-step equations for actual Source inference of numeric prefix/suffix and assignment effects, deletion, arrays, tuples and builtin environment members and self address/balance; registered bytes-literal spelling/inference; actual capture/callback spelling composition and named-hoister guard/run extraction; explicit recursive child obligations and retained refusal guards. |
+| `Examples/Lowering/Total/SuccessfulExpr.lean` | Source model checks for numeric and assignment effects, storage copy, nonnumeric/rvalue refusal, deletion, arrays, tuples, environment reads, registered bytes and concrete callback composition and named effect-order refusals. |

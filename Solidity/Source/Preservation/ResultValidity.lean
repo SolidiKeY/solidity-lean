@@ -1,7 +1,7 @@
 import Solidity.Source.Preservation.Expressions
 
 /-! The existing fragment's result/reference validity, including its checked
-call return defaults. No outcome or memory-operation admission is changed. -/
+call return defaults. -/
 namespace Solidity.Source.Preservation
 variable {E : Env} {H : HeapTy}
 

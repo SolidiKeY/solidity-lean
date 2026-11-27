@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.InitializedLocals
 
-/-! Finite initialized-local prefixes followed by one composed return. The
-certificate follows the intrinsic body syntax; it excludes uninitialized locals,
-nonidentity conversions, loops and mutation. Scope exit uses the evaluator's
-actual local restoration, including on reference returns. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

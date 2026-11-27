@@ -81,7 +81,7 @@ theorem returning_items_mem {E : Env} {A : Decl → Prop} {G : Glob E} {c : Stri
 
 /-- Nonrecursive reference parameters/results for a body returning admitted
 exact-type expressions. Its preservation premise is derived here, not supplied
-as an interpreter axiom. Defaults and all actual halts remain unchanged. -/
+as an interpreter axiom. -/
 theorem call_returning_mem {E : Env} {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (contract : F.contract = c) (d : Decl)
     (ps rs : List STy) (es : RConvArgs E (rs.reverseAux (ps.reverseAux [])) rs)

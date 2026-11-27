@@ -15,11 +15,11 @@ AREA_KEYS = {'Backend': 'backend', 'Yul': 'yul', 'Lowering': 'lowering', 'Fronte
              'SolcValidation': 'solcValidation', 'Source': 'source', 'Optimizer': 'optimizer'}
 # Library roots (lakefile.toml lean_lib / lean_exe roots). Test roots: libraries whose
 # modules are checks rather than library code; their direct imports are test modules.
-LIB_ROOTS = ('Solidity', 'SolidityExamples', 'SoliditySlowExamples', 'SolkeyTestSuite',
+LIB_ROOTS = ('Solidity', 'SolidityControls', 'SolidityExamples', 'SoliditySlowExamples', 'SolkeyTestSuite',
              'SolidityCorpus')
 TEST_ROOTS = ('SolidityExamples', 'SoliditySlowExamples', 'SolkeyTestSuite', 'SolidityCorpus')
 EXE_ROOTS = {'SolkeyCheck': 'solkeycheck', 'SolCases': 'solcases', 'SolidityLean': 'solidity-lean'}
-GENERATED_ROOTS = ('Solidity.lean', 'SolidityExamples.lean', 'Bridge/SolidityBridge.lean')
+GENERATED_ROOTS = ('Solidity.lean', 'SolidityControls.lean', 'SolidityExamples.lean', 'Bridge/SolidityBridge.lean')
 BLANKET_RUNNERS = {
     # Read: its header says it audits the axioms of every constant the library roots reach.
     'scripts/AxiomAudit.lean': 'whole-library axiom audit (header lines 1-20): a scan of '

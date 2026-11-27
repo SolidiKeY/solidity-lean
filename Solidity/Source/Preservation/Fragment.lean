@@ -52,8 +52,8 @@ theorem fragMemAt {A : Decl → Prop} {G : Glob E} {c : String} (hG : CallsOK A 
         (ih.stmt.execItems F hc b.ps.length none b.items l hf ho H)
       call := callMem_step hG ih }
 
-/-- Source progress and full memory preservation use the same unmodified
-fragment and call predicate, without changing halt semantics or the progress theorem's original frame premises. -/
+/-- Source progress and full memory preservation use the same
+fragment and call predicate. -/
 theorem progress_and_preservation {A : Decl → Prop} {G : Glob E} {c : String}
     (hG : CallsOK A G c) (n : Nat) : Source.FragAt A G c n ∧ FragMemAt A G c n :=
   ⟨Source.fragAt hG n, fragMemAt hG n⟩

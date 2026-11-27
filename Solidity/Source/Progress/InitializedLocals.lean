@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.ForwardingReturns
 
-/-! Initialized locals consume composed expressions, including certified internal
-calls. The new local aliases the returned memory reference; the existing caller
-locals and all reached allocations remain valid. Only identity conversions are
-admitted here. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

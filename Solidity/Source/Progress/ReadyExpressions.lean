@@ -1,10 +1,6 @@
 import Solidity.Source.Progress.NewArray
 import Solidity.Source.Preservation.AllocatingFragment
 
-/-! Readiness-decorated allocating expressions, over the existing intrinsic
-syntax and preservation admission. Reference locals, identity conversions and
-reference-result conditionals compose with ready dynamic-new parents. The old
-value-call graph remains separately checked; no memory-call recursion is added. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

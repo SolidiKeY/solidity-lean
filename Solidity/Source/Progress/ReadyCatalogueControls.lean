@@ -2,10 +2,6 @@ import Solidity.Source.Progress.ReadyCatalogue
 import Solidity.Source.Progress.ReadyBodyControls
 import Solidity.Source.Progress.ReadyProgramControls
 
-/-! Consumers of ready catalogues with elaboration-derived frame metadata.
-Actual nested allocation, reference-parameter identity and mixed value/memory
-units consume the public theorem at inhabited inputs. Supplied call-expression
-nodes remain intrinsic controls over these elaborated programs. -/
 namespace Solidity.Source.Progress.ReadyCatalogueControls
 open EM ReadyBodyControls
 

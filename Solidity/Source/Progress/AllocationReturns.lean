@@ -2,10 +2,6 @@ import Solidity.Source.Progress.AggregateDefaults
 import Solidity.Source.Progress.AllocationBodyCalls
 import Solidity.Source.Progress.ReadyReturns
 
-/-! Returning actual allocating parents from modifier-free ordinary internal
-bodies. The body constructor and call evaluator are reused; parent progress,
-finite aggregate defaults and memory preservation are derived syntactically.
-No body execution or desired poststate is an admission premise. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
