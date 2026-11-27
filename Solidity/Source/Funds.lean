@@ -1,19 +1,9 @@
 import Solidity.Source.Session
 
-/-!
-# Sender-funds validity at the actual request boundary (S04.04)
-
-The raw runTx body is unchanged. The real session drivers test requestFunded
-before reaching it. This API exposes the same validation with the complete
-actual Source state/result: invalid requests are absent, not reverts or stuck.
-No gas/fee/nonce validity, deployment validity or new execution semantics.
--/
 namespace Solidity.Source
 open Solidity.Roadmap (Request Outcome SessionEnv Prefix Event)
 variable {E : Env}
 
-/-- Existing transaction evaluation, gated by the actual boundary ledger.
-None means invalid/dropped. Some retains ANY actual evaluation result. -/
 def runCheckedTx (G : Glob E) (n : Nat) (q : Request) (s : St E) :
     Option (Except Halt Outcome) × St E :=
   if requestFunded G.fixed G.balance0 s.events q then
@@ -34,7 +24,6 @@ theorem runCheckedTx_valid (G : Glob E) (n : Nat) (q : Request) (s : St E)
   rw [runCheckedTx, h]
   rfl
 
-/-- A checked transaction cannot return a result without real funding. -/
 theorem runCheckedTx_result_funded (G : Glob E) (n : Nat) (q : Request) (s : St E)
     {r : Except Halt Outcome} {post : St E} (h : runCheckedTx G n q s = (some r, post)) :
     RequestFunded G.fixed G.balance0 s.events q := by
@@ -43,13 +32,11 @@ theorem runCheckedTx_result_funded (G : Glob E) (n : Nat) (q : Request) (s : St 
   next funded => exact (requestFunded_true_iff _ _ _ _).1 funded
   next unfunded => cases h
 
-/-- All state fields are preserved on invalidity, even at horizon zero. -/
 theorem runCheckedTx_invalid_state (G : Glob E) (q : Request) (s : St E)
     (h : requestFunded G.fixed G.balance0 s.events q = false) (n : Nat) :
     (runCheckedTx G n q s).2 = s :=
   congrArg Prod.snd (runCheckedTx_invalid G n q s h)
 
-/-- Completed-horizon stability of the ACTUAL evaluator; no outcome oracle. -/
 theorem runCheckedTx_stable (G : Glob E) (q : Request) (s : St E)
     {n n' : Nat} (hn : n ≤ n')
     (hd : Done (runAt (fun f => runTx G f q) s n) = true) :
@@ -59,8 +46,6 @@ theorem runCheckedTx_stable (G : Glob E) (q : Request) (s : St E)
   · rw [runTx_stable G q s hn hd]
   · rfl
 
-/-- Dropping consumes the action index but not a transaction, its state,
-its last completed outcome, or any of its history. -/
 theorem sessionGo_drop_unfunded (P : SrcProg E) (env : SessionEnv) (n k i : Nat)
     (s : St E) (last : Outcome) (q : Request)
     (issued : env.requests s.events i = some (.request q))
@@ -75,8 +60,6 @@ theorem sessionGoEvents_drop_unfunded (P : SrcProg E) (env : SessionEnv) (n k i 
     sessionGoEvents P env n (k + 1) i s last = sessionGoEvents P env n k (i + 1) s last := by
   simp only [sessionGoEvents, issued, bad, Bool.false_eq_true, if_false]
 
-/-- A finite invalid action followed by end-of-input preserves exact prefix
-and final outcome; it is NOT a completed revert, even at transaction horizon0. -/
 theorem dropped_then_end (P : SrcProg E) (env : SessionEnv) (n k i : Nat)
     (s : St E) (last : Outcome) (q : Request)
     (issued : env.requests s.events i = some (.request q))

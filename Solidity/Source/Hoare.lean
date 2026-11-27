@@ -1,7 +1,7 @@
 import Solidity.Source.Machine
 
 /-!
-# Hoare triples over the interpreter monad (lane V04b)
+# Hoare triples over the interpreter monad
 
 `Hoare P m Q X`: from every state satisfying `P`, the computation `m`
 either returns `a` in a state satisfying `Q a`, or halts with `h` in a

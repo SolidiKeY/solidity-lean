@@ -2,11 +2,11 @@ import Solidity.Source.Elaborated
 import Solidity.Source.Value
 
 /-!
-# Progress of the value operations (lane V04b)
+# Progress of the value operations
 
 The pure operations of `Solidity/Source/Value.lean` halt `stuck` only on
 operands outside their domain. Here each is shown never `stuck` on the
-operands S01's typing gives it, through the premises its `toR` image
+operands the typing judgment gives it, through the premises its `toR` image
 carries:
 
 | Operation | Domain (`toR` premise) |

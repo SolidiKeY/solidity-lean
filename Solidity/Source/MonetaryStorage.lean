@@ -1,8 +1,5 @@
 import Solidity.Source.MonetaryExecution
 
-/-! H19 invariant transport through actual mutable storage operations.
-These laws retain the current-and-saved-account bound explicitly. They are
-not a full evaluator reachability proof and introduce no new write cases. -/
 namespace Solidity.Source
 open Solidity.Roadmap (Address)
 variable {D : Layout} {L T : Address → SPath → STy}
@@ -33,8 +30,6 @@ theorem ExecState.transient_balancesFit (state : ExecState D L T) (address : Add
 namespace MonetaryStorage
 variable {E : Env} {Γ : RCtx}
 
-/-- Exact static refusal versus actual journaled update, with all other
-Source fields and locals retained. No unchecked/mutable-write rule changes. -/
 theorem applyOp_run (locals : Locals E.layout Γ) (state : St E) (frame : Fr)
     (operation : Op E.layout E.lay E.lay) :
     (applyOp frame operation : EM E Γ Unit).run (locals,state) =
@@ -43,7 +38,6 @@ theorem applyOp_run (locals : Locals E.layout Γ) (state : St E) (frame : Fr)
   unfold applyOp
   cases frame.static <;> rfl
 
-/-- Actual persistent and transient branches, including static refusal. -/
 theorem setCell_preserves (locals : Locals E.layout Γ) (state : St E) (frame : Fr)
     (path : SPath) (value : Option (Val E.layout (E.cellTy path)))
     (fit : state.ex.BalancesFit) :
@@ -59,8 +53,6 @@ theorem setCell_preserves (locals : Locals E.layout Γ) (state : St E) (frame : 
     · exact fit
     · exact state.ex.storage_balancesFit frame.this (fun storage => storage.set path value) fit
 
-/-- Invalid typed writes stay stuck without mutation. Successful writes use
-the actual storage branch and preserve the same explicit journal invariant. -/
 theorem writeAt_preserves (locals : Locals E.layout Γ) (state : St E) (frame : Fr)
     (path : SPath) {type : STy} (value : Val E.layout type) (fit : state.ex.BalancesFit) :
     ((writeAt frame path value : EM E Γ Unit).run (locals,state)).2.2.ex.BalancesFit := by
@@ -68,6 +60,13 @@ theorem writeAt_preserves (locals : Locals E.layout Γ) (state : St E) (frame : 
   split
   · exact setCell_preserves locals state frame path _ fit
   · exact fit
+
+example (locals : Locals E.layout Γ) (state : St E) (frame : Fr)
+    (path : SPath) {type : STy} (value : Val E.layout type)
+    (wrong : type ≠ E.cellTy path) :
+    (writeAt frame path value : EM E Γ Unit).run (locals,state) =
+      (.error (.stuck "storage cell type"),(locals,state)) := by
+  simp only [writeAt, dif_neg wrong] <;> rfl
 
 end MonetaryStorage
 end Solidity.Source

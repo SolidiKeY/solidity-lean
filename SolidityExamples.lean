@@ -189,6 +189,7 @@ import Solidity.Examples.Goals.ElabTotal
 import Solidity.Examples.Goals.Endpoint
 import Solidity.Examples.Goals.FastModeAgrees
 import Solidity.Examples.Goals.Finish
+import Solidity.Examples.Goals.FrontendValidation
 import Solidity.Examples.Goals.GenericYulViewsPreserve
 import Solidity.Examples.Goals.GoalPinsSpec
 import Solidity.Examples.Goals.Hash

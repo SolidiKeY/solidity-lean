@@ -1,30 +1,5 @@
 import Solidity.Source.Semantics
 
-/-!
-# Horizons: the interpreter is monotone in its fuel (S05 item 2)
-
-`Below m m'`: on every state, `m` times out or runs exactly as `m'`.  Every
-function of the interpreter at horizon `n` is `Below` itself at `n + 1`
-(`belowAt`, by induction on `n`, one step theorem per function so each stays
-within the default heartbeats), and so are deployments and transactions
-(`deploy_below`, `runTx_below`).  Hence **horizon independence**: a result
-that completes at some horizon is the result at every larger one
-(`runTx_stable`, `deploy_stable`), what `firstDone` finds is not a choice
-(`firstDone_runTx`), and a `stuck` run stays stuck (`runTx_stuck_stable`),
-so it is not a lack of horizon.
-
-Every interpreter function also only appends events (`growAt`), and a run
-that times out shows a prefix of the events of the run at every larger
-horizon (`approxAt`, `runTx_events_mono`); `Solidity/Source/Session.lean`
-uses this to show the events of unfinished transactions. For checking cost
-those results live in `HorizonGrow`, `HorizonConst` and `Horizon` (which
-imports the others, so its importers see all of them).
-
-The tactic `below_go` walks two copies of a body that differ only in the
-horizon: through binds, `attempt`s, `match`es and `if`s, closing calls by the
-given lemmas and the rest by reflexivity.  `below_unfold f n` unfolds one
-level of `f` on each side without unfolding the right side's inner calls.
--/
 
 namespace Solidity.Source
 
@@ -33,12 +8,9 @@ open Solidity.Roadmap (Address Word Bytes Request Outcome Event)
 
 variable {E : Env}
 
-/-- A computation only appends events. -/
 def Grow {Γ : RCtx} {α : Type} (m : EM E Γ α) : Prop :=
   ∀ x, x.2.events <+: (m.run x).2.2.events
 
-/-- **`m` approximates `m'`**: both grow, and on every state `m` either
-times out with events `m'` extends, or agrees with `m'`. -/
 def Approx {Γ : RCtx} {α : Type} (m m' : EM E Γ α) : Prop :=
   Grow m ∧ Grow m' ∧ ∀ x, ((m.run x).1 = .error .timeout ∧ (m.run x).2.2.events <+: (m'.run x).2.2.events) ∨
     m.run x = m'.run x
@@ -98,10 +70,7 @@ theorem Approx.bind {Γ : RCtx} {α β : Type} {m m' : EM E Γ α} {k k' : α �
     | ok a => exact (hk a).2.2 y
     | error e => exact .inr rfl
 
-/-! ## Completion is stable under more fuel -/
 
-/-- **`m` is `m'` or times out**: on every state, `m` times out or agrees
-with `m'`. -/
 def Below {Γ : RCtx} {α : Type} (m m' : EM E Γ α) : Prop :=
   ∀ x, (m.run x).1 = .error .timeout ∨ m.run x = m'.run x
 
@@ -131,9 +100,6 @@ theorem Below.bind_left {Γ : RCtx} {α β : Type} {m m' : EM E Γ α} {k : α �
 theorem Below.bind_right {Γ : RCtx} {α β : Type} (m : EM E Γ α) {k k' : α → EM E Γ β}
     (hk : ∀ a, Below (k a) (k' a)) : Below (m >>= k) (m >>= k') := Below.bind (Below.refl m) hk
 
-/-- Close `Below (body at n) (body at n + 1)`: through binds, `match`es and
-`if`s, by the given fuel lemmas at the calls, and by reflexivity where no
-fuel is read. -/
 syntax "below_go" "[" ident,* "]" : tactic
 macro_rules
   | `(tactic| below_go [$ls,*]) => `(tactic| repeat' (first
@@ -280,7 +246,6 @@ theorem storeBytes_below {Γ : RCtx} (F : Fr) : ∀ (n : Nat) (p : SPath) (i : N
 end
 
 
-/-! ### The interpreter's helpers -/
 
 theorem bytesOfRV_below {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (v : RVal E.layout τ) :
     Below (bytesOfRV (Γ := Γ) F n v) (bytesOfRV F (n + 1) v) := by
@@ -370,7 +335,6 @@ theorem getterPath_below {Γ : RCtx} (F : Fr) (n : Nat) (data : Solidity.Roadmap
     Below.refl _
 
 
-/-! ### Frames and caught halts -/
 
 theorem run_attempt {Γ : RCtx} {α : Type} (m : EM E Γ α) (x) :
     (EM.attempt m).run x = (.ok (m.run x).1, (m.run x).2) := by
@@ -397,7 +361,6 @@ theorem Below.sub {Γ Γ' : RCtx} {α : Type} (l' : Locals E.layout Γ') {m m' :
   · right
     rw [he]
 
-/-- A halt caught by `attempt`: the continuation re-raises a timeout. -/
 theorem Below.attempt_bind {Γ : RCtx} {α β : Type} {m m' : EM E Γ α} {k k' : Except Halt α → EM E Γ β}
     (hm : Below m m') (hk : ∀ r, Below (k r) (k' r))
     (h0 : ∀ x, ((k (.error .timeout)).run x).1 = .error .timeout) :
@@ -412,10 +375,7 @@ theorem Below.attempt_bind {Γ : RCtx} {α β : Type} {m m' : EM E Γ α} {k k' 
     exact hk _ _
 
 
-/-! ### The interpreter -/
 
-/-- Unfold one level of `f` on each side of `Below (f (n + 1) …) (f (n + 2) …)`
-without unfolding the right side's inner calls at `n + 1`. -/
 syntax "below_unfold" ident ident : tactic
 macro_rules
   | `(tactic| below_unfold $f $n) => `(tactic| (
@@ -426,8 +386,6 @@ macro_rules
 
 
 
-/-! The shared horizon family below covers both calldata modes and the new
-delegated library entry. The shared schema also accepts the existing failure plan; ordinary-mode records and statements stay unchanged. -/
 
 theorem Below.withLibraryCalldata {Γ : RCtx} {α : Type}
     (known : Bool) (ty : STy) {a b : EM E Γ α} (h : Below a b) :
@@ -606,8 +564,6 @@ end
 section
 variable (G : Glob E)
 
-/-- **The induction hypothesis**: every interpreter function at horizon `n`
-is below itself at `n + 1`. -/
 structure BelowAt (n : Nat) : Prop where
   evalE : ∀ (F : Fr) {Γ : RCtx} {τ : STy} (e : RExpr E Γ τ), Below (evalE G F n e) (evalE G F (n + 1) e)
   evalPair : ∀ (F : Fr) {Γ : RCtx} {σ τ : STy} (a : RExpr E Γ σ) (b : RExpr E Γ τ),
@@ -742,7 +698,6 @@ theorem dispatch_step (ih : BelowAt G n) (F : Fr) (input : Solidity.Roadmap.Byte
     Below (dispatch G F (n + 1) input) (dispatch G F (n + 1 + 1) input) := by
   exact (belowAtKnown G (n + 1)).dispatch F input
 
-/-- **Every interpreter function is monotone in its horizon.** -/
 theorem belowAt (G : Glob E) : ∀ n, BelowAt G n
   | 0 => belowAt_zero G
   | n + 1 =>
@@ -756,7 +711,6 @@ theorem belowAt (G : Glob E) : ∀ n, BelowAt G n
 end
 
 
-/-! ### Transactions -/
 
 theorem Below.forIn {Γ : RCtx} {α β : Type} (l : List α) (b : β) {f f' : α → β → EM E Γ (ForInStep β)}
     (h : ∀ a b, Below (f a b) (f' a b)) : Below (forIn l b f) (forIn l b f') := by
@@ -842,7 +796,6 @@ theorem runTx_below (G : Glob E) (n : Nat) (q : Request) :
   · refine Below.attempt_bind ?_ (fun _ => Below.refl _) (fun _ => rfl)
     exact Below.bind (Below.refl _) fun _ => ih.dispatch _ _
 
-/-! ## Horizon independence -/
 
 theorem Below.trans {Γ : RCtx} {α : Type} {a b c : EM E Γ α} (h₁ : Below a b) (h₂ : Below b c) : Below a c := by
   intro x
@@ -853,7 +806,6 @@ theorem Below.trans {Γ : RCtx} {α : Type} {a b c : EM E Γ α} (h₁ : Below a
     · exact .inl (he ▸ ht)
     · exact .inr he'
 
-/-- A family monotone at each step is monotone. -/
 theorem Below.mono {Γ : RCtx} {α : Type} {f : Nat → EM E Γ α} (h : ∀ n, Below (f n) (f (n + 1)))
     {n m : Nat} (hnm : n ≤ m) : Below (f n) (f m) := by
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hnm
@@ -861,7 +813,6 @@ theorem Below.mono {Γ : RCtx} {α : Type} {f : Nat → EM E Γ α} (h : ∀ n, 
   | zero => exact Below.refl _
   | succ d ih => exact (ih (by omega)).trans (h _)
 
-/-- A run that does not time out is the run at every larger horizon. -/
 theorem Below.eq_of_done {Γ : RCtx} {α : Type} {m m' : EM E Γ α} (h : Below m m') (x)
     (hd : (m.run x).1 ≠ .error .timeout) : m'.run x = m.run x :=
   match h x with
@@ -878,8 +829,6 @@ theorem done_iff {α σ : Type} (r : Except Halt α × σ) : Done r = true ↔ r
     | revert _ => exact ⟨(fun _ h => nomatch h), (fun _ => rfl)⟩
     | stuck _ => exact ⟨(fun _ h => nomatch h), (fun _ => rfl)⟩
 
-/-- **Horizon independence** of a monotone family: a result that
-completes at horizon `k` is the result at every horizon `k' ≥ k`. -/
 theorem runAt_stable {α : Type} {m : Nat → EM E [] α} (hm : ∀ n, Below (m n) (m (n + 1))) (s : St E)
     {k k' : Nat} (hk : k ≤ k') (hd : Done (runAt m s k) = true) : runAt m s k' = runAt m s k := by
   have hb := Below.mono hm hk
@@ -892,14 +841,11 @@ theorem runAt_stable {α : Type} {m : Nat → EM E [] α} (hm : ∀ n, Below (m 
   simp only [runAt]
   rw [hb.eq_of_done _ hd']
 
-/-- **A transaction's result does not depend on its horizon** once it
-completes. -/
 theorem runTx_stable (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (hk : k ≤ k')
     (hd : Done (runAt (fun f => runTx G f q) s k) = true) :
     runAt (fun f => runTx G f q) s k' = runAt (fun f => runTx G f q) s k :=
   runAt_stable (fun n => runTx_below G n q) s hk hd
 
-/-- So does a deployment's. -/
 theorem deploy_stable (G : Glob E) (c : String) (addr sender : Address) (value : Word) (args : Bytes)
     (s : St E) {k k' : Nat} (hk : k ≤ k')
     (hd : Done (runAt (fun f => deploy G f c addr sender value args) s k) = true) :
@@ -907,17 +853,12 @@ theorem deploy_stable (G : Glob E) (c : String) (addr sender : Address) (value :
       runAt (fun f => deploy G f c addr sender value args) s k :=
   runAt_stable (fun n => deploy_below G n c addr sender value args) s hk hd
 
-/-- **The least completing horizon is not a choice**: what `firstDone`
-finds is the run at every horizon from there on, so a transaction's
-meaning in a session is its result at any completing horizon. -/
 theorem firstDone_runTx (G : Glob E) (q : Request) (s : St E) {n k k' : Nat}
     {r : Except Halt Outcome × St E} (h : firstDone (runAt (fun f => runTx G f q) s) n = some (k, r))
     (hk : k ≤ k') : runAt (fun f => runTx G f q) s k' = r := by
   obtain ⟨_, rfl, hd⟩ := firstDone_spec h
   exact runTx_stable G q s hk hd
 
-/-- A stuck transaction is stuck at every larger horizon: being stuck is
-not a lack of horizon. -/
 theorem runTx_stuck_stable (G : Glob E) (q : Request) (s : St E) {k k' : Nat} (hk : k ≤ k') {msg : String}
     (h : (runAt (fun f => runTx G f q) s k).1 = .error (.stuck msg)) :
     (runAt (fun f => runTx G f q) s k').1 = .error (.stuck msg) := by

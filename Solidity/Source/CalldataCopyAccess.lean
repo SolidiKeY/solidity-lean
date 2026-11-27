@@ -1,13 +1,9 @@
 import Solidity.Source.CalldataCopy
 
-/-! G18.05 extent and indexed-read transport through actual calldata copies.
-No new evaluator or compiler simulation is introduced. -/
 namespace Solidity.Source
 open EM
 variable {E : Env} {Γ : RCtx}
 
-/-- Successful ordered validation derives the complete length and every
-position's actual decoder equation; these are not extra copy premises. -/
 theorem decode_traversal_shape {α β : Type} (decode : α → R β)
     (inputs : List α) {values : List β} (success : inputs.mapM decode = .ok values) :
     values.length = inputs.length ∧
@@ -40,8 +36,6 @@ theorem decode_traversal_shape {α β : Type} (decode : α → R β)
         | zero => exact decoded
         | succ i => exact positions i (Nat.lt_of_succ_lt_succ hi) (Nat.lt_of_succ_lt_succ hv)
 
-/-- The copied dynamic array has the requested extent, derived from the
-actual decoder traversal rather than an assumed resource certificate. -/
 theorem cdToMem_array_length (F : Fr) (σ : STy) (offset length : Nat)
     {values : List (Val E.layout σ)}
     (validation : (List.range length).mapM (fun j =>
@@ -50,8 +44,6 @@ theorem cdToMem_array_length (F : Fr) (σ : STy) (offset length : Nat)
   have shape := (decode_traversal_shape _ _ validation).1
   exact shape.trans List.length_range
 
-/-- The actual Source object accessor sees the just-installed object at
-its real fresh address and retains the complete grown caller state. -/
 theorem heapObj_alloc_run (before : EMState E Γ) (object : Σ τ, Data E.layout τ) :
     let after : EMState E Γ :=
       (before.1,{before.2 with heap := (before.2.heap.alloc object).1})
@@ -67,8 +59,6 @@ theorem heapObj_alloc_run (before : EMState E Γ) (object : Σ τ, Data E.layout
   rw [installed]
   rfl
 
-/-- Read the exact positional value from the actual freshly allocated typed
-array, without a desired read/run premise. -/
 theorem readLoc_alloc_array_run (F : Fr) (σ : STy) (values : List (Val E.layout σ))
     (before : EMState E Γ) (index : Fin values.length) :
     let after : EMState E Γ := (before.1,{before.2 with heap :=
@@ -82,9 +72,6 @@ theorem readLoc_alloc_array_run (F : Fr) (σ : STy) (values : List (Val E.layout
   simp only [dif_pos index.isLt]
   rfl
 
-/-- General actual copy-then-index transport. Requested extent and the
-index's decoded value follow from validation. The read runs on the actual
-grown heap, with the full copied caller state as its final state. -/
 theorem cdToMem_array_read_run (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) {values : List (Val E.layout σ)}
     (validation : (List.range length).mapM (fun j =>
@@ -110,8 +97,6 @@ theorem cdToMem_array_read_run (F : Fr) (σ : STy) (offset length : Nat)
   simp only [cdToMem_array_run F σ offset length before plain,validation]
   exact readLoc_alloc_array_run F σ values before ⟨index.val,bound⟩
 
-/-- Reading outside a successfully copied array panics on the grown heap;
-it does not retroactively roll back the completed copy. -/
 theorem readLoc_alloc_array_out_run (F : Fr) (σ : STy) (values : List (Val E.layout σ))
     (before : EMState E Γ) (index : Nat) (outside : values.length ≤ index) :
     let after : EMState E Γ := (before.1,{before.2 with heap :=
@@ -125,8 +110,6 @@ theorem readLoc_alloc_array_out_run (F : Fr) (σ : STy) (values : List (Val E.la
   simp only [dif_neg (Nat.not_lt_of_ge outside)]
   rfl
 
-/-- A failed copy bypasses its actual read continuation and retains the
-original caller state, contrasting with a post-copy bounds failure. -/
 theorem cdToMem_array_read_failure (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) (index : Nat) (halt : Halt)
     (validation : (List.range length).mapM (fun j =>
@@ -137,8 +120,6 @@ theorem cdToMem_array_read_failure (F : Fr) (σ : STy) (offset length : Nat)
       (.error halt,before) := by
   rw [Hoare.run_bind,cdToMem_array_failure F σ offset length before halt validation plain]
 
-/-- The requested length, derived from actual validation, determines the
-post-copy bounds check. The copy remains installed on its original heap. -/
 theorem cdToMem_array_read_out_run (F : Fr) (σ : STy) (offset length : Nat)
     (before : EMState E Γ) {values : List (Val E.layout σ)}
     (validation : (List.range length).mapM (fun j =>

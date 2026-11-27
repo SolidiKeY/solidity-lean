@@ -3,7 +3,7 @@ import Solidity.Source.FailurePrimitives
 import Solidity.Source.LibrarySemantics
 
 /-!
-# Expression and statement semantics (S02, S03)
+# Expression and statement semantics
 
 The independent semantics of resolved Solidity (`RExpr`, `RLVal`, `RStmt`,
 `RItems`, `Solidity/Source/Resolved.lean`), never of raw syntax, over the
@@ -17,7 +17,7 @@ semantics of an execution is the family over all horizons
 completes, and an execution that completes at none diverges).  No inlining
 depth, loop bound or recursion bound restricts what completes.
 
-**Expressions (S02).**
+**Expressions.**
 
 - *Values*: constants are carried exactly and converted only by an explicit
   `conv`; integer and fixed-point arithmetic is checked (`Panic(0x11)`) or,
@@ -40,14 +40,14 @@ depth, loop bound or recursion bound restricts what completes.
   (`storeVal`), converting storage to memory copies (`loadMem`), memory to
   memory keeps the pointer.
 
-**Statements (S03.01).**  `execS` gives each statement an outcome
+**Statements.**  `execS` gives each statement an outcome
 (`Out`): normal completion in the statement's output context, or `break`,
 `continue`, `return` with the locals of its input context; blocks end
 their scope (`Locals.restore`), loops iterate until their condition fails,
 `break` or `return`.  `return e` writes the function's return slots and
 leaves the body, as solc compiles it.
 
-**Modifiers and calls (S03.02, S03.03).**  `runMods` runs a body under its
+**Modifiers and calls.**  `runMods` runs a body under its
 modifiers, outermost first; each `_` runs the rest (`Ph`), any number of
 times.  Under the legacy pipeline every `_` shares the function's
 parameter and return slots; via IR each `_` starts from the parameters at
@@ -59,10 +59,9 @@ calls to an instance of the system enter a new frame (`Fr`: `this`,
 sender, value, static flag, depth) with fresh memory and a journal mark,
 moving the value first; a revert rolls back to the mark and its data
 reaches the caller, which re-raises it.  Calls to accounts outside the
-system are G01 events: the call, then the environment's moves (answers,
+system are events: the call, then the environment's moves (answers,
 credits and callbacks into any instance at any depth, `envLoop`).  At
-depth 1024 a call fails with empty revert data (G01 follow-up
-"nested-frame failures").  Writes in a static frame revert.
+depth 1024 a call fails with empty revert data.  Writes in a static frame revert.
 -/
 
 namespace Solidity.Source
@@ -207,7 +206,7 @@ def decodeElemWord (D : Layout) (w : Nat) : (τ : STy) → R (Val D τ)
   | _ => stuck "dynamic ABI decoding is not modelled"
 
 /-- **Decoding a static value** from its word: a user-defined value type
-as its underlying type (lane V04b), anything else by `decodeElemWord`. -/
+as its underlying type, anything else by `decodeElemWord`. -/
 def decodeWord (D : Layout) (w : Nat) (τ : STy) : R (Val D τ) :=
   match τ with
   | .udvt d => do pure (.udvt (← decodeElemWord D w (D.underlying d)))
@@ -234,7 +233,7 @@ def tailBytes {Γ : RCtx} (data : Bytes) (i : Nat) : EM E Γ Bytes := do
     if 2 ^ 64 ≤ len then lift (panic .alloc)
     else if off + 32 + len ≤ data.length then pure ((data.drop (off + 32)).take len) else halt (.revert [])
 
-/-- **A dynamic `calldata` argument at entry** (lane FU2-B), whose head is
+/-- **A dynamic `calldata` argument at entry**, whose head is
 the `i`-th word, elements of `stride` bytes: solc's
 `abi_decode_t_*_calldata_ptr` checks, all reverting with no data: the
 length word within the data (`offset + 0x1f < end`), a length below
@@ -346,7 +345,7 @@ def unRet {D : Layout} : (rs : List STy) → RVal D (STy.ret rs) → R (RVals D 
   | _ :: _ :: _, .tuple vs => pure vs
   | _ :: _ :: _, _ => stuck "return tuple"
 
-/-- **`abi.decode`** (FU2-B): data shorter than one head word per type
+/-- **`abi.decode`**: data shorter than one head word per type
 reverts with no data (solc's `abi_decode_tuple` head check), then the
 values are decoded as a call's arguments are (`decodeArgs`): an invalid
 word, an offset or length word past the data, or a tail past the data
@@ -364,7 +363,7 @@ end, as `calldataload`). -/
 def cdWordAt (F : Fr) (off : Nat) : Nat := beValue (fitBytes 32 (F.cd.drop off))
 
 /-- The `m` elements of a copied static `calldata` array: element `j` is
-`go (off + stride * j)`, each copied before the next (G18.05). -/
+`go (off + stride * j)`, each copied before the next. -/
 def cdElems {Γ : RCtx} {σ : STy} (go : Nat → EM E Γ (Val E.layout σ)) (stride : Nat) :
     Nat → (m : Nat) → EM E Γ (Fin m → Data E.layout σ)
   | _, 0 => pure Fin.elim0
@@ -373,7 +372,7 @@ def cdElems {Γ : RCtx} {σ : STy} (go : Nat → EM E Γ (Val E.layout σ)) (str
     let f ← cdElems go stride (off + stride) m
     pure (finCons (.val x) f)
 
-/-- **A statically encoded `calldata` element copied into memory** (G18.05):
+/-- **A statically encoded `calldata` element copied into memory**:
 a one-word value decoded and validated from its word; a static array of
 statically encoded elements copied element by element at its head stride
 into a new memory array, inner arrays allocated first as `zeroData` does.
@@ -386,13 +385,13 @@ def cdStaticToMem {Γ : RCtx} (F : Fr) : (σ : STy) → Nat → EM E Γ (Val E.l
     else halt (.stuck "calldata conversion")
   | σ, off => lift (decodeWord E.layout (cdWordAt F off) σ)
 
-/-- **A copy of `calldata` into memory** (lane FU2-B): `bytes`/`string` as
+/-- **A copy of `calldata` into memory**: `bytes`/`string` as
 their bytes; an array of one-word values decoded element by element, each
 validated (an invalid element reverts with no data, as solc's
 `abi_decode_available_length` copy); a `calldata` target keeps the
 reference. A dynamic array of static arrays, and a static array, copy
 their statically encoded elements at the element's head stride
-(`cdStaticToMem`, G18.05). -/
+(`cdStaticToMem`). -/
 def cdToMem {Γ : RCtx} (F : Fr) (τ : STy) (off len : Nat) : EM E Γ (RVal E.layout τ) :=
   if h : τ.loc? = some .calldata then return .val (.cdRef h off len) else
   match τ with
@@ -415,7 +414,7 @@ def cdToMem {Γ : RCtx} (F : Fr) (τ : STy) (off len : Nat) : EM E Γ (RVal E.la
       (fun _ h => by cases h; rfl) xs))
   | _ => halt (.stuck "calldata conversion")
 
-/-- **A slice `a[s:e]` of a `calldata` array or `bytes`** (lane FU2-B):
+/-- **A slice `a[s:e]` of a `calldata` array or `bytes`**:
 solc's `calldata_array_index_range_access`: a start past the end, or an end
 past the length, reverts with no data; the slice is the reference moved by
 the start, of length `e - s` (`toEnd`: `a[s:]`). -/
@@ -466,12 +465,12 @@ def Vals.nthRep {D : Layout} {σ : STy} : {m : Nat} → Vals D (List.replicate m
   | _ + 1, .cons v _, ⟨0, _⟩ => v
   | _ + 1, .cons _ vs, ⟨i + 1, h⟩ => Vals.nthRep vs ⟨i, Nat.lt_of_succ_lt_succ h⟩
 
-/-- **An inline array's contents** (lane FU2-B): its converted elements. -/
+/-- **An inline array's contents**: its converted elements. -/
 def inlineData {D : Layout} {σ : STy} {m : Nat} (vs : Vals D (List.replicate m σ)) :
     Data D (.array .memory σ (some m)) :=
   .array m (fun _ h => (Option.some.inj h).symm) (fun i => .val (vs.nthRep i))
 
-/-- **A new memory object of `len` zeroed elements** (`new`, lane FU2-B). -/
+/-- **A new memory object of `len` zeroed elements** (`new`). -/
 def newData {D : Layout} (τ : STy) (len : Nat) : R (Data D τ) :=
   match τ with
   | .bytes _ => pure (.bytes (List.replicate len 0))
@@ -487,7 +486,7 @@ def RVal.untuple {D : Layout} {σs : List STy} : RVal D (.tuple σs) → R (RVal
   | .tuple vs => pure vs
   | _ => stuck "not a tuple"
 
-/-- **Pushing a tuple declaration's components** (lane FU2-B): each declared
+/-- **Pushing a tuple declaration's components**: each declared
 slot's component converted to its type (`convRV`), holes discarded. -/
 def pushVals {Γ' : RCtx} (F : Fr) (n : Nat) : (slots : List (Option STy)) → {σs : List STy} →
     RVals E.layout σs → {Γ : RCtx} → Locals E.layout Γ → EM E Γ' (Locals E.layout (pushTys slots Γ))
@@ -538,7 +537,7 @@ inductive Loc (D : Layout) (Γ : RCtx) : STy → Type where
   /-- Byte `i` of the memory `bytes` at `a`. -/
   | memByte (a i : Nat) : Loc D Γ (.fixedBytes 1 (by decide))
   /-- The one-word value at byte offset `off` of the frame's call data (an
-  element of a `calldata` array, lane FU2-B); read only. -/
+  element of a `calldata` array); read only. -/
   | cd {τ : STy} (off : Nat) : Loc D Γ τ
   /-- An indirect dynamic element of a calldata reference array, retaining
   the original head coordinate through any reference-element slice. -/
@@ -775,7 +774,7 @@ def copyInto {Γ : RCtx} (F : Fr) (n : Nat) (τ : STy) (p : SPath) {σ : STy} (v
     EM E Γ Unit :=
   match v with
   | .strLit bs => storeData F n τ p (Data.bytes (D := E.layout) (l := .memory) bs)
-  -- `calldata` (lane FU2-B): through a memory copy (`cdToMem`, which
+  -- `calldata`: through a memory copy (`cdToMem`, which
   -- validates each element), as solc copies calldata into storage.
   | .val (.cdRef _ off len) => do
     storeVal F n τ p (← getV (← cdToMem F (σ.withLoc .memory) off len))
@@ -1449,7 +1448,7 @@ def execS (G : Glob E) (F : Fr) (n : Nat) (nps : Nat) (ph : Option (Ph E)) {R : 
         let o ← execItems (plan := plan) (calldataKnown := calldataKnown) G F n nps ph cat (.cons text l1)
         lift (← lift (o.up Γ)).close
   | .tryCall (rs := rs) target d _ args ok cbind cat => do
-    -- `try` (lane FU2-B): the target and arguments are evaluated, and a
+    -- `try`: the target and arguments are evaluated, and a
     -- call to an address without code reverts, outside the `try`; the
     -- call's revert runs the `catch` clause; returns that do not decode
     -- revert outside it, as solc's.
@@ -1618,7 +1617,7 @@ termination_by structural n
 
 /-- **A call to an address** with value and input data, as its caller
 sees it: an instance of the system runs in a new frame; another account is
-the environment's (G01 events). At depth 1024 the call fails; with value
+the environment's (events). At depth 1024 the call fails; with value
 from a static frame the calling frame halts (EIP-214), so `send` cannot
 observe `false` there. -/
 def callAddr (G : Glob E) (F : Fr) (n : Nat) (a : Address) (v : Word) (input : Bytes) (static : Bool) (plan : FailureExecution.RuntimePlan := none) :
@@ -1748,7 +1747,7 @@ def dispatch (G : Glob E) (F : Fr) (n : Nat) (input : Bytes) (plan : FailureExec
             pure []
           else if h' : b.locals = [.bytes .memory, .bytes .calldata] then
             -- `fallback(bytes calldata input) returns (bytes memory output)`
-            -- (lane FU2-B): `input` is all of the call data, `output` is
+            -- `input` is all of the call data, `output` is
             -- returned as it is, not ABI-encoded.
             let out ← zeroVals n [.bytes .memory]
             let cd : Vals E.layout [.bytes .calldata] := .cons (.cdRef rfl 0 input.length) .nil

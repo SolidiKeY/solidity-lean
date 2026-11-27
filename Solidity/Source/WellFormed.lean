@@ -2,14 +2,14 @@ import Solidity.Source.Typing
 import Solidity.Roadmap.Contracts
 
 /-!
-# Settings, resolutions and well-formedness (S01)
+# Settings, resolutions and well-formedness
 
-The resolved form of a source unit and when it is well formed, the S01
-part of G01's `SourceSpec` (`Resolves`, `WellFormed`, the settings fields):
+The resolved form of a source unit and when it is well formed, the typing
+part of `SourceSpec` (`Resolves`, `WellFormed`, the settings fields):
 
-- `Settings`: solc's two pipelines (decision G00 Q4, second round): legacy
+- `Settings`: solc's two pipelines: legacy
   with the pragma's ABI coder, via-IR with coder v2 (`Settings.coder`), and
-  the library link map, which must be empty (G05 Q1);
+  the library link map, which must be empty;
 - `Syn.pragmaCoder`: the coder a unit's pragmas select (`pragma abicoder
   v1/v2`, `pragma experimental ABIEncoderV2`; v2 by default);
 - `Resolution`: a unit with its environment and the settings it was

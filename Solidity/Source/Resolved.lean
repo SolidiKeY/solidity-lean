@@ -1,11 +1,10 @@
 import Solidity.Source.Typing
 
 /-!
-# The resolved layer (S01)
+# The resolved layer
 
-S01's output, intrinsically typed: expressions and statements over a
-context of local *types* (`RCtx := List STy`, names kept beside it, as
-Gate G0 condition 3 asks), with
+The typing judgment's output, intrinsically typed: expressions and statements over a
+context of local *types* (`RCtx := List STy`, names kept beside it), with
 
 - locals by position (`Idx Γ τ`); state variables, functions, events and
   errors by their declaration (`Decl`, so the overload is the one chosen),
@@ -23,9 +22,8 @@ Gate G0 condition 3 asks), with
 
 `Typed.toR`, `StmtD.toR` and `ItemsD.toR` read a typing derivation
 (`Solidity/Source/Typing.lean`) as such a term, at the derivation's type.
-Nothing of S00's string names remains in a resolved term except
-declarations, which are identities.  S02 defines its semantics over these
-terms.
+Nothing of the source syntax's string names remains in a resolved term except
+declarations, which are identities. The semantics evaluates these terms.
 -/
 
 namespace Solidity.Source
@@ -447,11 +445,11 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
       (args : RConvArgs E Γ ps) : RStmt E R M k Γ Γ
   /-- The canonical rethrow of a `bytes memory` local. -/
   | rethrow {k : SCtx} {Γ : RCtx} (i : Idx Γ (.bytes .memory)) : RStmt E R M k Γ Γ
-  /-- A tuple declaration (lane FU2-B): the tuple's components converted to
+  /-- A tuple declaration: the tuple's components converted to
   the declared slots' types and pushed, holes discarded. -/
   | declTuple {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs))
       (h : slotsFit E.isBase E.mapFree slots σs = true) : RStmt E R M k Γ (pushTys slots Γ)
-  /-- `try` (lane FU2-B): an external call without value; on success its
+  /-- `try`: an external call without value; on success its
   returns are pushed and `ok` runs, on a revert `cat` runs (the revert data
   pushed as `bytes memory` when `cbind`). -/
   | tryCall {k : SCtx} {Γ Γ₁ Γ₂ : RCtx} {dn : DeclName} {ps rs : List STy} (target : RExpr E Γ (.contract dn))
@@ -487,7 +485,7 @@ def OptExpr.toR {Γ : Ctx} {c : Syn (.opt .expr)} : OptExpr Γ c → ROptExpr Γ
   | .none => .none
   | .some d => .some d.toR
 
-/-- The success block's local types of a `try` (lane FU2-B). -/
+/-- The success block's local types of a `try`. -/
 theorem tryOk_tys (ns : List (Option String)) (rs : List STy) (L : List (String × STy)) :
     tysOf ((tryLocals ns rs).reverse ++ L) = rs.reverseAux (tysOf L) := by
   simp only [tysOf, List.map_append, List.map_reverse, tryLocals_tys, List.reverseAux_eq]
