@@ -2774,12 +2774,14 @@ import Solidity.Frontend.SolcJson
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Frontend.SolcJson.Body
 import Solidity.Frontend.SolcJson.CallMetadata
+import Solidity.Frontend.SolcJson.CallMetadataControls
 import Solidity.Frontend.SolcJson.CallMetadataData
 import Solidity.Frontend.SolcJson.CallMetadataPath
 import Solidity.Frontend.SolcJson.CallMetadataSound
 import Solidity.Frontend.SolcJson.Contract
 import Solidity.Frontend.SolcJson.Getters
 import Solidity.Frontend.SolcJson.IrImport
+import Solidity.Frontend.SolcJson.IrImportControls
 import Solidity.Frontend.SolcJson.TryPanicCallMetadata
 import Solidity.Frontend.SolcJson.TryPanicSourceCaller
 import Solidity.Frontend.SolcJson.TryPanicSourceData
@@ -2998,6 +3000,7 @@ import Solidity.Goals.ElabTotal
 import Solidity.Goals.Endpoint
 import Solidity.Goals.FastModeAgrees
 import Solidity.Goals.Finish
+import Solidity.Goals.FrontendValidation
 import Solidity.Goals.GenericYulViewsPreserve
 import Solidity.Goals.GoalPinSpecBase
 import Solidity.Goals.GoalPinsSpec
@@ -3034,6 +3037,8 @@ import Solidity.Hash.CollisionBridgeCompiler
 import Solidity.Hash.CompilerCorrect
 import Solidity.Hash.CompilerCorrect.Prefix
 import Solidity.Hashes
+import Solidity.Interfaces.FrontendExecution
+import Solidity.Interfaces.FrontendValidation
 import Solidity.Keccak
 import Solidity.KeySort
 import Solidity.Language.FeatureInfo
