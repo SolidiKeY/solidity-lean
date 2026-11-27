@@ -55,6 +55,9 @@ class SlowExamples(unittest.TestCase):
             subprocess.run(["git", "init", "-q", str(root)], check=True)
             script = root / "register.sh"
             script.write_bytes((ROOT / "scripts/coord-tools/register.sh").read_bytes())
+            classifier = root / "scripts/coord-tools/controls-classify.py"
+            classifier.parent.mkdir(parents=True, exist_ok=True)
+            classifier.write_bytes((ROOT / "scripts/coord-tools/controls-classify.py").read_bytes())
             subprocess.run(["bash", str(script)], cwd=root, check=True)
             self.assertFalse((root / "SoliditySlowExamples.lean").exists())
             for name in imports(ROOT / "SoliditySlowExamples.lean"):
@@ -68,6 +71,35 @@ class SlowExamples(unittest.TestCase):
             self.assertIn("Solidity.Examples.DecisionGaps.Extra", imports(root / "SolidityExamples.lean"))
             self.assertNotIn("Solidity.Examples.DecisionGaps.Extra", imports(root / "SoliditySlowExamples.lean"))
 
+    def test_controls_partition_tracks_transitive_library_imports(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            tools = root / "scripts/coord-tools"
+            tools.mkdir(parents=True)
+            for name in ("register.sh", "controls-classify.py"):
+                (tools / name).write_bytes((ROOT / "scripts/coord-tools" / name).read_bytes())
+            sources = {
+                "Main": "import Solidity.Fixture.ReachableControls\n",
+                "ReachableControls": "import Solidity.Fixture.TransitiveControls\n",
+                "TransitiveControls": "-- reachable through another Controls module\n",
+                "OrphanControls": "-- unreachable\n",
+            }
+            for name, text in sources.items():
+                path = root / f"Solidity/Fixture/{name}.lean"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(text)
+            subprocess.run(["bash", str(tools / "register.sh")], cwd=root, check=True)
+            self.assertEqual(["Solidity.Fixture.OrphanControls"], imports(root / "SolidityControls.lean"))
+            self.assertEqual({"Solidity.Fixture.Main", "Solidity.Fixture.ReachableControls",
+                              "Solidity.Fixture.TransitiveControls"}, set(imports(root / "Solidity.lean")))
+            check = ["python3", str(tools / "controls-classify.py"), "--check"]
+            subprocess.run(check, cwd=root, check=True)
+            (root / "SolidityControls.lean").unlink()
+            missing = subprocess.run(check, cwd=root, text=True, capture_output=True)
+            self.assertEqual(1, missing.returncode)
+            self.assertIn("neither root", missing.stdout)
+
     def test_partial_sparse_examples_are_supported(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
@@ -75,6 +107,9 @@ class SlowExamples(unittest.TestCase):
             subprocess.run(["git", "config", "core.sparseCheckout", "true"], cwd=root, check=True)
             script = root / "register.sh"
             script.write_bytes((ROOT / "scripts/coord-tools/register.sh").read_bytes())
+            classifier = root / "scripts/coord-tools/controls-classify.py"
+            classifier.parent.mkdir(parents=True, exist_ok=True)
+            classifier.write_bytes((ROOT / "scripts/coord-tools/controls-classify.py").read_bytes())
             source = root / "Solidity/Examples/DecisionGaps.lean"
             source.parent.mkdir(parents=True)
             source.write_text("-- fixture\n")
@@ -88,6 +123,7 @@ class SlowExamples(unittest.TestCase):
             gate = root / "scripts/coord-tools/gate.sh"
             gate.parent.mkdir(parents=True)
             gate.write_bytes((ROOT / "scripts/coord-tools/gate.sh").read_bytes())
+            (gate.parent / "controls-classify.py").write_bytes((ROOT / "scripts/coord-tools/controls-classify.py").read_bytes())
             for name in ("scripts/check-trust.sh", "scripts/check-doc-paths.sh",
                          "scripts/check-private-paths.sh", "scripts/check-evidence-files.sh",
                          "scripts/coord-tools/register.sh", "scripts/coord-tools/fragments.sh",
@@ -102,6 +138,9 @@ class SlowExamples(unittest.TestCase):
             slow = root / "Solidity/Examples/Tactics/OpenLoops.lean"
             core.parent.mkdir(parents=True)
             slow.parent.mkdir(parents=True)
+            control = core.parent / "DeferredControls.lean"
+            control.write_text("import Solidity.Syntax.Core\n")
+            (root / "SolidityControls.lean").write_text("import Solidity.Syntax.DeferredControls\n")
             core.write_text("-- base\n")
             slow.write_text("import Solidity.Syntax.Core\n")
             (root / "SoliditySlowExamples.lean").write_text("import Solidity.Examples.Tactics.OpenLoops\n")
@@ -126,6 +165,12 @@ class SlowExamples(unittest.TestCase):
             self.assertIn("Solidity.Syntax.Core", commands)
             self.assertNotIn("Solidity.Examples.Tactics.OpenLoops", commands)
             self.assertNotIn("SoliditySlowExamples", commands)
+            self.assertNotIn("Solidity.Syntax.DeferredControls", commands)
+            calls.write_text("")
+            result = subprocess.run(["bash", str(gate), "touched"], cwd=root, env=env,
+                                    text=True, capture_output=True)
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertIn("Solidity.Syntax.DeferredControls", calls.read_text())
             result = subprocess.run(["bash", str(gate), "per-file", "Solidity/Syntax/Core.lean"],
                                     cwd=root, env=env, text=True, capture_output=True)
             self.assertEqual(0, result.returncode, result.stdout + result.stderr)

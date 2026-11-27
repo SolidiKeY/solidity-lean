@@ -30,6 +30,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Examples/Backend/BytesFullMachine/FixedLayout.lean` | Default-local acceptance and intrinsic write at arbitrary frame base; refutes a universal word-bounded fixed `32*b` layout without asserting byte agreement. |
+| `Backend/Passes/Bytes/FullMachine/Intrinsic.lean` | Existing intrinsic compiler outcome projections: fault iff source divergence and zero pending skip on success; no byte-entry or byte-execution claim. |
+| `Examples/Backend/BytesFullMachine/Intrinsic.lean` | Negative intrinsic outcome controls: source divergence cannot have intrinsic success, and success cannot retain a positive pending skip. |
 | `Goals/ElabTotal.lean` | The elaborator-kernel totalization goal `elabKernelTotal` (et3-elab-knot-total), open: the knot of `Syntax/Elab/Stmt.lean` satisfies its defining equations (`ElabKernelFix`, `ElabKernelNames`), admits induction over its successful runs (`ElabKernelInduction`), and the helpers it reaches keep theirs (`ElabKernelHelpers`). |
 | `Examples/Goals/ElabTotal.lean` | Pinned `#roadmap_goal` open check for `elabKernelTotal`, with failing-knot controls. |
 | `Goals/{Headline,Endpoint,Loops,Hash,Panic,Taclets,Total}.lean` | One finish-line component goal per module, each owned by the lane that states or proves it. |
