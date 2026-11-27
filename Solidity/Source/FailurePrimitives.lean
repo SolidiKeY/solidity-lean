@@ -1,7 +1,6 @@
 import Solidity.Source.Machine
 
-/-! Shared actual-EM failure primitives below Eval. The check/pending/frame
-bodies are extracted unchanged from FailureMachine. The preflight combinator
+/-! Shared actual-EM failure primitives below Eval. The preflight combinator
 preserves disabled expressions exactly; this module installs no dispatch hook. -/
 namespace Solidity.Source.FailureExecution
 open EM

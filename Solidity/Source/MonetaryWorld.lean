@@ -1,8 +1,6 @@
 import Solidity.Source.World
 import Solidity.Source.MonetaryLaws
 
-/-! Explicit monetary range on both the current world and saved journal
-accounts. This is not a theorem of whole Source/EVM reachability. -/
 namespace Solidity.Source
 open Solidity.Roadmap (Address Word)
 variable {D : Layout} {L T : Address → SPath → STy}
@@ -74,8 +72,6 @@ theorem ExecState.endTx_balancesFit (state : ExecState D L T) (fit : state.Balan
   intro entry impossible
   cases impossible
 
-/-- Successful transfers preserve current and saved-account range. The sender
-range is an explicit input; recipient range follows from the actual guard. -/
 theorem ExecState.transferNat_balancesFit (state result : ExecState D L T)
     (src dst : Address) (amount : Monetary.Balance) (fit : state.BalancesFit)
     (execution : state.transferNat src dst amount = some result) : result.BalancesFit := by
@@ -93,18 +89,14 @@ theorem ExecState.transferNat_balancesFit (state result : ExecState D L T)
           (Nat.lt_of_le_of_lt (Nat.sub_le _ _) (fit.1 src))) guard.2
     next => cases execution
 
-/-- Existing word-valued calls use the same actual natural transfer. -/
 theorem ExecState.transfer_balancesFit (state result : ExecState D L T)
     (src dst : Address) (value : Word) (fit : state.BalancesFit)
     (execution : state.transfer src dst value = some result) : result.BalancesFit :=
   state.transferNat_balancesFit result src dst value.val fit execution
 
-/-- Exact account money can represent the first value outside the word range. -/
 theorem Account.wide_balance (layout : SPath → STy) :
     ((Account.empty (D := D) layout).withBalance Monetary.wide).balance = 2 ^ 256 := rfl
 
-/-- A present in-range world can have an out-of-range saved account. This
-control prevents treating the current-world predicate as a rollback invariant. -/
 def savedWide (address : Address) : ExecState D L T :=
   ⟨⟨fun a => Account.empty (L a)⟩, Transient.empty,
     [.account address ((Account.empty (L address)).withBalance Monetary.wide)]⟩

@@ -2,15 +2,14 @@ import Solidity.Source.Decls
 import Solidity.Source.Upstream
 
 /-!
-# S00 controls: concrete syntax trees
+# Source controls: concrete syntax trees
 
 A counter contract inside the profile; programs using each syntax-level
 exclusion, alone, nested in a modifier or an initializer, and together; the
 in-profile neighbours of two exclusions (a literal `layout at` base, the
 canonical rethrow); their rejections and declarations computed by the kernel;
 and the intrinsic contexts as theorems (`break` outside a loop and nested
-`unchecked` have no tree).  The trees are written by hand from their Solidity text (shown
-in each docstring); parsing text into them is G08–G11's.
+`unchecked` have no tree).  Each tree's Solidity text is shown in its docstring.
 -/
 
 namespace Solidity.Source.Examples

@@ -3,7 +3,7 @@ import Solidity.Source.ValueProgress
 import Solidity.Source.Hoare
 
 /-!
-# Progress of the interpreter on value expressions (lane V04b)
+# Progress of the interpreter on value expressions
 
 `NS m`: the computation `m` never halts `stuck`, from any state. For the
 **value fragment** of resolved expressions (`RExpr.ValFrag`: constants,

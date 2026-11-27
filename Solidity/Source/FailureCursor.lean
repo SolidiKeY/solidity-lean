@@ -1,9 +1,9 @@
 import Solidity.Source.FailureResources
 
 /-!
-# Typed failure-execution cursor (H16 interface checkpoint)
+# Typed failure-execution cursor
 
-The semantic resource is the existing `FailureResources.Bound`. Request and
+The semantic resource is `FailureResources.Bound`. Request and
 frame ordinals are distinct Fin-indexed namespaces, bounded by counts of
 entries already issued/started. Frame budgets count the observable subtrace
 while active, including nested events; request budgets count body events,
@@ -11,7 +11,7 @@ not the terminal receipt. Pending request failure has priority over frames;
 otherwise the oldest active failing frame owns the unwind.
 
 These are executable cursor operations only. Machine/Eval/Session hooks are
-not installed by this interface module, and no failure-aware language or P8a
+not installed by this interface module, and no failure-aware language or
 Producer inhabitant is claimed here. Logical rollback must retain the cursor;
 leaving a frame pops its live budget rather than restoring a stale snapshot.
 -/
@@ -20,7 +20,7 @@ open Solidity.Roadmap.Evm
 
 abbrev Resource := FailureResources.Bound
 
-/-- Immutable evaluator input: existing calls default to None; a failure-aware
+/-- Immutable evaluator input: calls default to None; a failure-aware
 session supplies Some resource.points throughout its actual recursive calls.
 This is a configuration type, not an interpreter or a SourceSpec instance. -/
 abbrev RuntimePlan := Option FailurePoints

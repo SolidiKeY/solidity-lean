@@ -1,11 +1,7 @@
 import Solidity.Source.Preservation.LocalFrames
 import Solidity.Source.Decode
 
-/-! Hoare bridges for actual modifier-free body and internal-call frames.
-The caller supplies the recursive body-preservation step; this module discharges
-frame packing, defaults, heap growth, scope restoration and returned references.
-It does not assume that the whole interpreter preserves memory.
--/
+
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}

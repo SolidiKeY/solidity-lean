@@ -3,7 +3,7 @@ import Solidity.Source.Examples
 import Solidity.Source.Ledger
 
 /-!
-# Controls of the source semantics (S02, S03, S04.04, S05)
+# Controls of the source semantics
 
 Kernel-checked runs of resolved programs (`decide` evaluates the
 interpreter of `Solidity/Source/Eval.lean`), each with the wrong result it
@@ -21,7 +21,7 @@ Keccak-256 in the kernel.
 | `revert_rolls_back` | a transaction writing storage and transient storage, then reverting: both unchanged, the revert data the caller's |
 | `commit_keeps_storage`, `transient_cleared` | without the revert the storage write stays and transient storage is cleared at the end of the transaction |
 | `reentrant_callback` | a call out whose callee calls back into the contract before answering: the callback's write is seen, and the events are the call, the callback, its outcome, the answer and the transaction |
-| `session_consistent` | the session family of a deployment is consistent (G01) |
+| `session_consistent` | the session family of a deployment is consistent |
 -/
 
 namespace Solidity.Source.SemanticsExamples
@@ -50,7 +50,7 @@ def uint : STy := .int IntTy.u256
 /-- The state before any instance exists. -/
 def s0 {E : Env} : St E := St.init E
 
-/-! ## S02: expressions -/
+/-! ## Expressions -/
 
 def E0 : Env := ⟨[]⟩
 
@@ -128,7 +128,7 @@ theorem hex_literal_bytes :
       | .ok (.val (.fixedBytes bs _)) => some bs
       | _ => none) = some [0x12, 0x34] := by decide
 
-/-! ## S03: a modifier with two placeholders -/
+/-! ## A modifier with two placeholders -/
 
 /-- `modifier repeat(bool twice) { if (twice) _; _; }` -/
 def repeatDecl : Decl :=
@@ -168,7 +168,7 @@ theorem modifier_twice_legacy : intOf (callF .legacy true) = some 2 := by decide
 theorem modifier_twice_viaIR : intOf (callF .viaIR true) = some 1 := by decide
 theorem modifier_once : intOf (callF .legacy false) = some 1 ∧ intOf (callF .viaIR false) = some 1 := by decide
 
-/-! ## S04.04 and S05: transactions, rollback, transient storage, callbacks -/
+/-! ## Transactions, rollback, transient storage, callbacks -/
 
 /-- ```
 contract C {
@@ -378,7 +378,7 @@ theorem static_value_call_halts :
       some (.revert []) := by
   decide +kernel
 
-/-! ## S03.02: constructor order -/
+/-! ## Constructor order -/
 
 /-- ```
 contract A { uint256 a = 1; constructor() { a = a + 1; } }
@@ -463,7 +463,7 @@ the kernel does not unfold `Evm.beBytes`, so the control runs `sessionFrom`). -/
 theorem sessionAt_eq (env : SessionEnv) (n : Nat) :
     sessionAt PS env n = sessionFrom PS env (toyFixed.createAddress env.deployer env.deployNonce) n := rfl
 
-/-- The session family of every program is consistent (G01). -/
+/-- The session family of every program is consistent. -/
 theorem session_consistent {E : Env} (P : SrcProg E) (env : SessionEnv) :
     Solidity.Roadmap.Prefixes.Consistent (sessionAt P env) := sessionAt_consistent P env
 

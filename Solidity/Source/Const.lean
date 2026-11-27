@@ -1,13 +1,13 @@
 import Solidity.Source.Syntax
 
 /-!
-# Compile-time constants (S01)
+# Compile-time constants
 
 solc evaluates literal expressions exactly, as rational numbers
 (`RationalNumberType`), before any conversion; a constant meets a type only
 when it is converted implicitly or explicitly, and an out-of-range constant
 is a compile error, never a wrapped value.  This module defines that
-evaluation over S00's syntax (`Syn .expr`):
+evaluation over the source syntax (`Syn .expr`):
 
 - `Q`: exact rationals (numerator, positive denominator), with `Q.Eqv` the
   equality of the denoted numbers;
@@ -17,14 +17,11 @@ evaluation over S00's syntax (`Syn .expr`):
   exponent or shift beyond solc's bounds, a bitwise operation or shift on a
   non-integer);
 - `Q.FitsInt` and `Q.toFixed?`: the implicit conversions of a constant
-  (`Solidity/Source/Types.lean` uses them); `NumLit.fitsBytes` is no longer
-  read by any typing rule (a hexadecimal literal's bytes length is
-  `Syn.hexLen?`).
+  (`Solidity/Source/Types.lean` uses them).
 
 Bitwise operations on negative integers are two's complement of unbounded
-width, as solc's `RationalNumberType` computes them (`Int.bitAnd` …).  The
-fixed-point readings follow the second-round decisions
-(`docs/solidity-scope.md`): a constant converts implicitly to `fixedMxN` only
+width, as solc's `RationalNumberType` computes them (`Int.bitAnd` …).  For fixed-point
+types, a constant converts implicitly to `fixedMxN` only
 exactly and in range; explicitly it is truncated toward zero at `N` digits,
 and out of range it is a compile error.
 -/
@@ -146,7 +143,7 @@ def NumLit.value : NumLit → Q
   | .hex ds _ => Q.ofInt (ds.foldl (fun acc d => acc * 16 + d.val) 0)
 
 /-- The factor of a unit: `wei`/`seconds` 1, `gwei` 10⁹, `ether` 10¹⁸, and
-the time units in seconds (`years`, rejected by S00, is 365 days). -/
+the time units in seconds (`years`, rejected by the source profile, is 365 days). -/
 def Denom.factor : Denom → Nat
   | .wei => 1
   | .gwei => 10 ^ 9
@@ -240,8 +237,7 @@ def IntTy.hi (t : IntTy) : Int :=
 
 /-- A fixed-point type `fixedMxN`/`ufixedMxN` inside solc's bounds; its
 fields are those of the fixed-point reference semantics' `FxTy`
-(`docs/feature-work/fixed-point-semantics.md`, on its own branch), to be
-identified with it when that module is integrated. -/
+(`docs/feature-work/fixed-point-semantics.md`). -/
 structure FixTy where
   signed : Bool
   bits : Nat
