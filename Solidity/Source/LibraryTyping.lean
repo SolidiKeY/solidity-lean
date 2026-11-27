@@ -1,8 +1,7 @@
 import Solidity.Source.ExpressionTyping
 
 /-! Generic library-call resolution. Guards qualified-name shadowing and
-using-target mismatches before typed delegated-call admission. Existing v1
-statement typing is unchanged; these helpers alone admit no new statement. -/
+using-target mismatches before typed delegated-call admission. -/
 namespace Solidity.Source
 
 /-- A library named as a qualifier, respecting local shadowing. -/

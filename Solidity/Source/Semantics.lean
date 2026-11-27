@@ -1,12 +1,12 @@
 import Solidity.Source.Eval
 
 /-!
-# Constructors, transactions and sessions (S03.02, S03.04, S04.04, S05)
+# Constructors, transactions and sessions
 
-The source semantics composed into G01's interface
+The source semantics composed into the language interface
 (`Solidity/Roadmap/Contracts.lean`):
 
-- **Constructors** (S03.02).  `construct` runs a contract's state variable
+- **Constructors**.  `construct` runs a contract's state variable
   initializers and constructors along its C3 linearization in the pinned
   order of each pipeline.  Legacy: every initializer, most base first; the
   base-constructor arguments, derived to base (each in the parameters of
@@ -15,26 +15,26 @@ The source semantics composed into G01's interface
   derived, its initializers and its body (solc's `ir-breaking-changes`,
   "order of state variable initialization"; recorded in
   `docs/solc-alignment.md`).
-- **Deployment and transactions** (S04.04).  `deploy` creates the instance
+- **Deployment and transactions**.  `deploy` creates the instance
   at the fixed creation address with nonce 1, its balance the deployment
   value and its code the contract's position, then constructs it; a revert
   undoes the creation.  `runTx` credits the request's value, dispatches
   the call data in a frame of depth 0, rolls back on a revert, ends the
   transaction (transient storage cleared, journal closed: `ExecState.endTx`)
-  and records G01's `Event.tx`.  Events of the environment's moves inside
+  and records `Event.tx`.  Events of the environment's moves inside
   a transaction (calls out, answers, callbacks, credits) are recorded as
   they happen (`Solidity/Source/Eval.lean`); logs are not observations.
-- **Horizons** (S03.04).  `firstDone f n` is the least horizon `k ≤ n` at
+- **Horizons**.  `firstDone f n` is the least horizon `k ≤ n` at
   which `f k` completes, and its result.  It is monotone by construction
   (`firstDone_mono`), and an execution diverges exactly when no horizon
   completes (`firstDone_none_iff`).  No horizon is a semantic restriction:
   a finite execution completes at some horizon, a divergent one at none.
-- **Sessions** (S05).  `sessionAt` runs the deployment and then the
+- **Sessions**.  `sessionAt` runs the deployment and then the
   session environment's actions, each transaction at its least completing
-  horizon up to `n`; it is G01's `Prefix` at horizon `n`, and the family is
-  consistent (`sessionAt_consistent`), so `sourceLang` has the type of G01's
-  `Lang Event Outcome`.  Its resources are horizons only: the failure points
-  the user decisions require (any external frame or transaction may fail),
+  horizon up to `n`; it is `Prefix` at horizon `n`, and the family is
+  consistent (`sessionAt_consistent`), so `sourceLang` has the type of
+  `Lang Event Outcome`.  Its resources are horizons only: failure points
+  (any external frame or transaction may fail),
   and the stipend rule are not modelled. Sender-funds validity is checked
   at each request boundary using the external ledger before runTx; invalid
   requests consume their action index without execution or events. A `stuck`
@@ -206,10 +206,7 @@ def runTx (G : Glob E) (n : Nat) (q : Request) : EM E [] Outcome := do
 plan. Root frame checks surround actual credit/dispatch; remaining request or
 ancestor stops propagate after rollback and before finalization/receipt.
 Terminal receipts do not count toward body budgets. This is the same Source
-evaluator, not a second statement semantics. It deliberately leaves legacy
-`runTx` unchanged: adding a disabled option to that hot proof interface caused
-a measured checking regression. Request-fate entry/post-fee installation and
-fixed-plan session consistency remain separate obligations. -/
+evaluator, not a second statement semantics.  -/
 def runTxWithPlan (G : Glob E) (n : Nat) (q : Request)
     (points : Roadmap.Evm.FailurePoints) : EM E [] Outcome :=
   let plan : FailureExecution.RuntimePlan := some points
@@ -400,7 +397,7 @@ def sessionFrom (P : SrcProg E) (env : SessionEnv) (addr : Address) (n : Nat) : 
   | _ => ⟨[], none⟩
 
 /-- The session at the deployment's creation address (`this` from the
-deployment, G01). -/
+deployment). -/
 def sessionAt (P : SrcProg E) (env : SessionEnv) (n : Nat) : Prefix Event Outcome :=
   sessionFrom P env (P.fixed.createAddress env.deployer env.deployNonce) n
 
@@ -415,12 +412,12 @@ theorem sessionFrom_consistent (P : SrcProg E) (env : SessionEnv) (addr : Addres
     exact sessionGo_mono P env n m n m 0 s o hnm hnm
   · exact ⟨List.nil_prefix, .inl rfl⟩
 
-/-- **The source session semantics is consistent** (G01 `Prefixes.Consistent`). -/
+/-- **The source session semantics is consistent** (`Prefixes.Consistent`). -/
 theorem sessionAt_consistent (P : SrcProg E) (env : SessionEnv) :
     Prefixes.Consistent (sessionAt P env) :=
   sessionFrom_consistent P env _
 
-/-- **The source language** (G01 `Lang Event Outcome`): programs at the
+/-- **The source language** (`Lang Event Outcome`): programs at the
 source, the session environment, horizons.  `Admissible`, `Forward` and
 `Guard` are trivial: resource failures, the hash premise and the stipend
 rule are not instantiated (see the module docstring). -/

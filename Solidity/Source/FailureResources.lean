@@ -1,12 +1,12 @@
 import Solidity.Roadmap.Evm
 
 /-!
-# Source failure resources (S05 checkpoint 5, resource interface only)
+# Source failure resources (resource interface only)
 
-The source session currently uses a bare horizon. This module gives its future
-resource parameter the existing G06 request/frame failure choices, with an
-order that extends only the horizon at fixed choices. It does not change
-`sourceLangEvents` or claim that the evaluator consults these choices yet.
+The source session uses a bare horizon. This resource interface pairs the
+horizon with request/frame failure choices, with an order that extends only
+the horizon at fixed choices. The interface does not imply that
+`sourceLangEvents` or the evaluator consults these choices.
 -/
 namespace Solidity.Source.FailureResources
 open Solidity.Roadmap.Evm
@@ -91,7 +91,7 @@ theorem frame_not_noFail {p : FailurePoints} {k cut : Nat} (h : p.frame k = some
 theorem Bound.not_le_of_points_ne {r s : Bound} (h : r.points ≠ s.points) : ¬ r ≤ s :=
   fun hrs => h hrs.1
 
-/-- The current bare `Nat` horizon cannot encode G06's independent frame
+/-- The bare `Nat` horizon cannot encode independent frame
 choices with the retraction demanded by `SourceSpec.failures_with`. The
 explicit diagonal uses only frame choices, so no cardinality axiom is needed.
 A failure-aware source must extend its resource, not ignore the schedule. -/
