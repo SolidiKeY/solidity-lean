@@ -769,4 +769,13 @@ example (H K : RawExpr → ElabM (SProg C × RawExpr)) (sc : ElabScope) (e : Raw
   agree_run
   exact h (by simpa using ‹¬e.isLit = true›)
 
+omit [FreshNames] in
+/-- The statement map over a state-passing callback that agrees at the statement's own expression. -/
+example (f g : RawExpr → StateT (SProg C) ElabM RawExpr) (sc : ElabScope) (c : RawExpr)
+    (t e : List RawStmt) (h : AgreeS sc (f c) (g c)) :
+    AgreeS sc ((RawStmt.ite c t e).mapExprsM f) ((RawStmt.ite c t e).mapExprsM g) :=
+  mapExprsM_agree f g _ (fun x hx => by
+    simp only [RawStmt.exprs, List.mem_cons, List.not_mem_nil, or_false] at hx; exact hx ▸ h)
+    (fun _ _ _ _ _ hs => by cases hs)
+
 end Solidity.Examples.ElabTotal.Stmts
