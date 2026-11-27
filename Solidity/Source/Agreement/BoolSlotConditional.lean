@@ -49,7 +49,7 @@ theorem bool_cond_init_model (pre tail : List PrimTy) (a b : Bool) (name : Var)
   cases TEnv.get (modelBoolSlot tail pre) model.env <;> rfl
 
 /-- All actual normal Source runs of this pair agree on the selected literal;
-no chosen condition value or successful-run premise is added to the producer. -/
+no chosen condition value or successful-run premise is required by the producer. -/
 theorem bool_cond_init_step (pre tail : List PrimTy) (a b : Bool) (name : Var)
     (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E)) :
     NormalStmtObligation (C := C) (R := R) (M := M) (k := k)

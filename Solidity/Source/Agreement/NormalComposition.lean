@@ -24,7 +24,7 @@ theorem normal_nil (ps : List PrimTy) (G : Glob E) (F : Fr)
     exact ⟨⟨model, List.prefix_refl _⟩, rfl, related⟩
 
 /-- The first producer hypothesis is single-statement normal agreement; the
-second is the already-built tail proof. Neither supplies a chosen whole run,
+second is the tail proof. Neither supplies a chosen whole run,
 intermediate state, journal or final result. All source error/control arms
 remain outside the explicit normal-result antecedent. -/
 theorem normal_cons {ps ms qs : List PrimTy} (G : Glob E) (F : Fr)

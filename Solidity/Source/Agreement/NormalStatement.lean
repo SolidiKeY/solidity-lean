@@ -12,8 +12,7 @@ state and execution agreement remain separate obligations.
 -/
 namespace Solidity.Source.Agreement
 
-/-- The normal-result clause to be proved for an explicitly associated pair
-of programs. There is no arbitrary observer, supported-fragment predicate,
+/-- The normal-result clause for an explicitly associated pair of programs. There is no arbitrary observer, supported-fragment predicate,
 or assumed execution field. Source initial/final journal states remain
 explicit and are not identified with the model heap or storage.
 

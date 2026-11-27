@@ -1,6 +1,6 @@
 import Solidity.Source.Agreement.BoolSlotNot
 
-/-! Computed-RHS local assignment in unchanged Source/model semantics. -/
+/-! Computed-RHS local assignment in Source/model semantics. -/
 namespace Solidity.Source.Agreement
 variable {E : Env} {C : Contract} {R : List STy} {M : Bool} {k : SCtx}
 
