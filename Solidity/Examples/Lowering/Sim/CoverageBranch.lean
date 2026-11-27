@@ -57,4 +57,15 @@ example : Runs (elabScopeWith C0 (elabBranchWith C0 child) [] [.revert, .revert]
 example : ((child .revert).run sc |>.run ([], 7)).run memo0 =
     .error "wrong branch reader" := rfl
 
+/-- Public producer boundary cases at a nonempty entry context and memo.
+The block arm requires the explicit kernel equation hypothesis; the list
+and scope wrappers do not. The nonempty execution above tests the effects. -/
+example (hk : Solidity.Goals.elabKernelTotal) :
+    Runs (elabStmtsP C0 []) sc (Γtmp, 7) memo0 [] (Γtmp, 7) memo0 ∧
+    Runs (elabScope C0 [(Var.ofName "temporary", .val .uint)] []) sc
+      (Γtmp, 7) memo0 ⟨[.val .uint], .nil⟩ (Γtmp, 7) memo0 ∧
+    Runs (elabStmt1 C0 (.block [])) sc (Γtmp, 7) memo0 [] (Γtmp, 7) memo0 :=
+  ⟨actual_list (.nil _ _), actual_scope (.nil _ _) (chain_nil _ _),
+    actual_block hk (.nil _ _)⟩
+
 end Solidity.Examples.Lowering.Sim.CoverageBranch

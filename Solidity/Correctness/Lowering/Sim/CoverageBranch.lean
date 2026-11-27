@@ -50,7 +50,7 @@ theorem list_run {stmt : RawStmt → ElabM (SProg C)} {sc ss st memo P out memo'
     (children : Children stmt sc ss st memo P out memo') :
     Runs (elabStmtsPWith C stmt ss) sc st memo P out memo' := by
   induction children with
-  | nil => rfl
+  | nil => exact list_nil _ _ _ _
   | cons head _ ih => exact list_cons head ih
 
 /-- Branch children run with `top = false`, all other reader fields unchanged.
@@ -130,12 +130,10 @@ theorem actual_block (hk : Solidity.Goals.elabKernelTotal)
     Runs (elabStmt1 C (.block ss)) sc (Γ, k) memo P (Γ, k') memo' := by
   have fix := (hk.1 C).1
   have names := (hk.1 C).2.1
-  have hs : (elabRec C ()).elabStmt1 = elabStmt1 C := by
-    simp only [Solidity.Goals.ElabKernelNames] at names
-    grind only
-  have hb : (elabRec C ()).elabBranch = elabBranch C := by
-    simp only [Solidity.Goals.ElabKernelNames] at names
-    grind only
+  have hs : (elabRec C ()).elabStmt1 = elabStmt1 C :=
+    names.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1
+  have hb : (elabRec C ()).elabBranch = elabBranch C :=
+    names.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1
   have equation : elabStmt1 C (.block ss) = elabBranch C ss := by
     rw [← hs, fix.2.2.2.1]
     change (elabRec C ()).elabBranch ss = _
