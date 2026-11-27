@@ -323,6 +323,7 @@ import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.StaticLinear
+import Solidity.Examples.StringLaws
 import Solidity.Examples.Tactics.AbiFeatures
 import Solidity.Examples.Tactics.AbiFeaturesImport
 import Solidity.Examples.Tactics.AbiHexCall
