@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.InlineArrayParents
 import Solidity.Source.Preservation.MemoryProgramControls
 
-/-! Inhabited inline-array progress over a live caller reference and a nonempty
-heap. The checked-elaboration adapter is consumed in both evaluator pipelines;
-exact allocation, child panic, horizon and readiness boundaries are retained. -/
 namespace Solidity.Source.Progress.InlineArrayParentControls
 open EM Preservation.MemoryProgramControls
 
