@@ -230,6 +230,7 @@ import Solidity.Backend.CompilerEndpointScalarBoundary
 import Solidity.Backend.CompilerEndpointV2
 import Solidity.Backend.CompilerEndpointWitnesses
 import Solidity.Backend.CompilerOptimized
+import Solidity.Backend.CompilerOptimizerDomain.ConstFold
 import Solidity.Backend.CompilerTotal
 import Solidity.Backend.Control
 import Solidity.Backend.Creation.Artifact
