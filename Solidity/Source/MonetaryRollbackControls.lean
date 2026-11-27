@@ -1,8 +1,6 @@
 import Solidity.Source.MonetaryRollback
 import Solidity.Source.FailureMachineControls
 
-/-! Inhabited actual Source controls with an existing heap alias, saved
-function locals, event/log prefixes and nonempty persistent journal. -/
 namespace Solidity.Source.MonetaryExecution.Controls
 open Solidity.Roadmap (Address Word)
 open FailureExecution.Controls (E caller)
@@ -31,7 +29,6 @@ theorem refused :
   have rejected : ¬ (wideSeed.ex.world.accounts address).balance + value.val < 2^256 := by decide
   simp only [creditRollback_run, rejected, if_false]
 
-/-- Attempt alone keeps the actual credited balance and new journal entry. -/
 theorem capture_is_not_rollback :
     let result := (EM.attempt (credit address value) :
       EM E [.bytes .memory,.bool] (Except Halt Unit)).run (caller,seed)
@@ -42,14 +39,10 @@ theorem capture_is_not_rollback :
   simp only [attempt_run, credit_run, accepted, if_true, ExecState.journal_apply]
   decide
 
-/-- Reverting to the wrong zero mark destroys the retained prefix. This is
-not the selected mark captured by creditRollback. -/
 theorem wrong_mark_loses_prefix :
     let result := (rollbackTo (0,0,seed.heap) : EM E [.bytes .memory,.bool] Unit).run (caller,seed)
     result.2.2.ex.journal.length = 0 ∧ result.2.2.logs = [] ∧ seed.logs ≠ [] := by decide
 
-/-- Equal numeric balance is not full journal restoration. Even a zero credit
-has a real saved account entry before explicit rollback. -/
 theorem zero_credit_still_journals :
     let result := (credit address ⟨0,by decide⟩ : EM E [.bytes .memory,.bool] Unit).run (caller,seed)
     (result.2.2.ex.world.accounts address).balance = 17 ∧
@@ -58,8 +51,6 @@ theorem zero_credit_still_journals :
   simp only [credit_run, accepted, if_true, ExecState.journal_apply]
   decide
 
-/-- A genuine Source byte read after the captured rollback sees the original
-full nonempty heap payload, not merely its length or a projected balance. -/
 theorem continuation_reads_full_alias :
     ((do
       let outcome ← creditRollback address value

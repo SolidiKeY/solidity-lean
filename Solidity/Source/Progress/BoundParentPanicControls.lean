@@ -2,9 +2,6 @@ import Solidity.Source.Progress.BoundParents
 import Solidity.Source.Progress.ReadyReturns
 import Solidity.Lowering.P9.InferenceCuts
 
-/-! An elaborated allocating local initializer followed by runtime division
-panic. Actual call/caller observations retain reached heap allocations while
-restoring caller locals; no transaction rollback or compiler claim is made. -/
 namespace Solidity.Source.Progress.BoundParentPanicControls
 open EM Solidity.Lowering.P9
 

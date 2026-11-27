@@ -1,8 +1,5 @@
 import Solidity.Source.HorizonConst
 
-/-! Event-prefix expression proofs. Guards the regression where one monolithic
-Source horizon check exceeds the per-module limit. Declarations retain their
-qualified names and are re-exported by Source.Horizon; no evaluator changes. -/
 
 namespace Solidity.Source
 
@@ -11,7 +8,6 @@ open Solidity.Roadmap (Address Word Bytes Request Outcome Event)
 
 variable {E : Env}
 
-/-! ## Timed-out runs show a prefix of the events -/
 
 theorem Approx.trans {Γ : RCtx} {α : Type} {a b c : EM E Γ α} (h₁ : Approx a b) (h₂ : Approx b c) :
     Approx a c := by
@@ -39,8 +35,6 @@ theorem Approx.sub {Γ Γ' : RCtx} {α : Type} (l' : Locals E.layout Γ') {m m' 
   · right
     rw [he]
 
-/-- A halt caught by `attempt`: the continuation re-raises a timeout
-without adding events. -/
 theorem Approx.attempt_bind {Γ : RCtx} {α β : Type} {m m' : EM E Γ α} {k k' : Except Halt α → EM E Γ β}
     (hm : Approx m m') (hk : ∀ r, Approx (k r) (k' r))
     (h0 : ∀ x, ((k (.error .timeout)).run x).1 = .error .timeout ∧
@@ -69,8 +63,6 @@ theorem Approx.forIn {Γ : RCtx} {α β : Type} (l : List α) (b : β) {f f' : �
     | done _ => exact Approx.refl (Grow.pure _)
     | yield b' => exact ih b'
 
-/-- Close `Approx (body at n) (body at n + 1)` as `below_go` does; where the
-two sides agree, by `Grow` (`grow_go` with the second list). -/
 syntax "approx_go" "[" ident,* "]" "[" ident,* "]" "[" ident,* "]" "[" ident,* "]" : tactic
 macro_rules
   | `(tactic| approx_go [$ls,*] [$gs,*] [$bs,*] [$cs,*]) => `(tactic| repeat' (first
@@ -85,7 +77,6 @@ macro_rules
       | ((refine Approx.of_below ?_ ?_ ?_) <;> (first | (first $[| with_reducible apply $bs:ident]*) | (const_go [$cs,*])) <;> done)
       | (dsimp only)))
 
-/-! Both calldata modes share the ordinary-plan event-prefix induction. -/
 section
 variable {G : Glob E} {n : Nat}
 

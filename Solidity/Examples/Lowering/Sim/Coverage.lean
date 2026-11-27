@@ -1,3 +1,5 @@
+import Solidity.Correctness.Lowering.Sim.CoverageControl
+import Solidity.Correctness.Lowering.Sim.CoverageBranch
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
@@ -16,7 +18,14 @@ shows that caller placement alone does not repair the frozen spelling relation.
 The final checks establish decoding, alignment, acceptance of the existing
 materialized program, and actual lowering of the smoke separately. The generated
 flag declaration, condition capture, captured assignment, and flag write have
-exact elaboration receipts below; the complete loop production receipt is still outstanding.
+exact elaboration receipts below. The flag and condition instructions also have
+placement and acceptance checks. The owned branch/control interfaces compose
+the condition hoisting and first conditional, including its complete
+preprocessing. Both guards, the complete body scope, and the primitive loop
+also have receipts. Complete loop preprocessing and outer-block/list composition
+now establish actual accepted production of the smoke under `elabKernelTotal`.
+`smoke_coverage` applies the approved restricted v2 theorem to that run; it does
+not establish the frozen unrestricted `Diagram.Total`.
 -/
 namespace Solidity.Examples.Lowering.Sim.Coverage
 
@@ -486,6 +495,654 @@ theorem smoke_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
   simp only [checkIn, check_smoke_se]
   rfl
 
+/-- The condition's capture followed by its assignment, in the flag context. -/
+def smokeConditionBlock : Blk Match.C [.val .bool, .val .bool, .val .bool] :=
+  letI : FreshNames := productionNames
+  ⟨[.val .bool, .val .bool, .val .bool, .val .bool],
+    .cons (.declLocal .bool (Var.ofName "se1")
+      (some (.simple (.local (.there (.there .here))))))
+      (.cons (.assignLocal (.there (.there .here)) (.simple (.local .here))) .nil)⟩
+
+/-- Actual placement of the two independently proved condition instructions.
+This is a `chain` receipt, not a claim about list elaboration or loop production. -/
+theorem smoke_condition_placed :
+    @SProg.chain Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals)).names
+      [.val .bool, .val .bool, .val .bool]
+      (smokeCaptureProgram ++ smokeWriteProgram) = .ok smokeConditionBlock := by
+  rfl
+
+/-- The placed capture/assignment block is accepted by the production checker. -/
+theorem smoke_condition_accepted :
+    Solidity.Backend.AbiWorld.PublicCompilerTotal.ProgOk [] smokeConditionBlock.2 := by
+  repeat constructor
+
+/-- The generated flag declaration, placed under the exact caller names. -/
+def smokeFlagBlock : Blk Match.C [.val .bool, .val .bool] :=
+  letI : FreshNames := productionNames
+  ⟨[.val .bool, .val .bool, .val .bool],
+    .cons (.declLocal .bool (Var.ofName "brk0") (some (.simple (.bool false)))) .nil⟩
+
+/-- Actual caller-context placement of the generated flag instruction. -/
+theorem smoke_flag_placed :
+    @SProg.chain Match.C productionNames (@ECtx.toNCtx productionNames Match.locals).names
+      [.val .bool, .val .bool] smokeFlagProgram = .ok smokeFlagBlock := by
+  rfl
+
+/-- Acceptance of the placed flag declaration, separately from the loop. -/
+theorem smoke_flag_accepted :
+    Solidity.Backend.AbiWorld.PublicCompilerTotal.ProgOk [] smokeFlagBlock.2 := by
+  repeat constructor
+
+/-- The owned list-composition theorem lifts the exact captured assignment. -/
+theorem smoke_write_list (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabStmtsP Match.C productionNames [.assign (.name "i") (.name "se1")]
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((smokeWriteProgram, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  have h := CoverageBranch.actual_list
+    (CoverageBranch.Children.cons (smoke_write hk k)
+      (CoverageBranch.Children.nil (smokeCapturedLocals, k) ({} : CallMemo)))
+  simpa only [List.append_nil] using h
+
+/-- Actual hoisting of the smoke condition captures `a` and then writes `i`. -/
+theorem smoke_condition_hoist (hk : Solidity.Goals.elabKernelTotal) :
+    @hoist Match.C productionNames (.assign (.name "i") (.name "a"))
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), .name "se1"),
+        (smokeCapturedLocals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hh : hoist Match.C = hoistWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.2.2.2
+  have hm : storageMappingAlias? Match.C (("brk0", .val .bool) :: Match.locals)
+      (.name "i") = false := by
+    unfold storageMappingAlias?
+    rw [synth]
+    rfl
+  have hl : (elabRec Match.C ()).elabStmtsP [.assign (.name "i") (.name "se1")]
+      { funs := [], top := false } (smokeCapturedLocals, 2) {} =
+      .ok ((smokeWriteProgram, (smokeCapturedLocals, 2)), {}) := smoke_write_list hk 2
+  rw [hh]
+  conv => lhs; whnf
+  rw [hm]
+  conv => lhs; whnf
+  rw [smoke_capture]
+  conv => lhs; whnf
+  rw [hl]
+  rfl
+
+/-- Negating the smoke condition introduces no further Boolean capture. -/
+theorem smoke_condition_not_hoist (hk : Solidity.Goals.elabKernelTotal) :
+    @hoist Match.C productionNames (.unop .not (.assign (.name "i") (.name "a")))
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), .unop .not (.name "se1")),
+        (smokeCapturedLocals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hh : hoist Match.C = hoistWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.2.2.2
+  have hc : (elabRec Match.C ()).hoist (.assign (.name "i") (.name "a"))
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), .name "se1"),
+        (smokeCapturedLocals, 2)), {}) := by
+    rw [(hk.1 Match.C).2.1.1]
+    exact smoke_condition_hoist hk
+  have hn : narrowCapture Match.C (.unop .not (.name "se1"))
+      { funs := [], top := false } (smokeCapturedLocals, 2) {} =
+      .ok ((([], .unop .not (.name "se1")), (smokeCapturedLocals, 2)), {}) := rfl
+  rw [hh, Solidity.Correctness.Lowering.Sim.hoist_unop _ _ _ _ rfl]
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  rw [hc]
+  dsimp only
+  rw [hn]
+  simp only [List.append_nil]
+  rfl
+
+/-- The branch instruction setting the generated flag after capture. -/
+def smokeSetFlagBlock : Blk Match.C [.val .bool, .val .bool, .val .bool, .val .bool] :=
+  ⟨_, .cons (.assignLocal (.there .here) (.simple (.bool true))) .nil⟩
+
+/-- The owned scope theorem composes the actual flag-write child receipt. -/
+theorem smoke_set_flag_scope (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabScope Match.C productionNames (@ECtx.toNCtx productionNames smokeCapturedLocals)
+      [.assign (.name "brk0") (.bool true)] { funs := [], top := false }
+      (smokeCapturedLocals, k) {} =
+      .ok ((smokeSetFlagBlock, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  apply CoverageBranch.actual_scope (sc := { funs := [], top := false })
+    (CoverageBranch.Children.cons (smoke_set_flag hk k)
+      (CoverageBranch.Children.nil (smokeCapturedLocals, k) ({} : CallMemo)))
+  rfl
+
+private theorem check_not_se :
+    @check Match.C productionNames (@ECtx.toNCtx productionNames smokeCapturedLocals)
+      .bool (.unop .not (.name "se1")) =
+      .ok (.unop .not rfl rfl (.simple (.local .here))) := by
+  rw [check, checkVia, synth]
+  rw [synth_smoke_se]
+  all_goals first | rfl | simp
+
+/-- The first conditional instruction after its condition has been hoisted. -/
+def smokeGuardProgram : SProg Match.C :=
+  letI : FreshNames := productionNames
+  [.of (ECtx.toNCtx smokeCapturedLocals)
+    (.ite (.unop .not rfl rfl (.simple (.local .here))) smokeSetFlagBlock.2 .nil)]
+
+/-- The owned control interface composes the actual first conditional arm. -/
+theorem smoke_guard_primitive (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabStmt1 Match.C productionNames
+      (.ite (.unop .not (.name "se1")) [.assign (.name "brk0") (.bool true)] [])
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((smokeGuardProgram, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  apply CoverageControl.producer_ite_success Match.C hk _ _ _
+    { funs := [], top := false } (smokeCapturedLocals, k) (smokeCapturedLocals, k)
+    (smokeCapturedLocals, k) (smokeCapturedLocals, k) {} {} {} {}
+    (.unop .not rfl rfl (.simple (.local .here))) smokeSetFlagBlock ⟨_, .nil⟩
+  · unfold checkIn
+    rw [check_not_se]
+    rfl
+  · exact smoke_set_flag_scope hk k
+  · apply CoverageBranch.actual_scope (sc := { funs := [], top := false })
+      (CoverageBranch.Children.nil _ _)
+    rfl
+
+/-- The first lowered conditional before expression preprocessing. -/
+def smokeGuardRaw : RawStmt :=
+  .ite (.unop .not (.assign (.name "i") (.name "a")))
+    [.assign (.name "brk0") (.bool true)] []
+
+/-- The first conditional after its effectful condition has been hoisted. -/
+def smokeGuardHoisted : RawStmt :=
+  .ite (.unop .not (.name "se1")) [.assign (.name "brk0") (.bool true)] []
+
+/-- Statement hoisting preserves the conditional's branches and threads the
+condition's actual capture and assignment into its emitted prefix. -/
+theorem smoke_guard_hoist (hk : Solidity.Goals.elabKernelTotal) :
+    @hoistStmt Match.C productionNames smokeGuardRaw { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), smokeGuardHoisted),
+        (smokeCapturedLocals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hh : hoistStmt Match.C = hoistStmtWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.2.2.1
+  have hc : (elabRec Match.C ()).hoist (.unop .not (.assign (.name "i") (.name "a")))
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), .unop .not (.name "se1")),
+        (smokeCapturedLocals, 2)), {}) := by
+    rw [(hk.1 Match.C).2.1.1]
+    exact smoke_condition_not_hoist hk
+  rw [hh]
+  unfold smokeGuardRaw hoistStmtWith
+  simp only [RawStmt.mapExprsM]
+  conv => lhs; whnf
+  dsimp only [StateT.run, Bind.bind, StateT.bind, ReaderT.bind, Except.bind,
+    liftM, MonadLiftT.monadLift, MonadLift.monadLift, StateT.lift]
+  rw [hc]
+  rfl
+
+private theorem guard_fn (Γ : ECtx) :
+    @fnPure Match.C productionNames Γ (.unop .not (.assign (.name "i") (.name "a"))) =
+      .ok (.unop .not (.assign (.name "i") (.name "a"))) := by
+  simp only [fnPure_unop, fnPure_assign, fnPure_other]
+  rfl
+
+private theorem guard_bytes :
+    @bytesPure Match.C productionNames (("brk0", .val .bool) :: Match.locals)
+      (.unop .not (.assign (.name "i") (.name "a"))) =
+      .ok (.unop .not (.assign (.name "i") (.name "a"))) := by
+  simp only [bytesPure_unop, bytesPure_assign, bytesPure_other]
+  rfl
+
+private theorem guard_whole :
+    @narrowWholeUse? Match.C productionNames (("brk0", .val .bool) :: Match.locals)
+      (.unop .not (.assign (.name "i") (.name "a"))) = none := by
+  rw [narrowWholeUse?_unop, narrowWholeUse?_assign]
+  have hm : @storageMappingAlias? Match.C productionNames
+      (("brk0", .val .bool) :: Match.locals) (.name "i") = false := by
+    unfold storageMappingAlias?
+    rw [synth]
+    rfl
+  simp only [hm, Bool.false_and, Bool.false_eq_true, if_false, narrowWholeUse?_name]
+  rfl
+
+private theorem guard_narrow :
+    @narrowPure Match.C productionNames false (("brk0", .val .bool) :: Match.locals)
+      (.unop .not (.assign (.name "i") (.name "a"))) =
+      .ok (.unop .not (.assign (.name "i") (.name "a"))) := by
+  simp only [narrowPure_unop, narrowPure_other]
+  rfl
+
+/-- Complete preprocessing and elaboration of the first lowered conditional,
+including its actual effectful condition and the owned primitive receipt. -/
+theorem smoke_guard (hk : Solidity.Goals.elabKernelTotal) :
+    @elabStmtP Match.C productionNames smokeGuardRaw { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok (((smokeCaptureProgram ++ smokeWriteProgram) ++ smokeGuardProgram,
+        (smokeCapturedLocals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have hh : (elabRec Match.C ()).hoistStmt smokeGuardRaw { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((((smokeCaptureProgram ++ smokeWriteProgram), smokeGuardHoisted),
+        (smokeCapturedLocals, 2)), {}) := smoke_guard_hoist hk
+  have hg : (elabRec Match.C ()).elabStmt1 smokeGuardHoisted
+      { funs := [], top := false } (smokeCapturedLocals, 2) {} =
+      .ok ((smokeGuardProgram, (smokeCapturedLocals, 2)), {}) := smoke_guard_primitive hk 2
+  dsimp only [smokeGuardRaw] at hh
+  dsimp only [smokeGuardHoisted] at hg
+  rw [hp]
+  unfold smokeGuardRaw
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, guard_fn]
+  conv => lhs; whnf
+  simp only [bytesStmt, RawStmt.mapExprsM, guard_bytes]
+  conv => lhs; whnf
+  simp only [RawStmt.exprs, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
+    Bool.false_eq_true, if_false, guard_whole]
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, guard_narrow]
+  conv => lhs; whnf
+  dsimp only
+  rw [hh]
+  conv => lhs; whnf
+  dsimp only [smokeGuardHoisted]
+  rw [hg]
+  rfl
+
+/-- The break body is a block containing the already-proved flag assignment. -/
+theorem smoke_break_block (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabStmtP Match.C productionNames (.block [.assign (.name "brk0") (.bool true)])
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((smokeSetFlagProgram, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have hb : (elabRec Match.C ()).elabStmt1 (.block [.assign (.name "brk0") (.bool true)])
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((smokeSetFlagProgram, (smokeCapturedLocals, k)), {}) := by
+    have h := CoverageBranch.actual_block (C := Match.C) hk
+      (sc := { funs := [], top := false })
+      (CoverageBranch.Children.cons (smoke_set_flag hk k)
+        (CoverageBranch.Children.nil (smokeCapturedLocals, k) ({} : CallMemo)))
+    simpa only [List.append_nil] using h
+  rw [hp]
+  conv => lhs; whnf
+  dsimp only
+  rw [hb]
+  rfl
+
+/-- The owned scope interface restores the entry context around the break block. -/
+theorem smoke_break_scope (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabScope Match.C productionNames (@ECtx.toNCtx productionNames smokeCapturedLocals)
+      [.block [.assign (.name "brk0") (.bool true)]] { funs := [], top := false }
+      (smokeCapturedLocals, k) {} =
+      .ok ((smokeSetFlagBlock, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  apply CoverageBranch.actual_scope (sc := { funs := [], top := false })
+    (CoverageBranch.Children.cons (smoke_break_block hk k)
+      (CoverageBranch.Children.nil (smokeCapturedLocals, k) ({} : CallMemo)))
+  rfl
+
+/-- The second lowered guard executes the original break body if still active. -/
+def smokeBreakRaw : RawStmt :=
+  .ite (.unop .not (.name "brk0")) [.block [.assign (.name "brk0") (.bool true)]] []
+
+/-- The second guard reads the generated flag in the post-capture context. -/
+def smokeBreakProgram : SProg Match.C :=
+  letI : FreshNames := productionNames
+  [.of (ECtx.toNCtx smokeCapturedLocals)
+    (.ite (.unop .not rfl rfl (.simple (.local (.there .here)))) smokeSetFlagBlock.2 .nil)]
+
+private theorem check_not_flag :
+    @check Match.C productionNames (@ECtx.toNCtx productionNames smokeCapturedLocals)
+      .bool (.unop .not (.name "brk0")) =
+      .ok (.unop .not rfl rfl (.simple (.local (.there .here)))) := by
+  rw [check, checkVia, synth]
+  rw [synth_flag]
+  all_goals first | rfl | simp
+
+/-- The owned conditional interface composes the actual break block's scope. -/
+theorem smoke_break_primitive (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabStmt1 Match.C productionNames smokeBreakRaw
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((smokeBreakProgram, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  apply CoverageControl.producer_ite_success Match.C hk _ _ _
+    { funs := [], top := false } (smokeCapturedLocals, k) (smokeCapturedLocals, k)
+    (smokeCapturedLocals, k) (smokeCapturedLocals, k) {} {} {} {}
+    (.unop .not rfl rfl (.simple (.local (.there .here)))) smokeSetFlagBlock ⟨_, .nil⟩
+  · unfold checkIn
+    rw [check_not_flag]
+    rfl
+  · exact smoke_break_scope hk k
+  · apply CoverageBranch.actual_scope (sc := { funs := [], top := false })
+      (CoverageBranch.Children.nil _ _)
+    rfl
+
+/-- Hoisting the second guard leaves both the instruction and state unchanged. -/
+theorem smoke_break_hoist (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @hoistStmt Match.C productionNames smokeBreakRaw { funs := [], top := false }
+      (smokeCapturedLocals, k) {} =
+      .ok ((([], smokeBreakRaw), (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  have hh : hoistStmt Match.C = hoistStmtWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.2.2.1
+  rw [hh]
+  unfold smokeBreakRaw hoistStmtWith
+  simp only [RawStmt.mapExprsM]
+  conv => lhs; whnf
+  dsimp only [StateT.run, Bind.bind, StateT.bind, ReaderT.bind, Except.bind,
+    liftM, MonadLiftT.monadLift, MonadLift.monadLift, StateT.lift]
+  rfl
+
+/-- Complete preprocessing and elaboration of the second lowered conditional. -/
+theorem smoke_break (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    @elabStmtP Match.C productionNames smokeBreakRaw { funs := [], top := false }
+      (smokeCapturedLocals, k) {} =
+      .ok ((smokeBreakProgram, (smokeCapturedLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have hg : (elabRec Match.C ()).elabStmt1 smokeBreakRaw
+      { funs := [], top := false } (smokeCapturedLocals, k) {} =
+      .ok ((smokeBreakProgram, (smokeCapturedLocals, k)), {}) := smoke_break_primitive hk k
+  dsimp only [smokeBreakRaw] at hg
+  rw [hp]
+  unfold smokeBreakRaw
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, fnPure_unop, fnPure_other]
+  conv => lhs; whnf
+  simp only [bytesStmt, RawStmt.mapExprsM, bytesPure_unop, bytesPure_other]
+  conv => lhs; whnf
+  simp only [RawStmt.exprs, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
+    Bool.false_eq_true, if_false, narrowWholeUse?_unop, narrowWholeUse?_name]
+  conv => lhs; whnf
+  simp only [narrowPure_unop, narrowPure_other]
+  conv => lhs; whnf
+  dsimp only
+  rw [hg]
+  rfl
+
+/-- Exact sequential output of both lowered guards, including condition effects. -/
+def smokeBodyProgram : SProg Match.C :=
+  ((smokeCaptureProgram ++ smokeWriteProgram) ++ smokeGuardProgram) ++ smokeBreakProgram
+
+private theorem smoke_body_children (hk : Solidity.Goals.elabKernelTotal) :
+    @CoverageBranch.Children Match.C (@elabStmtP Match.C productionNames)
+      { funs := [], top := false } [smokeGuardRaw, smokeBreakRaw]
+      ((("brk0", .val .bool) :: Match.locals), 1) {} smokeBodyProgram
+      (smokeCapturedLocals, 2) {} := by
+  simpa only [List.append_nil, smokeBodyProgram] using
+    CoverageBranch.Children.cons (smoke_guard hk)
+      (CoverageBranch.Children.cons (smoke_break hk 2)
+        (CoverageBranch.Children.nil (smokeCapturedLocals, 2) ({} : CallMemo)))
+
+/-- The whole lowered loop body, placed in its entry flag context. -/
+def smokeBodyBlock : Blk Match.C [.val .bool, .val .bool, .val .bool] :=
+  ⟨_, Prog.join smokeConditionBlock.2
+    (.cons (.ite (.unop .not rfl rfl (.simple (.local .here))) smokeSetFlagBlock.2 .nil)
+      (.cons (.ite (.unop .not rfl rfl (.simple (.local (.there .here))))
+        smokeSetFlagBlock.2 .nil) .nil))⟩
+
+/-- Actual placement of all condition effects and both lowered guards. -/
+theorem smoke_body_placed :
+    @SProg.chain Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals)).names
+      [.val .bool, .val .bool, .val .bool] smokeBodyProgram = .ok smokeBodyBlock := rfl
+
+/-- The owned scope composition restores the flag context but retains counter 2. -/
+theorem smoke_body_scope (hk : Solidity.Goals.elabKernelTotal) :
+    @elabScope Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals))
+      [smokeGuardRaw, smokeBreakRaw] { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((smokeBodyBlock, ((("brk0", .val .bool) :: Match.locals), 2)), {}) := by
+  letI : FreshNames := productionNames
+  exact CoverageBranch.actual_scope (sc := { funs := [], top := false })
+    (smoke_body_children hk) smoke_body_placed
+
+/-- The complete placed loop body passes the unchanged production checker. -/
+theorem smoke_body_accepted :
+    Solidity.Backend.AbiWorld.PublicCompilerTotal.ProgOk [] smokeBodyBlock.2 := by
+  repeat constructor
+
+/-- The canonical lowered loop tests the live flag and a literal true operand. -/
+def smokeLoopCondition : RawExpr := .binop .and (.unop .not (.name "brk0")) (.bool true)
+
+/-- The typed loop condition in the flag context, before body-local captures. -/
+def smokeLoopValue : Val Match.C [.val .bool, .val .bool, .val .bool] .bool :=
+  .binop .and rfl rfl (.unop .not rfl rfl (.simple (.local .here))) (.simple (.bool true))
+
+private theorem loop_not_literal : (RawExpr.unop .not (.name "brk0")).isLit = false := by
+  rw [RawExpr.isLit]
+  all_goals first | rfl | simp
+
+private theorem loop_not_constant : smokeLoopCondition.constRat? = none := by
+  unfold smokeLoopCondition
+  rw [RawExpr.constRat?, RawExpr.constRat?]
+  all_goals first | rfl | simp
+
+private theorem synth_loop_not_flag :
+    @synth Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals))
+      (.unop .not (.name "brk0")) =
+      .ok (.val .bool (.unop .not rfl rfl (.simple (.local .here)))) := by
+  rw [synth, synth]
+  all_goals first | rfl | simp
+
+private theorem check_loop_not_flag :
+    @check Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals))
+      .bool (.unop .not (.name "brk0")) =
+      .ok (.unop .not rfl rfl (.simple (.local .here))) := by
+  rw [check, checkVia, synth_loop_not_flag]
+  all_goals first | rfl | simp
+
+private theorem check_loop_condition :
+    @check Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals))
+      .bool smokeLoopCondition = .ok smokeLoopValue := by
+  have hc := loop_not_constant
+  dsimp only [smokeLoopCondition] at hc
+  unfold smokeLoopCondition
+  rw [check, hc]
+  simp only [loop_not_literal, Bool.false_and, Bool.false_eq_true, if_false]
+  rw [checkVia, synth, hc]
+  simp only [loop_not_literal, Bool.false_eq_true, if_false]
+  rw [synth_loop_not_flag]
+  dsimp only
+  conv => lhs; whnf
+  simp only [synth_bool]
+  conv => lhs; whnf
+  dsimp only [Bind.bind, Except.bind, Pure.pure, Except.pure, TExpr.toVal?, BinOp.accepts, BinOp.ret]
+  rw [check_loop_not_flag, check_bool]
+  rfl
+  all_goals simp
+
+private theorem loop_bool_any (f : RawExpr → Bool) :
+    RawExpr.any f (.bool true) = f (.bool true) := by
+  rw [RawExpr.any]
+  all_goals first | rfl | simp
+
+private theorem smoke_loop_hoist (hk : Solidity.Goals.elabKernelTotal) :
+    @hoist Match.C productionNames smokeLoopCondition { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((([], smokeLoopCondition), ((("brk0", .val .bool) :: Match.locals), 1)), {}) := by
+  letI : FreshNames := productionNames
+  have hh : hoist Match.C = hoistWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.2.2.2
+  have hf : smokeLoopCondition.foldConst = pure smokeLoopCondition := by
+    unfold RawExpr.foldConst
+    rw [loop_not_constant]
+  have hp : ((RawExpr.bool true).hasCall || (RawExpr.bool true).hasIncDec ||
+      hasNarrow Match.C (("brk0", .val .bool) :: Match.locals) (.bool true) ||
+      powerDataNeeded Match.C { funs := [], top := false }
+        (("brk0", .val .bool) :: Match.locals) (.bool true)) = false := by
+    simp only [RawExpr.hasCall, RawExpr.hasIncDec, hasNarrow, powerDataNeeded, loop_bool_any]
+    rfl
+  rw [hh]
+  unfold hoistWith
+  rw [hf]
+  conv => lhs; whnf
+  rw [hp]
+  rfl
+
+/-- The actual loop-expression producer emits no prelude and restores its input. -/
+theorem smoke_loop_expression (hk : Solidity.Goals.elabKernelTotal) :
+    @loopExpr Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals))
+      .bool smokeLoopCondition "condition" { funs := [], top := false }
+      ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((smokeLoopValue, ((("brk0", .val .bool) :: Match.locals), 1)), {}) := by
+  letI : FreshNames := productionNames
+  unfold loopExpr loopExprWith
+  conv => lhs; whnf
+  rw [smoke_loop_hoist hk]
+  conv => lhs; whnf
+  rw [check_loop_condition]
+  rfl
+
+/-- The complete intrinsic lowered loop instruction. -/
+def smokeLoopProgram : SProg Match.C :=
+  letI : FreshNames := productionNames
+  [.of (ECtx.toNCtx (("brk0", .val .bool) :: Match.locals))
+    (.loop .auto smokeLoopValue smokeBodyBlock.2)]
+
+/-- The owned loop interface composes actual condition and complete body scope. -/
+theorem smoke_loop_primitive (hk : Solidity.Goals.elabKernelTotal) :
+    @elabStmt1 Match.C productionNames (.loop {} smokeLoopCondition [smokeGuardRaw, smokeBreakRaw])
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((smokeLoopProgram, ((("brk0", .val .bool) :: Match.locals), 2)), {}) := by
+  letI : FreshNames := productionNames
+  exact CoverageControl.producer_loop_default_success Match.C hk _ _
+    { funs := [], top := false }
+    ((("brk0", .val .bool) :: Match.locals), 1)
+    ((("brk0", .val .bool) :: Match.locals), 1)
+    ((("brk0", .val .bool) :: Match.locals), 2) {} {} {} smokeLoopValue smokeBodyBlock
+    (smoke_loop_expression hk) (smoke_body_scope hk)
+
+/-- Complete preprocessing and elaboration of the lowered loop statement. -/
+theorem smoke_loop (hk : Solidity.Goals.elabKernelTotal) :
+    @elabStmtP Match.C productionNames (.loop {} smokeLoopCondition [smokeGuardRaw, smokeBreakRaw])
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((smokeLoopProgram, ((("brk0", .val .bool) :: Match.locals), 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have hg : (elabRec Match.C ()).elabStmt1
+      (.loop {} smokeLoopCondition [smokeGuardRaw, smokeBreakRaw])
+      { funs := [], top := false } ((("brk0", .val .bool) :: Match.locals), 1) {} =
+      .ok ((smokeLoopProgram, ((("brk0", .val .bool) :: Match.locals), 2)), {}) :=
+    smoke_loop_primitive hk
+  dsimp only [smokeLoopCondition] at hg
+  rw [hp]
+  unfold smokeLoopCondition
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, fnPure_binop, fnPure_unop, fnPure_other]
+  conv => lhs; whnf
+  simp only [bytesStmt, RawStmt.mapExprsM, bytesPure_binop, bytesPure_unop, bytesPure_other]
+  conv => lhs; whnf
+  simp only [RawStmt.exprs, RawLoopSpec.exprs, Option.toList, List.flatMap_nil, List.reverse_nil, List.nil_append, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
+    Bool.false_eq_true, if_false, narrowWholeUse?_binop, narrowWholeUse?_unop,
+    narrowWholeUse?_name, narrowWholeUse?_other]
+  conv => lhs; whnf
+  simp only [narrowPure_binop, narrowPure_unop, narrowPure_other]
+  conv => lhs; whnf
+  dsimp only
+  simp only [List.reverse_nil]
+  rw [hg]
+  rfl
+
+/-- The complete flag-plus-loop output in the exact caller context.
+`smoke_production` below connects this program to the actual producer. -/
+def smokeProgram : Blk Match.C [.val .bool, .val .bool] :=
+  letI : FreshNames := productionNames
+  ⟨[.val .bool, .val .bool, .val .bool],
+    .cons (.declLocal .bool (Var.ofName "brk0") (some (.simple (.bool false))))
+      (.cons (.loop .auto smokeLoopValue smokeBodyBlock.2) .nil)⟩
+
+/-- Actual caller-name placement of the complete intrinsic output. -/
+theorem smoke_program_placed :
+    @SProg.chain Match.C productionNames (@ECtx.toNCtx productionNames Match.locals).names
+      [.val .bool, .val .bool] (smokeFlagProgram ++ smokeLoopProgram) = .ok smokeProgram := rfl
+
+/-- The complete program satisfies the unchanged production checker.
+The separate `smoke_production` receipt proves actual producer provenance. -/
+theorem smoke_program_accepted :
+    Solidity.Backend.AbiWorld.PublicCompilerTotal.ProgOk [] smokeProgram.2 := by
+  repeat constructor
+
+/-- The exact raw block emitted by lowering the Match while/break input. -/
+def smokeRaw : List RawStmt :=
+  [.block [.decl (.named "bool") "brk0" (some (.bool false)),
+    .loop {} smokeLoopCondition [smokeGuardRaw, smokeBreakRaw]]]
+
+/-- The complete outer block restores caller locals while retaining fresh counter 2. -/
+theorem smoke_outer_block (hk : Solidity.Goals.elabKernelTotal) :
+    @elabStmtP Match.C productionNames (.block
+      [.decl (.named "bool") "brk0" (some (.bool false)),
+       .loop {} smokeLoopCondition [smokeGuardRaw, smokeBreakRaw]])
+      { funs := [] } (Match.locals, 1) {} =
+      .ok ((smokeFlagProgram ++ smokeLoopProgram, (Match.locals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have hb : (elabRec Match.C ()).elabStmt1 (.block
+      [.decl (.named "bool") "brk0" (some (.bool false)),
+       .loop {} smokeLoopCondition [smokeGuardRaw, smokeBreakRaw]])
+      { funs := [] } (Match.locals, 1) {} =
+      .ok ((smokeFlagProgram ++ smokeLoopProgram, (Match.locals, 2)), {}) := by
+    have h := CoverageBranch.actual_block (C := Match.C) hk (sc := { funs := [] })
+      (CoverageBranch.Children.cons (smoke_flag hk)
+        (CoverageBranch.Children.cons (smoke_loop hk)
+          (CoverageBranch.Children.nil ((("brk0", .val .bool) :: Match.locals), 2)
+            ({} : CallMemo))))
+    simpa only [List.append_nil] using h
+  rw [hp]
+  conv => lhs; whnf
+  dsimp only
+  rw [hb]
+  rfl
+
+/-- The actual complete statement-list producer, with both mutable state layers. -/
+theorem smoke_elaborated (hk : Solidity.Goals.elabKernelTotal) :
+    @elabStmtsP Match.C productionNames smokeRaw { funs := [] } (Match.locals, 1) {} =
+      .ok ((smokeFlagProgram ++ smokeLoopProgram, (Match.locals, 2)), {}) := by
+  letI : FreshNames := productionNames
+  simpa only [List.append_nil] using CoverageBranch.actual_list
+    (CoverageBranch.Children.cons (smoke_outer_block hk)
+      (CoverageBranch.Children.nil (Match.locals, 2) ({} : CallMemo)))
+
+/-- Exact raw, scope, state, name and intrinsic-output proposals for the smoke. -/
+def smokeOutput : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool, .val .bool] where
+  raw := smokeRaw
+  afterLower := ⟨(Match.locals, 1), {}⟩
+  elabScope := { funs := [] }
+  beforeElab := ⟨(Match.locals, 1), {}⟩
+  afterElab := ⟨(Match.locals, 2), {}⟩
+  elaborated := smokeFlagProgram ++ smokeLoopProgram
+  names := (@ECtx.toNCtx productionNames Match.locals).names
+  program := smokeProgram
+
+/-- Actual lowering and elaboration establish the approved v2 production receipt. -/
+theorem smoke_production (hk : Solidity.Goals.elabKernelTotal) :
+    @ProductionV2 productionNames Match.body (Match.emitted smokeOutput) := by
+  letI : FreshNames := productionNames
+  refine ⟨⟨rfl, ?_⟩, ⟨smoke_elaborated hk, smoke_program_placed⟩, ?_⟩
+  · have h := Solidity.Correctness.Lowering.Total.Coverage.Template.whileBreak
+      none (.assign (.name "i") (.name "a")) Match.body.input.before
+      (Solidity.Correctness.Lowering.Total.Coverage.hasIncDec_assign _ _)
+    exact lowerAt_of_lowersTo (h.lowers Match.body.input.scope)
+  · exact ⟨⟨rfl, rfl, rfl⟩, rfl, rfl⟩
+
+/-- Nonvacuous application of restricted coverage to the actual accepted Match run. -/
+theorem smoke_coverage (hk : Solidity.Goals.elabKernelTotal) :
+    ∃ b' : Body, b'.SameInput Match.body ∧
+      ∃ m, diagram.Assoc b' (Match.emitted smokeOutput) m :=
+  diagram_total_boolean Match.body (Match.emitted smokeOutput)
+    (smoke_in_domain smokeOutput) (smoke_production hk) smoke_program_accepted
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -509,3 +1166,43 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_capture
 
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_write
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_condition_placed
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_condition_accepted
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_flag_placed
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_flag_accepted
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_write_list
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_condition_hoist
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_condition_not_hoist
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_set_flag_scope
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_guard_primitive
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_guard_hoist
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_guard
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_break_block
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_break_scope
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_break_primitive
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_break_hoist
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_break
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_body_scope
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_body_placed
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_body_accepted
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_loop_expression
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_loop_primitive
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_program_placed
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_program_accepted
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_loop
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_production
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_coverage

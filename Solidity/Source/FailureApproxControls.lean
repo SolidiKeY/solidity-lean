@@ -2,9 +2,6 @@ import Solidity.Source.FailureTransactionApprox
 import Solidity.Source.FailureTransactionControls
 import Solidity.Source.FailureEvaluatorGrowControls
 
-/-! Inhabited event-prefix uses with the existing independently frozen
-Source fixture. These do not generate or compare native observations.
-A fixed plan is essential; captured timeouts are not completed results. -/
 namespace Solidity.Source.FailureExecution.PlannedApprox.Controls
 open EM SemanticsExamples
 open RuntimeControls (input glob data points priorEvent callEvent answerEvent)
@@ -15,8 +12,6 @@ theorem root_prefix (pipeline : Roadmap.Pipeline) (cut : Option Nat)
       (TransactionControls.run pipeline cut later).2.2.events :=
   runTxWithPlan_events_mono (glob pipeline) (tx data) (points cut) (L0 EB) input more
 
-/-- Horizon zero times out after frame entry, before any child events.
-The event prefix theorem does not equate its retained state to finalization. -/
 theorem timeout_prefix (pipeline : Roadmap.Pipeline) :
     (TransactionControls.run pipeline none 0).1 = .error .timeout ∧
     (TransactionControls.run pipeline none 0).2.2.events = [priorEvent] ∧
@@ -28,15 +23,12 @@ theorem timeout_prefix (pipeline : Roadmap.Pipeline) :
   rw [short.2.1,long.2.1] at included
   exact included
 
-/-- This is a genuine completed cut, with full state from the frozen fixture,
-not timeout evidence relabelled as a successful transaction. -/
 theorem completed_cut (pipeline : Roadmap.Pipeline) :
     TransactionControls.run pipeline (some 1) =
       (.ok (.revert []),(.nil,TransactionControls.finalized [priorEvent,callEvent,
         TransactionControls.receipt (.revert [])])) :=
   TransactionControls.own_cut1_full_state pipeline
 
-/-- Event inclusion fails if a consumer silently changes the failure plan. -/
 theorem changed_plan_not_prefix (pipeline : Roadmap.Pipeline) :
     ¬ ((TransactionControls.run pipeline none).2.2.events <+:
       (TransactionControls.run pipeline (some 0)).2.2.events) := by
@@ -47,8 +39,6 @@ theorem changed_plan_not_prefix (pipeline : Roadmap.Pipeline) :
   change 4 ≤ 2 at size
   omega
 
-/-- Capturing timeout changes it into a normal result. Approximation cannot
-silently substitute an unrelated completed value in that result. -/
 theorem captured_timeout_not_approx :
     ¬ Approx (attempt (halt .timeout : EM EB [] Nat)) (attempt (pure 7)) := by
   intro claimed

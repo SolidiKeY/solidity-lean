@@ -118,3 +118,12 @@ test('raw presentation-role diagnostics cannot waive strict trust menu attribute
  v.menuRoles={version:1,reads:[{roles:[{label:{role:'presentation',className:'separator disabled',ariaDisabled:'true'},menuItem:null}]}]};
  assert.ok(trustErrors(v,'run','local').includes('incomplete trust menu attributes'));
 });
+
+
+test('menu mouse passes original absolute deadline and clock without changing ownership guard',async()=>{
+ const {menuMouse}=require('../parity/menu-lifecycle.cjs');let wall=100,checks=0;const now=()=>wall,calls=[],client={request:async(...args)=>{calls.push(args);return{};}};
+ for(const type of ['mousePressed','mouseReleased'])await menuMouse(client,{type},()=>{checks++;},200,now);
+ assert.equal(checks,2);assert.equal(calls.length,2);for(const [method,,options] of calls){assert.equal(method,'Input.dispatchMouseEvent');assert.equal(options.deadlineWall,200);assert.equal(options.wallNow,now);}
+ wall=200;await assert.rejects(menuMouse(client,{},()=>{checks++;},200,now),/Original3s/);assert.equal(checks,2);assert.equal(calls.length,2);
+ await assert.rejects(menuMouse(client,{},()=>{throw Error('foreign ownership');},300,now),/foreign ownership/);assert.equal(calls.length,2);
+});

@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.ReadyReturns
 
-/-! Complete function coverage combining the existing P9 value-call graph and
-ready single-return bodies. The memory entries store syntax/readiness and actual
-selected-body equality, not semantic progress. Coverage is checked explicitly;
-all conclusions refer to actual internal calls in the elaborated program. -/
 namespace Solidity.Source.Progress
 open EM Solidity.Lowering.P9
 

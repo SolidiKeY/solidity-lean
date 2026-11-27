@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.ReadyReturns
 
-/-! Progress through syntactically ready memory statements and sequences.
-The admission refines the preservation certificate with readiness, plain-value
-extraction and default witnesses. Existing value loops keep their old checks;
-new memory loops and modifiers are not admitted. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

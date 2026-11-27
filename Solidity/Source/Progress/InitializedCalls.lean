@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.InitializedPrefixes
 
-/-! Modifier-free internal calls with initialized-local prefixes and one return.
-Frame packing, defaults and the final return extraction are the existing source
-operations. The items certificate supplies progress and memory preservation. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

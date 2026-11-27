@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.BuiltinControls
 
-/-! Controls for `addmod`, `mulmod` and `ecrecover`: exact results, the
-zero-modulus panic, and the legacy/via-IR argument-order difference.
-`recovery_failure` uses a precompile that halts (`none`), a branch the pinned
-Osaka precompiles never take; an invalid signature there returns `some []`. -/
 
 namespace Solidity.Source.Progress.ScalarBuiltinControls
 open EM Preservation.AllocationControls

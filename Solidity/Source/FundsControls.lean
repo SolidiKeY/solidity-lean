@@ -1,13 +1,10 @@
 import Solidity.Source.Funds
 import Solidity.Source.SemanticsExamples
 
-/-! Actual typed Source controls for request admission, not a compiler/EVM or
-real-ledger specification proof. Fixed fixture ledgers are explicit below. -/
 namespace Solidity.Source.FundsControls
 open Solidity.Roadmap (Address Word Bytes Request Outcome Event SessionEnv Action Pipeline)
 open Solidity.Source.SemanticsExamples (word addr toyFixed selOf answerOnly)
 
-/-- Fixture-only decidable structural equality; no execution oracle. -/
 private instance : DecidableEq (Except Halt Outcome) := fun a b =>
   match a, b with
   | .error x, .error y => decidable_of_iff (x = y) (by constructor <;> intro h <;> cases h <;> rfl)
@@ -107,8 +104,6 @@ theorem funded_timeout_is_not_drop (p : Pipeline) :
     (runCheckedTx (glob p (word 9)) 0 (request (word 9)) initial).1 = some (.error .timeout) := by
   cases p <;> decide +kernel
 
-/-- A funded request with missing receiver code executes and reverts; it must
-not be confused with an invalid dropped request. -/
 def missingCode : St E := St.init E
 theorem funded_revert_is_not_drop (p : Pipeline) :
     let r := runCheckedTx (glob p (word 9)) 20 (request (word 9)) missingCode
@@ -123,8 +118,6 @@ theorem invalid_advances_to_valid (p : Pipeline) :
     sessionGoEvents (prog p) e 20 3 0 initial last = ⟨events, some (.success [])⟩ := by
   cases p <;> decide +kernel
 
-/-- Control ledger: successful transactions debit the sender from the actual
-prior event history. This fixture does not implement the full external ledger. -/
 def debit (old : Word) (events : List Event) (who : Address) : Word :=
   events.foldl (fun balance event => match event with
     | .tx s _ v _ _ (.success _) => if s = who then
@@ -141,7 +134,6 @@ theorem earlier_tx_debits (p : Pipeline) :
     sessionGoEvents (debitProg p) e 20 3 0 initial last = ⟨events, some (.success [])⟩ := by
   cases p <;> decide +kernel
 
-/-- Control ledger: a recorded credit to the sender makes nine available. -/
 def credited (b : Address → Word) (h : List Event) (a : Address) : Word :=
   if h.any (fun e => match e with | .credit t _ => t == a | _ => false) then word 9 else b a
 def creditFixed : Roadmap.Fixed := { toyFixed with ledger := credited }

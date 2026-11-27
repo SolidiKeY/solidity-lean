@@ -3,6 +3,7 @@
 import Solidity.Examples.AliasConstraints
 import Solidity.Examples.AutoComplete
 import Solidity.Examples.Backend.BytesFullMachine.FixedLayout
+import Solidity.Examples.Backend.BytesFullMachine.Intrinsic
 import Solidity.Examples.Benchmark.Algorithms.BinarySearch
 import Solidity.Examples.Benchmark.Algorithms.FastExponentiation
 import Solidity.Examples.Benchmark.Algorithms.Fibonacci
@@ -160,6 +161,7 @@ import Solidity.Examples.DependentReduction
 import Solidity.Examples.Docs.ProseCalibrated.Allowance
 import Solidity.Examples.ElabTotal.Context
 import Solidity.Examples.ElabTotal.Guard
+import Solidity.Examples.ElabTotal.HashCongruence
 import Solidity.Examples.ElabTotal.Lower
 import Solidity.Examples.ElabTotal.Measure
 import Solidity.Examples.ElabTotal.Stmts
@@ -173,6 +175,7 @@ import Solidity.Examples.Finish.Assembly
 import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
 import Solidity.Examples.FreshNamesLaw
+import Solidity.Examples.FrontendValidation.SolcJson
 import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
 import Solidity.Examples.Goals.BenchmarkBudgetsMet
@@ -187,6 +190,7 @@ import Solidity.Examples.Goals.ElabTotal
 import Solidity.Examples.Goals.Endpoint
 import Solidity.Examples.Goals.FastModeAgrees
 import Solidity.Examples.Goals.Finish
+import Solidity.Examples.Goals.FrontendValidation
 import Solidity.Examples.Goals.GenericYulViewsPreserve
 import Solidity.Examples.Goals.GoalPinsSpec
 import Solidity.Examples.Goals.Hash
@@ -236,9 +240,12 @@ import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.CasesV2
 import Solidity.Examples.Lowering.Sim.Coverage
 import Solidity.Examples.Lowering.Sim.Coverage.ThreadedV2
+import Solidity.Examples.Lowering.Sim.CoverageBranch
+import Solidity.Examples.Lowering.Sim.CoverageControl
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Induction
 import Solidity.Examples.Lowering.Sim.Match
+import Solidity.Examples.Lowering.Sim.PassList
 import Solidity.Examples.Lowering.Sim.Session.Backward
 import Solidity.Examples.Lowering.Sim.Session.Binding
 import Solidity.Examples.Lowering.Sim.Session.Forward
@@ -259,6 +266,7 @@ import Solidity.Examples.Lowering.Total.ConstructorDecode
 import Solidity.Examples.Lowering.Total.ConstructorPlacement
 import Solidity.Examples.Lowering.Total.EnumDecode
 import Solidity.Examples.Lowering.Total.EnumUseDecode
+import Solidity.Examples.Lowering.Total.FullDomain
 import Solidity.Examples.Lowering.Total.FunctionTypeDecode
 import Solidity.Examples.Lowering.Total.FunctionTypeFuelLaws
 import Solidity.Examples.Lowering.Total.FunctionTypeParserLaws
@@ -273,6 +281,8 @@ import Solidity.Examples.Lowering.Total.StructRows
 import Solidity.Examples.Lowering.Total.StructTableAgreement
 import Solidity.Examples.Lowering.Total.StructUnit
 import Solidity.Examples.Lowering.Total.StructUnitInference
+import Solidity.Examples.Lowering.Total.SuccessfulContext
+import Solidity.Examples.Lowering.Total.SuccessfulExpr
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
@@ -322,6 +332,7 @@ import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.StaticLinear
+import Solidity.Examples.StringLaws
 import Solidity.Examples.Tactics.AbiFeatures
 import Solidity.Examples.Tactics.AbiFeaturesImport
 import Solidity.Examples.Tactics.AbiHexCall

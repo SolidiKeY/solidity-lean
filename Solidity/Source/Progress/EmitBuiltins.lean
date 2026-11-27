@@ -1,14 +1,9 @@
 import Solidity.Source.Progress.CheckedPrograms
 
-/-! Direct builtin/emit progress adapters over the existing checked call
-fragment. These lemmas do not change `CallsOK` or silently admit new callee
-bodies. Allocation-sensitive byte arguments require a separate invariant.
--/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env} {Γ : RCtx}
 
-/-- Elementary event parameters really have ABI words. -/
 theorem encodeOne_key_ns (F : Fr) (n : Nat) (packed : Bool) {t : STy}
     (ht : t.keyable = true) (v : Val E.layout t) :
     NS (encodeOne (Γ := Γ) F n packed (.val v)) := by
@@ -19,7 +14,6 @@ theorem encodeOne_key_ns (F : Fr) (n : Nat) (packed : Bool) {t : STy}
       | (cases packed <;> exact NS.pure' _)
       | rename_i h; rw [h] at hw; cases hw
 
-/-- Event arguments in the elementary ABI fragment. -/
 theorem encodeVals_key_ns (F : Fr) (n : Nat) (packed : Bool)
     {ts : List STy} (ht : ts.all STy.keyable = true) (vs : Vals E.layout ts) :
     NS (encodeVals (Γ := Γ) F n packed vs.toR) := by
@@ -70,8 +64,6 @@ theorem evalBuiltin_revert_ns (G : Glob E) (F : Fr) (n : Nat)
   cases vs
   exact NS.halt' fun _ h => by cases h
 
-/-- Direct emit progress: argument progress and elementary ABI parameters.
-The static-frame revert remains an allowed non-stuck outcome. -/
 theorem execS_emit_ns (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph E))
     {R : List STy} {M : Bool} {k : SCtx} {ps : List STy}
     (ev : Decl) (he : ev.paramTys E = some ps) (args : RConvArgs E Γ ps)
@@ -86,8 +78,6 @@ theorem execS_emit_ns (G : Glob E) (F : Fr) (n nps : Nat) (ph : Option (Ph E))
   · exact NS.halt' fun _ h => by cases h
   · exact NS.bind (NS.modSt' (fun s => {s with logs := (F.this, G.selector (sigOf E.layout ev.name ps) ++ data) :: s.logs})) fun _ => NS.pure' _
 
-/-- Reuse the same whole-program checker for event argument calls. The
-new direct emit node is not inserted into the old body admission. -/
 theorem checked_emit (res : Resolution) (G : Glob res.env) (c : String)
     (ha : (Source.elaborate res).isSome = true) (hg : G.prog = Source.progOf res.env)
     (hc : Solidity.Lowering.P9.WholeProgram.checkFunctions res G c = true)

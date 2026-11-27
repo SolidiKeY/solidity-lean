@@ -1,8 +1,6 @@
 import Solidity.Source.MonetaryStorage
 import Solidity.Source.FailureRuntimeControls
 
-/-! Selected direct Source storage operations, not a dispatched contract call.
-The registered example layout supplies real persistent/transient paths. -/
 namespace Solidity.Source.MonetaryStorage.Controls
 open SemanticsExamples
 open FailureExecution.RuntimeControls (caller priorEvent)
@@ -61,7 +59,6 @@ theorem wrong_type_stuck :
     (writeAt FC dX.path (.bool false) : EM EB [.bytes .memory,.bool] Unit).run (caller,seed) =
       (.error (.stuck "storage cell type"),(caller,seed)) := by rfl
 
-/-- The real account journal restores both the overwritten cell and old money. -/
 theorem persistent_undo : persistentExpected.ex.undo = seed.ex := by
   simp only [persistentExpected, ExecState.undo_apply]
 
