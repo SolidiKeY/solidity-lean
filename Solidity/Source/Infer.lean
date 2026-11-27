@@ -1,51 +1,23 @@
 import Solidity.Source.Typing
 
-/-!
-# Type inference: derivations computed
-
-`Typed.infer Γ e` returns a type and a derivation `Typed Γ e τ`, or `none`;
-`StmtD.infer` and `ItemsD.infer` do the same for statements and blocks.
-The result is a derivation, so inference is sound by construction; by
-`Typed.unique` (`Solidity/Source/Unique.lean`) the derivation it finds has
-the meaning every derivation has.  Inference follows the rules' premises in
-order; its recursion is structural on a fuel bounded by the syntax's size
-(`Syn.nodes`), so it runs in the kernel.
-
-It is not proved complete: where it returns `none`, a derivation may still
-exist.  The rules are syntax-directed except for the choices below, which
-inference makes in this order:
-
-- a constant expression is `const` (`Typed.constShape`: every other
-  derivation of it means the same);
-- `return (a, b, …);` is `retTuple` before `retVal`;
-- `f(x)` is a conversion (`convUser`), then a struct (`structNew`), then a
-  builtin, then an internal call, as `f` resolves;
-- `a = b` is `assign` before `assignCopy`.
--/
 
 namespace Solidity.Source
 
-/-- A typed expression: its type and derivation. -/
 abbrev Inferred (Γ : Ctx) (e : Syn .expr) := (τ : STy) × Typed Γ e τ
 
-/-- Whether a type is a mapping (`Typed.delete`'s test). -/
 def STy.isMapping (τ : STy) : Bool := τ matches .mapping _ _
 
-/-- Whether a type is an address or contract (`Typed.payable`'s test). -/
 def STy.isPayableArg (σ : STy) : Bool :=
   match σ with | .address _ => true | .contract _ => true | _ => false
 
-/-- The location an elementary conversion keeps (`Typed.convElem`). -/
 def STy.convLoc (σ : STy) : DataLoc :=
   match σ with | .bytes l => l | .string l => l | _ => .memory
 
-/-- The `const` rule, when its premises hold. -/
 def tryConst (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :=
   match hc : e.const, ha : e.isAddressLit, hx : e.hexLen? with
   | Option.some _, false, Option.none => Option.some ⟨_, .const hc ha hx⟩
   | _, _, _ => Option.none
 
-/-- A binary operation of kind `k` from its operands' derivations. -/
 def inferBin (Γ : Ctx) (e a b : Syn .expr) (k : BinKind) (hb : e.binOp? = Option.some (k, a, b))
     (ra : Option (Inferred Γ a)) (rb : Option (Inferred Γ b)) : Option (Inferred Γ e) :=
   match k, hb, a.const, b.const with
@@ -107,7 +79,6 @@ def inferBin (Γ : Ctx) (e a b : Syn .expr) (k : BinKind) (hb : e.binOp? = Optio
         | _, _, _, _ => Option.none
     | _, _ => Option.none
 
-/-- A magic member `g.m` of a builtin `g`. -/
 def tryMagic (Γ : Ctx) (g m : String) : Option (Inferred Γ (.member (.ident g) m)) :=
   match hr : Γ.resolve g with
   | Option.some (.builtin b) =>
@@ -119,7 +90,6 @@ def tryMagic (Γ : Ctx) (g m : String) : Option (Inferred Γ (.member (.ident g)
     | _, _ => Option.none
   | _ => Option.none
 
-/-- An internal call `f(args)` from its arguments' types. -/
 def inferCall (Γ : Ctx) (f : String) (args : Syn (.list .expr)) (σs : List STy)
     (da : TypedArgs Γ args σs) : Option (Inferred Γ (.call (.ident f) (.positional args))) :=
   match hf : (Γ.functions f).filter (fun d' => match d'.fnSig Γ.env with
@@ -131,7 +101,6 @@ def inferCall (Γ : Ctx) (f : String) (args : Syn (.list .expr)) (σs : List STy
     | Option.none => Option.none
   | _ => Option.none
 
-/-- `abi.decode(x, ts)` from the data's inferred derivation. -/
 def inferDecode (Γ : Ctx) (g : String) (x ts : Syn .expr) (rx : Unit → Option (Inferred Γ x)) :
     Option (Inferred Γ (.call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil))))) :=
   match hr : Γ.resolve g with
@@ -150,7 +119,6 @@ def inferDecode (Γ : Ctx) (g : String) (x ts : Syn .expr) (rx : Unit → Option
 
 mutual
 
-/-- **Type inference** of an expression: a type and a derivation. -/
 def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :=
   match n with
   | 0 => Option.none
@@ -411,7 +379,6 @@ def Typed.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :
   | _ => Option.none
 termination_by structural n
 
-/-- Inference of an lvalue. -/
 def LVal.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option ((τ : STy) × LVal Γ e τ) :=
   match n with
   | 0 => Option.none
@@ -458,7 +425,6 @@ def LVal.inferN (n : Nat) (Γ : Ctx) (e : Syn .expr) : Option ((τ : STy) × LVa
   | _ => Option.none
 termination_by structural n
 
-/-- Inference of an argument list. -/
 def TypedArgs.inferN (n : Nat) (Γ : Ctx) (es : Syn (.list .expr)) :
     Option ((τs : List STy) × TypedArgs Γ es τs) :=
   match n with
@@ -472,7 +438,6 @@ def TypedArgs.inferN (n : Nat) (Γ : Ctx) (es : Syn (.list .expr)) :
     pure ⟨τ :: τs, .cons d ds⟩
 termination_by structural n
 
-/-- Inference of tuple slots, each present. -/
 def TypedSlots.inferN (n : Nat) (Γ : Ctx) (s : Syn (.list (.opt .expr))) :
     Option ((τs : List STy) × TypedSlots Γ s τs) :=
   match n with
@@ -489,25 +454,18 @@ termination_by structural n
 
 end
 
-/-- **Type inference** of an expression, with fuel its number of nodes
-(each rule's premises are about strictly smaller syntax, so the fuel never
-runs out first). -/
 def Typed.infer (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) := Typed.inferN (e.nodes.length + 1) Γ e
 
-/-- Inference of an lvalue. -/
 def LVal.infer (Γ : Ctx) (e : Syn .expr) : Option ((τ : STy) × LVal Γ e τ) :=
   LVal.inferN (e.nodes.length + 1) Γ e
 
-/-- Inference of an argument list. -/
 def TypedArgs.infer (Γ : Ctx) (es : Syn (.list .expr)) : Option ((τs : List STy) × TypedArgs Γ es τs) :=
   TypedArgs.inferN (es.nodes.length + 1) Γ es
 
-/-- Inference of tuple slots. -/
 def TypedSlots.infer (Γ : Ctx) (s : Syn (.list (.opt .expr))) :
     Option ((τs : List STy) × TypedSlots Γ s τs) :=
   TypedSlots.inferN (s.nodes.length + 1) Γ s
 
-/-- Inference of an optional loop condition. -/
 def OptCond.infer (Γ : Ctx) (c : Syn (.opt .expr)) : Option (OptCond Γ c) :=
   match c with
   | .none => Option.some .none
@@ -516,17 +474,14 @@ def OptCond.infer (Γ : Ctx) (c : Syn (.opt .expr)) : Option (OptCond Γ c) :=
     | Option.some ⟨.bool, d⟩ => Option.some (.some d)
     | _ => Option.none
 
-/-- Inference of an optional loop step. -/
 def OptExpr.infer (Γ : Ctx) (c : Syn (.opt .expr)) : Option (OptExpr Γ c) :=
   match c with
   | .none => Option.some .none
   | .some e => (Typed.infer Γ e).map fun ⟨_, d⟩ => .some d
 
-/-- The locals a statement leaves, and its derivation. -/
 abbrev StmtInferred (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : Syn (.stmt k)) :=
   (L' : List (String × STy)) × StmtD C L s L'
 
-/-- Inference of a simple statement (no nested statements). -/
 def StmtD.inferSimple (C : Ctx) {k : SCtx} (L : List (String × STy)) (i : Syn .simple) :
     Option (StmtInferred C (k := k) L (.simpleStmt i)) :=
   match i with
@@ -572,7 +527,6 @@ def StmtD.inferSimple (C : Ctx) {k : SCtx} (L : List (String × STy)) (i : Syn .
         | _, _ => Option.none
     | Option.none => Option.none
 
-/-- `return e;` against a single return. -/
 def StmtD.inferSingle (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .expr) :
     Option (StmtInferred C (k := k) L (.returnStmt (.some e))) :=
   match hR : C.rets with
@@ -580,8 +534,6 @@ def StmtD.inferSingle (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .
     if h : σ.implicit C.isBase C.mapFree τ = true then Option.some ⟨L, .retVal hR d h⟩ else Option.none
   | _ => Option.none
 
-/-- `return e;`: a tuple of two or more components against the returns,
-otherwise a single value. -/
 def StmtD.inferReturn (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .expr) :
     Option (StmtInferred C (k := k) L (.returnStmt (.some e))) :=
   match e with
@@ -597,7 +549,6 @@ def StmtD.inferReturn (C : Ctx) {k : SCtx} (L : List (String × STy)) (e : Syn .
 
 mutual
 
-/-- **Inference of a statement**: the locals it leaves and a derivation. -/
 def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : Syn (.stmt k)) :
     Option (StmtInferred C L s) :=
   match n with
@@ -746,7 +697,6 @@ def StmtD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : 
   | _, _ => Option.none
 termination_by structural n
 
-/-- **Inference of a block**: its items in order. -/
 def ItemsD.inferN (n : Nat) (C : Ctx) {k : SCtx} (L : List (String × STy)) (b : Syn (.list (.item k))) :
     Option ((L' : List (String × STy)) × ItemsD C L b L') :=
   match n with
@@ -764,12 +714,10 @@ termination_by structural n
 
 end
 
-/-- Inference of a statement. -/
 def StmtD.infer (C : Ctx) {k : SCtx} (L : List (String × STy)) (s : Syn (.stmt k)) :
     Option (StmtInferred C L s) :=
   StmtD.inferN (s.nodes.length + 1) C L s
 
-/-- Inference of a block. -/
 def ItemsD.infer (C : Ctx) {k : SCtx} (L : List (String × STy)) (b : Syn (.list (.item k))) :
     Option ((L' : List (String × STy)) × ItemsD C L b L') :=
   ItemsD.inferN (b.nodes.length + 1) C L b

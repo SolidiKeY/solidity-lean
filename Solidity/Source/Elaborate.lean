@@ -1,35 +1,9 @@
 import Solidity.Source.Infer
 import Solidity.Source.Elaborated
 
-/-!
-# The elaborator: a resolution to its program
-
-`elaborate r` infers a derivation for every body, initializer, constant,
-modifier invocation and base-constructor argument of `r`'s unit
-(`Solidity/Source/Infer.lean`) and assembles the `Program` the semantics
-runs.  Each piece is built together with the proof that it is the
-elaboration of the derivation it came from (`RBody.Derived`,
-`RInit.Derived`, `RConvArgs.Derived`), so the `Elaborated` it returns is
-coherent by construction.  It returns `none` when a body, an initializer or
-a base argument does not elaborate.
-
-Where the syntax goes:
-
-- a function, modifier, `receive` or `fallback` body: `Program.body`, its
-  modifier invocations typed in its locals (parameters and named returns);
-- a constructor: `Program.body` and `Program.ctor`; its invocations that
-  name a contract (`constructor() B(x)`) are base arguments, not modifiers;
-- `is B(args)`: base arguments, typed in the contract's scope with the
-  constructor's locals present but unnamed, so they occupy the constructor's
-  frame without being visible (solc evaluates them outside the constructor);
-- a state variable's initializer: `Program.inits` in declaration order; a
-  constant's: `Program.consts`.
--/
 
 namespace Solidity.Source
 
-/-- Converted arguments from a derivation, at parameters `ps`, in context
-`C`. -/
 def elabArgs (C : Ctx) (es : Syn (.list .expr)) (ps : List STy) :
     Option {a : RConvArgs C.env C.tys ps // RConvArgs.DerivedIn C es ps a} :=
   match TypedArgs.infer C es with
@@ -39,7 +13,6 @@ def elabArgs (C : Ctx) (es : Syn (.list .expr)) (ps : List STy) :
     else Option.none
   | Option.none => Option.none
 
-/-- Arguments derived in a context, moved to an equal list of local types. -/
 def castArgs {C : Ctx} {es : Syn (.list .expr)} {Γ Γ' : RCtx} {ps : List STy} (h : Γ = Γ')
     (a : RConvArgs C.env Γ ps) (ha : RConvArgs.DerivedIn C es ps a) :
     {a' : RConvArgs C.env Γ' ps // RConvArgs.DerivedIn C es ps a'} :=
@@ -47,8 +20,6 @@ def castArgs {C : Ctx} {es : Syn (.list .expr)} {Γ Γ' : RCtx} {ps : List STy} 
     obtain ⟨σs, D, hf, he⟩ := ha
     exact ⟨σs, D, hf, (cast_heq _ a).trans he⟩⟩
 
-/-- The modifier invocations among `invs`, each typed in `f`'s locals: a
-constructor's invocations of a contract are skipped (base arguments). -/
 def elabMods (E : Env) (d : Decl) (f : Frame) :
     (invs : List (IdPath × Syn (.opt .callArgs))) → Option {ms : List (RModInv E (tysOf f.locals)) //
       ∀ m ∈ ms, ∃ p a es, (p, a) ∈ invs ∧ E.modifierAt d.scope p = some (m.modifier, m.ps) ∧
@@ -75,7 +46,6 @@ def elabMods (E : Env) (d : Decl) (f : Frame) :
           exact ⟨p', a', es', List.mem_cons_of_mem _ hmem, h1, h2, h3⟩⟩
       else Option.none
 
-/-- **A body, elaborated**, with its modifier invocations. -/
 def elabBody (E : Env) (d : Decl) : Option {b : RBody E // RBody.Derived E d b} :=
   match hf : d.frame? E with
   | Option.none => Option.none
@@ -88,7 +58,6 @@ def elabBody (E : Env) (d : Decl) : Option {b : RBody E // RBody.Derived E d b} 
       | Option.some ⟨ms, hms⟩ =>
         Option.some ⟨RBody.ofDerivation f D ms, f, L', hf, ⟨D, rfl, rfl, rfl, rfl, rfl, HEq.rfl⟩, hms⟩
 
-/-- **An initializer, elaborated** and converted to the variable's type. -/
 def elabInit (E : Env) (d : Decl) : Option {i : RInit E // i.var = d ∧ RInit.Derived E i} :=
   match he : d.init?, hτ : d.varTy E with
   | Option.some e, Option.some τ =>
@@ -104,7 +73,6 @@ theorem tysOf_anonLocals (L : List (String × STy)) : tysOf (anonLocals L) = tys
   simp only [tysOf, anonLocals, List.map_map]
   rfl
 
-/-- The base arguments of inheritance-list entries `xs` of contract `c`. -/
 def elabInherit (E : Env) (c : String) :
     (xs : List (IdPath × Syn (.opt .callArgs))) → Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) //
       ∀ a ∈ as, a.ps = E.ctorParams a.base ∧ ∃ p es, (p, Syn.some (.positional es)) ∈ xs ∧
@@ -132,7 +100,6 @@ def elabInherit (E : Env) (c : String) :
       | Option.none => Option.none
     | .some (.named _) => Option.none
 
-/-- A constructor's invocations of base contracts, typed in its parameters. -/
 def elabCtorBases (E : Env) (c : String) (d : Decl) (f : Frame) (hL : f.locals = E.ctorFrameLocals c) :
     (xs : List (IdPath × Syn (.opt .callArgs))) → Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) //
       ∀ a ∈ as, a.ps = E.ctorParams a.base ∧ ∃ p args es, (p, args) ∈ xs ∧
@@ -159,8 +126,6 @@ def elabCtorBases (E : Env) (c : String) (d : Decl) (f : Frame) (hL : f.locals =
       | Option.none => Option.none
     | Option.none => pure ⟨as, lift⟩
 
-/-- **The base-constructor arguments contract `c` gives**: its
-constructor's invocations, then its inheritance list. -/
 def elabBaseArgs (E : Env) (c : String) :
     Option {as : List (RBaseArg E (tysOf (E.ctorFrameLocals c))) // ∀ a ∈ as, RBaseArg.Derived E c a} := do
   let ⟨fromInherit, hi⟩ ← elabInherit E c (E.inheritOf c).inheritList
@@ -182,11 +147,9 @@ def elabBaseArgs (E : Env) (c : String) :
           exact ⟨h0, Or.inr ⟨d, f, p, args, es, hd, hf, h1, h2, h3, h4⟩⟩
         · exact hi' x hx⟩
 
-/-- The state variables of contract `c` that are not constants, in order. -/
 def Env.stateVarsOf (E : Env) (c : String) : List Decl :=
   E.decls.filter fun d => d.kind == .stateVar && d.scope == Option.some c && !d.isConst
 
-/-- **The program** of an environment, every part elaborated on demand. -/
 def progOf (E : Env) : Program E where
   body d := (elabBody E d).map Subtype.val
   consts d := if d.isConst then (elabInit E d).map Subtype.val else Option.none
@@ -196,8 +159,6 @@ def progOf (E : Env) : Program E where
   baseArgs c := ((elabBaseArgs E c).map Subtype.val).getD []
   contracts := E.contracts
 
-/-- Whether every part of a unit elaborates: each body, each initializer,
-each contract's base arguments. -/
 def elaborates (E : Env) : Bool :=
   E.decls.all (fun d => !d.hasBody || (elabBody E d).isSome) &&
   E.decls.all (fun d => d.init?.isNone || (elabInit E d).isSome) &&
@@ -211,8 +172,6 @@ theorem mem_of_map_val {α : Type} {P : α → Prop} {o : Option (Subtype P)} {a
     cases h
     exact x.property
 
-/-- **The elaborator**: a resolution's program, when every part of it
-elaborates; coherent by construction. -/
 def elaborate (r : Resolution) : Option Elaborated :=
   if elaborates r.env then
     Option.some
@@ -252,5 +211,8 @@ def elaborate (r : Resolution) : Option Elaborated :=
             rw [h] at ha
             exact x.property a ha }
   else Option.none
+
+example (r : Resolution) : (elaborate r).isSome = elaborates r.env := by
+  cases gate : elaborates r.env <;> simp [elaborate, gate]
 
 end Solidity.Source
