@@ -250,4 +250,55 @@ theorem hoistCallArgs_spells (H : RawExpr → ElabM (SProg C × RawExpr))
     (fun e => ∃ t, ExprX T R e t) (fun x => ⟨_, .name x⟩)
     H stmt f args hin hh sc st m out st' m' run)
 
+private theorem named_step (rc : ElabRec C) (f : String) (ns : List String)
+    (args : List RawExpr) : hoistWith C rc (.named f ns args) = (do
+    -- the members' order; an effect may not move
+    let flds := (C.structFields f).map (·.1)
+    if flds.isEmpty then throw s!"{f}(\{…}): {f} is not a struct or a function declared before this one"
+    unless ns.length == flds.length && flds.all ns.contains do
+      throw s!"{f}(\{…}) names each member of {f} once: {flds}"
+    if ns != flds && args.any (·.hasIncDec) then
+      throw s!"{f}(\{…}): an argument with an effect, out of the members' order"
+    rc.hoist (.call f (flds.map fun g => (Semantics.lookupBy g (ns.zip args)).getD (.num 0)))) := by
+  have hfold : (liftM (RawExpr.named f ns args).foldConst : ElabM RawExpr) =
+      pure (.named f ns args) := rfl
+  unfold hoistWith
+  extract_lets
+  rw [hfold]
+  simp -zeta only [pure_bind]
+  dsimp +zetaDelta only
+  simp only [pure_bind]
+
+/-- Successful named-struct hoisting enforces the existing member and effect
+order guards and runs its callback on exactly the declaration-ordered call.
+This is a producer fact, not a new Source spelling or typing premise. -/
+theorem named_run (rc : ElabRec C) (f : String) (ns : List String) (args : List RawExpr)
+    (sc : ElabScope) (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+    : hoistWith C rc (.named f ns args) sc st m = .ok ((out, st'), m') ↔
+    let fs := (C.structFields f).map (·.1)
+    fs.isEmpty = false ∧ (ns.length == fs.length && fs.all ns.contains) = true ∧
+      (ns != fs && args.any (·.hasIncDec)) = false ∧
+      rc.hoist (.call f (fs.map fun g => (Semantics.lookupBy g (ns.zip args)).getD (.num 0)))
+        sc st m = .ok ((out, st'), m') := by
+  constructor
+  · intro h
+    dsimp only
+    rw [named_step] at h
+    dsimp only at h
+    split at h
+    · cases h
+    · rename_i h1
+      split at h
+      · rename_i h2
+        split at h
+        · cases h
+        · rename_i h3
+          exact ⟨by simpa using h1, h2, by simpa using h3, h⟩
+      · cases h
+  · rintro ⟨h1, h2, h3, h4⟩
+    rw [named_step]
+    dsimp only
+    simp only [h1, h2, h3, Bool.false_eq_true, ↓reduceIte, pure_bind]
+    exact h4
+
 end Solidity.Correctness.Lowering.Total.Decode.SuccessfulExpr

@@ -104,4 +104,26 @@ example (C : Contract) [FreshNames] (T : Tables) (R : Registry) :
     exact ⟨_, .bool true⟩
   · exact fun _ _ => ElabControlProof.obs_pure ⟨_, .num 2⟩
 
+-- Named-constructor guard failures cannot be hidden by an arbitrary callback.
+variable (C : Contract) [FreshNames] (rc : ElabRec C) (f : String)
+  (ns : List String) (args : List RawExpr) (sc : ElabScope)
+  (st st' : ECtx × Nat) (m m' : CallMemo) (out : SProg C × RawExpr)
+example (empty : C.structFields f = []) :
+    hoistWith C rc (.named f ns args) sc st m ≠ .ok ((out, st'), m') := by
+  intro run
+  have h := ((named_run C rc f ns args sc st st' m m' out).mp run).1
+  simp [empty] at h
+example (order : (ns != (C.structFields f).map (·.1)) = true)
+    (effect : args.any (·.hasIncDec) = true) :
+    hoistWith C rc (.named f ns args) sc st m ≠ .ok ((out, st'), m') := by
+  intro run
+  have h := ((named_run C rc f ns args sc st st' m m' out).mp run).2.2.1
+  simp [order, effect] at h
+
+example (fields : C.structFields f = [("x", .prim .uint)]) :
+    hoistWith C {rc with hoist := fun _ => pure ([], .bool true)}
+      (.named f ["x"] [.num 1]) sc st m = .ok ((([], .bool true), st), m) := by
+  apply (named_run C _ f ["x"] [.num 1] sc st st m m _).mpr
+  exact ⟨by simp [fields], by simp [fields], by simp [fields], rfl⟩
+
 end Solidity.Examples.Lowering.Total.SuccessfulExpr
