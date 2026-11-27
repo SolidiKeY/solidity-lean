@@ -56,4 +56,5 @@ example {p : PrimTy} {v : Val C Γ p} (w : Thin Γ Δ) (hv : ValOk v) :
 example {ps : Ctx} {as : Args C Γ ps} (w : Thin Γ Δ) (ha : ArgsOk as) :
     ArgsOk (as.wk w) := args_wk_ok w ha
 
+example {p : PrimTy} {l : OpLoc C Γ p} (w : Thin Γ Δ) (h : OpLocOk l) : OpLocOk (l.wk w) := opLoc_wk_ok w h
 end Solidity.Backend.CompilerOptimizerDomain.Controls

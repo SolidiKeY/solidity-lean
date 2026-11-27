@@ -38,4 +38,7 @@ theorem args_wk_ok (w : Thin Γ Δ) :
   | _, _, .nil => .nil
   | _, _, .snoc p x ha he => .snoc p x (args_wk_ok w ha) (val_wk_ok w he)
 
+theorem opLoc_wk_ok (w : Thin Γ Δ) {p : PrimTy} {l : OpLoc C Γ p}
+    (h : OpLocOk l) : OpLocOk (l.wk w) := by
+  cases h <;> constructor <;> first | assumption | exact path_wk_ok w ‹_› | exact loc_wk_ok w ‹_›
 end Solidity.Backend.CompilerOptimizerDomain
