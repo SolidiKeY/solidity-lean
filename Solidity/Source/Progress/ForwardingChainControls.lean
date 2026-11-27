@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.ForwardingChain
 import Solidity.Source.Progress.ForwardingControls
 
-/-! The actual allocating/relay unit consumes a finite chain certificate.
-Both base and added functions use the whole-unit theorem. Duplicate/value-list
-overlap guards and omitted-function coverage remain explicit negative controls. -/
 namespace Solidity.Source.Progress.ForwardingChainControls
 open EM Solidity.Lowering.P9 ForwardingControls
 

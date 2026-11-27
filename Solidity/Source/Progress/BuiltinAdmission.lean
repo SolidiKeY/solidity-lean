@@ -1,10 +1,5 @@
 import Solidity.Source.Progress.LiteralBuiltins
 
-/-! A direct builtin admission over the existing checked whole-program call
-fragment. It admits scalar/constant argument expressions and literal bytes.
-It does not change the old checker or admit emitting/builtin callee bodies.
-Memory/storage/calldata byte expressions need invariant-relative admission.
--/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}
@@ -40,9 +35,6 @@ theorem argsFragment_ns {C : Decl → Prop} (G : Glob E) (F : Fr)
       exact ⟨NS.bind (arg n _ h) fun _ => NS.bind ht.1 fun _ => NS.pure' _,
         NS.bind ht.2 fun _ => NS.bind (arg n _ h) fun _ => NS.pure' _⟩
 
-/-- Typed intrinsic builtin nodes additionally carry the unchanged callTy
-equation. This predicate selects the proved direct fragment, not a replacement
-source typing rule. -/
 inductive BuiltinFragment (C : Decl → Prop) {Γ : RCtx} :
     (b : Builtin) → {ts : List STy} → RArgs E Γ ts → STy → Prop
   | require (args : RArgs E Γ [.bool]) : ArgsFragment C args →

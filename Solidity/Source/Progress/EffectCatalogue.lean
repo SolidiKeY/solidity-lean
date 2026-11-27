@@ -1,9 +1,5 @@
 import Solidity.Source.Progress.EffectBodies
 
-/-! A finite declaration-order certificate for nonrecursive effect bodies.
-Each head may call only its certified tail. Actual elaboration supplies the
-frame and signature facts; admission stores syntax checks, not progress.
-The original recursive value-fragment checker and CallsOK remain unchanged. -/
 namespace Solidity.Source.Progress
 open EM
 open Solidity.Lowering.P9
@@ -39,8 +35,6 @@ theorem effect_body_ns {A : Decl → Prop} {G : Glob E} {c : String}
     | brk _ => exact nomatch noEscape
     | cont _ => exact nomatch noEscape
 
-/-- Consume actual source call/default/body/return operations. The body
-progress is derived from syntactic effect membership and smaller callees. -/
 theorem effect_call_ns {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallProgress A G c) (F : Fr) (hc : F.contract = c) (d : Decl)
     {ps : List STy} (vs : Vals E.layout ps) (rs : List STy) (b : RBody E)
@@ -62,8 +56,6 @@ theorem effect_call_ns {A : Decl → Prop} {G : Glob E} {c : String}
     · rw [List.length_reverse,parameters]
     · exact NS.bind (NS.lift' (Source.retVals_ok l' rs (layout.trans rfl))) (fun _ => NS.pure' _)
 
-/-- Every listed function has its actual selected body, and that body's
-syntax calls only the certified suffix. There is no semantic NS premise. -/
 inductive EffectCatalogue (G : Glob E) (c : String) : List Decl → Prop
   | nil : EffectCatalogue G c []
   | cons {d : Decl} {ds : List Decl} {ps rs targetPs : List STy} {b : RBody E} :
@@ -73,8 +65,6 @@ inductive EffectCatalogue (G : Glob E) (c : String) : List Decl → Prop
       (∀ τ ∈ rs, (Val.default E.layout τ).isSome = true) →
       EffectItems (fun d => d ∈ ds) b.items → EffectCatalogue G c (d :: ds)
 
-/-- Actual elaboration supplies dispatch membership, body typing, signature
-coherence and frame layout; a finite syntactic catalogue derives call progress. -/
 theorem effect_catalogue_progress (el : Elaborated) (G : Glob el.res.env)
     (program : G.prog = el.prog) (environment : el.res.env.decls = el.res.unit.decls)
     (c : String) {ds : List Decl} (admission : EffectCatalogue G c ds) :
@@ -101,8 +91,6 @@ theorem effect_catalogue_progress (el : Elaborated) (G : Glob el.res.env)
         (by rw [parameterTypes,sameParameters]) mods defaults fragment n
     · exact ih F hc n called callSignature inTail vs
 
-/-- Transfer the certificate through actual successful elaborate, using the
-published dependent program-identity theorem rather than an assumed CallsOK. -/
 theorem effect_from_elaborate (res : Resolution) (ha : (Source.elaborate res).isSome = true)
     (G : Glob res.env) (program : G.prog = Source.progOf res.env)
     (environment : res.env.decls = res.unit.decls) (c : String) {ds : List Decl}
@@ -117,8 +105,6 @@ theorem effect_from_elaborate (res : Resolution) (ha : (Source.elaborate res).is
   exact effect_catalogue_progress ⟨r,Source.progOf r.env,hb,hcs,hm,hct,hco,hi,hba⟩
     G program environment c admission
 
-/-- Complete-catalogue coverage is checked separately; a caller cannot leave
-out a source function silently. This admission is nonrecursive and additive. -/
 theorem checked_effect_call (res : Resolution) (ha : (Source.elaborate res).isSome = true)
     (G : Glob res.env) (program : G.prog = Source.progOf res.env)
     (environment : res.env.decls = res.unit.decls) (c : String) (ds : List Decl)

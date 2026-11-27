@@ -66,3 +66,79 @@ for(const stage of ['fetch','json'])for(const [index,reason] of phaseReasons.ent
  assert.equal(f.created(),0);assert.equal(f.events.at(-1).event,'target.lookup.failed');assert.ok(f.events.at(-1).error.length);
 });
 test('falsy lookup reporting failure cannot replace original fetch cause',async()=>{const f=transport();await assert.rejects(connect(42,{...f.options,diagnostic:event=>{if(event.event==='target.lookup.failed')throw null;f.events.push(event);},fetchImpl:async()=>{throw false;}}),e=>e instanceof Error&&e.cause===false&&e.reportingErrors.length===1&&e.reportingErrors[0].includes('null'));assert.equal(f.created(),0);});
+
+// Fake endpoint controls only: no browser input or parity evidence.
+function deadlineTransport(){
+ const {DevTools}=require('../parity/renderer.cjs'),listeners=new Map(),timers=new Map(),sent=[];
+ let wall=100,mono=0,nextTimer=0,onNote=()=>{},onSend=()=>{};
+ const client=new DevTools('ws://owned',{now:()=>typeof mono==='function'?mono():mono,diagnostic:e=>onNote(e),setTimer:(fn,ms)=>{const id=++nextTimer;timers.set(id,{fn,ms});return id;},clearTimer:id=>timers.delete(id),socketFactory:()=>({addEventListener:(name,fn)=>listeners.set(name,fn),send:payload=>{sent.push(JSON.parse(payload));onSend();},close:()=>{}})});
+ return{client,timers,sent,wall:n=>{wall=n;},mono:n=>{mono=n;},options:{deadlineWall:200,wallNow:()=>wall},open:()=>listeners.get('open')(),note:fn=>{onNote=fn;},onSend:fn=>{onSend=fn;},reply:body=>listeners.get('message')({data:JSON.stringify({id:sent.at(-1).id,...body})})};
+}
+const input={type:'mousePressed',x:1,y:2};
+for(const options of [null,{}, {deadlineWall:NaN,wallNow:Date.now},{deadlineWall:200,wallNow:0},{deadlineWall:200,wallNow:Date.now,extra:true}])test('bounded request refuses malformed options '+String(options?.deadlineWall),async()=>{
+ const f=deadlineTransport();f.open();await assert.rejects(f.client.request('Input.dispatchMouseEvent',input,options),/Invalid CDP deadline/);assert.equal(f.sent.length,0);assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+});
+test('bounded readiness timeout cannot later dispatch or close shared connection',async()=>{
+ const f=deadlineTransport(),p=f.client.request('Input.dispatchMouseEvent',input,f.options),rejected=assert.rejects(p,/CDP timeout/);
+ const timer=[...f.timers.values()].find(t=>t.ms===100);assert.ok(timer);timer.fn();await rejected;f.open();await Promise.resolve();assert.equal(f.sent.length,0);assert.equal(f.client.failure,undefined);assert.equal(f.timers.size,0);
+});
+for(const stage of ['before','ready','serialize','diagnostic','rollback','invalid'])test('bounded send refuses '+stage+' clock before socket input',async()=>{
+ const f=deadlineTransport();if(stage==='before')f.wall(200);
+ if(stage!=='ready')f.open();
+ let params=input;
+ if(stage==='serialize')params={toJSON(){f.wall(200);return input;}};
+ if(stage==='diagnostic')f.note(e=>{if(e.event==='request')f.wall(200);});
+ if(stage==='rollback')f.note(e=>{if(e.event==='request')f.wall(99);});
+ if(stage==='invalid')f.note(e=>{if(e.event==='request')f.wall(Infinity);});
+ const p=f.client.request('Input.dispatchMouseEvent',params,f.options),rejected=assert.rejects(p,/CDP timeout|Invalid CDP deadline clock/);
+ if(stage==='ready'){f.wall(200);f.open();}
+ await rejected;assert.equal(f.sent.length,0);assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+});
+for(const stage of ['arrival','diagnostic','rollback','monotonic'])test('bounded response refuses '+stage+' late success',async()=>{
+ const f=deadlineTransport();f.open();const options=stage==='monotonic'?{...f.options,deadlineWall:10000}:f.options;
+ const p=f.client.request('Input.dispatchMouseEvent',input,options),rejected=assert.rejects(p,/CDP timeout|Invalid CDP deadline clock/);await Promise.resolve();await Promise.resolve();
+ assert.equal(f.sent.length,1);
+ if(stage==='arrival')f.wall(200);if(stage==='rollback')f.wall(99);if(stage==='monotonic')f.mono(5000);
+ if(stage==='diagnostic')f.note(e=>{if(e.event==='response')f.wall(200);});
+ f.reply({result:{}});await rejected;assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+});
+for(const body of [{error:{code:-1,message:'protocol refusal'}},{result:{exceptionDetails:{text:'execution refusal'}}}])test('on-time response errors survive diagnostic deadline consumption '+JSON.stringify(body),async()=>{
+ const f=deadlineTransport();f.open();f.note(e=>{if(e.event==='response')f.wall(200);});const p=f.client.request('Input.dispatchMouseEvent',input,f.options),rejected=assert.rejects(p,/protocol refusal|execution refusal/);await Promise.resolve();await Promise.resolve();f.reply(body);await rejected;assert.equal(f.timers.size,0);
+});
+test('bounded success clears timers; ordinary request keeps5000ms and ignores menu clock',async()=>{
+ for(const bounded of [true,false]){const f=deadlineTransport();f.open();const p=bounded?f.client.request('Input.dispatchMouseEvent',input,f.options):f.client.request('Input.dispatchMouseEvent',input);await Promise.resolve();await Promise.resolve();assert.equal([...f.timers.values()][0].ms,bounded?100:5000);if(!bounded)f.wall(10000);f.reply({result:{ok:true}});assert.deepEqual(await p,{ok:true});assert.equal(f.timers.size,0);assert.equal(f.client.pending.size,0);}
+});
+test('bounded timeout retires pending record; late reply supplies no success',async()=>{
+ const f=deadlineTransport();f.open();const p=f.client.request('Input.dispatchMouseEvent',input,f.options),rejected=assert.rejects(p,/CDP timeout/);await Promise.resolve();await Promise.resolve();[...f.timers.values()][0].fn();await rejected;f.reply({result:{ok:true}});assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+});
+test('bounded clock and send preserve non-Error causes',async()=>{
+ for(const stage of ['clock','send']){const f=deadlineTransport();f.open();const options=stage==='clock'?{deadlineWall:200,wallNow:()=>{throw null;}}:f.options;if(stage==='send')f.onSend(()=>{throw false;});const p=f.client.request('Input.dispatchMouseEvent',input,options);await p.then(()=>assert.fail('must reject'),e=>assert.equal(e,stage==='clock'?null:false));assert.equal(f.timers.size,0);assert.equal(f.client.pending.size,0);}
+});
+
+for(const stage of ['diagnostic','clock'])test('bounded send cannot outlive callback abort '+stage,async()=>{
+ const f=deadlineTransport();f.open();const original=Error('owned request aborted');let reads=0;
+ if(stage==='diagnostic')f.note(e=>{if(e.event==='request')f.client.abort(original,'owned.abort');});
+ const options=stage==='clock'?{deadlineWall:200,wallNow:()=>{if(++reads===3)f.client.abort(original,'owned.abort');return 100;}}:f.options;
+ await assert.rejects(f.client.request('Input.dispatchMouseEvent',input,options),e=>e===original);assert.equal(f.sent.length,0);assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+});
+
+for(const stage of ['diagnostic','clock'])for(const original of [Error('response aborted'),null,false])test('bounded response retains callback abort '+stage+'/'+String(original),async()=>{
+ const f=deadlineTransport();f.open();let reads=0;
+ const options=stage==='clock'?{deadlineWall:200,wallNow:()=>{if(++reads===4)f.client.abort(original,'owned.abort');return 100;}}:f.options;
+ const p=f.client.request('Input.dispatchMouseEvent',input,options),rejected=p.then(()=>assert.fail('must reject'),e=>assert.equal(e,original));await Promise.resolve();await Promise.resolve();
+ if(stage==='diagnostic')f.note(e=>{if(e.event==='response')f.client.abort(original,'owned.abort');});
+ f.reply({result:{ok:true}});await rejected;assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+});
+
+for(const original of [Error('serialize aborted'),null,false])test('serialization abort cannot send '+String(original),async()=>{
+ const f=deadlineTransport();f.open();const params={toJSON(){f.client.abort(original,'owned.abort');return input;}};
+ await f.client.request('Input.dispatchMouseEvent',params,f.options).then(()=>assert.fail('must reject'),e=>assert.equal(e,original));assert.equal(f.sent.length,0);assert.equal(f.timers.size,0);assert.equal(f.client.pending.size,0);
+});
+for(const mono of [NaN,Infinity])test('bounded request refuses nonfinite monotonic time '+mono,async()=>{
+ const f=deadlineTransport();f.open();f.note(e=>{if(e.event==='request')f.mono(mono);});await assert.rejects(f.client.request('Input.dispatchMouseEvent',input,f.options),/Invalid CDP deadline clock/);assert.equal(f.sent.length,0);assert.equal(f.timers.size,0);
+});
+
+for(const original of [Error('monotonic response abort'),null,false])test('final monotonic response guard preserves callback abort '+String(original),async()=>{
+ const f=deadlineTransport();f.open();const p=f.client.request('Input.dispatchMouseEvent',input,f.options),rejected=p.then(()=>assert.fail('must reject'),e=>assert.equal(e,original));await Promise.resolve();await Promise.resolve();let reads=0;
+ f.note(e=>{if(e.event==='response')f.mono(()=>{if(++reads===2)f.client.abort(original,'owned.abort');return 0;});});f.reply({result:{ok:true}});await rejected;assert.equal(f.client.pending.size,0);assert.equal(f.timers.size,0);
+});
