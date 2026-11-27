@@ -1,9 +1,6 @@
 import Solidity.Source.FailureFrameHorizon
 import Solidity.Source.FailureRequest
 
-/-! Actual scope transport for full-result equality or timeout. Capturing a
-halt alone is not Below-preserving; cleanup must rethrow timeouts. These
-laws introduce no evaluator, resource representation or session claim. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env} {Γ : RCtx} {α : Type}

@@ -1,9 +1,6 @@
 import Solidity.Source.FailureRequestAdmissionHorizon
 import Solidity.Source.FailureRequestAdmissionLaws
 
-/-! Nonconstant-plan/current-ordinal and actual caller-alias controls. The
-seed is an explicit quiescent cursor, not a claim of a whole session prefix.
-Complete Source state, journals and bytes are compared. No native evidence. -/
 namespace Solidity.Source.FailureExecution.AdmissionHorizonControls
 open EM Controls
 
@@ -55,8 +52,6 @@ theorem current_ordinal_approx (horizon : Nat) :
       (requestValueScope (points (2^256) none) qMax (family (horizon+1))) :=
   requestValueScope_approx _ _ (family_step horizon)
 
-/-- Changing the indexed fate to zero is detected even with equal body and
-input state: the current request is now dropped rather than reading the alias. -/
 theorem wrong_index_drops :
     (requestValueScope {points (2^256) none with
       tx := fun index => if index = 0 then .runs (2^256) none else .dropped}
