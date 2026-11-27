@@ -7,9 +7,10 @@ import Solidity.Backend.CompilerOptimizerDomain.Weakening
 import Solidity.Backend.CompilerOptimizerDomain.Inline
 import Solidity.Backend.CompilerOptimizerDomain.CSE
 import Solidity.Backend.CompilerOptimizerDomain.Propagate
+import Solidity.Backend.CompilerOptimizerDomain.Strengthening
 
 /-! Integration controls for the proved folding, simplification, removal, LICM,
-weakening, inlining, CSE and constant-propagation results. These check both
+weakening/strengthening, inlining, CSE and constant-propagation results. These check both
 resource and fragment consequences against the unchanged public compiler domain;
 they do not assert preservation by the remaining optimizer stages or iteration. -/
 namespace Solidity.Backend.CompilerOptimizerDomain.Controls
@@ -92,6 +93,14 @@ example (hP : ProgOk [] P) :
       ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.cprop Optimizer.ConstFold.Facts.empty P) = some G := by
   have hQ := prog_cprop_ok hP facts_empty_ok
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- Successful strengthening carries the original input acceptance proof.
+example {Θ : Ctx} (hP : ProgOk [] P) (w : Thin Θ Γ)
+    {Q : Optimizer.ConstFold.Str C Θ Δ} (he : Optimizer.ConstFold.Prog.str? w P = some Q) :
+    Evm.Prog.pushes Q.2.2 = 0 ∧ ∃ G, inFragP (Frag.init Θ) Q.2.2 = some G := by
+  have hQ := prog_str_ok hP w he []
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Θ) (Matches.init Θ)
   exact ⟨hQ.quiet.1, G, h⟩
 
 end Solidity.Backend.CompilerOptimizerDomain.Controls
