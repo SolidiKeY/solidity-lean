@@ -85,6 +85,10 @@ out={m for m in out if wide or m in leafs or not leaf(m)}
 if os.environ.get("GATE_MODE") == "checkpoint":
     slow={line.split()[1] for line in pathlib.Path("SoliditySlowExamples.lean").read_text().splitlines() if line.startswith("import ")}
     out.difference_update(slow)
+    # t2-controls-off-path: nor the SolidityControls library (built by full).
+    ctl=pathlib.Path("SolidityControls.lean")
+    if ctl.is_file():
+        out.difference_update(l.split()[1] for l in ctl.read_text().splitlines() if l.startswith("import "))
 print(" ".join(sorted(m for m in out if pathlib.Path(m.replace(".","/")+".lean").is_file())))
 open(os.environ["GATE_CORE_FILE"],"w").write("core" if core else "")
 PY
@@ -118,6 +122,8 @@ else
   if [ "$mode" = touched ] && [ -n "${GATE_TASK_SCOPE:-}" ]; then
     run_gate task-scope bash scripts/coord-tools/task-gate.sh scope
   fi
+  # t2-controls-off-path: every *Controls module in exactly one root, moved ones unreachable.
+  run_gate controls-roots python3 scripts/coord-tools/controls-classify.py --check
   [ "$failed" -eq 0 ] || exit "$failed"
   [ "$heartbeats" != 1 ] || rm -rf "$logs/heartbeats"  # a reused GATE_LOGS: no old records
   run_gate build-touched build_touched
@@ -139,7 +145,7 @@ else
     if [ "$mode" = full ]; then
       # H134: each slow example under its own 600 s one-core budget, as in CI
       # (after the libraries it imports); run-lean.sh then finds them built.
-      run_gate library lake build Solidity SolidityExamples
+      run_gate library lake build Solidity SolidityExamples SolidityControls
       if [ "${GATE_DECL_INDEX:-0}" = 1 ] && [ "$failed" -eq 0 ]; then
         run_gate decl-index python3 -B scripts/decl-index/decl_index.py gate full
       fi
