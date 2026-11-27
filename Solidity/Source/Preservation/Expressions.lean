@@ -2,7 +2,7 @@ import Solidity.Source.Preservation.ValueConversions
 import Solidity.Source.Preservation.Reads
 import Solidity.Source.Preservation.CallFrames
 
-/-! The expression half of joint memory preservation on the UNCHANGED value
+/-! The expression half of joint memory preservation on the value
 fragment. Progress remains the independently proved source `FragAt` theorem.
 -/
 namespace Solidity.Source.Preservation

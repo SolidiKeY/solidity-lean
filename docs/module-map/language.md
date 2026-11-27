@@ -357,6 +357,8 @@ same option to its monitor fixtures; no environment fallback enables it.
 | `Syntax/NumericV2.lean` | Additive full-domain signed-power range guard and statement/value pair; v1 remains unchanged. |
 | `Syntax/NumericV2Correct.lean` | Exact mathematical range/value, guard-before-value execution and full Source arithmetic panic-payload proofs. |
 | `Syntax/NumericV2Controls.lean` | Magnitude-overflow, signed-boundary, huge-exponent unit and unchanged successful-state regressions. |
+| `Solidity/Correctness/Elab/HashCongruence.lean` | Run-level hash and ERC7201 callback congruences through actual intermediate outputs; helper agreement only. |
+| `Solidity/Examples/ElabTotal/HashCongruence.lean` | Instantiated successful hash allocation, ERC7201 folding, and callback/arity failure boundaries. |
 | `Goals/Panic.lean` | `runCarriesPanicCodes`: conjunction of `panicRunOutcomes`, `panicCodeProvenance` and `panicSourceAssociation` (plan w3b-panic-bind). |
 | `Correctness/Panic/Main.lean` | `Semantics.run_panic_codes` assembles the three component proofs; guarded axiom pin permits only `propext`, `Classical.choice` and `Quot.sound`. |
 | `Examples/Goals/Panic.lean` | Roadmap pin and example of `runCarriesPanicCodes` proved by `Semantics.run_panic_codes`. |

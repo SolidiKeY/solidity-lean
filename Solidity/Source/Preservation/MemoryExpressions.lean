@@ -5,7 +5,7 @@ import Solidity.Source.Preservation.MemberPacking
 
 /-! Memory body expressions over the existing intrinsic source syntax.
 Reference rebinding and primitive memory-array writes retain actual bounds,
-type and horizon halts. No evaluator or original fragment is changed. -/
+type and horizon halts. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
