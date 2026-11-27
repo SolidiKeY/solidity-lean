@@ -2026,6 +2026,7 @@ import Solidity.Calculus.VisitedSet
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
 import Solidity.Correctness.Elab.Congruence
+import Solidity.Correctness.Elab.HashCongruence
 import Solidity.Correctness.Elab.Total
 import Solidity.Correctness.IntrinsicSession.Laws.Boundary
 import Solidity.Correctness.IntrinsicSession.Laws.Common
@@ -2084,6 +2085,7 @@ import Solidity.Correctness.Lowering.Sim.Match.CompositionV2
 import Solidity.Correctness.Lowering.Sim.Match.DiagramV2
 import Solidity.Correctness.Lowering.Sim.Match.Relations
 import Solidity.Correctness.Lowering.Sim.Match.StatementV2
+import Solidity.Correctness.Lowering.Sim.PassList
 import Solidity.Correctness.Lowering.Sim.Session.Backward
 import Solidity.Correctness.Lowering.Sim.Session.Backward.NoDiagram
 import Solidity.Correctness.Lowering.Sim.Session.Binding

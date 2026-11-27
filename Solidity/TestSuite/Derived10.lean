@@ -1,14 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-!
-# solkey's `TestSuite`, derived (10 of 12)
-
-`⊢` of each obligation the closer of memory added (objects allocated by
-the updates, read and written through members and indices, aliased
-and copied within memory), from `testMemoryDeleteAlias` to `memoryIndexArraySubAssignUnfold` in the
-order of the source; the replays are what `#solkey_derive? … pending`
-(`Frontend/Problems.lean`) prints.
--/
 
 open Solidity
 open scoped Scoped
