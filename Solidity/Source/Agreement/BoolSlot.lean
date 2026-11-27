@@ -1,7 +1,7 @@
 import Solidity.Source.Agreement.NormalBoolAssign
 
 /-! Existing intrinsic Source/model positions for a boolean beneath an arbitrary
-primitive pre. No new index representation or evaluator is introduced. -/
+primitive pre. -/
 namespace Solidity.Source.Agreement
 
 /-- Existing Source index at the exact end of the primitive pre. -/

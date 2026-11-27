@@ -1,7 +1,7 @@
 import Solidity.Source.Agreement.BoolSlot
 
 /-! Paired-index laws for the existing Source/model local operations. Recursion
-is on the ordinary primitive prefix; no index representation is changed. -/
+is on the ordinary primitive prefix. -/
 namespace Solidity.Source.Agreement
 
 /-- Reading the actual selected Source write returns that write. -/

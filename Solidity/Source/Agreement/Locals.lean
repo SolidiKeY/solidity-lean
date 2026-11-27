@@ -4,7 +4,6 @@ import Solidity.Source.Machine
 /-!
 # Primitive local-state correspondence
 
-This is the value/local-state interface of SS-AGREE, not a simulation.
 Contexts are intrinsic on both sides. Recursion is on the list of primitive
 types; no source local is erased. Heap, storage, events, calldata and execution
 resources have no correspondence theorem here.

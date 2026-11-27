@@ -5,8 +5,7 @@ import Solidity.Source.Agreement.PrimitiveTypes
 
 The two independently defined integer ranges agree, including their signed
 endpoints. This lets every supported model value produce an intrinsically
-well-ranged source value without a caller-supplied range hypothesis. This is
-only the value clause of SS-AGREE; it does not assert execution agreement.
+well-ranged source value without a caller-supplied range hypothesis. Execution agreement is not asserted.
 -/
 
 namespace Solidity.Source.Agreement

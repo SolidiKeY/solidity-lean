@@ -4,11 +4,9 @@ import Solidity.Semantics.Run
 /-!
 # Primitive source/model correspondence types
 
-The first value-level clause of source-soundness item 3. This relates the
-published independent source values to the existing elaborated model's
+This relates independent source values to the elaborated model's
 primitive values. It does not identify their heaps, executions, environments,
 calldata, or compiler outputs. In particular this is not an execution oracle.
-The source producers are imported unchanged from the recorded master input.
 -/
 
 namespace Solidity.Source.Agreement

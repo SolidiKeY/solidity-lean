@@ -1,7 +1,7 @@
 import Solidity.Source.Agreement.NormalDefaults
 
 /-! Constructed existing declaration pairs, not source/compiler/native fixtures.
-These clients discharge the earlier per-statement hypotheses with actual
+These clients discharge per-statement hypotheses with actual
 primitive producers and retain the entire incoming local tail and states. -/
 namespace Solidity.Source.Agreement
 
