@@ -1,1 +1,1 @@
-| `Backend/CompilerOptimizerDomain/ConstFold.lean` | Constant-fold preservation of the public compiler expression domain. |
+| `Backend/CompilerOptimizerDomain/{ConstFold,StmtFold,Controls}.lean` | Constant-fold expression and program domain preservation, generic statement lifting, and resource/fragment integration controls. |
