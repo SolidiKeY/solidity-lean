@@ -74,6 +74,16 @@ example (sc : ElabScope) (st : ECtx × Nat) (m : CallMemo) :
     hoistERC7201With C (fun _ => throw "hoist") [] sc st m =
       .error "erc7201 takes one string argument" := by rfl
 
+/-- Malformed ordinary hashes reject arbitrary callbacks before invoking
+any of them; instantiate the arity congruence against successful callbacks. -/
+example (sc : ElabScope) (st : ECtx × Nat) (m : CallMemo)
+    (H : RawExpr → ElabM (SProg C × RawExpr))
+    (B : RawExpr → ElabM (SProg C × String)) (S : List RawStmt → ElabM (SProg C)) :
+    hoistHashWith C H B S "sha256" [.num 1, .num 2] sc st m =
+      .error "sha256 takes one argument" := by
+  exact hoistHashWith_bad_arity_agree C H (one C) B (bytes C) S (stmts C) sc
+    "sha256" [.num 1, .num 2] (by decide) st m
+
 /-- A literal root folds successfully even with an always failing callback. -/
 example (sc : ElabScope) (st : ECtx × Nat) (m : CallMemo) :
     hoistERC7201With C (fun _ => throw "unreachable") [RawExpr.bytesLit []] sc st m =
