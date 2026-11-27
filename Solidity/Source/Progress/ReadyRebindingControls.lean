@@ -1,9 +1,6 @@
 import Solidity.Source.Progress.ReadyRebinding
 import Solidity.Source.Preservation.MemoryBodyControls
 
-/-! Direct intrinsic body/program controls, not an elaborated unit. A parameter
-is rebound to fresh object2 while a second parameter returns old object0. The
-actual call restores caller locals/function locals and retains both allocations. -/
 namespace Solidity.Source.Progress.ReadyRebindingControls
 open EM Preservation.MemoryBodyControls
 

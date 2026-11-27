@@ -1,8 +1,5 @@
 import Solidity.Source.Progress.ParentArgumentControls
 
-/-! Earlier argument references survive later argument allocation. A failing
-child propagates through the actual call before callee defaults/body start;
-the source halt and input policies are retained in both pipelines. -/
 namespace Solidity.Source.Progress.ParentArgumentFlowControls
 open EM ParentArgumentControls
 open Solidity.Lowering.P9
