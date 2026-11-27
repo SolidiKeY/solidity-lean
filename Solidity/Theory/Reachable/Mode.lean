@@ -1,7 +1,7 @@
 import Solidity.Calculus.Lifetime
 
 /-!
-# Reachable starting states as a mode (`docs/options.md`, O12)
+# Reachable starting states as a mode (`docs/options.md`)
 
 `Fml.Valid φ` reads `φ` at every typed state: any storage, any ledger, any
 transaction. The `reachable` mode reads it only at the states a deployed

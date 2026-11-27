@@ -2,9 +2,9 @@ import Solidity.Semantics.Transient
 import Solidity.Semantics.CallbackFrame
 
 /-!
-# A read-only body commits nothing (S3.1, view)
+# A read-only body commits nothing
 
-`docs/feature-work/semantics-extensions.md`, S3.1: a body a `view` (or
+`docs/feature-work/semantics-extensions.md`: a body a `view` (or
 `pure`) function may run leaves the storage, the transient storage and the
 balances as they were, in every outcome.
 
@@ -72,7 +72,7 @@ theorem Prog.committed_readOnly {μ : Mutability} {Γ Γ' : Ctx} (P : Prog C Γ 
   | error e => rfl
   | ok o => exact frame_globals (Prog.run_frame P hw 0 h).1 hμ
 
-/-- **S3.1 (view)**: a `view` body keeps storage, transient storage and
+/-- **View**: a `view` body keeps storage, transient storage and
 balances in every outcome (`uint x; function get() view returns (uint) {
 return x; }`). -/
 theorem Prog.committed_view {Γ Γ' : Ctx} (P : Prog C Γ Γ') (hw : Prog.within .view P = true)
@@ -94,7 +94,7 @@ def committedC {Γ Γ' : Ctx} (σ : State C Γ) : COut C σ.H Γ' → Globals C
   | .ok o => globals o.st
   | .halt _ | .violated => globals σ
 
-/-- **S3.1 (view), with callbacks**: under any callback strategy `J` a
+/-- **View, with callbacks**: under any callback strategy `J` a
 read-only body's run commits the entry's globals (a `view` body makes no
 call that may call back: `try` and payments are outside `view`). -/
 theorem ExecP.committed_readOnly {J : StateInv C} {μ : Mutability} {Γ Γ' : Ctx}

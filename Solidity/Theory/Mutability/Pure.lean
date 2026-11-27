@@ -1,9 +1,9 @@
 import Solidity.Theory.Mutability.View
 
 /-!
-# A pure body does not read the state (S3.1, pure)
+# A pure body does not read the state
 
-`docs/feature-work/semantics-extensions.md`, S3.1: a `pure` body's result
+`docs/feature-work/semantics-extensions.md`: a `pure` body's result
 does not depend on the state.
 
 A body a `pure` function may run is `Prog.within .pure`
@@ -422,7 +422,7 @@ end Progs
 
 /-! ## Consequences -/
 
-/-- **S3.1 (pure): a pure body's outcome does not depend on the state.**  From
+/-- **Pure: a pure body's outcome does not depend on the state.**  From
 any two outsides `w` and `w'` (storage, ledger, balance, transaction) the
 runs agree but for the outside itself: `function sq(uint x) pure returns
 (uint) { return x * x; }` returns the same value, or overflows alike,
@@ -483,7 +483,7 @@ def enterOutside (w : Outside C) : Outside C :=
 theorem permits_pure {μ : Mutability} (h : Program.permits .pure μ = true) : μ = .pure := by
   cases μ <;> first | rfl | exact absurd h (by decide)
 
-/-- **A pure effect tree does not read the state** (S3.1, pure, on the
+/-- **A pure effect tree does not read the state** (on the
 transient layer): in a `pure` context, replacing the outside and the
 transient cells commutes with the run, so neither `uint transient count`
 nor the storage, balance or transaction can change a pure result. -/

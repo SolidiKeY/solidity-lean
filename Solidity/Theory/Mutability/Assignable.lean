@@ -2,9 +2,9 @@ import Solidity.Theory.Mutability.View
 import Solidity.SpecSyntax
 
 /-!
-# `assignable` is sound (S3.2)
+# `assignable` is sound
 
-`docs/feature-work/semantics-extensions.md`, S3.2: the frame of
+`docs/feature-work/semantics-extensions.md`: the frame of
 `docs/function-specs.md` (`assignable l₁, …;`,
 `A` of the obligation) follows from the mutability theorem.
 
@@ -17,7 +17,7 @@ outside `L` reads in `τ` as in `σ`, and the ledger and the balance are kept.
 
 Two sources of the frame:
 
-* **mutability** (S3.1): a `view` or `pure` body changes no storage word
+* **mutability**: a `view` or `pure` body changes no storage word
   at all, so it meets every clause, `\nothing` included, word by word
   (`Prog.frames_readOnly`, `Prog.storage_readOnly`);
 * **the modifies set**: a body whose written roots (`Prog.storeAt`) the
@@ -72,7 +72,7 @@ theorem Frames.of_globals {Γ Δ : Ctx} (L : List Name) {σ : State C Γ} {τ : 
   have hb : τ.selfBalance = σ.selfBalance := congrArg Globals.selfBalance h
   exact ⟨fun r _ => by rw [hs], hn, hb⟩
 
-/-- **S3.2 from S3.1**: a read-only (`view` or `pure`) body meets every
+/-- **Read-only frames**: a read-only (`view` or `pure`) body meets every
 `assignable` clause: `function get() view returns (uint) { return x; }`
 under `assignable \nothing;`. -/
 theorem Prog.frames_readOnly {μ : Mutability} {Γ Γ' : Ctx} {P : Prog C Γ Γ'}
@@ -87,7 +87,7 @@ theorem Prog.storage_readOnly {μ : Mutability} {Γ Γ' : Ctx} {P : Prog C Γ Γ
     o.st.storage.find r = σ.storage.find r :=
   (Prog.frames_readOnly hw hμ [] h).nothing r
 
-/-- **S3.2 from the modifies set**: a body that writes only roots the clause
+/-- **The modifies set**: a body that writes only roots the clause
 names meets it (`uint a; uint b; function f() { a = 1; }` under `assignable
 a;` keeps every word of `b`). -/
 theorem Prog.frames_of_storeAt {Γ Γ' : Ctx} {P : Prog C Γ Γ'} {M L : List Name}

@@ -2,7 +2,7 @@ import Solidity.Theory.Reachable.CleanTail
 import Solidity.Calculus.CleanTailBoundary
 
 /-!
-# Reachable states under a caller model (O12 orthogonal to O11)
+# Reachable states under a caller model
 
 `Lifetime.Reachable` runs each entry call deterministically. Here an entry
 call runs under an execution relation `Exec C`: the outcomes a caller model
@@ -12,15 +12,6 @@ transaction layer is the same as `Lifetime`'s: the payable guard, the
 entry frame, a commit of a result, a rollback of a revert or a panic,
 waiting. A `violated` run admits any outcome, so an invariant proved under a
 caller model owes that its entries never violate the callback invariant.
-
-The caller model is a stub until O11 (lane VC2) publishes its lattice
-`none < staticOnly < nonReentrant < any`: `CallerStub` has the two readings
-that exist today, `noCallback` (the deterministic run, `COut.ofRes`) and
-`withCallback J` (`ExecP J`, `Semantics/Callback.lean`). What O12 needs from
-O11 is only an `Exec C` per model and its order (`Exec.Le`, or `Exec.LeOn`
-on an interface's entries): reachability is
-monotone in it (`ReachableE.mono`), so an invariant proved against a
-stronger attacker holds against a weaker one (`InvariantE.weaken`).
 
 `ReachableE (noCallback) M` is exactly `Lifetime.Reachable M`
 (`reachableE_noCallback_iff`), so `ValidStartE` under `noCallback` is
@@ -56,7 +47,7 @@ def Exec.top : Exec C := fun _ _ _ => True
 
 theorem Exec.le_top (E : Exec C) : Exec.Le E Exec.top := fun _ _ _ _ => trivial
 
-/-- **Stub of O11's caller models**: the two readings `ValidT` has today. -/
+/-- **Caller models**: two readings of `ValidT`. -/
 inductive CallerStub (C : Contract) where
   | noCallback
   | withCallback (J : StateInv C)

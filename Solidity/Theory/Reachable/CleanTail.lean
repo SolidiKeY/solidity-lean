@@ -2,7 +2,7 @@ import Solidity.Theory.Reachable.Mode
 import Solidity.Calculus.TailMode
 
 /-!
-# Clean tails follow from reachability (O12 over O6)
+# Clean tails follow from reachability
 
 `TailMode.clean` assumes the starting storage's array tails clean
 (`Calculus/TailMode.lean`). Under the `reachable` mode that assumption is

@@ -32,8 +32,7 @@ The section at the end restates each law under its solkey taclet's name,
 a taclet's `\else` as its frame (`readOnWriteFrame`), as the storage laws
 name theirs (`Obs.findOnSaveFrame`).
 
-The laws are proved on the typed heap alone: no erasure is read (W10.5.4,
-`docs/intrinsic.md`).
+The laws are proved on the typed heap alone: no erasure is read (`docs/intrinsic.md`).
 -/
 
 namespace Solidity

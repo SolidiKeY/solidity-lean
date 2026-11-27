@@ -2,9 +2,9 @@ import Solidity.Theory.Mutability.View
 import Solidity.Semantics.ContractWorld
 
 /-!
-# A non-payable entry refuses value (S3.1, payable)
+# A non-payable entry refuses value
 
-`docs/feature-work/semantics-extensions.md`, S3.1: a non-payable function
+`docs/feature-work/semantics-extensions.md`: a non-payable function
 reverts whenever `msg.value > 0`.
 
 The intrinsic `Mutability` (`AST.lean`) has no `payable`: paying is a

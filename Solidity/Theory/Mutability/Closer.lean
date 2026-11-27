@@ -3,9 +3,9 @@ import Solidity.Calculus.Transient
 import Solidity.Calculus.Logic
 
 /-!
-# Frame facts for proofs (S3.3)
+# Frame facts for proofs
 
-`docs/feature-work/semantics-extensions.md`, S3.3: a proof about a read-only
+`docs/feature-work/semantics-extensions.md`: a proof about a read-only
 body gets its frame for free.  Each lemma below takes a modal fact a proof
 already has (the calculus's `holds` of a box or diamond, a `Spec.sat` box,
 the transient layer's `Holds`) and adds, at every successful end state,
@@ -13,12 +13,8 @@ that the globals (storage with its transient roots, ledger, balance) and,
 on the transient layer, the transient cells are the entry's.  No program
 analysis is repeated: the premise is the decidable `Prog.within`, and the
 fact is `Prog.committed_readOnly` / `Transient.Program.readOnly_preserves`
-(S3.1).
 
-They replace the per-example frame checks of
-`Examples/Tactics/TransientStorage.lean` (a write refused in a `view`
-context, a `pure` read refused, a read-only call of a `nonpayable` callee
-refused, and the static/read-only frame itself).
+
 -/
 
 namespace Solidity.Theory.Mutability
