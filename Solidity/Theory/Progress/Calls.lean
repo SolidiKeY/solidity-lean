@@ -1,7 +1,7 @@
 import Solidity.Theory.Progress.Fragment
 
 /-!
-# Progress with internal calls over the extended fragment (S4.1)
+# Progress with internal calls over the extended fragment
 
 The joint induction of `Solidity/Source/StmtProgress.lean` (`FragAt`,
 `fragAt`) over the extended fragment of `Theory/Progress/Fragment.lean`:

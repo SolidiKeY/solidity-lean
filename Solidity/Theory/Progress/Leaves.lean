@@ -3,7 +3,7 @@ import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.EmitBuiltins
 
 /-!
-# Leaf statements as extensions (S4.2)
+# Leaf statements as extensions
 
 Three statement kinds the source interpreter runs, each an instance of the
 extension lemma shape `StmtExt.Sound` (`Theory/Progress/Fragment.lean`), so

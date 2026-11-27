@@ -2,13 +2,13 @@ import Solidity.Theory.Progress.Tuple
 import Solidity.Theory.Progress.Outcome
 
 /-!
-# The extensible progress fragment (S4.1, S4.2)
+# The extensible progress fragment
 
 `Solidity/Source/StmtProgress.lean` proves that the statement value
 fragment (`RStmt.ValFragC`) with internal calls is never `stuck`
 (`fragAt`). Its fragment is a recursive predicate with no room for new
 node kinds. This module closes a larger fragment under the same structure,
-and leaves a hook for node kinds later lanes add:
+and admits extensions:
 
 * `SFrag X A s` / `IFrag X A b`: a statement (block) whose every node is
   of the existing fragment (`base`), a **tuple declaration**
@@ -22,13 +22,13 @@ and leaves a hook for node kinds later lanes add:
   and expression progress at every horizon up to `n`, a node `X.P` admits
   is never `stuck` at `n + 1`, completes
   normally when it is a simple statement, and lets no `break`/`continue`
-  escape outside a loop. A construct lane X adds proves exactly this and
+  escape outside a loop. An extension proves exactly this and
   gets progress inside every block, loop and called body for free
   (`fragXAt`); nodes with sub-blocks nest (a `try` inside a `try` block).
   `StmtExt.none` (no extra nodes) is sound, and two sound extensions
   combine (`StmtExt.or`, `StmtExt.Sound.or`). Expressions are not
-  extended: they stay `RExpr.ValFragC`, whose induction is the Source
-  lane's (`Source/ExprProgress.lean`).
+  extended: they stay `RExpr.ValFragC`, whose induction is in
+  `Source/ExprProgress.lean`.
 * The program premise with internal calls, `CallsOKX` (`CallsOK` with
   bodies in `IFrag`), and the joint induction are in
   `Theory/Progress/Calls.lean`.
@@ -52,7 +52,7 @@ structure Blk (E : Env) (R : List STy) (M : Bool) where
   Γ' : RCtx
   b : RItems E R M k Γ Γ'
 
-/-- **A statement extension**: the node kinds a later lane admits. `P s bs`
+/-- **A statement extension**: the admitted node kinds. `P s bs`
 admits node `s` whose sub-blocks `bs` (a `try`'s success and catch blocks,
 say) must themselves be in the closure; a leaf node takes `bs = []` or
 ignores it. -/
@@ -208,7 +208,7 @@ theorem StmtNSAtX.restrict {G : Glob E} {X Y : StmtExt E} {A : Decl → Prop} {Q
   forIter F hP nps ph _ _ _ _ _ c post body l hc hc' hp hp' hb hb' hfr :=
     ih.forIter F hP nps ph c post body l hc hc' hp hp' (SFrag.mono hXY hb) hb' hfr
 
-/-- **Sound extensions combine**: the cases two lanes add separately are
+/-- **Sound extensions combine**: the separately admitted cases are
 sound together. -/
 theorem StmtExt.Sound.or {G : Glob E} {X Y : StmtExt E} {A : Decl → Prop} {Q : String → Prop}
     (hX : X.Sound G A Q) (hY : Y.Sound G A Q) : (X.or Y).Sound G A Q := by

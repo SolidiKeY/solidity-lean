@@ -2,9 +2,9 @@ import Solidity.Source.StmtProgress
 import Solidity.Source.Progress.BuiltinAdmission
 
 /-!
-# Progress of tuple declarations (S4.2)
+# Progress of tuple declarations
 
-`(, T x, , U y) = e;` (lane FU2-B, `RStmt.declTuple`) evaluates `e`, takes
+`(, T x, , U y) = e;` (`RStmt.declTuple`) evaluates `e`, takes
 its components (`RVal.untuple`) and pushes each declared one converted to
 its slot's type (`pushVals`). Three places can be `stuck`:
 

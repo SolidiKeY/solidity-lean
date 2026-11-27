@@ -3,7 +3,7 @@ import Solidity.Theory.Progress.Leaves
 import Solidity.Lowering.P9.FunctionCatalog
 
 /-!
-# Progress (S4.1): the public statements
+# Progress: the public statements
 
 A program whose allowed internal functions are bodies of the extended
 fragment (`CallsOKX`, `Theory/Progress/Calls.lean`), with a sound
@@ -23,7 +23,7 @@ data, or runs out of fuel (`Ends`, `Theory/Progress/Outcome.lean`).
   itself may contain tuple declarations and admitted extension nodes;
   the leaf extensions (`emit`, custom-error reverts, builtin statements)
   are sound there (`elaborated_leafExt_sound`).
-* `SFrag.cast_out`, `StmtD.declTuple_frag`: the elaboration of an S01
+* `SFrag.cast_out`, `StmtD.declTuple_frag`: the elaboration of a
   tuple-declaration derivation is in the closure under the initializer and
   slot conditions.
 
@@ -35,7 +35,7 @@ The core run's progress is `Prog.run_ends`/`Prog.runF_ends`
 reference values, external calls and payments, `try`, modifiers, the
 transaction layer
 (dispatch, ABI decoding, deployment, callbacks), `rethrow`, `abi.*`,
-`new` and calldata references; gas is not modelled (D2).
+`new` and calldata references; gas is not modelled.
 -/
 
 namespace Solidity.Theory.Progress
@@ -102,7 +102,7 @@ theorem SFrag.cast_out {X : StmtExt E} {A : Decl → Prop} {R : List STy} {M : B
   exact hs
 
 /-- **Elaborated tuple declarations enter the closure**: the elaboration of
-an S01 derivation of `(, T x, , U y) = e;` is in `SFrag` when its
+a derivation of `(, T x, , U y) = e;` is in `SFrag` when its
 initializer is (`TupleInit`) and its slots are (`SlotsOK`). -/
 theorem StmtD.declTuple_frag {C : Source.Ctx} {X : StmtExt C.env} {A : Decl → Prop} {k : SCtx} {L : List (String × STy)}
     {h : Nat} {d : Syn .varDecl} {ds : Syn (.list (.opt .varDecl))} {e : Syn .expr}

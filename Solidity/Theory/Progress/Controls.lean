@@ -3,9 +3,9 @@ import Solidity.Theory.Progress.Leaves
 import Solidity.Source.SoundnessExamples
 
 /-!
-# Witnesses and negative controls for progress (S4.1, S4.2)
+# Witnesses and negative controls for progress
 
-Over the toy environment of `Source/SemanticsExamples.lean` (`E0`, `G0`,
+Over the toy environment of `Source/SemanticsExamples.lean` (`E0`,
 `F0`, `s0`):
 
 * **Witnesses**: `(bool a, , bool b) = (true, false, true);` is in the
@@ -28,7 +28,7 @@ Over the toy environment of `Source/SemanticsExamples.lean` (`E0`, `G0`,
   (`nestedDecl_frag`, `nestedDecl_ends`).
 * **Boundaries** (facts, not controls): `SlotsOK` refuses a declared
   reference-type slot `slotsFit` admits (`slotsOK_refuses_reference`); no
-  locals hold a tuple (`no_tuple_local`); the elaboration of S01's
+  locals hold a tuple (`no_tuple_local`); the elaboration of
   `w_declTuple` is in the closure and ends (`elaborated_declTuple_frag`,
   `elaborated_declTuple_ends`).
 -/
@@ -180,7 +180,7 @@ theorem blockDecl_panics : Ends ((execS (G0 .legacy) F0 12 0 none blockDecl .nil
 
 /-! ## An elaborated tuple declaration -/
 
-/-- **Witness** (an S01 derivation): the elaboration of
+/-- **Witness** (a derivation): the elaboration of
 `(uint256 p, ) = (a, b);` (`TypingExamples.w_declTuple`) is in the closure. -/
 theorem elaborated_declTuple_frag :
     SFrag (StmtExt.none _) (fun _ => False) TypingExamples.w_declTuple.toR :=

@@ -2,7 +2,7 @@ import Solidity.Source.ExprProgress
 import Solidity.Semantics.RunFuel
 
 /-!
-# How a well-typed run ends (S4.1)
+# How a well-typed run ends
 
 Type soundness as progress: a run that is never stuck **returns, reverts,
 panics, or runs out of fuel or resources**. The repository has two
@@ -29,9 +29,6 @@ theorems of `Theory/Progress/Program.lean` cover a fragment.
   some getters, `Source/Eval.lean`), so well-typedness alone does not give
   progress there: the fragment's predicates exclude those nodes.
 
-Gas: neither semantics models gas today (D2 is lane X03's), so no run
-ends by running out of gas; the resource ends are the fuel horizon
-(`timeout`), `diverge` and `exhausted`.
 -/
 
 namespace Solidity.Theory.Progress
