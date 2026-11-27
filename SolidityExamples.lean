@@ -236,6 +236,7 @@ import Solidity.Examples.Lowering.Sim.Cases
 import Solidity.Examples.Lowering.Sim.CasesV2
 import Solidity.Examples.Lowering.Sim.Coverage
 import Solidity.Examples.Lowering.Sim.Coverage.ThreadedV2
+import Solidity.Examples.Lowering.Sim.CoverageBranch
 import Solidity.Examples.Lowering.Sim.Expr
 import Solidity.Examples.Lowering.Sim.Induction
 import Solidity.Examples.Lowering.Sim.Match
@@ -273,6 +274,7 @@ import Solidity.Examples.Lowering.Total.StructRows
 import Solidity.Examples.Lowering.Total.StructTableAgreement
 import Solidity.Examples.Lowering.Total.StructUnit
 import Solidity.Examples.Lowering.Total.StructUnitInference
+import Solidity.Examples.Lowering.Total.SuccessfulContext
 import Solidity.Examples.Lowering.Total.TransientDecode
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
