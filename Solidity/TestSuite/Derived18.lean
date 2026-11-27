@@ -1,6 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-! Native modular arithmetic and reference-parameter migration proofs. -/
 
 open Solidity
 open scoped Scoped

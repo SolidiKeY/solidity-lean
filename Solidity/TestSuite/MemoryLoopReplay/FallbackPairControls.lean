@@ -1,8 +1,7 @@
 import Solidity.Calculus.MemoryLoopReplay
 import Solidity.TestSuite.ScopedProblems
 
-/-! Kernel admission, collision and rollback controls for fallback sibling certificates.
-The fixed replay timing roster is unchanged. -/
+
 
 open Lean Meta Solidity Solidity.Seq Solidity.Seq.MemoryReplay
 
@@ -72,6 +71,5 @@ run_elab do
       let text ← e.toMessageData.toString
       if text=="memory replay requires kernel checking" then return true
       throw e)
-  -- This tests the shared preflight API; admission rollback is checked above.
   unless rejected do throwError "shared kernel preflight accepted disabled checking"
   logInfo "checked fallback truth values, both false components, names, collision, rollback, dispatch and shared kernel preflight"

@@ -1,12 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-!
-# solkey's `TestSuite`, derived (4 of 12)
-
-`⊢` of each obligation `sol_prove` and its leaf tactics close, from
-`unaryMinusSimple` to `mappingReadAsKey` in the order of the source; the replays are what
-`#solkey_derive?` (`Frontend/Problems.lean`) prints.
--/
 
 open Solidity
 open scoped Scoped

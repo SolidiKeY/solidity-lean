@@ -1,14 +1,5 @@
 import Solidity.TestSuite.ScopedProblems
 
-/-!
-# solkey's `TestSuite`, derived (8 of 12)
-
-`⊢` of each obligation the closer of arrays and copies added (arrays
-pushed and popped, the slot a `push()` recycles, copies between storage
-locations), from `testStoragePushFieldLvalue` to `arrayOfMappingsIndex` in the
-order of the source; the replays are what `#solkey_derive? … pending`
-(`Frontend/Problems.lean`) prints.
--/
 
 open Solidity
 open scoped Scoped
