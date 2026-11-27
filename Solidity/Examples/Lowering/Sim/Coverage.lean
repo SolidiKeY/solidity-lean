@@ -16,7 +16,8 @@ shows that caller placement alone does not repair the frozen spelling relation.
 The final checks establish decoding, alignment, acceptance of the existing
 materialized program, and actual lowering of the smoke separately. The generated
 flag declaration, condition capture, captured assignment, and flag write have
-exact elaboration receipts below; the complete loop production receipt is still outstanding.
+exact elaboration receipts below. The flag and condition instructions also have
+placement and acceptance checks; the complete loop production receipt is still outstanding.
 -/
 namespace Solidity.Examples.Lowering.Sim.Coverage
 
@@ -486,6 +487,45 @@ theorem smoke_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
   simp only [checkIn, check_smoke_se]
   rfl
 
+/-- The condition's capture followed by its assignment, in the flag context. -/
+def smokeConditionBlock : Blk Match.C [.val .bool, .val .bool, .val .bool] :=
+  letI : FreshNames := productionNames
+  ⟨[.val .bool, .val .bool, .val .bool, .val .bool],
+    .cons (.declLocal .bool (Var.ofName "se1")
+      (some (.simple (.local (.there (.there .here))))))
+      (.cons (.assignLocal (.there (.there .here)) (.simple (.local .here))) .nil)⟩
+
+/-- Actual placement of the two independently proved condition instructions.
+This is a `chain` receipt, not a claim about list elaboration or loop production. -/
+theorem smoke_condition_placed :
+    @SProg.chain Match.C productionNames
+      (@ECtx.toNCtx productionNames (("brk0", .val .bool) :: Match.locals)).names
+      [.val .bool, .val .bool, .val .bool]
+      (smokeCaptureProgram ++ smokeWriteProgram) = .ok smokeConditionBlock := by
+  rfl
+
+/-- The placed capture/assignment block is accepted by the production checker. -/
+theorem smoke_condition_accepted :
+    Solidity.Backend.AbiWorld.PublicCompilerTotal.ProgOk [] smokeConditionBlock.2 := by
+  repeat constructor
+
+/-- The generated flag declaration, placed under the exact caller names. -/
+def smokeFlagBlock : Blk Match.C [.val .bool, .val .bool] :=
+  letI : FreshNames := productionNames
+  ⟨[.val .bool, .val .bool, .val .bool],
+    .cons (.declLocal .bool (Var.ofName "brk0") (some (.simple (.bool false)))) .nil⟩
+
+/-- Actual caller-context placement of the generated flag instruction. -/
+theorem smoke_flag_placed :
+    @SProg.chain Match.C productionNames (@ECtx.toNCtx productionNames Match.locals).names
+      [.val .bool, .val .bool] smokeFlagProgram = .ok smokeFlagBlock := by
+  rfl
+
+/-- Acceptance of the placed flag declaration, separately from the loop. -/
+theorem smoke_flag_accepted :
+    Solidity.Backend.AbiWorld.PublicCompilerTotal.ProgOk [] smokeFlagBlock.2 := by
+  repeat constructor
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -509,3 +549,9 @@ end Solidity.Examples.Lowering.Sim.Coverage
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_capture
 
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_write
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_condition_placed
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_condition_accepted
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_flag_placed
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.smoke_flag_accepted
