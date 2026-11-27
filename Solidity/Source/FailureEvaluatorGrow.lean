@@ -3,7 +3,7 @@ import Solidity.Source.FailureFrameHorizon
 /-! Event growth of the actual enabled-plan evaluator. This module reuses
 Source's intrinsic functions, indices and existing induction proof partition.
 It introduces no alternate evaluator, NoFail assumption or execution oracle.
-No horizon approximation/session consistency or compiler adequacy is asserted here.
+No horizon approximation/session consistency or P8 adequacy is asserted here.
 Both calldata modes instantiate the shared HorizonAt schema at the same fixed plan. -/
 namespace Solidity.Source.FailureExecution.PlannedGrow
 open EM
