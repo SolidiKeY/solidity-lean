@@ -368,6 +368,18 @@ class HostCache(unittest.TestCase):
         self.assertIn(self.M, msg); self.assertIn("%016x" % 7035471506278441810, msg)
         self.assertIn("setup", msg)
 
+    def test_decimal_sidecar_matches_decimal_and_hex_traces(self):
+        stem = self.build / "MemoryStructDefaultPlan"
+        value = "15415156912065155277"
+        stem.with_suffix(".olean").write_text("current")
+        stem.with_suffix(".olean.hash").write_text(value)
+        for h in (value, d.hex_hash(value)):
+            stem.with_suffix(".trace").write_text(json.dumps({"outputs": {"o": [h]}}))
+            d.link_build(self.top, self.lib / h, [self.M])
+            self.assertEqual((self.lib / h / "Solidity/Evm/MemoryStructDefaultPlan.olean").read_text(), "current")
+        stem.with_suffix(".olean.hash").write_text(str(int(value) + 1))
+        with self.assertRaises(d.SetupError): d.link_build(self.top, self.lib / "stale", [self.M])
+
     def test_stale_build_olean_is_not_linked(self):
         """H1086 (2): .lake/build holds an old real olean while the trace names a newer one."""
         u = self.touched_importer()

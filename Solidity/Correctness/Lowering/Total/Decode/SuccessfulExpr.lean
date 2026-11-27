@@ -319,25 +319,11 @@ theorem named_run (rc : ElabRec C) (f : String) (ns : List String) (args : List 
       (ns != fs && args.any (·.hasIncDec)) = false ∧
       rc.hoist (.call f (fs.map fun g => (Semantics.lookupBy g (ns.zip args)).getD (.num 0)))
         sc st m = .ok ((out, st'), m') := by
-  constructor
-  · intro h
-    dsimp only
-    rw [named_step] at h
-    dsimp only at h
-    split at h
-    · cases h
-    · rename_i h1
-      split at h
-      · rename_i h2
-        split at h
-        · cases h
-        · rename_i h3
-          exact ⟨by simpa using h1, h2, by simpa using h3, h⟩
-      · cases h
-  · rintro ⟨h1, h2, h3, h4⟩
-    rw [named_step]
-    dsimp only
-    simp only [h1, h2, h3, Bool.false_eq_true, ↓reduceIte, pure_bind]
-    exact h4
+  rw [named_step]; dsimp only
+  cases h1 : ((C.structFields f).map (·.1)).isEmpty <;>
+    cases h2 : (ns.length == ((C.structFields f).map (·.1)).length &&
+      ((C.structFields f).map (·.1)).all ns.contains) <;>
+    cases h3 : (ns != (C.structFields f).map (·.1) && args.any (·.hasIncDec)) <;>
+    simp_all [pure_bind] <;> (intro h; cases h)
 
 end Solidity.Correctness.Lowering.Total.Decode.SuccessfulExpr
