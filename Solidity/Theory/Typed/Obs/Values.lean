@@ -774,6 +774,12 @@ theorem FixedCopy.child_apply {E : Ty} {n : Nat} {R : RefTy}
       · split <;> rfl
       · rfl
 
+example {E : Ty} {n : Nat} {R : RefTy}
+    (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n))) (i : PrimTy.uint.Denote) :
+    c.childOfDefined ⟨v.obs, SVal.obsOpt_has_nil (some v)⟩ i =
+      (c.apply v).obs.find (c.index i) :=
+  c.child_apply v i
+
 theorem FixedCopy.child_apply_read {E : Ty} {n : Nat} {R : RefTy} {V : Ty} {α : Type}
     (k : Comp V α) (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n)))
     (i : PrimTy.uint.Denote) (r : Path E V) :
