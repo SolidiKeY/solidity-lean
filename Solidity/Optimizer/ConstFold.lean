@@ -1,39 +1,16 @@
 import Solidity.Semantics.Run
 
-/-!
-# O02 constant folding over the typed value IR
-
-A total pass on the existing intrinsic `Val C Γ p` (no erased IR). An operator
-whose operands are literals is evaluated by the interpreter's own operator
-(`BinOp.shortT`, `BinOp.evalT`, `UnOp.evalT`, `ModOp.evalT`). A failing
-operation (checked overflow, zero divisor, negative exponent, out-of-range
-conversion) is **kept** as written: its halt is an observation, so folding
-never turns a failure into a value. A conditional on a literal is replaced by
-the branch it takes, and a short-circuit decided by a literal left operand
-drops the right operand, exactly as the run skips it. Index expressions inside
-storage and memory paths are folded too (`Loc.cfold`, `MLoc.cfold`, …, with
-`Loc.cfold_resolveT` and `MLoc.cfold_addrT`).
-
-Preservation is the strongest per-expression relation: for every typed state
-the folded expression's result (value or halt) is the original's
-(`Val.cfold_evalT`). Expression evaluation reads but does not write the state,
-so this relation is not a D6 instance; it implies equality of every
-observation of every statement built from the expression
-(`Solidity/Optimizer/StmtFold.lean`).
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract} {Γ : Ctx}
 
-/-- The value of a state-independent simple value. -/
 def _root_.Solidity.Simple.const? : {p : PrimTy} → Simple C Γ p → Option p.Denote
   | p, .lit n h => some (PrimTy.ofLit p n h)
   | _, .bool b => some b
   | _, .local _ => none
   | _, .env _ _ => none
 
-/-- The value of a state-independent literal. -/
 def _root_.Solidity.Val.const? : {p : PrimTy} → Val C Γ p → Option p.Denote
   | _, .simple s => s.const?
   | _, .read _ => none
@@ -46,7 +23,6 @@ def _root_.Solidity.Val.const? : {p : PrimTy} → Val C Γ p → Option p.Denote
   | _, .modular .. => none
   | _, .hash .. => none
 
-/-- Index-generalizing literal view, additive beside the frozen matcher. -/
 def _root_.Solidity.Simple.constView? : {p : PrimTy} → Simple C Γ p → Option p.Denote :=
   fun {_} value => Simple.casesOn (motive := fun p _ => Option p.Denote) value
     (fun {p} n h => some (PrimTy.ofLit p n h))
@@ -54,12 +30,10 @@ def _root_.Solidity.Simple.constView? : {p : PrimTy} → Simple C Γ p → Optio
     (fun {_} _ => none)
     (fun {_} _ _ => none)
 
-/-- The new view agrees with the unchanged matcher on every typed input. -/
 theorem _root_.Solidity.Simple.constView?_eq {p : PrimTy} (value : Simple C Γ p) :
     value.constView? = value.const? := by
   cases value <;> rfl
 
-/-- Index-generalizing literal view; existing optimizer callers stay unchanged. -/
 def _root_.Solidity.Val.constView? : {p : PrimTy} → Val C Γ p → Option p.Denote :=
   fun {_} value => Val.casesOn (motive_5 := fun p _ => Option p.Denote) value
     (fun {_} s => s.constView?)
@@ -73,12 +47,10 @@ def _root_.Solidity.Val.constView? : {p : PrimTy} → Val C Γ p → Option p.De
     (fun _ _ _ _ => none)
     (fun {_ _} _ _ _ => none)
 
-/-- Agreement with the frozen matcher, without changing any of its equations. -/
 theorem _root_.Solidity.Val.constView?_eq {p : PrimTy} (value : Val C Γ p) :
     value.constView? = value.const? := by
   cases value <;> simp only [Val.constView?, Val.const?, Simple.constView?_eq]
 
-/-- The literal denoting a value of a primitive type. -/
 def litV : (p : PrimTy) → p.Denote → Val C Γ p
   | .bool, b => .simple (.bool b)
   | .uint, x => .simple (.lit x.1 x.2)
@@ -113,9 +85,7 @@ theorem const?_evalT (σ : State C Γ) {p : PrimTy} {v : Val C Γ p} {x : p.Deno
   | read | binop | unop | ternary | readMem | len | mlen | modular | hash =>
     simp only [Val.const?, reduceCtorEq] at h
 
-/-! ## One node -/
 
-/-- Fold one binary node whose operands are already folded. -/
 def foldBin {p q : PrimTy} (op : BinOp) (h : op.accepts p = true) (hq : op.ret p = q)
     (a b : Val C Γ p) : Val C Γ q :=
   match a.const? with
@@ -131,7 +101,6 @@ def foldBin {p q : PrimTy} (op : BinOp) (h : op.accepts p = true) (hq : op.ret p
         | some r => litV q (hq ▸ r)
         | none => .binop op h hq a b
 
-/-- Fold one unary node whose operand is already folded. -/
 def foldUn {p q : PrimTy} (op : UnOp) (h : op.accepts p = true) (hq : op.ret p = q)
     (a : Val C Γ p) : Val C Γ q :=
   match a.const? with
@@ -141,13 +110,11 @@ def foldUn {p q : PrimTy} (op : UnOp) (h : op.accepts p = true) (hq : op.ret p =
     | some r => litV q (hq ▸ r)
     | none => .unop op h hq a
 
-/-- A conditional on a literal is the branch it takes. -/
 def foldTern {p : PrimTy} (c : Val C Γ .bool) (a b : Val C Γ p) : Val C Γ p :=
   match c.const? with
   | none => .ternary c a b
   | some v => if boolT v then a else b
 
-/-- `addmod`/`mulmod` of literals; a zero modulus keeps its failure. -/
 def foldMod (op : ModOp) (a b k : Val C Γ .uint) : Val C Γ .uint :=
   match a.const?, b.const?, k.const? with
   | some x, some y, some m =>
@@ -219,32 +186,25 @@ theorem foldMod_evalT (σ : State C Γ) (op : ModOp) (a b k : Val C Γ .uint) :
             const?_evalT σ hk, he, bind, Except.bind, TRes.ofOpt]
         | none => simp only [he]
 
-/-! ## The pass -/
 
 mutual
-/-- Fold the index expressions of a storage path. -/
 def _root_.Solidity.SPath.cfold : {T : Ty} → SPath C Γ T → SPath C Γ T
   | _, .alias i => .alias i
   | _, .loc l => .loc l.cfold
 
-/-- Fold the index expressions of a storage location. -/
 def _root_.Solidity.Loc.cfold : {T : Ty} → Loc C Γ T → Loc C Γ T
   | _, .root r h => .root r h
   | _, .field b f h => .field b.cfold f h
   | _, .index it b i => .index it b.cfold i.cfold
 
-/-- Fold the index expressions of a memory path. -/
 def _root_.Solidity.MPath.cfold : {T : Ty} → MPath C Γ T → MPath C Γ T
   | _, .var i hm => .var i hm
   | _, .loc l => .loc l.cfold
 
-/-- Fold the index expressions of a memory location. -/
 def _root_.Solidity.MLoc.cfold : {T : Ty} → MLoc C Γ T → MLoc C Γ T
   | _, .field b f h => .field b.cfold f h
   | _, .index a b i => .index a b.cfold i.cfold
 
-/-- Bottom-up constant folding, including the index expressions of storage and
-memory paths. -/
 def _root_.Solidity.Val.cfold : {p : PrimTy} → Val C Γ p → Val C Γ p
   | _, .binop op h hq a b => foldBin op h hq a.cfold b.cfold
   | _, .unop op h hq a => foldUn op h hq a.cfold
@@ -282,8 +242,6 @@ theorem _root_.Solidity.MLoc.cfold_addrT (σ : State C Γ) : {T : Ty} → (l : M
   | _, .index a b i => by
     simp only [MLoc.cfold, MLoc.addrT, MPath.cfold_mvalT σ b, Val.cfold_evalT σ i]
 
-/-- **Constant folding preserves every result**, value or halt, in every
-typed state. -/
 theorem _root_.Solidity.Val.cfold_evalT (σ : State C Γ) : {p : PrimTy} → (v : Val C Γ p) →
     v.cfold.evalT σ = v.evalT σ
   | _, .binop op h hq a b => by

@@ -1,44 +1,15 @@
 import Solidity.Optimizer.ConstFold
 import Solidity.Optimizer.Pass
 
-/-!
-# O02 constant folding and dead-branch elimination over lowering programs
-
-`Prog.vopt V` applies a proved expression pass `V` (`Prog.cfold` uses
-`Val.cfold`) to the value expressions of local assignments, local declarations,
-storage writes of a value and their locations' index expressions (`assign`,
-`push`, `delete`, `pop`, via `Src.vopt`, `Loc.vmap`, `SPath.vmap`),
-compound-assignment right sides (`opAssign`, `pushOpAssign`; their receivers are
-left as written, as is `pushIncDec`), `require`/`assert` conditions,
-`transfer`/`send` operands and `if`/`while` conditions, and recurses into `if`
-branches, blocks and loop bodies. On the folded program it removes dead code whose removal the
-run cannot observe:
-
-* `if (true) A else B` becomes the block `{ A }` (and `false` gives `{ B }`):
-  the branch is a scope in both forms;
-* `require(true);`, `assert(true);` and `while (false) …` are dropped from the
-  sequence.
-
-No pass recurses into call, `try`/`catch` or receiver-call bodies.
-Dropping `while (false)` also drops its `LoopAnn` (which the run does not read).
-
-A failing condition (`require(false)`, `assert(false)` — its Panic) is never
-dropped. Every other statement and position is left as written. The preservation theorem
-is equality of the typed run, as a function of the typed state
-(`Prog.cfold_runC`): result, halt kind, final state and heap growth are all
-unchanged, so every observation of the program is.
--/
 namespace Solidity.Optimizer.ConstFold
 open Solidity
 
 variable {C : Contract}
 
-/-! ## Run congruences -/
 
 section Congr
 variable {Γ : Ctx}
 
-/-- Two expressions with the same results in every state. -/
 def SameVal {p : PrimTy} (a b : Val C Γ p) : Prop := ∀ σ : State C Γ, a.evalT σ = b.evalT σ
 
 theorem TRun.ite_congr {Γ₁ Γ₂ : Ctx} {c c' : Val C Γ .bool} (hc : SameVal c' c)
@@ -95,7 +66,6 @@ theorem TRun.send_congr (pv : Idx Γ (.val .bool)) {r r' a a' : Val C Γ .uint}
   funext σ
   simp only [TRun.send, hr σ, ha σ]
 
-/-- A sequence after a step that leaves the state as it is. -/
 theorem TRun.seq_stay {Γ₂ : Ctx} (s : TStep C Γ Γ) (P : TStep C Γ Γ₂)
     (hs : ∀ σ, s σ = .ok ⟨σ, List.prefix_refl _⟩) : TRun.seq s P = P := by
   funext σ
@@ -104,14 +74,11 @@ theorem TRun.seq_stay {Γ₂ : Ctx} (s : TStep C Γ Γ) (P : TStep C Γ Γ₂)
 
 end Congr
 
-/-! ## The pass -/
 
-/-- An expression pass with its proof: equal results in every typed state. -/
 structure ValPass (C : Contract) where
   run : {Γ : Ctx} → {p : PrimTy} → Val C Γ p → Val C Γ p
   sound : ∀ {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (v : Val C Γ p), (run v).evalT σ = v.evalT σ
 
-/-- An expression pass on a storage source's value. -/
 def _root_.Solidity.Src.vopt {Γ : Ctx} (V : ValPass C) : {T : Ty} → Src C Γ T → Src C Γ T
   | _, .val v => .val (V.run v)
   | _, s@(.copy ..) | _, s@(.fixedCopy ..) | _, s@(.copyMem ..) | _, s@(.fixedCopyMem ..) => s
@@ -122,12 +89,10 @@ theorem _root_.Solidity.Src.vopt_valueT {Γ : Ctx} (V : ValPass C) (σ : State C
   | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
 
 mutual
-/-- An expression pass on the index expressions of a storage path. -/
 def _root_.Solidity.SPath.vmap {Γ : Ctx} (V : ValPass C) : {T : Ty} → SPath C Γ T → SPath C Γ T
   | _, .alias i => .alias i
   | _, .loc l => .loc (l.vmap V)
 
-/-- An expression pass on the index expressions of a storage location. -/
 def _root_.Solidity.Loc.vmap {Γ : Ctx} (V : ValPass C) : {T : Ty} → Loc C Γ T → Loc C Γ T
   | _, .root r h => .root r h
   | _, .field b f h => .field (b.vmap V) f h
@@ -148,23 +113,19 @@ theorem _root_.Solidity.Loc.vmap_resolveT {Γ : Ctx} (V : ValPass C) (σ : State
     simp only [Loc.vmap, Loc.resolveT, SPath.vmap_resolveT V σ b, V.sound]
 end
 
-/-- Constant folding as an expression pass. -/
 def cfoldPass : ValPass C := ⟨Val.cfold, fun σ v => Val.cfold_evalT σ v⟩
 
-/-- `if` on a literal: the branch it takes, as a block (the branch is a scope). -/
 def foldIte {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) :
     Stmt C Γ Γ :=
   match c.const? with
   | some v => if boolT v then .block thn else .block els
   | none => .ite c thn els
 
-/-- Is this condition the literal `true` (resp. `false`)? -/
 def litIs {Γ : Ctx} (b : Bool) (c : Val C Γ .bool) : Bool :=
   match c.const? with
   | some v => boolT v == b
   | none => false
 
-/-- Sequence a folded statement, dropping one the run cannot observe. -/
 def consDrop : {Γ Γ₁ Γ₂ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Γ₂ → Prog C Γ Γ₂
   | _, _, _, .require c, P => if litIs true c then P else .cons (.require c) P
   | _, _, _, .assert c, P => if litIs true c then P else .cons (.assert c) P
@@ -204,7 +165,6 @@ def consDrop : {Γ Γ₁ Γ₂ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Γ₂
   | _, _, _, s@(.catchData ..), P => .cons s P
 
 mutual
-/-- An expression pass on every handled position, and dead-branch elimination. -/
 def _root_.Solidity.Stmt.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
   | _, _, .assignLocal i r => .assignLocal i (V.run r)
   | _, _, .declLocal p x init => .declLocal p x (init.map V.run)
@@ -244,17 +204,14 @@ def _root_.Solidity.Stmt.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Stmt C Γ Γ'
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- An expression pass and dead-code elimination of a sequence. -/
 def _root_.Solidity.Prog.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
   | _, _, .cons s P => consDrop (Stmt.vopt V s) (Prog.vopt V P)
 end
 
-/-- Constant folding and dead-code elimination. -/
 abbrev _root_.Solidity.Prog.cfold {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' :=
   Prog.vopt cfoldPass P
 
-/-! ## Preservation -/
 
 theorem foldIte_runC {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) :
@@ -318,7 +275,6 @@ theorem consDrop_runC : {Γ Γ₁ Γ₂ : Ctx} → (s : Stmt C Γ Γ₁) → (P 
   | _, _, _, .revertData .., _ | _, _, _, .catchData .., _ => rfl
 
 mutual
-/-- **An expression pass lifted to a statement preserves the typed run.** -/
 theorem _root_.Solidity.Stmt.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
     Stmt.runC (Stmt.vopt V s) = Stmt.runC s
   | _, _, .assignLocal i r => by
@@ -385,7 +341,6 @@ theorem _root_.Solidity.Stmt.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (s :
   | _, _, .callReceiverPush .. | _, _, .callRec .. | _, _, .revertData ..
   | _, _, .catchData .. => rfl
 
-/-- **An expression pass lifted to a program preserves the typed run.** -/
 theorem _root_.Solidity.Prog.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     Prog.runC (Prog.vopt V P) = Prog.runC P
   | _, _, .nil => rfl
@@ -394,12 +349,10 @@ theorem _root_.Solidity.Prog.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (P :
     rfl
 end
 
-/-- **Constant folding and dead-code elimination preserve the typed run.** -/
 theorem _root_.Solidity.Prog.cfold_runC {Γ Γ' : Ctx} (P : Prog C Γ Γ') :
     Prog.runC (Prog.cfold P) = Prog.runC P :=
   Prog.vopt_runC cfoldPass P
 
-/-- The pass in the O01 interface: preservation of the exact typed run. -/
 def SameRun {Γ Γ' : Ctx} (P Q : Prog C Γ Γ') : Prop := Prog.runC P = Prog.runC Q
 
 theorem vopt_preserves (V : ValPass C) (Γ Γ' : Ctx) :
