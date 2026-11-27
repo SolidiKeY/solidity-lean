@@ -469,9 +469,7 @@ import Solidity.Frontend.QualifiedUnits.ReferenceControls
 import Solidity.Frontend.QualifiedUnits.SignatureMemberControls
 import Solidity.Frontend.QualifiedUnits.SignatureResolutionControls
 import Solidity.Frontend.QualifiedUnits.TargetControls
-import Solidity.Frontend.SolcJson.CallMetadataControls
 import Solidity.Frontend.SolcJson.CallMetadataPathControls
-import Solidity.Frontend.SolcJson.IrImportControls
 import Solidity.Frontend.StatementGrammarH28.ConstructorControls
 import Solidity.Hash.CollisionBridgeControls
 import Solidity.Lowering.G16.AddressLiteralControls
