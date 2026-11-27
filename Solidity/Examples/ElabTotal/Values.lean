@@ -3,11 +3,12 @@ import Solidity.Syntax.Elab.Values
 /-!
 # Checks: the value rewrites' equations
 
-The functions of `Syntax/Elab/Values.lean` checked here are total (other
-functions of that file are still `partial`), so each unfolds by its named equations with no
+The functions of `Syntax/Elab/Values.lean` checked here are total (`abiTyExpr?`
+and `abiFnType` are still `partial`), so each unfolds by its named equations with no
 `native_decide`: structural ones (`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`)
-also reduce in the kernel (`rfl`), the well-founded one (`narrowPure`, through
-`List.mapM`) by rewriting. The `#guard`s pin the compiled functions.
+also reduce in the kernel (`rfl`), the well-founded ones (`narrowPure`, the
+three mutual `narrow…?`, `abiTyName`, `bytesPure`, `fnPure`) by rewriting. The `#guard`s pin the
+compiled functions.
 -/
 
 namespace Solidity.Examples.ElabTotal.Values
@@ -169,6 +170,104 @@ private def shown (r : Except String RawExpr) : String :=
 #guard (shown (narrowPure C0 false [("a", .val .uint 8 [])]
   (.index (.name "m") (.binop .add (.name "a") (.num 300))))).startsWith "error: 300 does not fit"
 
+/-! ### `narrowWholeUse?`, `narrowWholeAt?`, `narrowBase?`: mutual, by `(sizeOf e, tag)` -/
+
+/-- A literal names no place, at any of the three. -/
+theorem narrow_num (C : Contract) (Γ : ECtx) (n : Nat) :
+    narrowWholeUse? C Γ (.num n) = none ∧ narrowBase? C Γ (.num n) = none ∧
+      narrowWholeAt? C Γ (.num n) = none := by
+  have hu := (narrowWholeUse?_other C Γ).1 n
+  have hb : narrowBase? C Γ (.num n) = none := by
+    rw [narrowBase?_other C Γ _ (by intro _ _ h; cases h) (by intro _ _ h; cases h)
+      (by intro _ h; cases h), hu]
+  exact ⟨hu, hb, by rw [narrowWholeAt?_other C Γ _ (by intro _ _ _ h; cases h), hb]⟩
+
+/-- Operators, tuples, constructors and array literals of literals name no place. -/
+theorem narrowWholeUse?_literals (C : Contract) (Γ : ECtx) (op : BinOp) (u : UnOp) (o : IncDec)
+    (m : ModOp) (T : RawTy) (b : Bool) (k : EnvKey) (f : String) (ns : List String) :
+    narrowWholeUse? C Γ (.binop op (.unop u (.num 1)) (.incDec o (.newArr T (.bool b)))) = none ∧
+      narrowWholeUse? C Γ (.ternary (.env k) (.opAssign op (.num 1) (.num 2))
+        (.tuple [.num 1])) = none ∧
+      narrowWholeUse? C Γ (.modular m (.num 1) (.num 2) (.num 3)) = none ∧
+      narrowWholeUse? C Γ (.named f ns []) = none ∧
+      narrowWholeUse? C Γ (.call "#array" [.num 1]) = none ∧
+      narrowWholeUse? C Γ (.assign (.num 1) (.num 2)) = none := by
+  have hn := fun n => narrow_num C Γ n
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [narrowWholeUse?_binop, narrowWholeUse?_unop, narrowWholeUse?_incDec,
+      narrowWholeUse?_newArr, (hn 1).1, (narrowWholeUse?_other C Γ).2.1]; rfl
+  · rw [narrowWholeUse?_ternary, narrowWholeUse?_opAssign, narrowWholeUse?_tuple,
+      (narrowWholeUse?_other C Γ).2.2, (hn 1).1, (hn 2).1]
+    simp only [List.findSome?, (hn 1).1]; rfl
+  · rw [narrowWholeUse?_modular]; simp only [List.findSome?, (hn 1).1, (hn 2).1, (hn 3).1]
+  · rw [narrowWholeUse?_named]; simp only [List.findSome?, ite_self]
+  · rw [narrowWholeUse?_call_array]; simp only [List.findSome?, (hn 1).2.2]
+  · rw [narrowWholeUse?_assign, (hn 1).1, (hn 2).1, (hn 1).2.2, (hn 2).2.2]
+    simp only [Option.orElse, ite_self]
+
+/-- A call with no argument names no place. -/
+theorem narrowWholeUse?_call_nil (C : Contract) (Γ : ECtx) (f : String) (hf : f ≠ "#array") :
+    narrowWholeUse? C Γ (.call f []) = none := by
+  rw [narrowWholeUse?_call C Γ f [] hf]
+  simp only [List.findSome?, List.zipIdx_nil, ite_self]
+
+/-- A name is itself when it has narrow positions; a member or an element of
+a name is itself or nothing (a name is no base). -/
+theorem narrowWholeUse?_places (C : Contract) (Γ : ECtx) (u : UnOp) (x f : String) (n : Nat) :
+    narrowWholeUse? C Γ (.unop u (.name x)) =
+        (if narrowWhole C Γ (.name x) then some (.name x) else none) ∧
+      narrowWholeUse? C Γ (.field (.name x) f) =
+        (if narrowWhole C Γ (.field (.name x) f) then some (.field (.name x) f) else none) ∧
+      narrowWholeUse? C Γ (.index (.name x) (.num n)) =
+        (if narrowWhole C Γ (.index (.name x) (.num n)) then some (.index (.name x) (.num n))
+          else none) := by
+  refine ⟨?_, ?_, ?_⟩
+  · rw [narrowWholeUse?_unop, narrowWholeUse?_name]
+  · rw [narrowWholeUse?_field, narrowBase?_name]
+  · rw [narrowWholeUse?_index, narrowBase?_name, (narrow_num C Γ n).1]; rfl
+
+/-- A conditional whose branches' shapes differ is refused whole; a base's
+own indices are all that is searched. -/
+theorem narrowWholeAt?_base (C : Contract) (Γ : ECtx) (c a b : RawExpr) (x f : String) (n : Nat)
+    (h : sameShape (exprShape C Γ a) (exprShape C Γ b) = false) :
+    narrowWholeAt? C Γ (.ternary c a b) = some (.ternary c a b) ∧
+      narrowBase? C Γ (.index (.field (.name x) f) (.num n)) = none := by
+  refine ⟨?_, ?_⟩
+  · rw [narrowWholeAt?_ternary, h]; rfl
+  · rw [narrowBase?_index, narrowBase?_field, narrowBase?_name, (narrow_num C Γ n).1]; rfl
+
+#guard narrowWholeUse? C0 [("a", .mem (.array .uint) [("[]", 8)])] (.unop .neg (.name "a")) matches
+  some (.name "a")
+#guard (narrowWholeUse? C0 [("a", .mem (.array .uint) [("[]", 8)])]
+  (.index (.name "a") (.num 0))).isNone
+#guard (narrowWholeUse? C0 [("a", .mem (.array .uint) [("[]", 8)])]
+  (.call "keccak256" [.name "a"])).isNone
+#guard (narrowWholeAt? C0 [] (.ternary (.bool true) (.num 1) (.num 2))).isNone
+
+/-! ### `abiTyName`: by the type's rank (`tyRank`), a struct's members below it -/
+
+omit [FreshNames] in
+/-- The seven arms: scalars, arrays (the element's key is `k[]`), a struct as
+the tuple of its members, no mapping. -/
+theorem abiTyName_arms (ws : List (String × Nat)) (k : String) (n w : Nat) (K : PrimTy) (V : Ty)
+    (s : Name) (ha : lookupBy (k ++ "#address") ws = some w)
+    (hb : (lookupBy (k ++ "[]#bytes") ws == some 1) = false) (hs : structDef s = []) :
+    abiTyName ws k (.ref (.fixed (.prim .bool) n)) = some s!"{"bool"}[{n}]" ∧
+      abiTyName [] k (.prim .int) = some s!"int{256}" ∧
+      abiTyName ws k (.prim .uint) = some "address" ∧
+      abiTyName ws k (.ref (.array (.ref (.mapping K V)))) = none ∧
+      abiTyName ws k (.ref (.struct s)) = some "()" := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [abiTyName_fixed, abiTyName_bool]; rfl
+  · rw [abiTyName_int]; rfl
+  · rw [abiTyName_uint, ha]; rfl
+  · rw [abiTyName_array, abiTyName_mapping, hb]; rfl
+  · rw [abiTyName_struct, hs]; rfl
+
+#guard abiTyName [] "x" (.ref (.struct "Token")) == some "(uint256)"
+#guard abiTyName [("x[]", 8)] "x" (.ref (.array (.prim .uint))) == some "uint8[]"
+#guard abiTyName [] "x" (.ref (.struct "Wallet")) == none
+
 /-! ### `bytesPure`: by `sizeOf`, through `List.mapM` -/
 
 /-- Every arm that only rebuilds its node, on leaves; an array literal is not entered. -/
@@ -295,6 +394,15 @@ theorem fnPure_field_plain (C : Contract) (Γ : ECtx) (x m : String)
     fnPure C Γ (.field (.name x) m) = pure (.field (.name x) m) := by
   rw [fnPure_field, if_neg (by rw [hm]; exact Bool.false_ne_true), extMember?_match_eq, he,
     (fnPure_other C Γ).2.1]
+  rfl
+
+/-- `r.g.selector`, `r.g` an external function of the contract: the literal
+selector (the member arm in its earlier spelling, `fnPure_field_old`). -/
+theorem fnPure_selector (C : Contract) (Γ : ECtx) (e r : RawExpr) (g : String) (sel : Nat)
+    (he : extMember? C Γ e = some (r, g)) (hs : fnSelector? C g = some sel) :
+    fnPure C Γ (.field e "selector") = pure (.num sel) := by
+  rw [fnPure_field_old, if_pos (by decide), he]
+  simp only [hs]
   rfl
 
 /-- The member arm's test of an external function type is the pattern it
