@@ -1,31 +1,7 @@
 import Solidity.Language.FixedPoint
 
-/-!
-# Fixed-point laws
-
-The laws of `Solidity/Language/FixedPoint.lean`: checked and unchecked arithmetic agree wherever nothing overflows;
-`*` and `/` are exact when the exact result has at most `N` digits and
-otherwise truncate toward zero by less than one unit in the last place, as
-the digit-dropping conversions do; lossless conversions round-trip;
-truncations compose (`tdiv_tdiv`, `Fx.rescale_rescale_down`); rescaling and
-unwrapped explicit conversions keep the order (`Fx.rescale_mono`,
-`Fx.explicit_le`); `+` is associative where it does not overflow
-(`Fx.add_assoc`) and `*` is not (an `example`); the implicit conversion is
-exactly the range-contained one
-(`FxTy.implicitOK_iff`, `FxTy.subsumes_iff`) and keeps the value and the
-order.
-
-A checked `*` or `/` range-checks the truncated exact result only: the
-exact product or quotient is an unbounded intermediate, so no
-overflow of a 512-bit or 256-bit intermediate is observable.
--/
-
 namespace Solidity.Language.FixedPoint
 
-/-! ### Truncating division -/
-
-/-- `tdiv` by a positive divisor truncates toward zero: `q·d` lies between
-`0` and `x`, less than one `d` away from `x`. -/
 theorem tdiv_trunc (x d : Int) (hd : 0 < d) :
     (0 ≤ x → 0 ≤ x.tdiv d * d ∧ x.tdiv d * d ≤ x ∧ x < x.tdiv d * d + d) ∧
     (x < 0 → x.tdiv d * d - d < x ∧ x ≤ x.tdiv d * d ∧ x.tdiv d * d ≤ 0) := by
@@ -40,8 +16,6 @@ theorem tdiv_trunc (x d : Int) (hd : 0 < d) :
   · have hm : x ≤ x.tmod d ∧ x.tmod d ≤ 0 := hb.2 hx
     omega
 
-/-- The remainder of a truncating division by any nonzero `b` has the sign
-of the dividend and is smaller than `b` in magnitude. -/
 theorem tdiv_rem (x b : Int) (hb : b ≠ 0) :
     x = x.tdiv b * b + x.tmod b ∧ (x.tmod b).natAbs < b.natAbs ∧
     (0 ≤ x → 0 ≤ x.tmod b) ∧ (x < 0 → x.tmod b ≤ 0) := by
@@ -63,8 +37,6 @@ theorem pow_ten_ne (n : Nat) : (10 : Int) ^ n ≠ 0 := by
   have h : (0 : Int) < 10 ^ n := Int.pow_pos (by decide)
   omega
 
-/-- Truncations compose: truncating by `a`, then by `b`, is truncating by
-`a·b`. -/
 theorem tdiv_tdiv (x : Int) {a : Int} (b : Int) (ha : 0 < a) :
     (x.tdiv a).tdiv b = x.tdiv (a * b) := by
   have hab : 0 ≤ a := Int.le_of_lt ha
@@ -84,9 +56,6 @@ namespace Fx
 
 variable {t t' : FxTy}
 
-/-! ### Checked and unchecked agree where nothing overflows -/
-
-/-- Where a checked result exists, the unchecked one is the same value. -/
 theorem result_unchecked_of_checked {v : Int} {r : Fx t}
     (h : result .checked t v = .ok r) : result .unchecked t v = .ok r := by
   by_cases hv : t.inRange v = true
@@ -95,12 +64,9 @@ theorem result_unchecked_of_checked {v : Int} {r : Fx t}
   · simp only [result, hv, Bool.false_eq_true, dite_false] at h
     exact nomatch h
 
-/-- In range, both modes give the same result. -/
 theorem result_agree {v : Int} (h : t.inRange v = true) :
     result .checked t v = result .unchecked t v := by
   rw [result_of_inRange .checked h, result_of_inRange .unchecked h]
-
-/-! Where the exact result does not overflow, the two modes agree. -/
 
 theorem add_agree_of_inRange {a b : Fx t} (h : t.inRange (a.1 + b.1) = true) :
     add .checked a b = add .unchecked a b := result_agree h
@@ -120,8 +86,6 @@ theorem inc_agree_of_inRange {a : Fx t} (h : t.inRange (a.1 + t.scale) = true) :
 theorem dec_agree_of_inRange {a : Fx t} (h : t.inRange (a.1 - t.scale) = true) :
     dec .checked a = dec .unchecked a := result_agree h
 
-/-- Division agrees where its exact quotient does not overflow; a zero
-divisor panics in both modes. -/
 theorem div_agree_of_inRange {a b : Fx t}
     (h : b.1 ≠ 0 → t.inRange ((a.1 * t.scale).tdiv b.1) = true) :
     div .checked a b = div .unchecked a b := by
@@ -130,14 +94,11 @@ theorem div_agree_of_inRange {a b : Fx t}
   · simp only [div, hb, if_false]
     exact result_agree (h hb)
 
-/-- `%` never overflows, so the two modes always agree. -/
 theorem mod_agree' (a b : Fx t) : mod .checked a b = mod .unchecked a b := by
   by_cases hb : b.1 = 0
   · simp only [mod, hb, if_true]
   · simp only [mod, hb, if_false]
     exact result_agree (mod_inRange a b)
-
-/-! The same agreement read from a checked success. -/
 
 theorem add_agree {a b : Fx t} {r : Fx t} (h : add .checked a b = .ok r) :
     add .unchecked a b = .ok r := result_unchecked_of_checked h
@@ -173,8 +134,6 @@ theorem mod_agree {a b : Fx t} {r : Fx t} (h : mod .checked a b = .ok r) :
   rw [← mod_agree' a b]
   exact h
 
-/-- Every result of an operation is the wrapped exact scaled integer:
-the unchecked result always, the checked one whenever it exists. -/
 theorem result_val {m : Mode} {v : Int} {r : Fx t} (h : result m t v = .ok r) :
     r.1 = wrapInt t v := by
   cases m
@@ -188,7 +147,6 @@ theorem result_val {m : Mode} {v : Int} {r : Fx t} (h : result m t v = .ok r) :
     cases h
     rfl
 
-/-- A checked result is the exact scaled integer itself. -/
 theorem result_checked_val {v : Int} {r : Fx t} (h : result .checked t v = .ok r) :
     r.1 = v := by
   by_cases hv : t.inRange v = true
@@ -198,8 +156,6 @@ theorem result_checked_val {v : Int} {r : Fx t} (h : result .checked t v = .ok r
   · simp only [result, hv, Bool.false_eq_true, dite_false] at h
     exact nomatch h
 
-/-- Unary minus at a `ufixed` type: checked, `0x11` unless the operand
-is `0`; unchecked it wraps (`neg_agree`, `result_val`). -/
 theorem neg_unsigned (hs : t.signed = false) (a : Fx t) :
     neg .checked a = if a.1 = 0 then .ok a else .error .overflow := by
   have ha : t.inRange a.1 = true := a.2
@@ -218,12 +174,6 @@ theorem neg_unsigned (hs : t.signed = false) (a : Fx t) :
     simp only [h0, if_false, neg]
     exact result_checked_overflow hv
 
-/-! ### `*` and `/`: exact, then truncated toward zero -/
-
-/-- A checked product is the exact product truncated toward zero: `r·10^N`
-lies between `0` and `a·b`, less than one `10^N` away (an error below one
-unit in the last place).  An unchecked product is the wrap of the
-same integer (`mul_agree`, `result_val`). -/
 theorem mul_trunc {a b r : Fx t} (h : mul .checked a b = .ok r) :
     (0 ≤ a.1 * b.1 → 0 ≤ r.1 * t.scale ∧ r.1 * t.scale ≤ a.1 * b.1 ∧
       a.1 * b.1 < r.1 * t.scale + t.scale) ∧
@@ -233,16 +183,12 @@ theorem mul_trunc {a b r : Fx t} (h : mul .checked a b = .ok r) :
   rw [hr]
   exact tdiv_trunc _ _ t.scale_pos
 
-/-- A checked product whose exact value has at most `N` digits is exact. -/
 theorem mul_exact {a b r : Fx t} (h : mul .checked a b = .ok r)
     (hd : t.scale ∣ a.1 * b.1) : r.1 * t.scale = a.1 * b.1 := by
   have hr : r.1 = (a.1 * b.1).tdiv t.scale := result_checked_val h
   rw [hr]
   exact Int.tdiv_mul_cancel hd
 
-/-- A checked quotient is the exact quotient truncated toward zero:
-`a·10^N = r·b + e` with `|e| < |b|` and `e` of the sign of `a`,
-which determines `r`. -/
 theorem div_trunc {a b r : Fx t} (h : div .checked a b = .ok r) :
     b.1 ≠ 0 ∧ ∃ e : Int, a.1 * t.scale = r.1 * b.1 + e ∧ e.natAbs < b.1.natAbs ∧
       (0 ≤ a.1 → 0 ≤ e) ∧ (a.1 < 0 → e ≤ 0) := by
@@ -262,7 +208,6 @@ theorem div_trunc {a b r : Fx t} (h : div .checked a b = .ok r) :
     · exact hq.2.2.1 (Int.mul_nonneg ha (by omega))
     · exact hq.2.2.2 (Int.mul_neg_of_neg_of_pos ha hs)
 
-/-- A checked quotient whose exact value has at most `N` digits is exact. -/
 theorem div_exact {a b r : Fx t} (h : div .checked a b = .ok r)
     (hd : b.1 ∣ a.1 * t.scale) : r.1 * b.1 = a.1 * t.scale := by
   by_cases hb : b.1 = 0
@@ -273,18 +218,12 @@ theorem div_exact {a b r : Fx t} (h : div .checked a b = .ok r)
     rw [hr]
     exact Int.tdiv_mul_cancel hd
 
-/-- Checked `++` and `--` move the value by exactly `1`; unchecked they
-wrap the same integer (`result_val`). -/
 theorem inc_val {a r : Fx t} (h : inc .checked a = .ok r) : r.1 = a.1 + t.scale :=
   result_checked_val h
 
 theorem dec_val {a r : Fx t} (h : dec .checked a = .ok r) : r.1 = a.1 - t.scale :=
   result_checked_val h
 
-/-! ### Conversions: truncation and lossless round trips -/
-
-/-- Dropping digits truncates toward zero: the rescaled integer, scaled
-back, lies between `0` and `v`, less than one dropped unit away. -/
 theorem rescale_down_trunc (n n' : Nat) (h : n' < n) (v : Int) :
     (0 ≤ v → 0 ≤ rescale n n' v * 10 ^ (n - n') ∧ rescale n n' v * 10 ^ (n - n') ≤ v ∧
       v < rescale n n' v * 10 ^ (n - n') + 10 ^ (n - n')) ∧
@@ -294,7 +233,6 @@ theorem rescale_down_trunc (n n' : Nat) (h : n' < n) (v : Int) :
   simp only [rescale, hn, if_false]
   exact tdiv_trunc v _ (Int.pow_pos (by decide))
 
-/-- Dropping digits that are zero is exact: rescaling back gives `v`. -/
 theorem rescale_down_exact (n n' : Nat) (v : Int) (hd : n' < n → 10 ^ (n - n') ∣ v) :
     rescale n' n (rescale n n' v) = v := by
   by_cases hle : n ≤ n'
@@ -309,7 +247,6 @@ theorem rescale_down_exact (n n' : Nat) (v : Int) (hd : n' < n → 10 ^ (n - n')
     simp only [rescale, hle, if_false, hle', if_true]
     exact Int.tdiv_mul_cancel (hd hlt)
 
-/-- Dropping digits in two steps is dropping them at once. -/
 theorem rescale_rescale_down (n m k : Nat) (h1 : k ≤ m) (h2 : m ≤ n) (v : Int) :
     rescale m k (rescale n m v) = rescale n k v := by
   have hp : ∀ e : Nat, (0 : Int) < 10 ^ e := fun e => Int.pow_pos (by decide)
@@ -327,7 +264,6 @@ theorem rescale_rescale_down (n m k : Nat) (h1 : k ≤ m) (h2 : m ≤ n) (v : In
       have he : n - m + (m - k) = n - k := by omega
       rw [he]
 
-/-- Rescaling is monotone. -/
 theorem rescale_mono (n n' : Nat) {v w : Int} (h : v ≤ w) : rescale n n' v ≤ rescale n n' w := by
   have hp : ∀ e : Nat, (0 : Int) < 10 ^ e := fun e => Int.pow_pos (by decide)
   unfold rescale
@@ -335,15 +271,10 @@ theorem rescale_mono (n n' : Nat) {v w : Int} (h : v ≤ w) : rescale n n' v ≤
   · exact Int.mul_le_mul_of_nonneg_right h (Int.le_of_lt (hp _))
   · exact Int.tdiv_le_tdiv (hp _) h
 
-/-- Rescaling up and back down is the identity. -/
 theorem rescale_up_down (n n' : Nat) (h : n ≤ n') (v : Int) :
     rescale n' n (rescale n n' v) = v :=
   rescale_down_exact n n' v (fun hlt => absurd h (Nat.not_le.mpr hlt))
 
-/-- An explicit conversion is value-preserving whenever the value is
-representable at the target: no nonzero digit dropped and the rescaled
-integer in range.  This covers a narrower width, the other signedness and
-fewer digits, value by value. -/
 theorem explicit_sameValue (a : Fx t)
     (hd : t'.digits < t.digits → 10 ^ (t.digits - t'.digits) ∣ a.1)
     (hr : t'.inRange (rescale t.digits t'.digits a.1) = true) :
@@ -362,8 +293,6 @@ theorem explicit_sameValue (a : Fx t)
       Int.tdiv_mul_cancel (hd hlt)
     rw [hp, ← Int.mul_assoc, hc]
 
-/-- Under the same premises the explicit conversion back gives the value
-back. -/
 theorem explicit_explicit (a : Fx t)
     (hd : t'.digits < t.digits → 10 ^ (t.digits - t'.digits) ∣ a.1)
     (hr : t'.inRange (rescale t.digits t'.digits a.1) = true) :
@@ -372,8 +301,6 @@ theorem explicit_explicit (a : Fx t)
   simp only [explicit, wrap, wrapInt_of_inRange hr, rescale_down_exact _ _ _ hd,
     wrapInt_of_inRange a.2]
 
-/-- An implicit conversion followed by the explicit conversion back gives
-the value back. -/
 theorem explicit_implicit (h : t.subsumes t' = true) (a : Fx t) :
     explicit t (implicit h a) = a := by
   rw [← explicit_of_subsumes h a]
@@ -385,22 +312,17 @@ theorem explicit_implicit (h : t.subsumes t' = true) (a : Fx t) :
     exact inRange_mul_of_subsumes h a
   exact explicit_explicit a (fun hlt => absurd hd (Nat.not_le.mpr hlt)) hr
 
-/-- An integer converted explicitly and converted back gives the integer
-back, when its scaled value is in range. -/
 theorem toIntTrunc_ofIntegerExplicit (k : Int) (h : t.inRange (k * t.scale) = true) :
     toIntTrunc (ofIntegerExplicit t k) = k := by
   have hs : 0 < t.scale := t.scale_pos
   simp only [toIntTrunc, ofIntegerExplicit, wrap, wrapInt_of_inRange h]
   exact Int.mul_tdiv_cancel k (by omega)
 
-/-- A value with no fractional part converted to an integer and back is the
-value. -/
 theorem ofIntegerExplicit_toIntTrunc (a : Fx t) (h : t.scale ∣ a.1) :
     ofIntegerExplicit t (toIntTrunc a) = a := by
   apply Subtype.ext
   simp only [ofIntegerExplicit, toIntTrunc, wrap, Int.tdiv_mul_cancel h, wrapInt_of_inRange a.2]
 
-/-- Conversion to an integer truncates toward zero. -/
 theorem toIntTrunc_trunc (a : Fx t) :
     (0 ≤ a.1 → 0 ≤ toIntTrunc a * t.scale ∧ toIntTrunc a * t.scale ≤ a.1 ∧
       a.1 < toIntTrunc a * t.scale + t.scale) ∧
@@ -408,14 +330,11 @@ theorem toIntTrunc_trunc (a : Fx t) :
       toIntTrunc a * t.scale ≤ 0) :=
   tdiv_trunc a.1 t.scale t.scale_pos
 
-/-- A bit pattern read as a value and back is the bit pattern (`bytesM`
-by bit pattern). -/
 theorem toBits_ofBits {u : Int} (h0 : 0 ≤ u) (h1 : u < 2 ^ t.bits) :
     toBits (ofBits t u) = u := by
   simp only [toBits, ofBits, wrap, wrapInt_emod]
   exact Int.emod_eq_of_lt h0 h1
 
-/-- A value's bit pattern read back is the value. -/
 theorem ofBits_toBits (a : Fx t) : ofBits t (toBits a) = a := by
   apply Subtype.ext
   have he : wrapInt t (a.1 % 2 ^ t.bits) = wrapInt t a.1 := by
@@ -423,8 +342,6 @@ theorem ofBits_toBits (a : Fx t) : ofBits t (toBits a) = a := by
     simp only [Int.emod_emod]
   simp only [ofBits, toBits, wrap, he, wrapInt_of_inRange a.2]
 
-/-- An explicit conversion keeps the order of the values it does not
-wrap. -/
 theorem explicit_le {a b : Fx t} (h : le a b = true)
     (ha : t'.inRange (rescale t.digits t'.digits a.1) = true)
     (hb : t'.inRange (rescale t.digits t'.digits b.1) = true) :
@@ -432,8 +349,6 @@ theorem explicit_le {a b : Fx t} (h : le a b = true)
   simp only [le, decide_eq_true_eq] at h ⊢
   simp only [explicit, wrap, wrapInt_of_inRange ha, wrapInt_of_inRange hb]
   exact rescale_mono _ _ h
-
-/-! ### Implicit conversions keep value and order -/
 
 theorem implicit_le (h : t.subsumes t' = true) (a b : Fx t) :
     le (implicit h a) (implicit h b) = le a b := by
@@ -458,12 +373,8 @@ theorem implicit_injective (h : t.subsumes t' = true) {a b : Fx t}
 
 end Fx
 
-/-! ### The implicit conversion is the range-contained one -/
-
 namespace FxTy
 
-/-- A range-contained pair passes solc's own test, so `implicitOK` is just
-`subsumes`. -/
 theorem solcImplicit_of_subsumes {t t' : FxTy} (h : t.subsumes t' = true) :
     t.solcImplicit t' = true := by
   simp only [subsumes, inRange, Bool.and_eq_true, decide_eq_true_eq] at h
@@ -475,7 +386,7 @@ theorem solcImplicit_of_subsumes {t t' : FxTy} (h : t.subsumes t' = true) :
     rw [← Int.pow_add, Nat.sub_add_cancel hd]
   have hl : t.lo ≤ 0 := t.lo_le_zero
   have hh : 0 ≤ t.hi := t.hi_nonneg
-  -- the integer parts
+
   have hmax : t.maxInt ≤ t'.maxInt := by
     simp only [maxInt]
     have e : t.hi / t.scale =
@@ -494,7 +405,7 @@ theorem solcImplicit_of_subsumes {t t' : FxTy} (h : t.subsumes t' = true) :
       Int.ediv_le_ediv t'.scale_pos hle
     rw [← hs'] at e
     omega
-  -- the widths
+
   have hhi : t.hi ≤ t'.hi := by
     have h1 : t.hi * 1 ≤ t.hi * 10 ^ (t'.digits - t.digits) :=
       Int.mul_le_mul_of_nonneg_left (show (1 : Int) ≤ 10 ^ (t'.digits - t.digits) by omega) hh
@@ -521,7 +432,6 @@ theorem solcImplicit_of_subsumes {t t' : FxTy} (h : t.subsumes t' = true) :
   simp only [solcImplicit, Bool.and_eq_true, decide_eq_true_eq]
   exact ⟨⟨⟨hd, hb⟩, hmax⟩, hmin⟩
 
-/-- The implicit conversion test is exactly `subsumes`. -/
 theorem implicitOK_iff {t t' : FxTy} : t.implicitOK t' = true ↔ t.subsumes t' = true := by
   simp only [implicitOK, Bool.and_eq_true]
   exact ⟨fun h => h.2, fun h => ⟨solcImplicit_of_subsumes h, h⟩⟩
@@ -540,8 +450,6 @@ theorem hi_inRange (t : FxTy) : t.inRange t.hi = true := by
   simp only [lo, hi]
   split <;> omega
 
-/-- `subsumes` is range containment: it holds exactly when every value of
-`t` is a value of `t'`. -/
 theorem subsumes_iff {t t' : FxTy} :
     t.subsumes t' = true ↔ ∀ a : Fx t, ∃ b : Fx t', Fx.SameValue a b := by
   constructor
@@ -550,7 +458,7 @@ theorem subsumes_iff {t t' : FxTy} :
   · intro h
     have hs : 0 < t.scale := t.scale_pos
     have hs1 : 0 < t'.scale := t'.scale_pos
-    -- the least unit of `t` forces the digits
+
     have hd : t.digits ≤ t'.digits := by
       have h1 : t.inRange 1 = true := by
         have hg : 8 ≤ t.bits := t.bits_ge
@@ -580,7 +488,7 @@ theorem subsumes_iff {t t' : FxTy} :
     have hs' : t'.scale = 10 ^ (t'.digits - t.digits) * t.scale := by
       simp only [scale]
       rw [← Int.pow_add, Nat.sub_add_cancel hd]
-    -- an endpoint's image is its rescaled integer
+
     have hend : ∀ a : Fx t, t'.inRange (a.1 * 10 ^ (t'.digits - t.digits)) = true := by
       intro a
       obtain ⟨b, hb⟩ := h a
@@ -593,13 +501,10 @@ theorem subsumes_iff {t t' : FxTy} :
     simp only [subsumes, Bool.and_eq_true, decide_eq_true_eq]
     exact ⟨⟨hd, hend ⟨t.lo, t.lo_inRange⟩⟩, hend ⟨t.hi, t.hi_inRange⟩⟩
 
-/-- Every type converts implicitly to itself. -/
 theorem subsumes_refl (t : FxTy) : t.subsumes t = true := by
   simp only [subsumes, Nat.le_refl, decide_true, Nat.sub_self, Int.pow_zero, Int.mul_one,
     t.lo_inRange, t.hi_inRange, Bool.and_self]
 
-/-- The common type of a binary operation is one both operands convert to
-implicitly. -/
 theorem common?_subsumes {t t' u : FxTy} (h : common? t t' = some u) :
     t.subsumes u = true ∧ t'.subsumes u = true := by
   unfold common? at h
@@ -620,8 +525,6 @@ namespace Fx
 
 variable {t t' : FxTy}
 
-/-- An implicit conversion (`implicitOK`) keeps the value, the order and
-distinctness. -/
 theorem implicit_preserves (h : t.implicitOK t' = true) (a b : Fx t) :
     SameValue a (implicit (FxTy.implicitOK_iff.mp h) a) ∧
     lt (implicit (FxTy.implicitOK_iff.mp h) a) (implicit (FxTy.implicitOK_iff.mp h) b) =
@@ -632,8 +535,6 @@ theorem implicit_preserves (h : t.implicitOK t' = true) (a b : Fx t) :
   ⟨implicit_sameValue _ a, implicit_lt _ a b, implicit_le _ a b,
     ⟨implicit_injective _, fun he => he ▸ rfl⟩⟩
 
-/-- Both operands of a binary operation keep their values at the common
-type. -/
 theorem common?_preserves {u : FxTy} (h : FxTy.common? t t' = some u) (a : Fx t) (b : Fx t') :
     SameValue a (implicit (FxTy.common?_subsumes h).1 a) ∧
     SameValue b (implicit (FxTy.common?_subsumes h).2 b) :=
@@ -641,7 +542,6 @@ theorem common?_preserves {u : FxTy} (h : FxTy.common? t t' = some u) (a : Fx t)
 
 end Fx
 
-/-- `+` is associative wherever the checked sums exist (it is exact). -/
 theorem Fx.add_assoc {t : FxTy} {a b c r s r' s' : Fx t} (h1 : Fx.add .checked a b = .ok r)
     (h2 : Fx.add .checked r c = .ok s) (h3 : Fx.add .checked b c = .ok r')
     (h4 : Fx.add .checked a r' = .ok s') : s = s' := by
@@ -652,16 +552,12 @@ theorem Fx.add_assoc {t : FxTy} {a b c r s r' s' : Fx t} (h1 : Fx.add .checked a
   apply Subtype.ext
   omega
 
-/-- `*` is not associative under truncation: at `ufixed16x2`,
-`(0.01 · 0.50) · 2.00 = 0.00` but `0.01 · (0.50 · 2.00) = 0.01`. -/
 example :
     ((Fx.mul .checked (⟨1, by decide⟩ : Fx Fx.ufixed16x2) ⟨50, by decide⟩).toOption.bind
         fun r => (Fx.mul .checked r ⟨200, by decide⟩).toOption).map Subtype.val = some 0 ∧
     ((Fx.mul .checked (⟨50, by decide⟩ : Fx Fx.ufixed16x2) ⟨200, by decide⟩).toOption.bind
         fun r => (Fx.mul .checked ⟨1, by decide⟩ r).toOption).map Subtype.val = some 1 := by
   decide
-
-/-! ### Axiom pins -/
 
 /--
 info: 'Solidity.Language.FixedPoint.FxTy.implicitOK_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
