@@ -2,12 +2,14 @@ import Solidity.Source.Preservation.ValueConversions
 import Solidity.Source.Preservation.Reads
 import Solidity.Source.Preservation.CallFrames
 
-/-! The expression half of joint memory preservation on the value
-fragment. Progress remains the independently proved source `FragAt` theorem.
--/
+
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
+
+example {E : Env} {A : Decl → Prop} {G : Glob E} {c : String}
+    (hG : CallsOK A G c) (n : Nat) : Source.FragAt A G c n :=
+  Source.fragAt hG n
 
 def CallMemAt (C : Decl → Prop) (G : Glob E) (F : Fr) (n : Nat) : Prop :=
   ∀ (d : Decl) {ps rs : List STy}, d.fnSig E = some (ps, rs) → C d →
