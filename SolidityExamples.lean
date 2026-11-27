@@ -180,6 +180,7 @@ import Solidity.Examples.FrontendValidation.SolcJson.BodyHelpers
 import Solidity.Examples.FrontendValidation.SolcJson.CallMetadata
 import Solidity.Examples.FrontendValidation.SolcJson.Ir
 import Solidity.Examples.FrontendValidation.SolcJson.YulIngress
+import Solidity.Examples.FrontendValidation.SolcJson.YulReferences
 import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
 import Solidity.Examples.Goals.BenchmarkBudgetsMet

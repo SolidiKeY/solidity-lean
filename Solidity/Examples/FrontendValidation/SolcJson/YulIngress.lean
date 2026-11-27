@@ -108,7 +108,7 @@ private def rawUnsafe : String :=
 #guard (checkMetadataSafety ["memory-safe"] none).isOk
 #guard (checkMetadataSafety [] none).toOption.isNone
 -- These also execute documentationTags on positive/negative safety input.
--- Its direct negative-case interpretation is pending F1B-DOC-TOTAL.
+-- A negative safety result need not mean that tag collection itself failed.
 #guard (checkMetadataSafety [] (some "@solidity memory-safe-assembly")).isOk
 #guard (checkMetadataSafety [] (some "@solidity other")).toOption.isNone
 

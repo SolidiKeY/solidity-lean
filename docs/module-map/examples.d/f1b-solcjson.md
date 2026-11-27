@@ -5,3 +5,4 @@
 | `Examples/FrontendValidation/SolcJson/CallMetadata.lean` | Literal profile, call-shape, static-target, location and attachment controls; structural metadata only. |
 | `Examples/FrontendValidation/SolcJson/YulIngress.lean` | Literal JSON grammar, metadata, documentation safety and closed/scoped ingress controls; no source or execution authentication. |
 | `Examples/FrontendValidation/SolcJson/BodyHelpers.lean` | Literal rational, expression, tuple, storage-reference, aggregate and declaration-owner acceptance/refusal controls. |
+| `Examples/FrontendValidation/SolcJson/YulReferences.lean` | Literal declaration IDs, namespace selection, shadowing, source spans, occurrence collection and unique reference coverage controls. |
