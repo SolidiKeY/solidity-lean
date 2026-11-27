@@ -2,9 +2,6 @@ import Solidity.Source.Progress.ReadyArguments
 import Solidity.Source.Preservation.AllocatingControls
 import Solidity.Source.Preservation.MemoryProgramControls
 
-/-! Ready reference conditionals and exact argument lists over inhabited
-memory. Actual runs distinguish alias selection, fresh allocation, later-argument
-panic and timeout. A checked-elaboration client retains the source-only boundary. -/
 namespace Solidity.Source.Progress.ReadyExpressionControls
 open EM
 open Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls (E Γ seed state small frame globals)

@@ -1,10 +1,6 @@
 import Solidity.Source.Progress.ReadyDefaults
 import Solidity.Source.Preservation.MemoryBodyCalls
 
-/-! Actual single-return memory bodies and calls. Return-slot default progress
-is proved from ZeroReady; body progress follows ready expression evaluation and
-checked frame writes. Preservation reuses the existing memory-body simulation.
-No arbitrary memory-call graph, modifier or transaction progress is assumed. -/
 namespace Solidity.Source.Progress
 open EM
 variable {E : Env}

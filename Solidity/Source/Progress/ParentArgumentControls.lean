@@ -2,10 +2,6 @@ import Solidity.Source.Progress.ParentArguments
 import Solidity.Source.Progress.ReadyReturns
 import Solidity.Lowering.P9.InferenceCuts
 
-/-! Actual frontend-elaborated reference identity callee, with an intrinsic
-allocating-parent argument. Exact call observations distinguish the caller's
-old heap, fresh argument and retained default; both evaluator pipelines and
-arbitrary fixed parameters are covered. -/
 namespace Solidity.Source.Progress.ParentArgumentControls
 open EM Solidity.Lowering.P9
 

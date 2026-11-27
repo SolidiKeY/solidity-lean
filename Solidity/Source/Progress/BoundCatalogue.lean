@@ -3,10 +3,6 @@ import Solidity.Source.Progress.ReadyCatalogue
 import Solidity.Source.Progress.ParentArguments
 import Solidity.Source.Progress.CallComposition
 
-/-! Catalogues of finite bound-parent bodies with metadata derived from actual
-elaboration. Entries contain syntax/default admission and actual body identity,
-not frame equations or execution oracles. Checked value and memory entries use
-the existing complete-coverage contract. -/
 namespace Solidity.Source.Progress
 open EM Solidity.Lowering.P9
 variable {E : Env}
