@@ -1,7 +1,5 @@
 import Solidity.Source.Monetary
 
-/-! Exact-money authority adapter. Session wiring, actual fee settlement and EVM-reachable
-range are NOT supplied. Funding saturation is not a balance observation. -/
 namespace Solidity.Source.Monetary
 open Solidity.Roadmap (Address Word Request)
 
@@ -15,17 +13,13 @@ theorem Authority.set_at (authority : Authority) (address : Address) (amount : B
     (authority.set address amount).balance address = amount := by
   simp only [Authority.set, if_true]
 
-/-- Exact funding authority. -/
 def Authority.funded (authority : Authority) (request : Request) : Prop :=
   request.value.val ≤ authority.balance request.sender
 
-/-- Bounded affordability adapter only. Never use it as an observed balance. -/
 def Authority.fundingWord (authority : Authority) (address : Address) : Word :=
   ⟨min (authority.balance address) (wordLimit-1),
     Nat.lt_of_le_of_lt (Nat.min_le_right _ _) (by decide : wordLimit-1 < 2^256)⟩
 
-/-- Every legal Word-valued request has the SAME funding decision even when
-exact money exceeds the Word limit. No range premise or amount is discarded. -/
 theorem Authority.funding_iff (authority : Authority) (request : Request) :
     request.value.val ≤ (authority.fundingWord request.sender).val ↔ authority.funded request := by
   have bound : request.value.val ≤ wordLimit-1 := by
@@ -34,10 +28,18 @@ theorem Authority.funding_iff (authority : Authority) (request : Request) :
     omega
   simp only [Authority.fundingWord, Authority.funded, Nat.le_min, bound, and_true]
 
-/-- Lossless optional balance conversion, distinct from the funding adapter. -/
 def Authority.balanceWord? (authority : Authority) (address : Address) : Option Word :=
   checkedWord (authority.balance address)
 
+
+example (authority : Authority) (address : Address) (word : Word)
+    (converted : authority.balanceWord? address = some word) :
+    word.val = authority.balance address := by
+  unfold Authority.balanceWord? checkedWord at converted
+  split at converted
+  · cases Option.some.inj converted
+    rfl
+  · cases converted
 
 def wideAuthority : Authority := ⟨fun _ => 2^256⟩
 
