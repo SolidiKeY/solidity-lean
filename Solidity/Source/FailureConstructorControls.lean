@@ -2,14 +2,9 @@ import Solidity.Source.SemanticsExamples
 import Solidity.Source.FailureEventLaws
 import Solidity.Source.Session
 
-/-! actual initcode-frame controls. The intrinsic constructor's state
-initializer calls an explicit environment receiver, receives an ABI word and
-writes the decoded value. Fixed hash and strategy are explicit fixture inputs;
-no compiler/EVM, root transaction ordinal or post-fee funding theorem is claimed. -/
 namespace Solidity.Source.FailureExecution.ConstructorControls
 open EM SemanticsExamples
 
-/-- Fixture structural equality only; execution is still the actual interpreter. -/
 private instance {α : Type} [DecidableEq α] : DecidableEq (Except Halt α) := fun a b =>
   match a,b with
   | .error x,.error y => decidable_of_iff (x=y) (by constructor <;> intro h <;> cases h <;> rfl)
@@ -110,8 +105,6 @@ theorem cut0_world_rollback (pipeline : Roadmap.Pipeline) :
   change (input.ex.apply (.account thisC (fun _ => prefund))).undo = input.ex
   exact ExecState.undo_apply input.ex _
 
-/-- A separate nonempty constructor body exercises runCtorBody/runMods, not
-just the initializer hook.  -/
 def body : RBody E := ⟨[],[],false,[],[],
   .stmt (.expr (.assign (.state stateDecl variable_type rfl) initializer)) .nil,[]⟩
 def bodyProgram : Program E := { program with
@@ -169,8 +162,6 @@ theorem request_stop_propagates (pipeline : Roadmap.Pipeline) :
       result.2.2.ex.journal.length = 1 ∧ (result.2.2.ex.world.accounts thisC).nonce = 0 := by
   cases pipeline <;> decide +kernel
 
-/-- Same registered constructor and host strategy, through the actual
-session deployment-receipt operation. No request-fate scope is fabricated. -/
 def sessionProgram (pipeline : Roadmap.Pipeline) : SrcProg E :=
   ⟨program,pipeline,toyFixed,"C"⟩
 def sessionEnv : Roadmap.SessionEnv where
@@ -295,7 +286,6 @@ end Solidity.Source.FailureExecution.ConstructorControls
 /-- info: 'Solidity.Source.FailureExecution.ConstructorControls.request_stop_propagates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.request_stop_propagates
 
-/- BEGIN GENERATED RECEIPT PINS -/
 /-- info: 'Solidity.Source.deployRun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.deployRun
 /-- info: 'Solidity.Source.deployRun_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -312,4 +302,3 @@ end Solidity.Source.FailureExecution.ConstructorControls
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.ancestor_no_receipt
 /-- info: 'Solidity.Source.FailureExecution.ConstructorControls.request_no_receipt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.ConstructorControls.request_no_receipt
-/- END GENERATED RECEIPT PINS -/

@@ -1,7 +1,5 @@
 import Solidity.Source.FailurePrimitives
 
-/-! Structural no-cut invariants of the actual typed cursor. These are not
-full evaluator coherence, NoFail execution, balance installation or compiler facts. -/
 namespace Solidity.Source.FailureExecution
 open EM
 
@@ -112,8 +110,6 @@ theorem Cursor.cutFree_advanceEvent (c : Cursor) (clear : c.CutFree) :
   rw [Cursor.cutFree_stop _ nextClear]
   exact ⟨rfl, nextClear.2.1, nextClear.2.2⟩
 
-/-- Exact full-state identity for a real check on a structurally clear cursor.
-NoFail of the input plan alone does not establish this cursor premise. -/
 theorem check_cutFree {E : Env} {Γ : RCtx} (plan : RuntimePlan)
     (locals : Locals E.layout Γ) (state : St E) (clear : state.resource.CutFree) :
     (check plan : EM E Γ Unit).run (locals,state) = (.ok (),(locals,state)) := by

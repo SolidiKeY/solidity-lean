@@ -1,8 +1,5 @@
 import Solidity.Source.FailureEvaluatorStability
 
-/-! Completed planned transactions have exactly the same full result at
-larger horizons. Fixed choices are retained. This is not the missing event
-prefix approximation on timeout, session consistency or compiler realization. -/
 namespace Solidity.Source.FailureExecution
 open EM
 variable {E : Env}
