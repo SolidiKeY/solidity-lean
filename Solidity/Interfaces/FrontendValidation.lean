@@ -51,7 +51,23 @@ def RationalChecks : Prop :=
     q.num * (a.den * b.den : Nat) = (a.num * b.num) * q.den) ∧
   (∀ a b q, Q.div a b = some q → Canonical q ∧
     q.num * (a.den * b.num) = (a.num * b.den) * q.den) ∧
-  (∀ a n, Q.int? a = some n → a.den = 1 ∧ a.num = n)
+  (∀ a n, Q.int? a = some n → a.den = 1 ∧ a.num = n) ∧
+  (∀ a e q, Q.pow a e = some q → e.den = 1 ∧
+    if e.num = 0 then q = Q.ofInt 1 else if a.num = 0 then q = Q.ofInt 0 else
+    ((1 < a.num.natAbs ∨ 1 < a.den) → (max (Nat.log2 a.num.natAbs) (Nat.log2 a.den) + 1) * e.num.natAbs ≤ 4096) ∧
+    if e.num < 0 then Canonical q ∧ q.num * a.num ^ e.num.natAbs = (a.den : Int) ^ e.num.natAbs * q.den else
+    q.num = a.num ^ e.num.natAbs ∧ q.den = a.den ^ e.num.natAbs) ∧
+  (∀ s q, parseRational s = some q → Canonical q ∧ 0 ≤ q.num ∧
+    let t := s.replace "_" "";
+    if t.startsWith "0x" || t.startsWith "0X" then
+      ∃ ds : List Nat, ds.length = (t.toList.drop 2).length ∧ (∀ (c : Char) (d : Nat), (c, d) ∈ List.zip (t.toList.drop 2) ds →
+        d < 16 ∧ ((d < 10 ∧ c.toNat = 48 + d) ∨ (10 ≤ d ∧ (c.toNat = 87 + d ∨ c.toNat = 55 + d)))) ∧
+        q.den = 1 ∧ q.num = (ds.foldl (fun n d => n * 16 + d) 0 : Nat) else
+      ∃ m i f : String, ∃ e : Int, ∃ n : Nat,
+        (((t.replace "E" "e").splitOn "e" = [m] ∧ e = 0) ∨ ∃ x, (t.replace "E" "e").splitOn "e" = [m, x] ∧
+          (if x.startsWith "-" then (x.drop 1).toNat?.map (fun n => -(n : Int)) else x.toInt?) = some e) ∧
+        (m.splitOn "." = [i] ∧ f = "" ∨ m.splitOn "." = [i, f]) ∧ (i ++ f) ≠ "" ∧ (i ++ f).toNat? = some n ∧ (n = 0 ∨ e.natAbs ≤ 4096) ∧
+        q.num * (10 : Int) ^ (f.length + if e < 0 then e.natAbs else 0) = (n : Int) * 10 ^ (if e < 0 then 0 else e.natAbs) * q.den)
 
 /-- Whole-reader preservation of recorded refusals and declaration identities. -/
 def ReaderRetainsChecks (c : SolcContract) : Prop :=
