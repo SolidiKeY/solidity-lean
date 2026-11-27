@@ -1,5 +1,6 @@
 import Solidity
 import SolidityExamples
+import SolidityControls
 import SoliditySlowExamples
 
 /-!
@@ -14,7 +15,7 @@ defined through `lcProof`, and putting `lcProof` on the global allow list would
 let a safe theorem use it.
 
 The audit, over every constant declared in a module `Solidity` or
-`Solidity.*` that `import Solidity`, `import SolidityExamples`, and `import SoliditySlowExamples` reach (the
+`Solidity.*` that `import Solidity`, `import SolidityExamples`, `import SolidityControls`, and `import SoliditySlowExamples` reach (the
 libraries CI builds; the `SolidityCorpus`
 and `SolkeyTestSuite` libraries' `Solidity.Corpus.*`/`Solidity.TestSuite.*`
 modules are not imported, so not audited here):
