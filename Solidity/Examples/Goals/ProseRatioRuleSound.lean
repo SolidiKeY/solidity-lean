@@ -1,4 +1,4 @@
-import Solidity.Goals.ProseRatioRuleSound
+import Solidity.Docs.ProseRatio
 
 /-! Pin and controls for the plan goal `proseRatioRuleSound`. -/
 
@@ -7,10 +7,16 @@ namespace Solidity.Goals
 /-! The Lean policy specification only: not the checker's proof, the calibrated
 policy, the Python integration or CI on the merged head. -/
 /--
-info: open Solidity.Goals.proseRatioRuleSound ← Solidity.Docs.prose_ratio_rule_sound plan pb2-prose-ratio-rule
+info: proved Solidity.Goals.proseRatioRuleSound ← Solidity.Docs.prose_ratio_rule_sound plan pb2-prose-ratio-rule
 -/
 #guard_msgs in
 #roadmap_goal proseRatioRuleSound
+
+example : proseRatioRuleSound := Solidity.Docs.prose_ratio_rule_sound
+
+/-- info: 'Solidity.Docs.prose_ratio_rule_sound' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Docs.prose_ratio_rule_sound
 
 /-! The decision model at its boundaries: equality passes and one line over fails,
 mixed lines count as code, audits padding and value-equal or raised proposals change

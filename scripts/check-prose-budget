@@ -356,7 +356,7 @@ _HEADER_IMPORT = re.compile(
 # Unknown bare names can be reserved header/command tokens. These standard
 # library roots are known identifiers in the pinned empty header environment.
 _HEADER_BARE_ROOTS = frozenset(("Init", "Lean", "Std"))
-_REGISTRY_ROOTS = ("Solidity.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean",
+_REGISTRY_ROOTS = ("Solidity.lean", "SolidityControls.lean", "SolidityExamples.lean", "SoliditySlowExamples.lean",
                    "Bridge/SolidityBridge.lean")
 
 
