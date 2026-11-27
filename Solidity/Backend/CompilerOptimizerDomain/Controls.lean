@@ -1,8 +1,9 @@
 import Solidity.Backend.CompilerOptimizerDomain.StmtFold
 import Solidity.Backend.CompilerOptimizerDomain.DeadCode
 import Solidity.Backend.CompilerOptimizerDomain.DeadStore
+import Solidity.Backend.CompilerOptimizerDomain.LICM
 
-/-! Integration controls for the proved constant-fold and removal stages only. These check both
+/-! Integration controls for the proved constant-fold, removal and LICM stages only. These check both
 resource and fragment consequences against the unchanged public compiler domain;
 they do not assert preservation by the remaining optimizer stages or iteration. -/
 namespace Solidity.Backend.CompilerOptimizerDomain.Controls
@@ -27,6 +28,14 @@ example (hP : ProgOk [] P) :
     Evm.Prog.pushes Q = 0 ∧ ∃ G, inFragP (Frag.init Γ) Q = some G := by
   dsimp only
   have hQ := prog_dstore_ok (prog_dse_ok (prog_dce_ok (prog_cfold_ok hP)))
+  obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
+  exact ⟨hQ.quiet.1, G, h⟩
+
+-- LICM must preserve both compiler-domain consequences, including hoisted loops.
+example (hP : ProgOk [] P) :
+    Evm.Prog.pushes (Optimizer.ConstFold.Prog.licm P) = 0 ∧
+      ∃ G, inFragP (Frag.init Γ) (Optimizer.ConstFold.Prog.licm P) = some G := by
+  have hQ := prog_licm_ok hP
   obtain ⟨G, h, _⟩ := hQ.frag (Frag.init Γ) (Matches.init Γ)
   exact ⟨hQ.quiet.1, G, h⟩
 
