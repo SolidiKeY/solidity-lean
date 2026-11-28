@@ -36,7 +36,8 @@ function durableFile(path, text) {
  * but throws and poisons the writer because durability was not confirmed.
  * A failure poisons the writer rather
  * than allowing a later finish to turn partial evidence into a complete run. */
-export function openRun(directory, {requested, inputPaths}) {
+export function openRun(directory, {requested, inputPaths, metadata = {}}) {
+  const runMetadata = JSON.parse(JSON.stringify(metadata));
   if (!Number.isSafeInteger(requested) || requested < 1 || requested > 10000)
     throw Error('requested must be 1..10000');
   if (typeof directory !== 'string' || !directory.length) throw Error('output directory required');
@@ -45,7 +46,7 @@ export function openRun(directory, {requested, inputPaths}) {
   if (within(ROOT, path) || within(ROOT, output)) throw Error('observations must be outside checkout');
   const before = fingerprint(inputPaths);
   mkdirSync(output, {mode:0o700}); // Existing directories, including symlinks, fail.
-  durableFile(join(output,'inputs.json'), encode({schema:1,requested,inputs:before}));
+  durableFile(join(output,'inputs.json'), encode({schema:1,requested,metadata:runMetadata,inputs:before}));
   const fd = openSync(join(output,'observations.jsonl'), 'wx', 0o600);
   const directoryFd = openSync(output, 'r');
   try {
@@ -59,7 +60,16 @@ export function openRun(directory, {requested, inputPaths}) {
     if (!current.isDirectory() || current.dev !== identity.dev || current.ino !== identity.ino ||
         realpathSync(output) !== output) throw Error('output directory changed');
   };
-  let rows = [], state = 'open', closed = false;
+  let rows = [], state = 'open', closed = false, findingsIdentity;
+  const findings = [];
+  const checkFindings = () => {
+    if (!findingsIdentity) return;
+    const dir = join(output,'findings'), current = lstatSync(dir);
+    if (!current.isDirectory() || current.dev !== findingsIdentity.dev || current.ino !== findingsIdentity.ino || realpathSync(dir) !== dir)
+      throw Error('findings directory changed');
+    for (const item of findings)
+      if (hash(readFileSync(join(output,item.path))) !== item.sha256) throw Error('saved finding changed');
+  };
   const recorded = createHash('sha256');
   const close = () => { if (!closed) { closed = true; try { closeSync(fd); } finally { closeSync(directoryFd); } } };
   const poison = error => { state = 'failed'; close(); throw error; };
@@ -79,17 +89,37 @@ export function openRun(directory, {requested, inputPaths}) {
         rows.push(copy.row);
       } catch (error) { poison(error); }
     },
+    writeFinding(value) {
+      if (state !== 'open') throw Error('run writer is not open');
+      try {
+        checkDirectory(); checkFindings();
+        const text = JSON.stringify(value,null,2) + '\n', sha256 = hash(text);
+        const path = 'findings/' + sha256 + '.json';
+        if (findings.some(item=>item.path===path)) return path;
+        if (!findingsIdentity) {
+          mkdirSync(join(output,'findings'),{mode:0o700});
+          findingsIdentity = lstatSync(join(output,'findings'));
+        }
+        durableFile(join(output,path),text);
+        const fd = openSync(join(output,'findings'),'r');
+        try { fsyncSync(fd); } finally { closeSync(fd); }
+        fsyncSync(directoryFd);
+        findings.push({path,sha256});
+        return path;
+      } catch (error) { poison(error); }
+    },
     finish() {
       if (state !== 'open') throw Error('run writer is not open');
       try {
         checkDirectory();
+        checkFindings();
         const summary = summarize(rows, requested);
         const after = fingerprint(inputPaths);
         if (JSON.stringify(before) !== JSON.stringify(after)) throw Error('execution inputs changed');
         fsyncSync(fd);
         const observationsSha256 = hash(readFileSync(join(output,'observations.jsonl')));
         if (observationsSha256 !== recorded.digest('hex')) throw Error('saved observations changed');
-        const report = {schema:1,summary,inputs:before, observationsSha256,
+        const report = {schema:1,summary,metadata:runMetadata,inputs:before, observationsSha256,findings:[...findings],
           boundary:'External observations only; no kernel proof. Mismatches still require triage.'};
         checkDirectory();
         durableFile(join(output,'report.pending.json'), encode(report));
