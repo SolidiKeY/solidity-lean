@@ -284,6 +284,12 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyOz/SolmateOwned.lean` | solkey's Solmate `Owned` port: both clauses proved. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/SolkeyGames/KingOfEther.lean` | solkey's pull-payment King of the Ether (DoS fix): `claimThrone` proved by `sol_prove`, including the dethroned king's credit and the payable booking. `withdraw` refuted (`¬ ⊢`, kernel-checked): the contract calling itself with a credit pays itself and books nothing, so the `net(msg.sender)` clause fails. |
+| `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
+| `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |
+| `Examples/Benchmark/SolkeyGames/SendEther.lean` | solkey's three ways to send ether: `sendViaTransfer`, `sendViaSend` and `sendViaCall` each refuted by `sol_refute`: with `_to == msg.sender == this` the booked `msg.value` is never paid out, so the self-payment clauses fail. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/Swc/IntegerOverflowMinimal.lean` | SWC-101 `integer_overflow_minimal.sol` (registry 1b62270), 0.4 wrapping `-=` as `unchecked`: `run` (`count == \old(count) - input`) refuted by a kernel-checked run from `count = 1` wrapping to 2^256-1. |
 | `Examples/Benchmark/Swc/IntegerOverflowMinimalFixed.lean` | SWC-101 `integer_overflow_minimal_fixed.sol`, SafeMath `sub`: `run` proved under the same clause. |
 | `Examples/Benchmark/Swc/WalletRefundNoSub.lean` | SWC-105 `wallet_02_refund_nosub.sol`: `refund` (`balances[msg.sender] == 0`) refuted by a run that pays and keeps the credit. Constructor, `withdraw`, `migrateTo` proved. `deposit` unknown (payable-snapshot leaf, as in WalletOk). |
