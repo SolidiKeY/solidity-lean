@@ -93,6 +93,14 @@ import Solidity.Examples.Benchmark.SolkeyMisc.DocsBallot
 import Solidity.Examples.Benchmark.SolkeyMisc.FunctionModifier
 import Solidity.Examples.Benchmark.SolkeyMisc.TimeLock
 import Solidity.Examples.Benchmark.SolkeyMisc.WETH9
+import Solidity.Examples.Benchmark.Swc.HashForEther
+import Solidity.Examples.Benchmark.Swc.HashForEtherFixed
+import Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimal
+import Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimalFixed
+import Solidity.Examples.Benchmark.Swc.MultiOwnedFixed
+import Solidity.Examples.Benchmark.Swc.MultiOwnedVulnerable
+import Solidity.Examples.Benchmark.Swc.WalletOk
+import Solidity.Examples.Benchmark.Swc.WalletRefundNoSub
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.TokenExtensions.AllowanceDelta
 import Solidity.Examples.Benchmark.TokenExtensions.Burnable
