@@ -5370,6 +5370,7 @@ import Solidity.Yul.Views.RootDeclarationTyping
 import Solidity.Yul.Views.RootDeclarations
 import Solidity.Yul.Views.RootMemberStorage
 import Solidity.Yul.Views.RootMemberTrace
+import Solidity.Yul.Views.ScalarArrayDecode
 import Solidity.Yul.Views.ScalarBytes
 import Solidity.Yul.Views.ScalarCodecs
 import Solidity.Yul.Views.ScalarControls
