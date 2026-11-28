@@ -25,9 +25,7 @@ unknown (closer gap, below).
     }
 ```
 -/
-
 namespace Solidity.Examples.Benchmark.Swc.WalletOk
-
 /-- `wallet_01_ok.sol` with the wallet's natural clauses. -/
 def Wallet : Contract := contract!{
   address creator;
@@ -56,26 +54,20 @@ def Wallet : Contract := contract!{
     to.transfer(address(this).balance);
   }
 }
-
 local instance : InContract := ⟨Wallet⟩
 open scoped Scoped
-
 /-- `constructor`: `ensures creator == msg.sender`. -/
 theorem spec_constructor : ⊢ spec!{ constructor } := by
   sol_prove
-
 /-- `refund`: `ensures balances[msg.sender] == 0`. -/
 theorem spec_refund : ⊢ spec!{ refund } := by
   sol_prove
-
 /-- `migrateTo`: only the creator migrates. -/
 theorem spec_migrateTo : ⊢ spec!{ migrateTo } := by
   sol_prove
-
 /-- `withdraw`: `ensures balances[msg.sender] == \old(balances[msg.sender]) - amount`. -/
 theorem spec_withdraw : ⊢ spec!{ withdraw } := by
   sol_prove
-
 /-- `deposit`: unknown.  `sol_prove` leaves one leaf: after the payable
 snapshot `{ old := storage ‖ net := … ‖ selfBalance := … }` and the save
 of `balances[msg.sender]`, `find(storage, balances[msg.sender]) =

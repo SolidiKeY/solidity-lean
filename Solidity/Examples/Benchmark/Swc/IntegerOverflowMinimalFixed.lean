@@ -16,25 +16,9 @@ SafeMath's `sub` is kept as an internal function, declared before
 `run` (`contract!` resolves a call against earlier functions); inside it `a - b` is the
 checked subtraction of 0.8 (the guard `b <= a` already excludes wrapping).
 
-```solidity
-contract IntegerOverflowMinimal {
-    uint public count = 1;
-    function run(uint256 input) public {
-        count = sub(count,input);
-    }
-    //from SafeMath
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a);//SafeMath uses assert here
-        return a - b;
-    }
-}
-```
-
 Verdict: `run` proved.
 -/
-
 namespace Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimalFixed
-
 /-- `integer_overflow_minimal_fixed.sol`, with the vulnerable clause. -/
 def IntegerOverflowMinimal : Contract := contract!{
   uint public count;
@@ -47,12 +31,9 @@ def IntegerOverflowMinimal : Contract := contract!{
     count = sub(count, input);
   }
 }
-
 local instance : InContract := ⟨IntegerOverflowMinimal⟩
 open scoped Scoped
-
 /-- `run`: `ensures count == \old(count) - input`. -/
 theorem spec_run : ⊢ spec!{ run } := by
   sol_prove
-
 end Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimalFixed

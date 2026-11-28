@@ -34,6 +34,14 @@ import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.Swc.HashForEther
+import Solidity.Examples.Benchmark.Swc.HashForEtherFixed
+import Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimal
+import Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimalFixed
+import Solidity.Examples.Benchmark.Swc.MultiOwnedFixed
+import Solidity.Examples.Benchmark.Swc.MultiOwnedVulnerable
+import Solidity.Examples.Benchmark.Swc.WalletOk
+import Solidity.Examples.Benchmark.Swc.WalletRefundNoSub
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Tokens.ERC1155
 import Solidity.Examples.Benchmark.Tokens.ERC20

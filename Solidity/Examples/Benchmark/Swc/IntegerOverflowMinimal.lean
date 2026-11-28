@@ -16,22 +16,11 @@ same wrapping is spelled `unchecked { … }` here.  The initializer
 `count = 1` is not part of the per-function obligation (it would only fix the
 initial store) and is dropped.  The natural clause: `run` debits `input`.
 
-```solidity
-contract IntegerOverflowMinimal {
-    uint public count = 1;
-    function run(uint256 input) public {
-        count -= input;
-    }
-}
-```
-
 Verdict: `run` refuted (a kernel-checked run below, from the initial
 `count = 1`, wraps to `2^256 - 1`).  The fixed variant is
 `Swc/IntegerOverflowMinimalFixed.lean`.
 -/
-
 namespace Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimal
-
 /-- `integer_overflow_minimal.sol`, the 0.4 wrapping `-=` as `unchecked`. -/
 def IntegerOverflowMinimal : Contract := contract!{
   uint public count;
@@ -40,10 +29,8 @@ def IntegerOverflowMinimal : Contract := contract!{
     unchecked { count -= input; };
   }
 }
-
 local instance : InContract := ⟨IntegerOverflowMinimal⟩
 open scoped Scoped
-
 /-- `run`: `ensures count == \old(count) - input`, refuted below. -/
 def run_obligation : Fml IntegerOverflowMinimal [] := spec!{ run }
 
@@ -58,5 +45,4 @@ example :
       (sol{ run(2); uint c = count; })).toOption.map
         fun o => o.st.env.1.1) = some (2 ^ 256 - 1) := by
   decide +kernel
-
 end Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimal
