@@ -1,7 +1,5 @@
 import Solidity.Source.Preservation.Combinators
 
-/-! Reads retain every state invariant, including on their existing halts.
-These results do not assert readability or admit new expression fragments. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {Γ : RCtx}

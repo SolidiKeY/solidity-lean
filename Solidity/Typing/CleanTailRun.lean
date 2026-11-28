@@ -1,32 +1,6 @@
 import Solidity.Typing.CleanTail
 import Solidity.Typing.HeredRun
 
-/-!
-# Clean tails, kept by a contract that exposes nothing
-
-`Storage.CleanTail` (`Typing/CleanTail.lean`) is not kept by every run: a
-write through an alias left past a live end by a shrink (a `pop`, a
-`delete`, a copy over a longer array) lands in the slots past the end, and
-an empty `push` later exposes it (`docs/options.md`).  It is kept by a
-program that never shrinks an array while a storage alias may point into
-it (`Prog.exposesNone`): then every alias stays at live slots, every write
-lands at live slots, and what lies past an end is only what a clear left,
-an ordinary default.
-
-**The invariant** (`CTInv`) is the clean storage and every alias local live
-(`Storage.LiveAll`: every dynamic array along its path entered below its
-length).  A statement keeps it (`Stmt.keeps_ct`), and where an alias may be
-held around it (its own context's, or a caller's: the flag `g`) it also
-keeps every live reference live (`Storage.Grows`): such a statement shrinks
-no array but one of words, which no alias enters.
-
-**The check** (`Stmt.ctSafe`) is syntactic, on the elaborated program: a
-statement that may shrink an array of references (an assignment or a
-`delete` of a reference, a copy out of memory, a `pop` of references) only
-where no alias is in scope, here or in a caller (`outer`); a recursive call
-is not unfolded and fails it.  A contract all of whose functions pass it
-keeps clean tails from its deployment on (`ReachableBy.cleanTail`).
--/
 
 namespace Solidity
 
@@ -35,9 +9,7 @@ open Semantics (structDef lookupBy setBy lookupBy_setBy_self lookupBy_setBy_ne
 
 variable {C : Contract}
 
-/-! ## Live slots, every array -/
 
-/-- Along `p` from `x`, every dynamic array entered below its live length. -/
 def SVal.LiveAll : {T U : Ty} → SVal T → Path T U → Prop
   | _, _, _, .nil => True
   | _, _, .struct fs, .field h p => (fs.get h).LiveAll p
@@ -68,7 +40,6 @@ theorem SVal.LiveAll.live : {T U : Ty} → {x : SVal T} → {p : Path T U} → x
     · rename_i y hy; simp only [hy] at hl; exact hl.live
     · rename_i hy; simp only [hy] at hl; exact hl.live
 
-/-- Live along a path, then along what it finds. -/
 theorem SVal.liveAll_append : {T R U : Ty} → (x : SVal T) → (p : Path T R) → (q : Path R U) →
     x.LiveAll p → (∀ y, x.findM p = some y → y.LiveAll q) → x.LiveAll (p.append q)
   | _, _, _, x, .nil, q, _, h => by rw [Path.append_nil]; exact h x (SVal.findM_nil' x)
@@ -97,10 +68,7 @@ theorem SVal.liveAll_append : {T R U : Ty} → (x : SVal T) → (p : Path T R) �
       simp only [hy] at hp
       exact SVal.liveAll_append d p q hp fun z hz => h z (by simp only [SVal.findM, hy]; exact hz)
 
-/-! ## A save at live slots keeps the tails clean -/
 
-/-- **A save keeps clean tails** where it enters every array at a live slot:
-what lies past each end is left as it was. -/
 theorem SVal.saveM_ct : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new : SVal U} →
     {x' : SVal T} → x.All cleanTailH → new.All cleanTailH → x.LiveAll p →
     x.saveM p new = some x' → x'.All cleanTailH
@@ -182,20 +150,15 @@ theorem SVal.saveM_ct : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new 
       · rw [he]; exact hzA
       · exact SMap.all_iff.mp hx.2.1 e he
 
-/-! ## Growing: every live reference stays live -/
 
-/-- Every reference path live in `x` is live in `y`. -/
 def SVal.GrowsTo {T : Ty} (x y : SVal T) : Prop :=
   ∀ (R : RefTy) (p : Path T (.ref R)), x.LiveAll p → y.LiveAll p
 
 theorem SVal.GrowsTo.refl {T : Ty} (x : SVal T) : x.GrowsTo x := fun _ _ h => h
 
-/-- A word has no reference path. -/
 theorem SVal.growsTo_prim {q : PrimTy} (x y : SVal (.prim q)) : x.GrowsTo y :=
   fun _ p _ => nomatch Path.eq_prim p
 
-/-- **A save keeps every live reference live** when what it replaces grows
-into what it writes: a save keeps every array's length along its path. -/
 theorem SVal.saveM_grows : {T U : Ty} → (x : SVal T) → (q : Path T U) → (new : SVal U) →
     {x' : SVal T} → x.saveM q new = some x' →
     (∀ old, x.findM q = some old → old.GrowsTo new) → x.GrowsTo x'
@@ -315,7 +278,6 @@ theorem SVal.saveM_grows : {T U : Ty} → (x : SVal T) → (q : Path T U) → (n
         · simp only [lookupBy_setBy_ne e]
           exact hp
 
-/-- An element pushed: every live slot stays live, at what it held. -/
 theorem SVal.growsTo_push {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (x : SVal E) (sh' : List (SVal E)) (h' : (e.toList ++ [x]).length < 2 ^ 256) :
     (SVal.array e sh hn).GrowsTo (.array (SVec.ofList (e.toList ++ [x])) (.ofList sh') h') := by
@@ -329,7 +291,6 @@ theorem SVal.growsTo_push {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn :
     rw [SVec.toList_ofList, List.append_assoc, List.getElem?_append_left hj] at hw
     rw [List.getElem?_append_left hj]; exact hw
 
-/-- An array of words: no reference path enters its slots. -/
 theorem SVal.growsTo_words {q : PrimTy} {n m : Nat} (e : SVec (.prim q) n) (sh : SList (.prim q))
     (hn : n < 2 ^ 256) (e' : SVec (.prim q) m) (sh' : SList (.prim q)) (hm : m < 2 ^ 256) :
     (SVal.array e sh hn).GrowsTo (.array e' sh' hm) := by
@@ -338,11 +299,9 @@ theorem SVal.growsTo_words {q : PrimTy} {n m : Nat} (e : SVec (.prim q) n) (sh :
   | nil => exact SVal.liveAll_nil _
   | «at» j p => exact nomatch Path.eq_prim p
 
-/-- A reference live in a storage. -/
 def Storage.LiveAll (st : Storage C) {U : Ty} (r : SRef C U) : Prop :=
   (st.get r.hroot).LiveAll r.path
 
-/-- Every reference live in `st` is live in `st'`. -/
 def Storage.Grows (st st' : Storage C) : Prop :=
   ∀ {R : RefTy} (r : SRef C (.ref R)), st.LiveAll r → st'.LiveAll r
 
@@ -351,8 +310,6 @@ theorem Storage.Grows.refl (st : Storage C) : st.Grows st := fun _ h => h
 theorem Storage.Grows.trans {st₁ st₂ st₃ : Storage C} (h₁ : st₁.Grows st₂) (h₂ : st₂.Grows st₃) :
     st₁.Grows st₃ := fun r h => h₂ r (h₁ r h)
 
-/-- **A save keeps every live reference live** when what it replaces grows
-into what it writes. -/
 theorem Storage.save_grows {st st' : Storage C} {U : Ty} {q : SRef C U} {new : SVal U}
     (h : st.save q new = some st') (hg : ∀ old, st.find q = some old → old.GrowsTo new) :
     st.Grows st' := by
@@ -372,7 +329,6 @@ theorem Storage.save_grows {st st' : Storage C} {U : Ty} {q : SRef C U} {new : S
   · rw [SFields.get_set_ne st qh rh (Ne.symm e)]
     exact hr
 
-/-! ## The storage operations keep clean tails -/
 
 theorem cleanTailH_stripOK : cleanTailH.StripOK := fun {E} _ _ _ _ _ =>
   SList.ordinaryDefault_nil (E := E)
@@ -387,7 +343,6 @@ theorem cleanTailH_ovOK : cleanTailH.OvOK := by
     exact SVal.defaultOf_ordinaryDefault u (SVec.all_iff.mp hoel u (List.mem_of_mem_drop hu))
   · exact (SList.ordinaryDefault_iff osh).1 ho w (List.mem_of_mem_drop hw)
 
-/-- A copy out of memory has no slot past an end. -/
 theorem SVal.plain_ct {T : Ty} {v : SVal T} (h : v.Plain) : v.All cleanTailH :=
   SVal.all_mono' (P := cleanTailH) (Q := plainH)
     (fun _ _ _ hsh => by
@@ -396,8 +351,6 @@ theorem SVal.plain_ct {T : Ty} {v : SVal T} (h : v.Plain) : v.All cleanTailH :=
       exact trivial)
     (fun _ _ _ => trivial) (fun _ _ h => h.elim) v h
 
-/-- Every value of a mapping type is an ordinary default: no clearing
-reaches a mapping's entries. -/
 theorem SVal.ordinaryDefault_of_isMapping {E : Ty} (hE : E.isMapping = true) (v : SVal E) :
     v.OrdinaryDefault := by
   cases v with
@@ -522,7 +475,6 @@ theorem pop_ct {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {kee
         · rw [hw]; exact hy
         · exact SList.all_iff.mp hvA.2.2 w hw
 
-/-! ### … and keep live references live -/
 
 theorem save_prim_grows {st st' : Storage C} {q : PrimTy} {r : SRef C (.prim q)}
     {new : SVal (.prim q)} (h : st.save r new = some st') : st.Grows st' :=
@@ -576,7 +528,6 @@ theorem pop_words_grows {st st' : Storage C} {q : PrimTy} {r : SRef C (.ref (.ar
       cases ho
       exact SVal.growsTo_words _ _ _ _ _ _
 
-/-- The slot a push appends is live. -/
 theorem pushPlace_liveAll {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
     {k : PrimTy.uint.Denote} (hl : st.LiveAll r) (h : st.pushPlace r = some (st', k)) :
     st'.LiveAll (r.index (.arr .dyn) k) := by
@@ -598,9 +549,7 @@ theorem pushPlace_liveAll {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.arra
 
 end Storage
 
-/-! ## The invariant: clean tails, live aliases -/
 
-/-- Whether a context holds a storage alias. -/
 def Ctx.hasAlias : Ctx → Bool
   | [] => false
   | .alias _ :: _ => true
@@ -623,7 +572,6 @@ theorem Ctx.hasAlias_append {Γ : Ctx} (ρ : Ctx) (h : Γ.hasAlias = true) :
     (ρ ++ Γ).hasAlias = true :=
   Ext.hasAlias (Ext.append Γ ρ) h
 
-/-- A storage alias local is live (an unset one is). -/
 def aliasLive (st : Storage C) {H : HTy} : (t : LTy) → t.TDenote C H → Prop
   | .alias _, v => ∀ r, v = some r → st.LiveAll r
   | .val _, _ => True
@@ -632,7 +580,6 @@ def aliasLive (st : Storage C) {H : HTy} : (t : LTy) → t.TDenote C H → Prop
   | .oldNet, _ => True
   | .kint, _ => True
 
-/-- **The invariant**: the storage's tails clean, every alias local live. -/
 def CTInv {Γ : Ctx} (σ : State C Γ) : Prop :=
   σ.storage.All cleanTailH ∧ TEnv.All (aliasLive σ.storage) σ.env
 
@@ -677,8 +624,6 @@ theorem env_grows {st st' : Storage C} (hg : st.Grows st') {H : HTy} {Γ : Ctx}
     {e : TEnv C H Γ} (he : TEnv.All (aliasLive st) e) : TEnv.All (aliasLive st') e :=
   TEnv.All.mono (fun t v h => aliasLive_grows hg t v h) he
 
-/-- The storage replaced by one with clean tails, every live reference kept
-live where an alias may be held. -/
 theorem withStorage {σ : State C Γ} (h : CTInv σ) {st : Storage C} (hs : st.All cleanTailH)
     (hg : Γ.hasAlias = true → σ.storage.Grows st) : CTInv (σ.withStorage st) := by
   refine ⟨hs, ?_⟩
@@ -703,7 +648,6 @@ theorem adopt {σ : State C Γ} {α : HTy → Type} (h : CTInv σ) (g : Grown σ
 
 end CTInv
 
-/-! ## Resolved references are live -/
 
 section Resolve
 
@@ -713,8 +657,6 @@ include he
 
 mutual
 
-/-- **A location resolves to live slots**: its alias is live, and each
-index the program takes it checks against the length. -/
 theorem Loc.resolveT_liveAll : {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T},
     l.resolveT σ = .ok r → σ.storage.LiveAll r
   | _, .root _ _, r, h => by
@@ -763,7 +705,6 @@ theorem Loc.resolveT_liveAll : {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C
         cases y with
         | fixed e => simp only [SVal.LiveAll]; exact fun _ _ => trivial
 
-/-- A path resolves to live slots: an alias is live by the invariant. -/
 theorem SPath.resolveT_liveAll : {T : Ty} → (b : SPath C Γ T) → ∀ {r : SRef C T},
     b.resolveT σ = .ok r → σ.storage.LiveAll r
   | _, .alias i, r, h => by
@@ -780,7 +721,6 @@ end
 
 end Resolve
 
-/-- The storage value a source stores has clean tails. -/
 theorem Src.valueT_ct {Γ : Ctx} {σ : State C Γ} {T : Ty} (hs : σ.storage.All cleanTailH) :
     (r : Src C Γ T) → {v : SVal T} → r.valueT σ = .ok v → v.All cleanTailH
   | .val _, v, h => by
@@ -805,8 +745,6 @@ theorem Src.valueT_ct {Γ : Ctx} {σ : State C Γ} {T : Ty} (hs : σ.storage.All
     exact SVal.plain_ct (shape.apply_plain (MVal.copyMToSt σ.heap mv) p.mapFree)
 
 
-/-- An alias's right-hand side: clean tails, every live reference kept live,
-and the reference it names live. -/
 theorem ARhs.evalT_ct {Γ : Ctx} {σ : State C Γ} (hσ : CTInv σ) {R : RefTy} :
     (r : ARhs C Γ R) → {st : Storage C} → {ref : SRef C (.ref R)} →
       r.evalT σ = .ok (st, ref) →
@@ -826,15 +764,11 @@ theorem ARhs.evalT_ct {Γ : Ctx} {σ : State C Γ} (hσ : CTInv σ) {R : RefTy} 
       exact ⟨Storage.pushPlace_ct hσ.1 hl hp, Storage.pushPlace_grows hp,
         Storage.pushPlace_liveAll hl hp⟩
 
-/-! ## Steps that keep the invariant -/
 
-/-- A step keeps the invariant and, where `g` (an alias may be held around
-it), every live reference live. -/
 def CKeeps (g : Bool) {Γ Γ' : Ctx} (t : TStep C Γ Γ') : Prop :=
   ∀ (σ : State C Γ) (o : Out C σ.H Γ'), CTInv σ → t σ = .ok o →
     CTInv o.st ∧ (g = true → σ.storage.Grows o.st.storage)
 
-/-- The invariant at one storage, as `RunInv` reads locals. -/
 def liveInv (st : Storage C) : RunInv C where
   glob _ := True
   loc := aliasLive st
@@ -885,7 +819,6 @@ theorem block {g : Bool} {Γ₁ : Ctx} (x : Ext Γ Γ₁) {body : TStep C Γ Γ�
     CKeeps g (TRun.block x body) :=
   hb.drop x
 
-/-- A step that changes nothing it ends in. -/
 theorem same {g : Bool} {t : TStep C Γ Γ}
     (ht : ∀ σ o, t σ = .ok o → o.st = σ) : CKeeps g t := by
   intro σ o hσ h
@@ -936,7 +869,6 @@ theorem loop {g : Bool} {Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {b
 
 end CKeeps
 
-/-- A call's arguments are live: an alias argument resolves to live slots. -/
 theorem Args.evalT_live {Γ : Ctx} (σ : State C Γ) (he : TEnv.All (aliasLive σ.storage) σ.env) :
     {ps : Ctx} → (as : Args C Γ ps) → {a : TEnv C σ.H ps} → Args.evalT σ as = .ok a →
       TEnv.All (aliasLive σ.storage) a
@@ -962,8 +894,6 @@ namespace CKeeps
 
 variable {Γ : Ctx}
 
-/-- **A call**: its body keeps the invariant, every live reference live
-where the caller may hold an alias (`g`). -/
 theorem call {g : Bool} {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
     (x : Ext (rs ++ ps) Γf) {body : TStep C (rs ++ ps) Γf} (hb : CKeeps g body)
     (hg : Γ.hasAlias = true → g = true) : CKeeps g (TRun.call args ret x body) := by
@@ -997,7 +927,6 @@ namespace CKeeps
 
 variable {Γ : Ctx}
 
-/-- **A `try`**: a self-call's frame and each clause keep the invariant. -/
 theorem tryCall {g : Bool} {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
     (rets : Binders ρ) (h₁ : Ext (ρ ++ Γ) Γ₁) {ok : TStep C (ρ ++ Γ) Γ₁}
     (h₂ : Ext Γ Γ₂) {err : TStep C Γ Γ₂} (code : CodeBinder κ)
@@ -1046,19 +975,15 @@ theorem tryCall {g : Bool} {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : 
 
 end CKeeps
 
-/-- A `new` array stored, not kept in memory. -/
 def NewLhs.isStore {Γ : Ctx} {R : RefTy} : NewLhs C Γ R → Bool
   | .store _ => true
   | .mem _ => false
 
-/-! ## The statements without sub-programs -/
 
 section Leaves
 
 variable {Γ : Ctx}
 
-/-- A step that only writes the storage: clean tails, and every live
-reference live where it grows. -/
 theorem CKeeps.ofStorage {g : Bool} {t : TStep C Γ Γ}
     (ht : ∀ σ o, CTInv σ → t σ = .ok o → ∃ st, o.st = σ.withStorage st ∧ st.All cleanTailH ∧
       (g = true ∨ Γ.hasAlias = true → σ.storage.Grows st)) : CKeeps g t := by
@@ -1131,7 +1056,6 @@ theorem ckeeps_declStorage {g : Bool} (R : RefTy) (init : Option (ARhs C Γ R)) 
     refine ⟨(hσ.withStorage hs fun _ => hg).push fun r' hr' => ?_, fun _ => hg⟩
     cases hr'; exact hl
 
-/-- A word saved at a live reference. -/
 theorem opStoreT_ct {σ : State C Γ} (hσ : CTInv σ) (op : BinOp) {p : PrimTy} {r : SRef C (.prim p)}
     (hl : σ.storage.LiveAll r) (v : p.Denote) {o : Out C σ.H Γ} (h : opStoreT σ op r v = .ok o) :
     CTInv o.st ∧ σ.storage.Grows o.st.storage := by
@@ -1317,8 +1241,6 @@ theorem ckeeps_pushIncDec {g : Bool} {p : PrimTy} (op : IncDec) (b : SPath C Γ 
     have := bumpStoreT_ct hst op (Storage.pushPlace_liveAll hl hs') hb
     exact ⟨this.1, fun _ => Storage.Grows.trans hg this.2⟩
 
-/-- A `pop`: clean tails always, every live reference kept live where its
-elements are words. -/
 theorem pop_ct {σ : State C Γ} (hσ : CTInv σ) {E : Ty} (b : SPath C Γ (.array E))
     {o : Out C σ.H Γ} (h : TRun.pop b σ = .ok o) :
     ∃ st, o.st = σ.withStorage st ∧ st.All cleanTailH ∧
@@ -1444,8 +1366,6 @@ theorem ckeeps_litBytesT {g : Bool} {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: �
   · exact CKeeps.seq (ckeeps_declMem _ _ _) (ckeeps_litWritesT hk bs 0)
   · exact CKeeps.seq (ckeeps_declMem _ _ _) hk
 
-/-- A `catch` clause binding the data keeps clean tails as its body does:
-the data is a fresh memory object, the callee's run read for its data only. -/
 theorem ckeeps_catchData {g : Bool} {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
     (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) {body : TStep C (.mem bytesR :: Γ) Γ₁}
@@ -1457,7 +1377,6 @@ theorem ckeeps_catchData {g : Bool} {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (
   · cases h
   · exact (ckeeps_litBytesT hb _).drop _ σ o hσ h
 
-/-- A revert with data ends in no state. -/
 theorem ckeeps_revertData {g : Bool} (d : List (RevPart C Γ)) : CKeeps g (TRun.revertData d) := by
   intro σ o _ h
   unfold TRun.revertData at h
@@ -1534,21 +1453,13 @@ theorem ckeeps_assignNew {g : Bool} {R : RefTy} (l : NewLhs C Γ R) (n : Simple 
 
 end Leaves
 
-/-! ## The check -/
 
-/-- A receiver's `push`. -/
 def ReceiverOp.isPush {Γ : Ctx} {E : Ty} : ReceiverOp C Γ E → Bool
   | .push .. => true
   | .pop => false
 
 mutual
 
-/-- **Exposes nothing**, from a context where a caller may hold an alias
-(`outer`): a statement that may shrink an array of references (an
-assignment or a `delete` of a reference, a copy out of memory, a `pop` of
-references) is taken only where no alias is in scope, here or in a caller,
-so no alias is ever left past a live end.  A recursive call is not
-unfolded: it fails the check. -/
 def Stmt.ctSafe : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool → Bool
   | Γ, _, s, outer =>
     let g := outer || Γ.hasAlias
@@ -1587,14 +1498,12 @@ def Prog.ctSafe : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool → Bool
 
 end
 
-/-- **A program that exposes nothing**: run where nobody holds an alias. -/
 def Prog.exposesNone {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Bool := P.ctSafe false
 
 theorem ctSafe_or {a o h : Bool} (H : (a || !(o || h)) = true) :
     a = true ∨ ((o || h) = false ∧ h = false) := by
   cases a <;> cases o <;> cases h <;> simp_all
 
-/-! ## Receivers -/
 
 section Receivers
 
@@ -1662,12 +1571,9 @@ theorem ckeeps_callReceiverPush {g : Bool} {ps Γf Γv : Ctx} {E : Ty} (args : A
 
 end Receivers
 
-/-! ## Every statement that passes the check keeps the invariant -/
 
 mutual
 
-/-- **A statement that exposes nothing keeps clean tails**, its aliases
-live, and every live reference live where an alias may be held around it. -/
 theorem Stmt.keeps_ct : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (outer : Bool) →
     s.ctSafe outer = true → CKeeps (outer || Γ.hasAlias) (Stmt.runR s)
   | _, _, .assign l r, _, h => ckeeps_assign l r (ctSafe_or h)
@@ -1754,7 +1660,6 @@ theorem Stmt.keeps_ct : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (outer : Bool
     ckeeps_catchData c rets sargs sbody.ext sbody.runR self kind body.ext
       (Prog.keeps_ct body outer h)
 
-/-- **A block that exposes nothing keeps clean tails.** -/
 theorem Prog.keeps_ct : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (outer : Bool) →
     P.ctSafe outer = true → CKeeps (outer || Γ.hasAlias) (Prog.runR P)
   | _, _, .nil, _, _ => CKeeps.nil
@@ -1769,20 +1674,12 @@ theorem Prog.keeps_ct : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (outer : Bool
 
 end
 
-/-! ## A contract that exposes nothing keeps clean tails -/
 
-/-- **A run that exposes nothing keeps clean tails**: from a state with
-clean tails and no alias local (a transaction's parameters are values and
-memory), a program that passes the check ends with clean tails. -/
 theorem Prog.run_cleanTail {Γ Γ' : Ctx} (P : Prog C Γ Γ') (hP : P.exposesNone = true)
     {σ : State C Γ} (hσ : σ.storage.CleanTail) (hΓ : Γ.hasAlias = false) {o : Out C σ.H Γ'}
     (h : P.run σ = .ok o) : o.st.storage.CleanTail :=
   (Prog.keeps_ct P false hP σ o ⟨hσ, env_noAlias _ hΓ _⟩ h).1.1
 
-/-- **The storages a contract reaches through `F`**: the deployment's, and
-whatever a run of a program `F` admits leaves, from a state over a reached
-storage with no alias local (the constructor, then any sequence of
-transactions). -/
 inductive ReachableBy (C : Contract) (F : (Γ Γ' : Ctx) → Prog C Γ Γ' → Prop) :
     Storage C → Prop
   | init : ReachableBy C F (Storage.init C)
@@ -1790,8 +1687,6 @@ inductive ReachableBy (C : Contract) (F : (Γ Γ' : Ctx) → Prog C Γ Γ' → P
       (hσ : ReachableBy C F σ.storage) (o : Out C σ.H Γ') (h : P.run σ = .ok o) :
       ReachableBy C F o.st.storage
 
-/-- **Clean tails are a contract's invariant** when every program it runs
-exposes nothing: every storage it reaches has clean tails. -/
 theorem ReachableBy.cleanTail {F : (Γ Γ' : Ctx) → Prog C Γ Γ' → Prop}
     (hF : ∀ {Γ Γ' : Ctx} (P : Prog C Γ Γ'), F Γ Γ' P → P.exposesNone = true) {st : Storage C}
     (h : ReachableBy C F st) : st.CleanTail := by
