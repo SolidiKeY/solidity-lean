@@ -2,27 +2,13 @@ import Solidity.Source.WellFormed
 import Solidity.Source.Resolved
 import Solidity.Source.Examples
 
-/-!
-# Source controls: typing derivations and constructor coverage
-
-A contract with state variables of several types and a function with
-parameters, a derivation for every expression constructor the typing judgment types
-(`exprCoverage`), the counter of `Solidity/Source/Examples.lean` proved well
-formed, and ill-typed programs refuted.
--/
 
 namespace Solidity.Source.TypingExamples
 
 open Solidity.Source Solidity.Source.Examples
 
-/-- `bool`. -/
 def tBool : Syn .typeName := .elem .bool
 
-/-- ```
-contract C {
-  uint256 count; bool flag; uint256[] arr; mapping(address => uint256) m; uint8 small;
-}
-``` -/
 def unitC : Syn .unit :=
   .unit (.cons (.contract false "C" .none .nil
     (.cons (.stateVar u256 none none none false "count" .none)
@@ -32,8 +18,6 @@ def unitC : Syn .unit :=
     (.cons (.stateVar (.elem (.int false 8 (by decide))) none none none false "small" .none)
       .nil)))))) .nil)
 
-/-- The body context of `function f(uint256 a, bool b, address o, bytes calldata cd) returns (uint256)`
-(`cd` is the slice witness). -/
 def Γ : Ctx :=
   { env := unitC.env, scope := some "C",
     locals := [("o", .address false), ("b", .bool), ("a", .int IntTy.u256), ("cd", .bytes .calldata)],
@@ -42,7 +26,6 @@ def Γ : Ctx :=
 def a : Syn .expr := .ident "a"
 def one : Syn .expr := .lit (.num (.dec 1 0 0))
 
-/-! Derivations are data (`Typed`): each is the elaborated term. -/
 
 def ty_a : Typed Γ a (.int IntTy.u256) := .loc rfl rfl
 def ty_b : Typed Γ (.ident "b") .bool := .loc rfl rfl
@@ -53,7 +36,6 @@ def ty_arr : Typed Γ (.ident "arr") (.array .storage (.int IntTy.u256) none) :=
 def ty_m : Typed Γ (.ident "m") (.mapping (.address false) (.int IntTy.u256)) := .state rfl rfl
 def ty_one : Typed Γ one (.rational (Q.ofInt 1)) := .const rfl rfl rfl
 
-/-! ## One derivation per typed expression constructor -/
 
 def w_ident : Typed Γ (.ident "a") (.int IntTy.u256) := ty_a
 def w_lit : Typed Γ (.lit (.bool true)) .bool := .bool true
@@ -70,17 +52,13 @@ def w_index_mapping : Typed Γ (.index (.ident "m") (.some (.ident "o"))) (.int 
 def w_member : Typed Γ (.member (.ident "arr") "length") (.int IntTy.u256) := .length ty_arr rfl
 def w_call : Typed Γ (.call (.elemType (.int false 8 (by decide)) (by decide))
     (.positional (.cons a .nil))) (.int IntTy.u8) := .convElem ty_a rfl rfl
-/-- `abi.decode(hex"…", (uint8, bool))`: the type names are read
-as the decoder's types, not typed as values. -/
 def w_abiDecode : Typed Γ (.call (.member (.ident "abi") "decode") (.positional (.cons (.lit (.hexStr [0, 1]))
     (.cons (.tuple (.some (.elemType (.int false 8 (by decide)) (by decide)))
       (.cons (.some (.elemType .bool (by decide))) .nil)) .nil))))
     (.tuple [.int IntTy.u8, .bool]) :=
   .abiDecode (τs := [.int IntTy.u8, .bool]) rfl (.hexStr _) rfl rfl rfl
-/-- `cd[1:]` on a `bytes calldata` parameter. -/
 def w_slice : Typed Γ (.slice (.ident "cd") (.some one) .none) (.bytes .calldata) :=
   .sliceFrom (.loc rfl rfl) rfl ty_one rfl
-/-- `[a, 1]`: a `uint256[2] memory`, `1` converting to `a`'s type. -/
 def w_inlineArray : Typed Γ (.inlineArray a (.cons one .nil)) (.array .memory (.int IntTy.u256) (some 2)) :=
   .inlineArray ty_a (.cons ty_one .nil) rfl rfl rfl
 def w_payableConv : Typed Γ (.payableConv (.positional (.cons (.ident "o") .nil))) (.address true) :=
@@ -104,19 +82,15 @@ def w_cond : Typed Γ (.cond (.ident "b") a a) (.int IntTy.u256) := .cond ty_b t
 def w_assign : Typed Γ (.assign .assign (.ident "count") a) (.int IntTy.u256) :=
   .assign (.state rfl rfl rfl) ty_a rfl rfl
 
-/-- The elaborated form of `count = a`: an assignment to a state variable. -/
 def r_assign : RExpr Γ.env Γ.tys (.int IntTy.u256) := w_assign.toR
 
-/-! ## Builtins, events and errors -/
 
 def w_msgSender : Typed Γ (.member (.ident "msg") "sender") (.address false) := .magic rfl rfl rfl rfl
 
-/-- `require(b, "no");` -/
 def w_require : StmtD (k := .body) Γ Γ.locals (.simpleStmt (.exprStmt (.call (.ident "require")
     (.positional (.cons (.ident "b") (.cons (.lit (.str [110, 111])) .nil)))))) Γ.locals :=
   .expr (.builtinCall rfl rfl (.cons ty_b (.cons (.str _) .nil)) rfl) rfl
 
-/-- `gasleft()` has no typing rule: an excluded builtin. -/
 theorem gasleft_untyped (τ : STy) (h : HasType Γ (.call (.ident "gasleft") (.positional .nil)) τ) : False := by
   obtain ⟨h⟩ := h
   cases h with
@@ -140,7 +114,6 @@ theorem gasleft_untyped (τ : STy) (h : HasType Γ (.call (.ident "gasleft") (.p
   | compareConst hb => nomatch hb
   | logic hb => nomatch hb
 
-/-- A name that denotes a builtin is no struct value. -/
 theorem Typed.ident_builtin_not_struct {Γ : Ctx} {x : String} {b : Builtin} {l : DataLoc} {dn : DeclName}
     (hr : Γ.resolve x = some (.builtin b)) (d : Typed Γ (.ident x) (.struct l dn)) : False := by
   generalize ht : STy.struct l dn = τ at d
@@ -158,11 +131,8 @@ theorem Typed.ident_builtin_not_struct {Γ : Ctx} {x : String} {b : Builtin} {l 
   | compareConst hb => nomatch hb
   | logic hb => nomatch hb
 
-/-- A non-payable external function's body: `msg.value` is refused. -/
 def Γv : Ctx := { Γ with msgValue := false }
 
-/-- **`msg.value` outside a payable function is ill typed** (solc error
-5887). -/
 theorem msgValue_refused (τ : STy) (h : HasType Γv (.member (.ident "msg") "value") τ) : False := by
   obtain ⟨h⟩ := h
   generalize hm : "value" = m at h
@@ -189,41 +159,29 @@ theorem msgValue_refused (τ : STy) (h : HasType Γv (.member (.ident "msg") "va
   | compareConst hb => nomatch hb
   | logic hb => nomatch hb
 
-/-- `contract E { event Done(uint256 v); error Bad(); }` -/
 def unitE : Syn .unit :=
   .unit (.cons (.contract false "E" .none .nil
     (.cons (.event "Done" (.cons (.eventParam u256 false (some "v")) .nil) false)
     (.cons (.error "Bad" .nil) .nil))) .nil)
 
-/-- A function body of `E` with a local `a : uint256`. -/
 def CE : Ctx := { env := unitE.env, scope := some "E", locals := [] }
 def LE : List (String × STy) := [("a", .int IntTy.u256)]
 
-/-- `emit Done(a);` -/
 def w_emit : StmtD (k := .body) CE LE (.emit (.ident "Done") (.positional (.cons (.ident "a") .nil))) LE :=
   .emit (.cons (.loc rfl rfl) .nil) rfl
 
-/-- `revert Bad();` -/
 def w_revertError : StmtD (k := .body) CE LE (.revert (.ident "Bad") (.positional .nil)) LE :=
   .revertError .nil rfl
 
-/-- The elaborated `emit`: the event's declaration and the argument. -/
 def r_emit : RStmt CE.env CE.rets CE.inModifier .body (tysOf LE) (tysOf LE) := w_emit.toR
 
-/-! ## Coverage -/
 
-/-- How typing covers a constructor. -/
 inductive Coverage where
   | typed
-  /-- Typed only as an operand that another constructor's rule reads (not
-  types): never an expression of its own, typed inside `parent`. -/
   | operand (parent : Ctor) (role : String)
-  /-- Deferred to a stage, with the reason. -/
   | deferred (stage reason : String)
   deriving DecidableEq, Repr
 
-/-- **The coverage of every expression constructor**, explicitly; `none`
-for constructors of other categories (`exprCoverage_total`). -/
 def exprCoverage : Ctor → Option Coverage
   | .index | .member | .call | .payableConv | .unaryPrefix | .unarySuffix | .exp | .mulDivMod
   | .addSub | .shift | .bitAnd | .bitXor | .bitOr | .order | .equality | .and | .or | .cond
@@ -234,12 +192,9 @@ def exprCoverage : Ctor → Option Coverage
   | .elemType => some (.operand .call "a type name: the callee of an elementary conversion (convElem) and a type expression of abi.decode (abiDecode, FU2-B); type(T) is metaType's")
   | _ => none
 
-/-- **Every expression constructor is classified.** -/
 theorem exprCoverage_total (e : Syn .expr) : (exprCoverage e.ctor).isSome = true := by
   cases e <;> rfl
 
-/-- **Coverage**: every constructor classified as typed has a derivation
-whose root is that constructor. -/
 theorem exprCoverage_typed (k : Ctor) (ht : exprCoverage k = some .typed) :
     ∃ (e : Syn .expr) (τ : STy), e.ctor = k ∧ HasType Γ e τ := by
   cases k <;> simp only [exprCoverage, reduceCtorEq, Option.some.injEq] at ht <;>
@@ -270,22 +225,18 @@ theorem exprCoverage_typed (k : Ctor) (ht : exprCoverage k = some .typed) :
     | exact ⟨_, _, rfl, ⟨w_slice⟩⟩
     | exact ⟨_, _, rfl, ⟨w_inlineArray⟩⟩
 
-/-- **Coverage of operands**: every constructor classified as an operand
-occurs in a typed expression whose root is its parent. -/
 theorem exprCoverage_operand (k p : Ctor) (r : String) (ho : exprCoverage k = some (.operand p r)) :
     ∃ (e : Syn .expr) (τ : STy), e.ctor = p ∧ k ∈ e.nodes.map Node.ctor ∧ HasType Γ e τ := by
   cases k <;> simp only [exprCoverage, reduceCtorEq, Option.some.injEq, Coverage.operand.injEq] at ho
   obtain ⟨rfl, -⟩ := ho
   exact ⟨_, _, rfl, by decide, ⟨w_call⟩⟩
 
-/-- `abi.decode`'s type expressions are operands of a typed call. -/
 theorem elemType_decode_operand :
     ∃ (e : Syn .expr) (τ : STy), e.ctor = .call ∧ Ctor.elemType ∈ e.nodes.map Node.ctor ∧
       (∃ g x ts, e = .call (.member (.ident g) "decode") (.positional (.cons x (.cons ts .nil)))) ∧
       HasType Γ e τ :=
   ⟨_, _, rfl, by decide, ⟨_, _, _, rfl⟩, ⟨w_abiDecode⟩⟩
 
-/-- **The coverage of every statement constructor**, explicitly. -/
 def stmtCoverage : Ctor → Option Coverage
   | .blockStmt | .simpleStmt | .declVar | .exprStmt | .ifStmt | .forStmt | .whileStmt | .doWhile
   | .continueStmt | .breakStmt | .returnStmt | .emit | .revert | .declTuple => some .typed
@@ -293,7 +244,6 @@ def stmtCoverage : Ctor → Option Coverage
   | .assembly => some (.deferred "S00" "inline assembly is excluded; only the canonical rethrow is typed (rethrow)")
   | _ => none
 
-/-- `(uint256 p, ) = (a, b);`: a tuple declaration with a hole. -/
 def w_declTuple : StmtD (k := .body) Γ Γ.locals
     (.simpleStmt (.declTuple 0 (.varDecl u256 none "p") (.cons .none .nil)
       (.tuple (.some a) (.cons (.some (.ident "b")) .nil))))
@@ -301,22 +251,16 @@ def w_declTuple : StmtD (k := .body) Γ Γ.locals
   .declTuple (slots := [some ("p", .int IntTy.u256), none]) (by
     simp only [Ctx.tupleSlots, Ctx.declSlot, Ctx.declSlots]; rfl) w_tuple rfl
 
-/-- **A hole refuses an empty component**:
-`(, uint a) = (g(), 1)` with `g` returning nothing fits no slots. -/
 theorem slotsFit_hole_empty (B : DeclName → DeclName → Bool) (M : DeclName → Bool) :
     slotsFit B M [Option.none, Option.some (.int IntTy.u256)] [.tuple [], .int IntTy.u256] = false := rfl
 
-/-- **Every statement constructor is classified.** -/
 theorem stmtCoverage_total {k : SCtx} (s : Syn (.stmt k)) : (stmtCoverage s.ctor).isSome = true := by
   cases s <;> rfl
 
-/-- **Every simple-statement constructor is classified.** -/
 theorem simpleCoverage_total (s : Syn .simple) : (stmtCoverage s.ctor).isSome = true := by
   cases s <;> rfl
 
-/-! ## Resolution controls -/
 
-/-- `contract A {} contract B is A {} contract C is A {} contract D is B, C {}` -/
 def diamond : Syn .unit :=
   .unit (.cons (.contract false "A" .none .nil .nil)
     (.cons (.contract false "B" .none (.cons (.inherit ⟨"A", []⟩ .none) .nil) .nil)
@@ -324,32 +268,23 @@ def diamond : Syn .unit :=
     (.cons (.contract false "D" .none (.cons (.inherit ⟨"B", []⟩ .none)
       (.cons (.inherit ⟨"C", []⟩ .none) .nil)) .nil) .nil))))
 
-/-- **C3**: `D`'s linearization, most derived first, is `D, C, B, A`. -/
 theorem diamond_linearize : diamond.env.linearize "D" = some ["D", "C", "B", "A"] := rfl
 
-/-- `contract X is Y {} contract Y is X {}`: a cycle has no linearization. -/
 theorem cycle_rejected :
     (Syn.unit (.cons (.contract false "X" .none (.cons (.inherit ⟨"Y", []⟩ .none) .nil) .nil)
       (.cons (.contract false "Y" .none (.cons (.inherit ⟨"X", []⟩ .none) .nil) .nil) .nil))).env.linearize
       "X" = none := rfl
 
-/-- An excluded builtin resolves, and is refused with its feature. -/
 theorem gasleft_excluded :
     Γ.resolve "gasleft" = some (.builtin .gasleft) ∧ Builtin.gasleft.status = .excluded "gasleft" :=
   ⟨rfl, rfl⟩
 
-/-- An excluded member: `block.number`. -/
 theorem blockNumber_excluded : Builtin.block.memberStatus "number" = some (.excluded "blockNumber") := rfl
 
-/-- A local shadows a state variable. -/
 theorem local_shadows :
     (Γ.push "count" .bool).resolve "count" = some (.loc 0) := rfl
 
-/-! ## Typing controls -/
 
-/-- A number literal has its exact rational type, the type of a hexadecimal
-literal of its digits (a constant convertible to `bytesN`) or the `address`
-type; never a `bytesN` type itself (solc). -/
 theorem Typed.lit_num {Γ : Ctx} {n : NumLit} {σ : STy} (h : Typed Γ (.lit (.num n)) σ) :
     σ = .rational n.value ∨ (∃ len, σ = .hexConst n.value len) ∨ σ = .address false := by
   cases h with
@@ -367,13 +302,10 @@ theorem Typed.lit_num {Γ : Ctx} {n : NumLit} {σ : STy} (h : Typed Γ (.lit (.n
   | compareConst hb => nomatch hb
   | logic hb => nomatch hb
 
-/-- `uint8 x = 300;` -/
 def tooBig : Syn (.stmt .body) :=
   .simpleStmt (.declVar (.varDecl (.elem (.int false 8 (by decide))) none "x")
     (.some (.lit (.num (.dec 300 0 0)))))
 
-/-- **An out-of-range constant does not convert**: `uint8 x = 300;` is ill
-typed in every body. -/
 theorem tooBig_illTyped (C : Ctx) (L L' : List (String × STy)) : ¬ StmtOK C L tooBig L' := by
   intro ⟨h⟩
   cases h with
@@ -387,11 +319,8 @@ theorem tooBig_illTyped (C : Ctx) (L L' : List (String × STy)) : ¬ StmtOK C L 
       exact absurd (of_decide_eq_true hc) (by decide)
     · cases hc
 
-/-- `1 << 8`. -/
 def shl18 : Syn .expr := .shift .shl one (.lit (.num (.dec 8 0 0)))
 
-/-- **Two constant operands are folded, never typed at a mobile type**:
-`1 << 8` has only its exact type `256`. -/
 theorem shl18_folded {Γ : Ctx} {τ : STy} (h : Typed Γ shl18 τ) : τ = .rational (Q.ofInt 256) := by
   cases h with
   | const hq _ =>
@@ -412,8 +341,6 @@ theorem shl18_folded {Γ : Ctx} {τ : STy} (h : Typed Γ shl18 τ) : τ = .ratio
     rcases hk with h | h <;> cases h
   | logic hb => nomatch hb
 
-/-- **`uint8 x = 1 << 8;` is ill typed** (solc: `int_const 256` is not
-implicitly convertible to `uint8`), in every body. -/
 theorem shlTooBig_illTyped (C : Ctx) (L L' : List (String × STy)) :
     ¬ StmtOK (k := .body) C L (.simpleStmt (.declVar (.varDecl (.elem (.int false 8 (by decide))) none "x")
       (.some shl18))) L' := by
@@ -426,48 +353,36 @@ theorem shlTooBig_illTyped (C : Ctx) (L L' : List (String × STy)) :
     rw [STy.implicit_rational_int] at hc
     exact absurd (of_decide_eq_true hc) (by decide)
 
-/-- **`return;` needs a function without returns** (solc error 6777):
-refused in `f`'s body, which returns `uint256`. -/
 theorem bareReturn_refused (L L' : List (String × STy)) :
     ¬ StmtOK (k := .body) Γ L (.returnStmt .none) L' := by
   intro ⟨h⟩
   cases h with
   | ret h => cases h
 
-/-- `uint8 x = 255;` is well typed. -/
 def fits_wellTyped : StmtD (k := .body) Γ Γ.locals (.simpleStmt (.declVar (.varDecl (.elem (.int false 8 (by decide)))
     none "x") (.some (.lit (.num (.dec 255 0 0)))))) (("x", .int IntTy.u8) :: Γ.locals) :=
   .declInit rfl rfl (.const rfl rfl rfl) rfl
 
-/-- `break;` outside a loop has no statement context to live in: a
-`breakStmt` is a statement only of a loop body (`Syn (.stmt ⟨true, u⟩)`), so
-`StmtD` needs no rule refusing it. -/
 example : (Syn.breakStmt (u := false) : Syn (.stmt ⟨true, false⟩)).ctor = .breakStmt := rfl
 
-/-! ## A well-formed unit -/
 
-/-- The counter under the legacy pipeline. -/
 def counterRes : Resolution := resolveUnit ⟨.legacy, []⟩ counter
 
-/-- The counter's contract definition. -/
 def counterTop : Syn .top :=
   .contract false "Counter" .none .nil
     (.cons (.stateVar u256 (some .pub) none none false "count" .none)
       (.cons (extFn "inc" (.cons incStmt .nil)) .nil))
 
-/-- The counter's declarations, explicitly. -/
 theorem counter_decls_eq : counter.decls =
     [⟨.contract, "Counter", none, true, counterTop⟩,
      ⟨.stateVar, "count", some "Counter", false, .stateVar u256 (some .pub) none none false "count" .none⟩,
      ⟨.function, "inc", some "Counter", false, extFn "inc" (.cons incStmt .nil)⟩] := rfl
 
-/-- The body of `inc`, typed: `count++;` on the state variable. -/
 def incBody : ItemsD (k := .body)
     ({ env := counter.env, scope := some "Counter", locals := [], rets := [], msgValue := false } : Ctx)
     [] (.cons incStmt .nil) [] :=
   .stmt (.expr (.incDecSuffix (.state rfl rfl rfl) rfl) rfl) .nil
 
-/-- **The counter is well formed** (and inside the profile's syntax). -/
 theorem counter_wellFormed : WellFormed counterRes ∧ InProfileSyntax counterRes := by
   have hd : counterRes.unit.decls = _ := counter_decls_eq
   refine ⟨⟨rfl, ?_, ?_, ?_, by decide, ?_, ?_, ?_, ?_, ?_⟩, rfl⟩
@@ -489,21 +404,16 @@ theorem counter_wellFormed : WellFormed counterRes ∧ InProfileSyntax counterRe
     · cases hb
     · exact ⟨_, _, rfl, List.Pairwise.nil, ⟨incBody⟩⟩
 
-/-- `contract D { uint256 x; function x() external {} }`: a name declared
-twice in one scope. -/
 def clashing : Syn .unit :=
   .unit (.cons (.contract false "D" .none .nil
     (.cons (.stateVar u256 none none none false "x" .none) (.cons (extFn "x" .nil) .nil))) .nil)
 
-/-- **A clash is ill formed.** -/
 theorem clashing_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s clashing) := by
   intro h
   have e : clashing.decls.Pairwise fun d d' => d.clash clashing.env d' = false := h.noClash
   revert e
   decide
 
-/-- `contract O { function f(uint256 a) external {} function f(uint256 b) external {} }`:
-two functions with one signature. -/
 def sameSig : Syn .unit :=
   .unit (.cons (.contract false "O" .none .nil
     (.cons (.function (.ident "f") (.cons (.param u256 none (some "a")) .nil) (some .external) none .nil
@@ -511,64 +421,51 @@ def sameSig : Syn .unit :=
       (.cons (.function (.ident "f") (.cons (.param u256 none (some "b")) .nil) (some .external) none .nil
         false none .nil (.some (.block .nil))) .nil))) .nil)
 
-/-- **Overloads need distinct parameter types.** -/
 theorem sameSig_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s sameSig) := by
   intro h
   have e : sameSig.decls.Pairwise fun d d' => d.clash sameSig.env d' = false := h.noClash
   revert e
   decide
 
-/-- `interface I { function f() external {} }`: an interface function with
-a body. -/
 def ifaceBody : Syn .unit :=
   .unit (.cons (.interface "I" .nil (.cons (extFn "f" .nil) .nil)) .nil)
 
-/-- **An interface function has no body.** -/
 theorem ifaceBody_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s ifaceBody) := by
   intro h
   have e : ∀ d ∈ ifaceBody.decls, d.placementOK ifaceBody.env = true := h.placement
   revert e
   decide
 
-/-- `contract K { constructor() {} constructor() {} }`. -/
 def twoCtors : Syn .unit :=
   .unit (.cons (.contract false "K" .none .nil
     (.cons (.constructor .nil .nil false none (.block .nil))
       (.cons (.constructor .nil .nil false none (.block .nil)) .nil))) .nil)
 
-/-- **One constructor per contract.** -/
 theorem twoCtors_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s twoCtors) := by
   intro h
   have e : twoCtors.decls.Pairwise fun d d' => d.clash twoCtors.env d' = false := h.noClash
   revert e
   decide
 
-/-- `contract V { function f() {} }`: a contract function without a
-visibility. -/
 def noVisibility : Syn .unit :=
   .unit (.cons (.contract false "V" .none .nil
     (.cons (.function (.ident "f") .nil none none .nil false none .nil (.some (.block .nil))) .nil)) .nil)
 
-/-- **A contract function has a visibility.** -/
 theorem noVisibility_illFormed (s : Settings) : ¬ WellFormed (resolveUnit s noVisibility) := by
   intro h
   have e : ∀ d ∈ noVisibility.decls, d.placementOK noVisibility.env = true := h.placement
   revert e
   decide
 
-/-- `pragma solidity ^0.8.0; pragma foo;`: an unknown pragma. -/
 theorem unknownPragma_illFormed (s : Settings) :
     ¬ WellFormed (resolveUnit s (.unit (.cons (.pragma ["solidity", "^0.8.0"]) (.cons (.pragma ["foo"]) .nil)))) := by
   intro h
   exact absurd (h.pragmas ["foo"] (List.mem_cons_of_mem _ (List.mem_singleton.2 rfl))) (by decide)
 
-/-- Both pipelines resolve the counter, recording their coders: the
-pragma's (v2 by default) under legacy, v2 under via-IR. -/
 theorem counter_pipelines :
     (resolveUnit ⟨.legacy, []⟩ counter).coder = .v2 ∧ (resolveUnit ⟨.viaIR, []⟩ counter).coder = .v2 :=
   ⟨rfl, rfl⟩
 
-/-- `pragma abicoder v1;`: v1 under legacy, v2 under via-IR. -/
 theorem abicoderV1 :
     let u : Syn .unit := .unit (.cons (.pragma ["abicoder", "v1"]) .nil)
     (resolveUnit ⟨.legacy, []⟩ u).coder = .v1 ∧ (resolveUnit ⟨.viaIR, []⟩ u).coder = .v2 := ⟨rfl, rfl⟩
