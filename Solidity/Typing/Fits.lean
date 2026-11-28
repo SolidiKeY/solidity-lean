@@ -1,7 +1,7 @@
 import Solidity.Typing.Tight
 
 /-!
-# Reachable storage fits (decision 77, its conditional form)
+# Reachable storage fits
 
 `Typing/Constructibility.lean` characterises the reachable storages among
 those that fit (`SVal.Fits`: every mapping key and array slot in range,
@@ -124,9 +124,7 @@ theorem Storage.init_bnd : (Storage.init C).Bnd :=
 abbrev fitsInv (C : Contract) : RunInv C := heredInv C bndH
 
 /-- A block run from a bounded state ends, if in a state, in a bounded one.
-The twin of `Prog.run_canon` (`Typing/Reachability.lean`) for this
-invariant: nothing cites it, it is kept as the run-level statement beside
-`reachable_bnd`. -/
+-/
 theorem Prog.run_bnd {Γ Γ' : Ctx} (P : Prog C Γ Γ') {σ : State C Γ} {o : Out C σ.H Γ'}
     (hσ : (fitsInv C).HoldsT σ) (h : P.run σ = .ok o) : o.st.storage.Bnd :=
   Prog.run_all bndH_run (fun _ => trivial) P hσ h
@@ -163,7 +161,7 @@ theorem SVal.fits_of_bnd {T : Ty} (v : SVal T) (hT : FixedFitsAt T) (h : v.Bnd) 
 theorem Storage.fits_of_bnd (hf : FixedFits C) (st : Storage C) (h : st.Bnd) : st.Fits :=
   SFields.all_mono (P := fitsH) (Q := bndH) (G := FixedFitsAt) fixedFits_mono st hf h
 
-/-- **Reachable ⇒ fits** (decision 77, its conditional form): for a contract
+/-- **Reachable ⇒ fits**: for a contract
 whose fixed sizes are at most `2^256` (solc's "type too large for storage"),
 every reachable storage has its keys and slots in range. -/
 theorem reachable_fits (hf : FixedFits C) {st : Storage C} (h : Reachable C st) : st.Fits :=

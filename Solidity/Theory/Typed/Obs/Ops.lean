@@ -1,45 +1,27 @@
 import Solidity.Theory.Typed.Obs.Values
 
-/-!
-# Observations under the storage operations
-
-Under a `select`, the operations on a storage, their bridge and laws.
-
-A piece of `Theory/Typed/Obs.lean`, whose docstring describes the whole.
--/
 
 namespace Solidity
 
 open Semantics (structDef lookupBy setBy)
 
-/-! ## Under a `select` -/
 
-/-- A struct's members as the state variables of a contract: what
-`select(s, r)` reads as a storage (`Storage (Contract.ofStruct s)`), and
-where a path under it is rooted (`SRef (Contract.ofStruct s) T`), so the
-storage's operations read it unchanged. -/
 def Contract.ofStruct (s : Name) : Contract :=
   { vars := structDef s, vars_ok := structDef_okDeep s, vars_nodup := structDef_nodup s }
 
-/-- A path under `select(s, r)` as a path from the root `r`: its member
-first. -/
 def SRef.under {C : Contract} {s r : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
     (h : C.rootType r = some (.ref (.struct s))) : SRef C U :=
   ⟨r, h, .field q.hroot q.path⟩
 
-/-- The struct at the root `r` of `st`, as a storage of its members. -/
 def Storage.selectT {C : Contract} {s r : Name} (st : Storage C)
     (h : C.rootType r = some (.ref (.struct s))) : Storage (Contract.ofStruct s) :=
   (SVal.view (st.get h) : SFields (structDef s))
 
-/-- A location under `select(s, r)` as a location of the whole storage. -/
 def SLoc.under {C : Contract} {s r : Name} {U : Ty} (h : C.rootType r = some (.ref (.struct s))) :
     SLoc (Contract.ofStruct s) U → SLoc C U
   | .ref q => .ref (q.under h)
   | .dangling V p => .dangling V p
 
-/-- **`select(s, r)`**: the struct at the root `r`, read as a storage of its
-members. -/
 def Obs.select {C : Contract} {s r : Name} (o : TSto C) (h : C.rootType r = some (.ref (.struct s))) :
     TSto (Contract.ofStruct s) :=
   ⟨fun l => o.word (l.under h), fun l => o.len (l.under h), fun l => o.has (l.under h)⟩
@@ -68,14 +50,9 @@ theorem Storage.obs_selectT {C : Contract} {s r : Name} (st : Storage C)
       rw [e]; cases st.get h; rfl
     | dangling => rfl
 
-/-! ## The operations on a storage
-
-Each is a `save` at the location it acts on (`Obs.save`), of what the
-location holds with the operation made on it: so its frame is `save`'s. -/
 
 namespace Path
 
-/-- The path that goes nowhere. -/
 def isNilB {T U : Ty} : Path T U → Bool
   | .nil => true
   | _ => false
@@ -84,25 +61,18 @@ end Path
 
 namespace TVal
 
-/-- The array with its live length set. -/
 def setLen {E : Ty} (a : TVal (.ref (.array E))) (k : Nat) : TVal (.ref (.array E)) :=
   ⟨a.word, fun r => if r.isNilB then k else a.len r, a.has⟩
 
-/-- A word as a stored value. -/
 def ofWord {P : PrimTy} (x : P.Denote) : TVal (.prim P) := (SVal.prim x).obs
 
-/-- **`push`** onto an array: `x` appended past the live elements. -/
 def pushA {E : Ty} (a : TVal (.ref (.array E))) (x : TVal E) : TVal (.ref (.array E)) :=
   TVal.setLen (a.save (.at (uintOfNat (a.len .nil)) .nil) x) (a.len .nil + 1)
 
-/-- One more live element: the slot past the end as it is (a word reset, a
-missing slot at its default). -/
 def extendA {E : Ty} (a : TVal (.ref (.array E))) : TVal (.ref (.array E)) :=
   if E.isPrimitive || !a.has (.at (uintOfNat (a.len .nil)) .nil) then a.pushA (SVal.dflt E).obs
   else a.setLen (a.len .nil + 1)
 
-/-- **`pop`**: the last live element moved past the end, reset unless
-`keep`; an empty array as it is. -/
 def popA {E : Ty} (keep : Bool) (a : TVal (.ref (.array E))) : TVal (.ref (.array E)) :=
   if a.len .nil = 0 then a
   else if keep then a.setLen (a.len .nil - 1)
@@ -115,25 +85,18 @@ namespace Obs
 
 variable {L : Ty → Type} [ObsLoc L]
 
-/-- **`delAt`**: the value at `p` deleted. -/
 def delAt (o : Obs L) {U : Ty} (p : L U) : Obs L := o.save p (TVal.del (o.find p))
-/-- **`save`** of a copy: `v` laid over what is at `p` (a word replaces). -/
 def copyTo (o : Obs L) {U : Ty} (p : L U) (v : TVal U) : Obs L :=
   o.save p (TVal.overlay (o.find p) v)
-/-- **`push`**: `x` appended to the array at `p`. -/
 def push (o : Obs L) {E : Ty} (p : L (.ref (.array E))) (x : TVal E) : Obs L :=
   o.save p (TVal.pushA (o.find p) x)
-/-- One more live element at the array at `p`, its slot as it is
-(`pushSlot`, `extend`). -/
 def extend (o : Obs L) {E : Ty} (p : L (.ref (.array E))) : Obs L :=
   o.save p (TVal.extendA (o.find p))
-/-- **`pop`** at `p`, the element reset unless `keep` (`shrink`). -/
 def pop (o : Obs L) (keep : Bool) {E : Ty} (p : L (.ref (.array E))) : Obs L :=
   o.save p (TVal.popA keep (o.find p))
 
 end Obs
 
-/-! ### The bridge of the storage operations -/
 
 theorem TVal.overlay_prim {P : PrimTy} (o n : TVal (.prim P)) : o.overlay n = n := by
   apply Obs.ext
@@ -153,7 +116,6 @@ theorem List.getElem?_snoc_tail {β : Type} (l : List β) (x : β) (sh : List β
     | nil => rfl
     | cons c rest => rw [List.tail_cons, List.getElem?_cons_succ]
 
-/-- An array with `x` appended, as the Theory's `pushA`. -/
 theorem SVal.obs_pushArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (x : SVal E) (sh' : List (SVal E)) (hsh : sh' = sh.toList.tail)
     (h' : (e.toList ++ [x]).length < 2 ^ 256) :
@@ -204,7 +166,6 @@ theorem SVal.obs_pushArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : 
       simp only [TVal.pushA, TVal.setLen, Obs.save, el, ObsLoc.strip?_path, Path.strip?]
       split <;> rfl
 
-/-- An array with the same slots and a new live length. -/
 theorem SVal.obs_array_setLen {E : Ty} {n n' : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (e' : SVec E n') (sh' : SList E) (hn' : n' < 2 ^ 256)
     (hs : e'.toList ++ sh'.toList = e.toList ++ sh.toList) :
@@ -227,7 +188,6 @@ theorem SVal.obs_array_setLen {E : Ty} {n n' : Nat} (e : SVec E n) (sh : SList E
     | nil => rfl
     | «at» j r => show Option.isSome _ = Option.isSome _; rw [Option.bind_some, Option.bind_some, hf]
 
-/-- An array with one slot replaced and a new live length. -/
 theorem SVal.obs_array_set {E : Ty} {n n' : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (e' : SVec E n') (sh' : SList E) (hn' : n' < 2 ^ 256) (k : Nat) (y : SVal E)
     (hk : k < (e.toList ++ sh.toList).length) (hkb : k < 2 ^ 256)
@@ -281,7 +241,6 @@ theorem obs_find_some {U : Ty} {st : Storage C} {r : SRef C U} {w : SVal U} (h :
     st.obs.find (.ref r) = w.obs := by
   rw [obs_find, h]; rfl
 
-/-- **The bridge of a write**: a word saved, a value laid over what is there. -/
 theorem obs_write {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     (h : st.write r v = some st') : st'.obs = st.obs.copyTo (.ref r) v.obs := by
   unfold Storage.write at h
@@ -295,7 +254,6 @@ theorem obs_write {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     obtain ⟨cur, hc, h⟩ := h
     rw [obs_save h, Obs.copyTo, obs_find_some hc, SVal.obs_overlay]
 
-/-- **The bridge of a delete.** -/
 theorem obs_delete {U : Ty} {st st' : Storage C} {r : SRef C U} (h : st.delete r = some st') :
     st'.obs = st.obs.delAt (.ref r) := by
   unfold Storage.delete at h
@@ -304,8 +262,6 @@ theorem obs_delete {U : Ty} {st st' : Storage C} {r : SRef C U} (h : st.delete r
   rw [obs_save h, Obs.delAt, obs_find_some hc, SVal.obs_defaultOf]
 
 
-/-- A push that returns: the array found, its slot, the element made of it,
-and the save of the array with it appended. -/
 theorem push_some {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
     {val : SVal E → Option (SVal E)} (h : st.push r val = some st') :
     ∃ (n : Nat) (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256) (x : SVal E)
@@ -331,7 +287,6 @@ theorem push_some {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
 theorem pushSlot_snd {E : Ty} (l : List (SVal E)) : (pushSlot E l).2 = l.tail := by
   cases l <;> rfl
 
-/-- **The bridge of a push** of a value made of nothing of the slot. -/
 theorem obs_push {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {x : SVal E}
     (h : st.push r (fun _ => some x) = some st') : st'.obs = st.obs.push (.ref r) x.obs := by
   obtain ⟨n, e, sh, hn, x', h', hf, hx, hs⟩ := push_some h
@@ -339,7 +294,6 @@ theorem obs_push {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {x
   rw [obs_save hs, Obs.push, obs_find_some hf,
     SVal.obs_pushArr e sh hn x _ (pushSlot_snd _) h']
 
-/-- The slot past the end, appended as it is. -/
 theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (h' : (e.toList ++ [(pushSlot E sh.toList).1]).length < 2 ^ 256) :
     (SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
@@ -375,7 +329,6 @@ theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n <
         rfl
       rw [TVal.pushA, el, ← hc, Obs.save_find]
 
-/-- **The bridge of `pushSlot`**: one more live element, its slot as it is. -/
 theorem obs_push_slot {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
     (h : st.push r some = some st') : st'.obs = st.obs.extend (.ref r) := by
   obtain ⟨n, e, sh, hn, x', h', hf, hx, hs⟩ := push_some h
@@ -383,14 +336,11 @@ theorem obs_push_slot {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E)
   rw [obs_save hs, Obs.extend, obs_find_some hf]
   exact congrArg _ (obs_extendArr e sh hn h')
 
-/-- **The bridge of a push** as a place (`pushPlace`): `extend`'s. -/
 theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
     {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) :
     st'.obs = st.obs.extend (.ref r) :=
   obs_push_slot (push_of_pushPlace h)
 
-/-- **The bridge of a pop**: the last element past the end, reset unless
-`keep`. -/
 theorem obs_pop {E : Ty} {st st' : Storage C} {keep : Bool} {r : SRef C (.ref (.array E))}
     (h : st.pop keep r = some st') : st'.obs = st.obs.pop keep (.ref r) := by
   unfold Storage.pop at h
@@ -448,7 +398,6 @@ theorem obs_pop {E : Ty} {st st' : Storage C} {keep : Bool} {r : SRef C (.ref (.
 end Storage
 
 
-/-! ### Laws of the operations -/
 
 theorem TVal.ofWord_word_nil {P : PrimTy} (x : P.Denote) : (TVal.ofWord x).word .nil = x := rfl
 
@@ -456,13 +405,10 @@ namespace Obs
 
 variable {L : Ty → Type} [ObsLoc L]
 
-/-- **`findOnSave`** of a copy at a word: the word written. -/
 theorem copyTo_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
     (o.copyTo p v).word p = v.word .nil := by
   rw [copyTo, save_word_same]; rfl
 
-/-- **`selectOnSaveEmptySize`** of a copy: the length where it was saved is
-the copy's. -/
 theorem copyTo_len_same (o : Obs L) {E : Ty} (p : L (.ref (.array E)))
     (v : TVal (.ref (.array E))) : (o.copyTo p v).len p = v.len .nil := by
   have e : (o.save p (TVal.overlay (o.find p) v)).len (ObsLoc.app p .nil) =
@@ -472,60 +418,46 @@ theorem copyTo_len_same (o : Obs L) {E : Ty} (p : L (.ref (.array E)))
   rw [copyTo, e]
   rfl
 
-/-- **`findOnDelAt`**: a word deleted reads its default. -/
 theorem delAt_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) :
     (o.delAt p).word p = PrimTy.dflt P := by
   rw [delAt, save_word_same]; rfl
 
-/-- Below a delete, the delete's reading. -/
 theorem delAt_word_below (o : Obs L) {U : Ty} (p : L U) {P : PrimTy} (r : Path U (.prim P)) :
     (o.delAt p).word (ObsLoc.app p r) = TVal.delR (Comp.word P) (o.find p) r := by
   rw [delAt, save_word_below]; rfl
 
-/-! The laws by solkey's taclet names, as `sol_rw` reads them: a frame's
-premise the decidable `(ObsLoc.strip? p q).isNone`. -/
 
-/-- **`findOnSave`**. -/
 theorem findOnSave (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
     (o.copyTo p v).word p = v.word .nil := copyTo_word_same o p v
 
-/-- **`findOnSavePrefix`**: a read above a save sees the save made below
-it. -/
 theorem findOnSavePrefix (o : Obs L) {U V : Ty} (q : L U) (r : Path U V) (v : TVal V) :
     (o.copyTo (ObsLoc.app q r) v).find q = (o.find q).copyTo r v := by
   rw [copyTo, copyTo, find_save_below, find_find]
 
-/-- **`findOnSaveFrame`** (solkey's `selectOnSaveCons` `\else`). -/
 theorem findOnSaveFrame (o : Obs L) {U : Ty} {p : L U} {P : PrimTy} {q : L (.prim P)}
     (v : TVal U) (h : (ObsLoc.strip? p q).isNone = true) : (o.copyTo p v).word q = o.word q :=
   save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)
 
-/-- **`findOnDelAt`**. -/
 theorem findOnDelAt (o : Obs L) {P : PrimTy} (p : L (.prim P)) :
     (o.delAt p).word p = PrimTy.dflt P := delAt_word_same o p
 
-/-- **`findOnDelAtFrame`**. -/
 theorem findOnDelAtFrame (o : Obs L) {U : Ty} {p : L U} {P : PrimTy} {q : L (.prim P)}
     (h : (ObsLoc.strip? p q).isNone = true) : (o.delAt p).word q = o.word q :=
   save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)
 
-/-- **`lenOnSaveFrame`**. -/
 theorem lenOnSaveFrame (o : Obs L) {U : Ty} {p : L U} {E : Ty} {q : L (.ref (.array E))}
     (v : TVal U) (h : (ObsLoc.strip? p q).isNone = true) : (o.copyTo p v).len q = o.len q :=
   save_len_frame _ _ (Option.isNone_iff_eq_none.1 h)
 
-/-- **`lenOnDelAtFrame`**. -/
 theorem lenOnDelAtFrame (o : Obs L) {U : Ty} {p : L U} {E : Ty} {q : L (.ref (.array E))}
     (h : (ObsLoc.strip? p q).isNone = true) : (o.delAt p).len q = o.len q :=
   save_len_frame _ _ (Option.isNone_iff_eq_none.1 h)
 
-/-- **`findOnPushFrame`**. -/
 theorem findOnPushFrame (o : Obs L) {E : Ty} {p : L (.ref (.array E))} {P : PrimTy}
     {q : L (.prim P)} (x : TVal E) (h : (ObsLoc.strip? p q).isNone = true) :
     (o.push p x).word q = o.word q :=
   save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)
 
-/-- **`findOnPopFrame`**. -/
 theorem findOnPopFrame (o : Obs L) (keep : Bool) {E : Ty} {p : L (.ref (.array E))} {P : PrimTy}
     {q : L (.prim P)} (h : (ObsLoc.strip? p q).isNone = true) :
     (o.pop keep p).word q = o.word q :=
@@ -533,7 +465,6 @@ theorem findOnPopFrame (o : Obs L) (keep : Bool) {E : Ty} {p : L (.ref (.array E
 
 end Obs
 
-/-! ### Under a `select` -/
 
 theorem SRef.under_append {C : Contract} {s r : Name} {U W : Ty} (h : C.rootType r = some (.ref (.struct s)))
     (q : SRef (Contract.ofStruct s) U) (p : Path U W) :
@@ -567,14 +498,11 @@ theorem SRef.strip?_under_ne {C : Contract} {s r s' r' : Name} {U W : Ty}
   unfold SRef.strip? SRef.under
   rw [dif_neg hne]
 
-/-- A `select`'s read below a member: the read below the member's path. -/
 theorem Obs.select_find {C : Contract} {s r : Name} (o : TSto C)
     (h : C.rootType r = some (.ref (.struct s))) {U : Ty} (l : SLoc (Contract.ofStruct s) U) :
     (o.select h).find l = o.find (l.under h) := by
   apply Obs.ext <;> intro _ q <;> simp only [Obs.find, Obs.select, SLoc.under_app]
 
-/-- **`selectOnSaveCons`** at the member saved: the save seen from the root
-is a save at the member path. -/
 theorem Obs.select_save {C : Contract} {s r : Name} (o : TSto C)
     (h : C.rootType r = some (.ref (.struct s))) {U : Ty} (l : SLoc (Contract.ofStruct s) U)
     (v : TVal U) : (o.save (l.under h) v).select h = (o.select h).save l v := by
@@ -588,8 +516,6 @@ theorem Obs.select_save {C : Contract} {s r : Name} (o : TSto C)
     · rfl
   apply Obs.ext <;> intro _ q <;> simp only [Obs.select, Obs.save, e]
 
-/-- **`selectOnSaveCons`** away from the member: a save under another root
-is not seen from `r`. -/
 theorem Obs.select_save_ne {C : Contract} {s r s' r' : Name} (o : TSto C)
     (h : C.rootType r = some (.ref (.struct s))) (h' : C.rootType r' = some (.ref (.struct s')))
     (hne : r' ≠ r) {U : Ty} (q' : SRef (Contract.ofStruct s') U) (v : TVal U) :

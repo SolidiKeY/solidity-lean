@@ -15,8 +15,7 @@ construction, and its runtime sort is its type's (`SVal.keySort`,
 `Typing/Sorts.lean`).
 `solkeycheck` keeps the table equal to the `.key` text; this module keeps it
 true of the interpreter, so a table updated to match a buggy
-taclet stops building here (`Counterexamples/PreFixSortAnnotations.lean`
-is the bug `12e72a1b4b` fixed, refuted).
+taclet stops building here.
 
 What a declared sort claims about the value found (`SortOkS`, `SortOkM`):
 

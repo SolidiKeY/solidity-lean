@@ -1,29 +1,5 @@
 import Solidity.Theory.Mutability.View
 
-/-!
-# A pure body does not read the state (S3.1, pure)
-
-`docs/feature-work/semantics-extensions.md`, S3.1: a `pure` body's result
-does not depend on the state.
-
-A body a `pure` function may run is `Prog.within .pure`
-(`Calculus/Blocks.lean`): beyond `view`'s restrictions, no value it evaluates
-reads the storage, memory or the environment (`Val.readsState`), and it binds
-no storage alias.  What it may not read is the **outside** of a state
-(`Outside`): the typed storage (persistent and transient roots), the ledger,
-the contract's balance and the transaction (`msg.sender`, `msg.value`,
-`block.timestamp`, `address(this)`).
-
-The theorem is a commutation: running from `σ` with its outside replaced by
-`w` is running from `σ` and replacing the outside of the end state by `w`
-(`Prog.run_withOutside`), halts included.  So the outcome a pure body
-reaches, its locals (the result) and how it halts, is the same from every
-outside (`Prog.pure_independent`, `Prog.pure_local_independent`).
-
-The proof is by structural recursion over the intrinsic syntax, one case per
-statement a pure body may contain; a loop's run is related through
-`TLoop.run_map`.
--/
 
 namespace Solidity.Theory.Mutability
 
@@ -31,18 +7,14 @@ open Solidity
 
 variable {C : Contract}
 
-/-- The part of a state a `pure` body may not read: the committed globals and
-the transaction. -/
 structure Outside (C : Contract) where
   storage : Storage C
   net : Ledger
   selfBalance : PrimTy.uint.Denote
   tx : TTx
 
-/-- The outside of `σ`. -/
 def outside {Γ : Ctx} (σ : State C Γ) : Outside C := ⟨σ.storage, σ.net, σ.selfBalance, σ.tx⟩
 
-/-- `σ` with its outside replaced by `w`: the same heap typing, heap and locals. -/
 def withOutside {Γ : Ctx} (σ : State C Γ) (w : Outside C) : State C Γ :=
   { σ with storage := w.storage, net := w.net, selfBalance := w.selfBalance, tx := w.tx }
 
@@ -54,7 +26,6 @@ theorem outside_withOutside {Γ : Ctx} (σ : State C Γ) (w : Outside C) :
 theorem withOutside_withOutside {Γ : Ctx} (σ : State C Γ) (w w' : Outside C) :
     withOutside (withOutside σ w) w' = withOutside σ w' := rfl
 
-/-- An outcome with its end state's outside replaced. -/
 def Out.withOutside {H : HTy} {Γ : Ctx} (w : Outside C) (o : Out C H Γ) : Out C H Γ :=
   ⟨Mutability.withOutside o.st w, o.ext⟩
 
@@ -62,7 +33,6 @@ theorem TRes.map_map {α β γ : Type} (f : α → β) (g : β → γ) (x : TRes
     (x.map f).map g = x.map (g ∘ f) := by
   cases x <;> rfl
 
-/-! ## Loops -/
 
 namespace TLoop
 
@@ -93,8 +63,6 @@ theorem iterN_map (f : α → β) {body : α → TRes α} {c : α → TRes Bool}
     | inl τ => exact iterN_map f hb hc n τ
     | inr r => rfl
 
-/-- **A loop's run commutes with a map** its body and condition commute
-with. -/
 theorem run_map (f : α → β) {body : α → TRes α} {c : α → TRes Bool} {body' : β → TRes β}
     {c' : β → TRes Bool} (hb : ∀ a, body' (f a) = (body a).map f) (hc : ∀ a, c' (f a) = c a)
     (a : α) : run body' c' (f a) = (run body c a).map f := by
@@ -116,7 +84,6 @@ theorem run_map (f : α → β) {body : α → TRes α} {c : α → TRes Bool} {
 
 end TLoop
 
-/-! ## Expressions that do not read the state -/
 
 section Eval
 
@@ -198,7 +165,6 @@ theorem RevPart.mapM_withOutside : (d : List (RevPart C Γ)) →
 
 end Eval
 
-/-! ## Entering and leaving a call -/
 
 theorem RetBinders.enterT_withOutside {ps : Ctx} (w : Outside C) : {ρ : Ctx} →
     (bs : RetBinders ρ) → bs.noMem = true → (τ : State C ps) →
@@ -219,15 +185,11 @@ theorem CallRet.enterT_withOutside {Γ Γ' rs ps : Ctx} (w : Outside C) (ret : C
   | rets bs => exact RetBinders.enterT_withOutside w bs hm τ
   | mem => exact absurd hm Bool.false_ne_true
 
-/-! ## Programs -/
 
 section Progs
 
-/-- The `within .pure` of a statement that only `nonpayable` admits. -/
 theorem pure_beq_nonpayable : (Mutability.pure == .nonpayable) = false := rfl
 
-/-- A call whose arguments read no state, with no memory return, of a body
-that commutes with replacing the outside, commutes with it too. -/
 theorem call_withOutside {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
     (body : Prog C (rs ++ ps) Γf) (ha : args.readsIn .pure = true) (hm : ret.noMem = true)
     (ih : ∀ (τ : State C (rs ++ ps)) (w : Outside C),
@@ -253,7 +215,6 @@ theorem call_withOutside {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : C
 
 mutual
 
-/-- **A pure statement commutes with replacing the outside.** -/
 theorem Stmt.run_withOutside : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.within .pure s = true →
     (σ : State C Γ) → (w : Outside C) →
     Stmt.run (withOutside σ w) s = (Stmt.run σ s).map (Out.withOutside w)
@@ -393,7 +354,6 @@ theorem Stmt.run_withOutside : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.w
     cases d.mapM (·.evalT σ) <;> rfl
   termination_by structural _ _ s => s
 
-/-- **A pure program commutes with replacing the outside.** -/
 theorem Prog.run_withOutside : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.within .pure P = true →
     (σ : State C Γ) → (w : Outside C) →
     Prog.run (withOutside σ w) P = (Prog.run σ P).map (Out.withOutside w)
@@ -420,28 +380,19 @@ end
 
 end Progs
 
-/-! ## Consequences -/
 
-/-- **S3.1 (pure): a pure body's outcome does not depend on the state.**  From
-any two outsides `w` and `w'` (storage, ledger, balance, transaction) the
-runs agree but for the outside itself: `function sq(uint x) pure returns
-(uint) { return x * x; }` returns the same value, or overflows alike,
-whatever the contract's storage or `msg.value`. -/
 theorem Prog.pure_independent {Γ Γ' : Ctx} (P : Prog C Γ Γ') (hw : Prog.within .pure P = true)
     (σ : State C Γ) (w w' : Outside C) :
     Prog.run (withOutside σ w) P = (Prog.run (withOutside σ w') P).map (Out.withOutside w) := by
   rw [Prog.run_withOutside P hw σ w, Prog.run_withOutside P hw σ w', TRes.map_map]
   rfl
 
-/-- A pure body halts, and how, independently of the outside. -/
 theorem Prog.pure_halt_independent {Γ Γ' : Ctx} (P : Prog C Γ Γ')
     (hw : Prog.within .pure P = true) (σ : State C Γ) (w : Outside C) :
     (Prog.run (withOutside σ w) P).halt? = (Prog.run σ P).halt? := by
   rw [Prog.run_withOutside P hw σ w]
   cases Prog.run σ P <;> rfl
 
-/-- **A pure body's result** (every local it leaves, its return values among
-them) is the one it computes from any other outside. -/
 theorem Prog.pure_local_independent {Γ Γ' : Ctx} {P : Prog C Γ Γ'}
     (hw : Prog.within .pure P = true) {σ : State C Γ} {o : Out C σ.H Γ'}
     (h : Prog.run σ P = .ok o) (w : Outside C) :
@@ -451,9 +402,6 @@ theorem Prog.pure_local_independent {Γ Γ' : Ctx} {P : Prog C Γ Γ'}
   rw [Prog.run_withOutside P hw σ w, h]
   rfl
 
-/-- A pure body is in particular read-only: it commits its entry's
-outside (`Prog.committed_readOnly`), so its successful run from `withOutside σ
-w` ends with outside `w`, the transaction included. -/
 theorem Prog.pure_outside {Γ Γ' : Ctx} {P : Prog C Γ Γ'} (hw : Prog.within .pure P = true)
     {σ : State C Γ} {o : Out C σ.H Γ'} (h : Prog.run σ P = .ok o) :
     outside o.st = outside σ := by
@@ -461,32 +409,22 @@ theorem Prog.pure_outside {Γ Γ' : Ctx} {P : Prog C Γ Γ'} (hw : Prog.within .
   have hk := hg.keeps pure_ne_nonpayable
   simp only [outside, hk.1, hk.2, hg.selfBalance pure_ne_nonpayable, hg.tx]
 
-/-! ## The explicit transient layer -/
 
 namespace Transient
 
 open Solidity.Transient
 
-/-- A transient-layer state with its base's outside replaced by `w` and its
-transient cells by `c`. -/
 def withOutsideCells {L : Layout} (s : FrameState C L) (w : Outside C) (c : Store L) :
     FrameState C L :=
   ⟨withOutside s.base w, c⟩
 
-/-- The outside a zero-value self-call enters with: the caller's globals,
-sender the contract itself, no value. -/
 def enterOutside (w : Outside C) : Outside C :=
   ⟨w.storage, w.net, w.selfBalance,
     { w.tx with msgSender := w.tx.selfAddress, msgValue := PrimTy.dflt .uint }⟩
 
-/-- `pure` permits only `pure` callees. -/
 theorem permits_pure {μ : Mutability} (h : Program.permits .pure μ = true) : μ = .pure := by
   cases μ <;> first | rfl | exact absurd h (by decide)
 
-/-- **A pure effect tree does not read the state** (S3.1, pure, on the
-transient layer): in a `pure` context, replacing the outside and the
-transient cells commutes with the run, so neither `uint transient count`
-nor the storage, balance or transaction can change a pure result. -/
 theorem Program.run_withOutsideCells {L : Layout} {α : Type} (body : Program C L α)
     {ctx : Context} (hμ : ctx.mutability = .pure) (s : FrameState C L) (w : Outside C)
     (c : Store L) :
@@ -570,8 +508,6 @@ theorem Program.run_withOutsideCells {L : Layout} {α : Type} (body : Program C 
       split <;> rfl
     | ok r => rfl
 
-/-- A pure effect tree's results are the same from every outside and every
-transient store. -/
 theorem Program.pure_independent {L : Layout} {α : Type} (body : Program C L α)
     {ctx : Context} (hμ : ctx.mutability = .pure) (s : FrameState C L) (w w' : Outside C)
     (c c' : Store L) :
