@@ -25,6 +25,12 @@ import Solidity.Examples.Benchmark.Defi.StakingRewards
 import Solidity.Examples.Benchmark.Defi.WrappedEther
 import Solidity.Examples.Benchmark.ERC20
 import Solidity.Examples.Benchmark.EtherWallet
+import Solidity.Examples.Benchmark.FixedPoint.BondingCurve
+import Solidity.Examples.Benchmark.FixedPoint.FeeSplit
+import Solidity.Examples.Benchmark.FixedPoint.LinearInterest
+import Solidity.Examples.Benchmark.FixedPoint.RayMath
+import Solidity.Examples.Benchmark.FixedPoint.Vesting
+import Solidity.Examples.Benchmark.FixedPoint.WadMath
 import Solidity.Examples.Benchmark.Governance.EnglishAuction
 import Solidity.Examples.Benchmark.Governance.Multisig
 import Solidity.Examples.Benchmark.Governance.Ownable
