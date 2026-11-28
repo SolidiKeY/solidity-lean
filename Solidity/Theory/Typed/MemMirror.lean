@@ -1,31 +1,11 @@
 import Solidity.Theory.Typed.Mem
 
-/-!
-# A copy into memory, below its root
-
-What `SVal.copyStToM` leaves, member by member: the copy's root, and every
-object the copy made for a member or an element, holds what the storage
-value held there (`SVal.Mirrors`), each at an identity past the heap the
-copy started from.  This is solkey's `readFromCopyToStorage` and
-`readFromCopyToStorageIdentity` at any depth (`idC(idp, fxs)` with `fxs`
-not empty), read on the typed heap: `Calculus/MemRead.lean`'s
-`copyObjN` and `copyPathRd?` take their soundness from it.
-
-The mirror is a property of the heap the copy leaves, so it is read at the
-copy's node only; past a later write the memory walk reads down to the
-node first.  It survives allocations (`SVal.Mirrors.wk`, `Heap.Keeps`),
-which is what lets a struct's later members be copied after its earlier
-ones.
--/
 
 namespace Solidity
 
 open Semantics (structDef lookupBy)
 
 mutual
-/-- **`w` holds, in `hp`, a copy of the storage value `v`**, every object
-of it at an identity at least `n`: a word is the word, a struct's members
-and an array's live elements are held member by member. -/
 def SVal.Mirrors {H : HTy} (hp : Heap H) (n : Nat) : {T : Ty} → SVal T → MVal H T → Prop
   | _, .prim x, w => w = x
   | _, .struct fs, r => n ≤ (r : HRef H _).id ∧ SFields.Mirrors hp n fs (hp.get r)
@@ -35,13 +15,11 @@ def SVal.Mirrors {H : HTy} (hp : Heap H) (n : Nat) : {T : Ty} → SVal T → MVa
     n ≤ (r : HRef H _).id ∧ SVec.Mirrors hp n e (MObj.elems .fixed (hp.get r))
   | _, .map _ _, _ => False
 
-/-- `SVal.Mirrors`, member by member. -/
 def SFields.Mirrors {H : HTy} (hp : Heap H) (n : Nat) :
     {fs : List (Name × Ty)} → SFields fs → MFields H fs → Prop
   | _, .nil, _ => True
   | _, .cons v rest, x => v.Mirrors hp n x.1 ∧ SFields.Mirrors hp n rest x.2
 
-/-- `SVal.Mirrors`, element by element. -/
 def SVec.Mirrors {H : HTy} (hp : Heap H) (n : Nat) :
     {E : Ty} → {k : Nat} → SVec E k → List (MVal H E) → Prop
   | _, _, .nil, l => l = []
@@ -50,7 +28,6 @@ end
 
 
 mutual
-/-- A mirror past `n` is one past any `n' ≤ n`. -/
 theorem SVal.Mirrors.mono {H : HTy} {hp : Heap H} {n n' : Nat} (hn : n' ≤ n) :
     {T : Ty} → (v : SVal T) → (w : MVal H T) → v.Mirrors hp n w → v.Mirrors hp n' w
   | _, .prim _, _, h => h
@@ -84,8 +61,6 @@ theorem SVec.Mirrors.mono {H : HTy} {hp : Heap H} {n n' : Nat} (hn : n' ≤ n) :
 end
 
 mutual
-/-- **A mirror survives a heap that keeps its objects** (`Heap.Keeps`): an
-allocation after the copy. -/
 theorem SVal.Mirrors.wk {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Heap H'}
     (hk : Heap.Keeps e hp hp') {n : Nat} :
     {T : Ty} → (v : SVal T) → (w : MVal H T) → v.Mirrors hp n w → v.Mirrors hp' n (MVal.wk e T w)
@@ -131,8 +106,6 @@ theorem SVec.Mirrors.wk {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Heap H'
 end
 
 mutual
-/-- **A copy into memory mirrors what it copies**, every object it makes
-past the heap it starts from. -/
 theorem SVal.mirrors_copyStToM {H : HTy} (hp : Heap H) :
     {T : Ty} → (v : SVal T) → (h : T.mapFree = true) →
     v.Mirrors (v.copyStToM hp h).heap H.length (v.copyStToM hp h).val
@@ -180,14 +153,11 @@ theorem SVec.mirrors_copyStToM {H : HTy} (hp : Heap H) :
         (SVec.mirrors_copyStToM _ rest _)⟩
 end
 
-/-! ### Reading a mirror -/
 
-/-- A mirrored word is the word. -/
 theorem SVal.Mirrors.prim {H : HTy} {hp : Heap H} {n : Nat} {p : PrimTy} :
     (v : SVal (.prim p)) → (w : MVal H (.prim p)) → v.Mirrors hp n w → (w : p.Denote) = v.view
   | .prim _, _, h => h
 
-/-- A mirrored object is past the heap the mirror is past. -/
 theorem SVal.Mirrors.id_ge {H : HTy} {hp : Heap H} {n : Nat} {R : RefTy} :
     (v : SVal (.ref R)) → (r : MVal H (.ref R)) → v.Mirrors hp n r → n ≤ (r : HRef H R).id
   | .struct _, _, h => by simp only [SVal.Mirrors] at h; exact h.1
@@ -195,7 +165,6 @@ theorem SVal.Mirrors.id_ge {H : HTy} {hp : Heap H} {n : Nat} {R : RefTy} :
   | .fixed _, _, h => by simp only [SVal.Mirrors] at h; exact h.1
   | .map _ _, _, h => by simp only [SVal.Mirrors] at h
 
-/-- A member of a mirrored struct mirrors the member. -/
 theorem SFields.Mirrors.get {H : HTy} {hp : Heap H} {n : Nat} {f : Name} :
     {fs : List (Name × Ty)} → (x : SFields fs) → (o : MFields H fs) → x.Mirrors hp n o →
     {T : Ty} → (hf : lookupBy f fs = some T) → (x.get hf).Mirrors hp n (MFields.get fs o hf)
@@ -211,7 +180,6 @@ theorem SFields.Mirrors.get {H : HTy} {hp : Heap H} {n : Nat} {f : Name} :
     · simp only [MFields.get, e, dite_false]
       exact SFields.Mirrors.get rest o.2 h.2 _
 
-/-- A mirrored vector: the elements, as many, each mirrored. -/
 theorem SVec.Mirrors.getElem {H : HTy} {hp : Heap H} {n : Nat} :
     {E : Ty} → {k : Nat} → (x : SVec E k) → (l : List (MVal H E)) → x.Mirrors hp n l →
     ∀ i : Nat, (x.toList[i]? = none ∧ l[i]? = none) ∨
