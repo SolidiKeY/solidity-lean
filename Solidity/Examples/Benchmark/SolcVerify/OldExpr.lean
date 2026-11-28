@@ -2,7 +2,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-import Solidity.Tools.Run
+import Solidity.Tools.Counterexample
 
 /-!
 # solc-verify: `\old` in postconditions
@@ -48,14 +48,8 @@ theorem changeOwnerCorrect_spec : ⊢ spec!{ changeOwnerCorrect } := by sol_prov
 theorem increment_spec : ⊢ spec!{ increment } := by sol_prove
 /-- The constructor has no clause. Proved. -/
 theorem constructor_spec : ⊢ spec!{ constructor } := by sol_prove
-/- `changeOwnerIncorrect(7)` from `owner == 0`, sent by `5`: refuted,
+/-- `changeOwnerIncorrect(7)` from `owner == 0`, sent by `5`: refuted,
 `owner == 7` and neither disjunct holds. -/
-/--
-info: ok
-owner = 7
-counter = 0
-counter2 = 0
--/
-#guard_msgs in #run OldExpr.changeOwnerIncorrect(7) with msg.sender := 5
+theorem changeOwnerIncorrect_refuted : ¬ (⊢ spec!{ changeOwnerIncorrect }) := by sol_refute
 
 end Solidity.Examples.Benchmark.SolcVerify.OldExpr

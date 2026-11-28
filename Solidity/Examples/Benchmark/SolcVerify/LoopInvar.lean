@@ -2,7 +2,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-import Solidity.Tools.Run
+import Solidity.Tools.Counterexample
 
 /-!
 # solc-verify: loop invariants
@@ -81,19 +81,14 @@ theorem correct_spec : ⊢ spec!{ correct } := by
 an invariant): the loop's bound is concrete and the strategy unwinds it. -/
 theorem cannotProveWithoutInvariant_spec : ⊢ spec!{ cannotProveWithoutInvariant } := by
   sol_prove
-/- `doesNotHoldOnEntry`: refuted, the loop ends with `x == 11`, `i == 10`. -/
-/-- info: panic (an `assert` failed) -/
-#guard_msgs in #run LoopInvar.doesNotHoldOnEntry()
-/- `isNotMaintainedByLoop`: refuted, the loop ends with `x == 0`, `i == 10`. -/
-/-- info: panic (an `assert` failed) -/
-#guard_msgs in #run LoopInvar.isNotMaintainedByLoop()
-/- `forLoop`: unknown. The run is `ok`; the annotated invariant `i == x`
+/-- `doesNotHoldOnEntry`: refuted, the loop ends with `x == 11`, `i == 10`. -/
+theorem doesNotHoldOnEntry_refuted : ¬ (⊢ spec!{ doesNotHoldOnEntry }) := by sol_refute
+/-- `isNotMaintainedByLoop`: refuted, the loop ends with `x == 0`, `i == 10`. -/
+theorem isNotMaintainedByLoop_refuted : ¬ (⊢ spec!{ isNotMaintainedByLoop }) := by sol_refute
+/-- `forLoop`: unknown. No `assert` fails (`x` ends at `10`), but the annotated invariant `i == x`
 leaves the exit leaf `x == i, !(i < 10) ⟹ x <= 10`, false without `i <= 10`,
 which solc-verify's Boogie infers. Missing: loop-invariant inference (an
 interval bound) beside the invariant rule. -/
-/-- info: ok -/
-#guard_msgs in #run LoopInvar.forLoop()
-/-- `forLoop`'s obligation, unknown. -/
 def forLoop_target := spec!{ forLoop }
 
 end Solidity.Examples.Benchmark.SolcVerify.LoopInvar

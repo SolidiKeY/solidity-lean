@@ -2,7 +2,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-import Solidity.Tools.Run
+import Solidity.Tools.Counterexample
 
 /-!
 # solc-verify: overflow in a specification
@@ -35,13 +35,8 @@ open scoped Scoped
 /-- `inc` keeps `x == y + 1`: an `x++` past `255` reverts. Proved (solc-verify
 flags the overflow, which reverts here). -/
 theorem inc_spec : ⊢ spec!{ inc } := by sol_prove
-/- `set()`: refuted, `x == 0`, `y == 255`, and `y + 1` overflows `uint8`: the
+/-- `set()`: refuted, `x == 0`, `y == 255`, and `y + 1` overflows `uint8`: the
 clause's equation is false (and `0 != 256` unbounded). -/
-/--
-info: ok
-x = 0
-y = 255
--/
-#guard_msgs in #run Overflow.set()
+theorem set_refuted : ¬ (⊢ spec!{ set }) := by sol_refute
 
 end Solidity.Examples.Benchmark.SolcVerify.OverflowSpec

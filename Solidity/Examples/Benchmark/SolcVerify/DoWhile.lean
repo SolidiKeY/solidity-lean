@@ -2,7 +2,6 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-import Solidity.Tools.Run
 
 /-!
 # solc-verify: `do … while` invariants
@@ -12,8 +11,8 @@ Changes: `@notice invariant` is `@custom:key invariant`. The natural
 specification is that no `assert` fails (`[ f(); ] true`). solc-verify
 proves `f1` and flags the invariants of `f2`–`f4`.
 
-All four are unknown. `f1`'s run is `ok` (`f2`–`f4` have no `assert`, so their
-boxes hold), but the invariant rule takes the annotated invariant, and it
+All four are unknown (`*_target` below). `f2`–`f4` have no `assert`, so their
+boxes hold, but the invariant rule takes the annotated invariant, and it
 is not inductive in `f2` (entry: `x == 1`, `i == 0`), `f3` (`x` lags `i`) and
 `f4` (`x = 1`), solc-verify's errors. In `f1` the exit leaf
 `x == i, !(i < 10) ⟹ x == 10` needs `i <= 10` (Boogie infers it), and the
@@ -67,9 +66,13 @@ def DoWhile : Contract := contract!{
 local instance : InContract := ⟨DoWhile⟩
 open scoped Scoped
 
-/-- info: ok -/
-#guard_msgs in #run DoWhile.f1()
-/-- `f1`'s obligation, unknown. -/
+/-- `f1`: unknown, the annotated invariant needs `i <= 10` at exit. -/
 def f1_target := spec!{ f1 }
+/-- `f2`: unknown, the invariant fails on entry. -/
+def f2_target := spec!{ f2 }
+/-- `f3`: unknown, the invariant fails after the first iteration. -/
+def f3_target := spec!{ f3 }
+/-- `f4`: unknown, the invariant is not maintained. -/
+def f4_target := spec!{ f4 }
 
 end Solidity.Examples.Benchmark.SolcVerify.DoWhile

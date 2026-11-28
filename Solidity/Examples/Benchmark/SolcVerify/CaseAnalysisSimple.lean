@@ -2,7 +2,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-import Solidity.Tools.Run
+import Solidity.Tools.Counterexample
 
 /-!
 # solc-verify: case-analysis postconditions
@@ -36,12 +36,7 @@ open scoped Scoped
 
 /-- `correct`: `y == 1` when `x > 0`, `y == -1` when `x < 0`. Proved. -/
 theorem correct_spec : ⊢ spec!{ correct } := by sol_prove
-/- `wrongdefault()` from `x == 1`: refuted, `y == -1`. -/
-/--
-info: ok
-x = 1
-y = -1
--/
-#guard_msgs in #run CaseAnalysisSimple.wrongdefault() with x := 1
+/-- `wrongdefault()` from `x == 1`: refuted, `y == -1`. -/
+theorem wrongdefault_refuted : ¬ (⊢ spec!{ wrongdefault }) := by sol_refute
 
 end Solidity.Examples.Benchmark.SolcVerify.CaseAnalysisSimple

@@ -2,7 +2,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-import Solidity.Tools.Run
+import Solidity.Tools.Counterexample
 
 /-!
 # solc-verify: a contract invariant
@@ -48,12 +48,7 @@ theorem add_spec : ⊢ spec!{ add } := by sol_prove
 so no invariant is owed at it; solc-verify owes it when entering `add`, where
 it fails. -/
 theorem add_incorrect_2_spec : ⊢ spec!{ add_incorrect_2 } := by sol_prove
-/- `add_incorrect(1)` from `x == y == 1`: refuted, `x == 2`, `y == 0`. -/
-/--
-info: ok
-x = 2
-y = 0
--/
-#guard_msgs in #run Simple.add_incorrect(1) with x := 1, y := 1
+/-- `add_incorrect(1)` from `x == y == 1`: refuted, `x == 2`, `y == 0`. -/
+theorem add_incorrect_refuted : ¬ (⊢ spec!{ add_incorrect }) := by sol_refute
 
 end Solidity.Examples.Benchmark.SolcVerify.Simple
