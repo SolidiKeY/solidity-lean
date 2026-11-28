@@ -12,9 +12,10 @@ structure Machine where
   calldata : ByteArray
   returnData : ByteArray
   reverted : Bool
+  callValue : Word := word 0
 /-- A fresh invocation with empty storage, memory and output. -/
 def Machine.empty (calldata : ByteArray := ByteArray.empty) : Machine :=
-  ⟨fun _ => word 0, fun _ => 0, calldata, ByteArray.empty, false⟩
+  ⟨fun _ => word 0, fun _ => 0, calldata, ByteArray.empty, false, word 0⟩
 structure Result (α : Type) where
   value : α
   machine : Machine
@@ -39,7 +40,7 @@ theorem runClosed_agrees (fuel : Nat) {F c n} (environment : FunctionEnv F)
       evalStmt fuel environment he code hc vars := by
   unfold runClosed
   cases evalStmt fuel environment he code hc vars <;> rfl
-/-- Pure execution preserves all five machine components, on every completed run. -/
+/-- Pure execution preserves all machine components, on every completed run. -/
 theorem runClosed_machine (fuel : Nat) {F c n} (environment : FunctionEnv F)
     (he : EnvWordP environment) (code : Stmt F [] c n) (hc : StmtWordP code)
     (vars : Values n) (machine : Machine) (result : Result (Outcome c n))
@@ -90,6 +91,7 @@ def builtin (outputLimit : Nat) {a r} (op : Builtin a r) (args : Values a) : Exe
   case pop => intro _; exact pure Fin.elim0
   case stop => intro _; exact do throw (.halted (← get))
   case invalid => intro _; exact throw .invalid
+  case callvalue => intro _; exact do let s ← get; pure (fun _ => s.callValue)
   case sload => intro args; exact do let s ← get; pure (fun _ => s.storage (args 0))
   case sstore => intro args; exact do
     modify fun s => { s with storage := fun key => if key = args 0 then args 1 else s.storage key }

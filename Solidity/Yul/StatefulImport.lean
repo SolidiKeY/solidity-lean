@@ -41,7 +41,7 @@ def source (code : IrSyntax.Code) : Solidity.Frontend.Checked.Bytes :=
   ("assembly { function memoryguard(x) -> r { r := x } " ++ render code ++ " }").toUTF8.data.toList
 
 def supported {a r} : Builtin a r → Bool
-  | .pure _ | .pop | .stop | .invalid | .sload | .sstore | .mload | .mstore | .mstore8
+  | .pure _ | .pop | .stop | .invalid | .callvalue | .sload | .sstore | .mload | .mstore | .mstore8
   | .calldatasize | .calldataload | .calldatacopy | .returndatasize | .returndatacopy
   | .mcopy | .return | .revert => true
   | _ => false
@@ -84,6 +84,7 @@ theorem Imported.provenance {text path} (p : Imported text path) :
   p.ir.sound
 def selfTest : IO UInt32 := do
   let cases : List (String × String) := [
+    ("if callvalue() { revert(0,0) } sstore(0,1)", "1::false"),
     ("sstore(0,7) mstore(0,9) return(31,1)", "7:09:false"),
     ("sstore(0,7) mstore(0,9) revert(31,1)", "0:09:true"),
     ("function f() { return(0,0) } f() sstore(0,9)", "0::false"),
@@ -92,7 +93,7 @@ def selfTest : IO UInt32 := do
     ("calldatacopy(0,1,3) return(0,3)", "0:340000:false"),
     ("for { let i := 0 } lt(i,3) { i := add(i,1) } { sstore(0,add(sload(0),1)) }", "3::false"),
     ("mstore(0,memoryguard(128)) return(31,1)", "0:80:false"),
-    ("if 0 { pop(callvalue()) }", "parse-error"),
+    ("if 0 { pop(caller()) }", "parse-error"),
     ("function f() { pop(gas()) }", "parse-error"),
     ("returndatacopy(0,0,1)", "run-error"),
     ("return(0,1025)", "run-error"),
@@ -109,7 +110,7 @@ def selfTest : IO UInt32 := do
     unless actual == expected do
       IO.eprintln s!"FAIL {body}: expected {expected}, got {actual}"
       return 1
-  let text := "object \"root\" { code { pop(callvalue()) } object \"runtime\" { code { sstore(0,5) } } }"
+  let text := "object \"root\" { code { pop(caller()) } object \"runtime\" { code { sstore(0,5) } } }"
   let .ok p := parse text ["runtime"] | IO.eprintln "FAIL runtime selection"; return 1
   match p.run 1024 0 StatefulRun.Machine.empty with
   | .error .exhausted => pure ()
@@ -117,12 +118,17 @@ def selfTest : IO UInt32 := do
   match p.run 1024 1000 StatefulRun.Machine.empty with
   | .ok s => unless (s.storage (word 0)).val == 5 do IO.eprintln "FAIL selected code"; return 1
   | _ => IO.eprintln "FAIL selected execution"; return 1
-  IO.println s!"PASS stateful-yul {cases.length + 2} cases"
+  let .ok p := parse "object \"value\" { code { sstore(0,callvalue()) } }" [] | IO.eprintln "FAIL callvalue import"; return 1
+  match p.run 1024 1000 { StatefulRun.Machine.empty with callValue := word 42 } with
+  | .ok s => unless (s.storage (word 0)).val == 42 do IO.eprintln "FAIL callvalue read"; return 1
+  | _ => IO.eprintln "FAIL callvalue execution"; return 1
+  IO.println s!"PASS stateful-yul {cases.length + 3} cases"
   return 0
 
 /-- Script entry: args are IR file, slash-separated child-object path (`-` for
 root), fuel, max output bytes, calldata hex, and comma-separated slot=value
-initial storage/query entries (`-` for empty). Decimal words are range checked.
+initial storage/query entries (`-` for empty), optional decimal call value (default 0).
+Decimal words are range checked.
 Use a two-line wrapper importing this module and defining `main := driver`;
 keeping main namespaced avoids collisions when the library root imports it. -/
 def driver (args : List String) : IO UInt32 := do
@@ -130,8 +136,11 @@ def driver (args : List String) : IO UInt32 := do
   let fail := fun (message : String) => do
     IO.println ((Lean.Json.mkObj [("status", .str "error"), ("error", .str message)]).compress)
     pure (1 : UInt32)
-  let [file, path, fuelText, limitText, calldataHex, storageText] := args
-    | return ← fail "expected: IR_FILE OBJECT_PATH FUEL MAX_OUTPUT_BYTES CALLDATA_HEX STORAGE"
+  let args := if args.length == 6 then args ++ ["0"] else args
+  let [file, path, fuelText, limitText, calldataHex, storageText, valueText] := args
+    | return ← fail "expected: IR_FILE OBJECT_PATH FUEL MAX_OUTPUT_BYTES CALLDATA_HEX STORAGE [CALL_VALUE]"
+  let some value := valueText.toNat? | return ← fail "call value must be a natural number"
+  if value ≥ 2^256 then return ← fail "call value out of range"
   let some fuel := fuelText.toNat? | return ← fail "fuel must be a natural number"
   let some limit := limitText.toNat? | return ← fail "max output bytes must be a natural number"
   let some [.hex bytes] := IrSyntax.lex ("hex\"" ++ calldataHex ++ "\"")
@@ -150,7 +159,7 @@ def driver (args : List String) : IO UInt32 := do
   let .ok imported := parsed | return ← fail "import failed"
   let initial : StatefulRun.Machine :=
     { StatefulRun.Machine.empty ⟨(bytes.map fun b => UInt8.ofNat b.val).toArray⟩ with
-      storage := fun key => ((slots.find? fun p => p.1 == key).map Prod.snd).getD (word 0) }
+      callValue := word value, storage := fun key => ((slots.find? fun p => p.1 == key).map Prod.snd).getD (word 0) }
   match imported.run limit fuel initial with
   | .error failure => return ← fail (match failure with
     | .exhausted => "fuel exhausted"
