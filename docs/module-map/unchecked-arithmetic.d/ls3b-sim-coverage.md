@@ -12,4 +12,4 @@
 | `Correctness/Lowering/Sim/Coverage/BooleanDecoding.lean` | Proves full existing-decoder success on approved Boolean inputs, with a singleton resolved statement; no decoder or inference premise is added. |
 | `Correctness/Lowering/Sim/Coverage/BooleanCoverage.lean` | Additive H1184 restricted v2 coverage under the H1361 syntax boundary and H1182 placement, retaining original acceptance; actual production nonvacuity remains separate. |
 | `Correctness/Lowering/Sim/Coverage/BooleanBlocksV3.lean` | Additive Boolean-block coverage with owned-decoder completeness, retaining the delivered Boolean domain and unchanged production/acceptance. |
-| `Correctness/Lowering/Sim/Coverage/BooleanStatementsV4.lean` | H2290 singleton Boolean-statement coverage, including all v3 inputs, with existing-decoder completeness and unchanged production/acceptance. |
+| `Correctness/Lowering/Sim/Coverage/BooleanStatements.lean` | Shared singleton Boolean-statement decoding and coverage; narrower while and block coverage delegates here with unchanged production/acceptance. |

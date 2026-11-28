@@ -3,7 +3,7 @@ import Solidity.Correctness.Lowering.Sim.CoverageBranch
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanBlocksV3
-import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStatementsV4
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStatements
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
@@ -1316,7 +1316,7 @@ theorem smoke_blocks_coverage (hk : Solidity.Goals.elabKernelTotal) :
     (BooleanBlocksV3.of_boolean (smoke_in_domain smokeOutput))
     (smoke_production hk) smoke_program_accepted
 
-/-- A standalone assignment admitted by v4 and outside both v3 alternatives. -/
+/-- A standalone assignment outside both the while-only and block input boundaries. -/
 def statementRaw : List RawStmt := [.assign (.name "i") (.bool true)]
 
 def statementBody : Body :=
@@ -1389,10 +1389,10 @@ def statementOutput : Solidity.Correctness.Lowering.Checker.Output Match.C [.val
 
 def statementEmitted : Emitted := ⟨Match.C, [.val .bool], statementOutput⟩
 
-theorem statement_in_domain : BooleanStatementsV4.Input statementBody statementEmitted := by
+theorem statement_in_domain : BooleanStatements.Input statementBody statementEmitted := by
   exact ⟨rfl, rfl, rfl, rfl, ["i"], _, rfl, rfl, .assign (by decide) (.bool true)⟩
 
-/-- Neither the old while boundary nor the v3 block boundary admits this run. -/
+/-- Neither the while boundary nor the block boundary admits this run. -/
 theorem statement_not_v3 : ¬ BooleanBlocksV3.Input statementBody statementEmitted := by
   intro h
   rcases h with old | block
@@ -1422,7 +1422,7 @@ theorem smoke_statements_coverage (hk : Solidity.Goals.elabKernelTotal) :
     ∃ b' : Body, b'.SameInput Match.body ∧
       ∃ m, diagram.Assoc b' (Match.emitted smokeOutput) m :=
   diagram_total_boolean_statements Match.body (Match.emitted smokeOutput)
-    (BooleanStatementsV4.of_blocks
+    (BooleanStatements.of_blocks
       (BooleanBlocksV3.of_boolean (smoke_in_domain smokeOutput)))
     (smoke_production hk) smoke_program_accepted
 

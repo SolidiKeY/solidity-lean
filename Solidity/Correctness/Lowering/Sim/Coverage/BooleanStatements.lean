@@ -1,13 +1,15 @@
-import Solidity.Correctness.Lowering.Sim.Coverage.BooleanBlocksV3
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStmtInference
+import Solidity.Correctness.Lowering.Sim.Coverage.ProductionV2
+import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 
-/-! H2290 additive singleton Boolean-statement coverage toward
-`Solidity.Goals.loweringBySimulation`. The existing grammar and decoder are
-reused; earlier domains and all frozen statements remain unchanged. -/
+/-! Coverage for singleton Boolean statements, using the existing Source
+inference and decoder. The while-only and block entry points delegate here;
+their narrower predicates remain available for existing callers. -/
 namespace Solidity.Correctness.Lowering.Sim.Coverage
 
 open Solidity.Goals.Shrink.Lowering
 
-namespace BooleanStatementsV4
+namespace BooleanStatements
 
 /-- Any singleton statement of the existing Boolean grammar at the approved
 plain caller boundary. Counter, memo and loop specifications are unrestricted. -/
@@ -18,13 +20,10 @@ def Input (b : Body) (u : Emitted) : Prop :=
     b.input.before.locals.1 = names.map (fun x => (x, .val .bool)) ∧
     b.input.raw = [stmt] ∧ BooleanDomain.Stmt names false stmt
 
-/-- The complete delivered v3 domain is included without production hypotheses. -/
-theorem of_blocks {b u} (h : BooleanBlocksV3.Input b u) : Input b u := by
-  rcases h with old | block
-  · obtain ⟨site, contract, slots, scope, names, c, ss, locals, raw, hc, hs⟩ := old
-    exact ⟨site, contract, slots, scope, names, _, locals, raw, .whileLoop hc hs⟩
-  · obtain ⟨site, contract, slots, scope, names, ss, locals, raw, hs⟩ := block
-    exact ⟨site, contract, slots, scope, names, _, locals, raw, .block hs⟩
+/-- Inclusion of the while-only caller boundary, without production hypotheses. -/
+theorem of_while {b u} (h : BooleanDomain.Input b u) : Input b u := by
+  obtain ⟨site, contract, slots, scope, names, c, ss, locals, raw, hc, hs⟩ := h
+  exact ⟨site, contract, slots, scope, names, _, locals, raw, .whileLoop hc hs⟩
 
 private theorem locals_decoded (names : List String) :
     Total.Decode.locals (names.map (fun x => (x, .val .bool))) =
@@ -94,17 +93,17 @@ theorem Input.associated {b u} (h : Input b u)
     aligned', Total.SourceProgram.ofStmt d.toR, spelled, ?_⟩
   simp only [Reads, b', h.1]
 
-end BooleanStatementsV4
+end BooleanStatements
 
 /-- Additive singleton-statement coverage under unchanged production and acceptance. -/
-def BooleanStatementsTotalV4 (D : Diagram) : Prop :=
-  ∀ (b : Body) (u : Emitted), BooleanStatementsV4.Input b u →
+def BooleanStatementsTotal (D : Diagram) : Prop :=
+  ∀ (b : Body) (u : Emitted), BooleanStatements.Input b u →
     @ProductionV2 productionNames b u → Accepted u →
     ∃ b' : Body, b'.SameInput b ∧ ∃ m, D.Assoc b' u m
 
-/-- Every accepted production in the H2290 domain has a resolved association.
+/-- Every accepted production in the singleton Boolean-statement domain has a resolved association.
 This restricted theorem does not prove unrestricted all-site Diagram.Total. -/
-theorem diagram_total_boolean_statements : BooleanStatementsTotalV4 diagram := by
+theorem diagram_total_boolean_statements : BooleanStatementsTotal diagram := by
   intro b u input production _accepted
   exact input.associated production.2.2
 
