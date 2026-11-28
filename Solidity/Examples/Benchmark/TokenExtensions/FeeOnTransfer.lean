@@ -3,30 +3,21 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
 # Fee-on-transfer token (weird-erc20 `TransferFeeToken`)
 
-Sources (d-xo/weird-erc20, commit `781c8f039c106eb2d5c6071046b0dbb2f72c9870`):
-<https://raw.githubusercontent.com/d-xo/weird-erc20/781c8f039c106eb2d5c6071046b0dbb2f72c9870/src/TransferFee.sol>
-and the same commit's `src/ERC20.sol` (the base `Math`, constructor, `transfer`).
-
-Every transfer moves `wad` out of `src`, credits `dst` with `wad - fee` and
-the sink `balanceOf[address(0)]` with `fee`. `Math.add`/`Math.sub` revert
-exactly when the word operation wraps, so they are written as checked `+`/`-`.
-Events, `name`/`symbol`/`decimals` and inheritance are omitted; `transfer`
-calls `transferFrom` (inlined) as the base does.
-
-Natural spec: for distinct `src`, `dst` and sink, the three touched balances
-keep their sum (the fee goes to the sink), each has its exact effect, other
-balances and `totalSupply` are unchanged, and a finite allowance of a third
-party is spent. Verdicts are on each theorem/definition below.
-
-Verdicts: constructor proved; transferFrom and transfer UNKNOWN at the
-three-slot sum leaf, every other clause proved as a component.
+Source: <https://raw.githubusercontent.com/d-xo/weird-erc20/781c8f039c106eb2d5c6071046b0dbb2f72c9870/src/TransferFee.sol>
+and the same commit's `src/ERC20.sol` (`Math`, constructor, `transfer`).
+`Math.add`/`sub` revert exactly on wrap, so they are checked `+`/`-`; events,
+metadata and inheritance are omitted; `transfer` inlines `transferFrom`.
+Natural spec: for distinct `src`, `dst` and the sink `balanceOf[address(0)]`,
+the three balances keep their sum (the fee goes to the sink), each moves by its
+exact amount, nothing else or `totalSupply` changes, and a third party's finite
+allowance is spent.
+Verdicts: constructor proved; transferFrom, transfer UNKNOWN at the three-slot
+sum leaf, every other clause proved as a component.
 -/
 namespace Solidity.Examples.Benchmark.TokenExtensions.FeeOnTransfer
-
 def TransferFeeToken : Contract := contract!{
   uint256 totalSupply;
   mapping(address => uint) balanceOf;
@@ -67,64 +58,34 @@ def TransferFeeToken : Contract := contract!{
 }
 local instance : InContract := ⟨TransferFeeToken⟩
 open scoped Scoped
-
 /-- PROVED: initial supply minted to the deployer, fee stored. -/
-theorem constructor_obligation : ⊢ spec!{ constructor } := by
-  sol_prove
-
-/-- UNKNOWN: the complete clauses. Every clause but the three-slot sum is
-proved by the components below; the sum leaf
-`find(storage, balanceOf[src]) + find(storage, balanceOf[dst]) + find(storage, balanceOf[0]) = …`
-after the three saves stays open (no closer sums several resolved reads). -/
+theorem constructor_obligation : ⊢ spec!{ constructor } := by sol_prove
+/-- UNKNOWN: the sum leaf `find(storage, balanceOf[src]) + … = …` after three saves
+stays open; every other clause is proved by the components below. -/
 def transferFrom_obligation := spec!{ transferFrom }
-
-/-- UNKNOWN, for the same three-slot sum leaf, through the inlined
-`transferFrom`; every other clause is `transfer_effects`. -/
+/-- UNKNOWN: the same sum leaf; every other clause is `transfer_effects`. -/
 def transfer_obligation := spec!{ transfer }
-
 /-- PROVED component: result and supply. -/
-theorem transferFrom_result : ⊢ dl!{
-    t0 == totalSupply → [ bool ok = transferFrom(src, dst, wad); ] ok == true && totalSupply == t0 } := by
-  sol_prove
-
+theorem transferFrom_result : ⊢ dl!{ t0 == totalSupply → [ bool ok = transferFrom(src, dst, wad); ] ok == true && totalSupply == t0 } := by sol_prove
 /-- PROVED component: `src` is debited `wad` (distinct `src`, `dst`, sink). -/
-theorem transferFrom_src : ⊢ dl!{
-    s0 == balanceOf[src] && src != dst && src != 0 && dst != 0 →
-    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[src] == s0 - wad } := by
-  sol_prove
-
+theorem transferFrom_src : ⊢ dl!{ s0 == balanceOf[src] && src != dst && src != 0 && dst != 0 →
+    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[src] == s0 - wad } := by sol_prove
 /-- PROVED component: `dst` is credited `wad - fee`. -/
-theorem transferFrom_dst : ⊢ dl!{
-    d0 == balanceOf[dst] && src != dst && src != 0 && dst != 0 →
-    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[dst] == d0 + (wad - fee) } := by
-  sol_prove
-
+theorem transferFrom_dst : ⊢ dl!{ d0 == balanceOf[dst] && src != dst && src != 0 && dst != 0 →
+    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[dst] == d0 + (wad - fee) } := by sol_prove
 /-- PROVED component: the sink `balanceOf[address(0)]` is credited `fee`. -/
-theorem transferFrom_sink : ⊢ dl!{
-    z0 == balanceOf[0] && src != dst && src != 0 && dst != 0 →
-    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[0] == z0 + fee } := by
-  sol_prove
-
+theorem transferFrom_sink : ⊢ dl!{ z0 == balanceOf[0] && src != dst && src != 0 && dst != 0 →
+    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[0] == z0 + fee } := by sol_prove
 /-- PROVED component: every other balance is unchanged. -/
-theorem transferFrom_frame : ⊢ dl!{
-    a0 == balanceOf[a] && a != src && a != dst && a != 0 →
-    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[a] == a0 } := by
-  sol_prove
-
+theorem transferFrom_frame : ⊢ dl!{ a0 == balanceOf[a] && a != src && a != dst && a != 0 →
+    [ bool ok = transferFrom(src, dst, wad); ] balanceOf[a] == a0 } := by sol_prove
 /-- PROVED component: a third party's finite allowance is spent. -/
-theorem transferFrom_allowance : ⊢ dl!{
-    l0 == allowance[src][msg.sender] && src != msg.sender && l0 != 115792089237316195423570985008687907853269984665640564039457584007913129639935 →
-    [ bool ok = transferFrom(src, dst, wad); ] allowance[src][msg.sender] == l0 - wad } := by
-  sol_prove
-
+theorem transferFrom_allowance : ⊢ dl!{ l0 == allowance[src][msg.sender] && src != msg.sender && l0 != 115792089237316195423570985008687907853269984665640564039457584007913129639935 →
+    [ bool ok = transferFrom(src, dst, wad); ] allowance[src][msg.sender] == l0 - wad } := by sol_prove
 /-- PROVED component: `transfer`'s clauses except the sum (no allowance branch). -/
-theorem transfer_effects : ⊢ dl!{
-    t0 == totalSupply && s0 == balanceOf[msg.sender] && d0 == balanceOf[dst] && z0 == balanceOf[0] && a0 == balanceOf[a] →
-    [ bool ok = transfer(dst, wad); ]
-      ok == true && totalSupply == t0 &&
-      (msg.sender != dst && msg.sender != 0 && dst != 0 →
+theorem transfer_effects : ⊢ dl!{ t0 == totalSupply && s0 == balanceOf[msg.sender] && d0 == balanceOf[dst] && z0 == balanceOf[0] && a0 == balanceOf[a] →
+    [ bool ok = transfer(dst, wad); ] ok == true && totalSupply == t0 && (msg.sender != dst && msg.sender != 0 && dst != 0 →
         balanceOf[msg.sender] == s0 - wad && balanceOf[dst] == d0 + (wad - fee) && balanceOf[0] == z0 + fee) &&
-      (a != msg.sender && a != dst && a != 0 → balanceOf[a] == a0) } := by
-  sol_prove
+      (a != msg.sender && a != dst && a != 0 → balanceOf[a] == a0) } := by sol_prove
 
 end Solidity.Examples.Benchmark.TokenExtensions.FeeOnTransfer
