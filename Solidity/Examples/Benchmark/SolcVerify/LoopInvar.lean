@@ -11,7 +11,8 @@ Source: <https://github.com/SRI-CSL/solidity/blob/8ea107cecd90ffff0d6a8f276b434b
 Changes: `@notice invariant` is `@custom:key invariant`. The natural
 specification of these `pure` functions is that no `assert` fails: the
 obligation `[ f(); ] true` (a panic fails a box). solc-verify proves
-`correct` and `forLoop` and flags the other three.
+`correct` and `forLoop` and flags the other three. The file's second
+contract, `ContractInvarOnLoop`, is not translated.
 -/
 
 namespace Solidity.Examples.Benchmark.SolcVerify.LoopInvar

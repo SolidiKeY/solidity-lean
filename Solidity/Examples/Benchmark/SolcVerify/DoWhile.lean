@@ -12,7 +12,7 @@ Changes: `@notice invariant` is `@custom:key invariant`. The natural
 specification is that no `assert` fails (`[ f(); ] true`). solc-verify
 proves `f1` and flags the invariants of `f2`–`f4`.
 
-All four are unknown. Each run is `ok` (`f2`–`f4` have no `assert`, so their
+All four are unknown. `f1`'s run is `ok` (`f2`–`f4` have no `assert`, so their
 boxes hold), but the invariant rule takes the annotated invariant, and it
 is not inductive in `f2` (entry: `x == 1`, `i == 0`), `f3` (`x` lags `i`) and
 `f4` (`x = 1`), solc-verify's errors. In `f1` the exit leaf

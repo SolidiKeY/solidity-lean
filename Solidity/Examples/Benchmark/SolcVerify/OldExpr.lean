@@ -9,7 +9,8 @@ import Solidity.Tools.Run
 
 Source: <https://github.com/SRI-CSL/solidity/blob/8ea107cecd90ffff0d6a8f276b434b5ac9aa043b/test/solc-verify/specs/OldExpr.sol>.
 Changes: `__verifier_old_address(e)`, `__verifier_old_int(e)`,
-`__verifier_old_uint(e)` are `\old(e)`; `@notice postcondition` is `ensures`.
+`__verifier_old_uint(e)` are `\old(e)`; `@notice postcondition` is `ensures`;
+arithmetic is checked (0.8), not solc-verify's default unbounded integers.
 -/
 
 namespace Solidity.Examples.Benchmark.SolcVerify.OldExpr

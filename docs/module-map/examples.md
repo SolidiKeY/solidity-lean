@@ -187,7 +187,7 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolcVerify/LoopInvar.lean` | solc-verify loop invariants with `assert`; two proved, two refuted by panicking runs, `forLoop` unknown. |
 | `Examples/Benchmark/SolcVerify/OldExpr.lean` | solc-verify `\old` postconditions on owner and counters; incorrect owner change refuted by a run. |
 | `Examples/Benchmark/SolcVerify/OverflowSpec.lean` | solc-verify `uint8` contract invariant `x == y + 1`; `inc` proved, `set` refuted (overflow in the clause). |
-| `Examples/Benchmark/SolcVerify/Simple.lean` | solc-verify contract invariant `x == y`; `add` and constructor proved, `add_incorrect` refuted. |
+| `Examples/Benchmark/SolcVerify/Simple.lean` | solc-verify contract invariant `x == y`; `add`, constructor and `add_incorrect_2` (call inlined, no entry invariant owed) proved, `add_incorrect` refuted. |
 | `Examples/Benchmark/SolcVerify/Storage.lean` | solc-verify records in a mapping of structs; frame (`modifies`) and postconditions all proved. |
 | `Examples/Benchmark/SolcVerify/StructMapping.lean` | SMTChecker `struct_1`: a struct stored in a mapping agrees with its memory copy; proved. |
 | `Examples/Benchmark/Tokens/ERC20.lean` | Pinned Solidity by Example ERC20. Full `transfer`, `_mint`, `_burn`, `mint`, `burn` clauses/frames proved. `approve`, `transferFrom`: unknown guarded two-key allowance frames. Supply equals finite-support balance sum: unknown sum syntax/update laws; approve normal-termination diamond proved; six other no-overflow diamonds unknown at checked-update definedness/range propagation. |
