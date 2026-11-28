@@ -24,25 +24,6 @@ so the `ensures` clauses are lost past the loop.  Missing: entry-state reads
 in loop invariants (as `Examples/Benchmark/Algorithms/Reverse.lean` notes);
 a stronger invariant would change the source.
 
-```solidity
-contract ArrayRemoveByShifting {
-    uint256[] public arr;
-
-    /// @custom:key requires _index >= 0
-    /// @custom:key ensures arr.length == \old(arr.length) - 1
-    /// @custom:key ensures \forall uint j; 0 <= j && j < _index -> arr[j] == \old(arr[j])
-    /// @custom:key ensures \forall uint j; _index <= j && j < arr.length -> arr[j] == \old(arr[j + 1])
-    function remove(uint256 _index) public {
-        require(_index < arr.length);
-
-        /// @custom:key invariant i + 1 <= arr.length
-        for (uint256 i = _index; i < arr.length - 1; i++) {
-            arr[i] = arr[i + 1];
-        }
-        arr.pop();
-    }
-}
-```
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyData.ArrayRemoveByShiftingOpen
