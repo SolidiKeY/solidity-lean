@@ -251,6 +251,23 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyMisc/FunctionModifier.lean` | solkey real-world `FunctionModifier`: constructor, `changeOwner` and recursive reentrancy-guarded `decrement` proved. |
 | `Examples/Benchmark/SolkeyMisc/TimeLock.lean` | solkey real-world `TimeLock` (0.8 overflow port): `deposit`, `increaseLockTime` proved. `withdraw` refuted by a kernel run: a self-withdrawal books no net debit. |
 | `Examples/Benchmark/SolkeyMisc/WETH9.lean` | solkey real-world `WETH9` (canonical WETH, 0.8 port): `deposit`, `approve` proved. `withdraw` unknown: the contract's own `transfer` shadows `address.transfer` in the front end. `transferFrom` unknown: closer exhausts heartbeats on consecutive mapping saves. |
+| `Examples/Benchmark/SolkeyOz/OZCounters.lean` | solkey's OpenZeppelin `Counters` port: all four clauses proved (unchecked increment/decrement by the leaf closer). |
+| `Examples/Benchmark/SolkeyOz/OZMath.lean` | solkey's OpenZeppelin `Math` port: `tryAdd`, `max`, `min` proved; `trySub`, `tryMul`, `tryDiv`, `tryMod`, `average`, `ceilDiv` unknown, each with its stuck leaf and missing closer law. |
+| `Examples/Benchmark/SolkeyOz/OZNonces.lean` | solkey's OpenZeppelin `Nonces` port: `nonces`, `useNonce` proved; `useCheckedNonce` unknown (wrapping add with a Boolean `!=` binding). |
+| `Examples/Benchmark/SolkeyOz/OZOwnable2Step.lean` | solkey's OpenZeppelin `Ownable2Step` port: all six clauses proved. |
+| `Examples/Benchmark/SolkeyOz/OZPausable.lean` | solkey's OpenZeppelin `Pausable` mock port: all six clauses proved. |
+| `Examples/Benchmark/SolkeyOz/OZReentrancyGuard.lean` | solkey's OpenZeppelin `ReentrancyGuard` mock port: all five clauses with both contract invariants proved, the recursive re-entry reverting. |
+| `Examples/Benchmark/SolkeyOz/SolmateOwned.lean` | solkey's Solmate `Owned` port: both clauses proved. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/Swc/IntegerOverflowMinimal.lean` | SWC-101 `integer_overflow_minimal.sol` (registry 1b62270), 0.4 wrapping `-=` as `unchecked`: `run` (`count == \old(count) - input`) refuted by a kernel-checked run from `count = 1` wrapping to 2^256-1. |
+| `Examples/Benchmark/Swc/IntegerOverflowMinimalFixed.lean` | SWC-101 `integer_overflow_minimal_fixed.sol`, SafeMath `sub`: `run` proved under the same clause. |
+| `Examples/Benchmark/Swc/WalletRefundNoSub.lean` | SWC-105 `wallet_02_refund_nosub.sol`: `refund` (`balances[msg.sender] == 0`) refuted by a run that pays and keeps the credit. Constructor, `withdraw`, `migrateTo` proved. `deposit` unknown (payable-snapshot leaf, as in WalletOk). |
+| `Examples/Benchmark/Swc/WalletOk.lean` | SWC-105 `wallet_01_ok.sol`: constructor, `withdraw`, `refund`, `migrateTo` proved. `deposit` unknown: `old` is not resolved through the parallel payable update after the mapping save (closer gap, as in Defi/Escrow). |
+| `Examples/Benchmark/Swc/MultiOwnedVulnerable.lean` | SWC-105 `multiowned_vulnerable.sol`, `onlyOwner` missing on `newOwner`: `newOwner` (only an owner adds owners) refuted by a run where a non-owner makes itself owner. Constructor and `deleteOwner` proved. |
+| `Examples/Benchmark/Swc/MultiOwnedFixed.lean` | SWC-105 `multiowned_not_vulnerable.sol`: constructor, `newOwner`, `deleteOwner` proved under the same clauses. |
+| `Examples/Benchmark/Swc/HashForEther.lean` | SWC-100 `visibility_not_set.sol`, default visibility written `public`: `_sendWinnings` (pays only a winner, `uint32(msg.sender) == 0`) refuted by a run paying account 1. `withdrawWinnings` proved. |
+| `Examples/Benchmark/Swc/HashForEtherFixed.lean` | SWC-100 `visibility_not_set_fixed.sol`, `_sendWinnings` internal: `withdrawWinnings`, the only public function, proved. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/TokenExtensions/FeeOnTransfer.lean` | Pinned weird-erc20 `TransferFeeToken` (fee credited to the `balanceOf[address(0)]` sink). Constructor proved. `transferFrom`, `transfer`: unknown at the three-slot balance-sum leaf; exact src/dst/sink effects, supply, frame and allowance spend proved as components. |
