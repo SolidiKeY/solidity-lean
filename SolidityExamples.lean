@@ -32,6 +32,14 @@ import Solidity.Examples.Benchmark.Governance.Pausable
 import Solidity.Examples.Benchmark.Governance.Timelock
 import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Mapping
+import Solidity.Examples.Benchmark.MemoryAlgorithms.ArrayEquals
+import Solidity.Examples.Benchmark.MemoryAlgorithms.BubbleSort
+import Solidity.Examples.Benchmark.MemoryAlgorithms.CountOccurrences
+import Solidity.Examples.Benchmark.MemoryAlgorithms.Dedupe
+import Solidity.Examples.Benchmark.MemoryAlgorithms.IsSorted
+import Solidity.Examples.Benchmark.MemoryAlgorithms.PairSum
+import Solidity.Examples.Benchmark.MemoryAlgorithms.PrefixSums
+import Solidity.Examples.Benchmark.MemoryAlgorithms.Rotate
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.Syntax
