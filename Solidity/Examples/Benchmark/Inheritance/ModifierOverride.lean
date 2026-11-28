@@ -3,7 +3,6 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
 # Benchmark: overridden modifiers and a virtual hook, in the constructor
 
@@ -17,7 +16,6 @@ member named after its contract (`A_mod1`, `A_f3`), which nothing applies or
 calls any more: `A`'s constructor applies `mod1`, which is `C`'s, so it calls
 `f4`, not `f2`; `mod2` calls the virtual `f3`, which is `C`'s, and then
 skips `f1`'s body (`if (false) _;`).  Nothing else is changed.
-
 ```solidity
 contract A {
     uint256 data;
@@ -49,7 +47,6 @@ proved.
 -/
 
 namespace Solidity.Examples.Benchmark.Inheritance.ModifierOverride
-
 /-- `C`, linearized `C, A`, with the clauses. -/
 def C : Contract := contract!{
   uint256 data;
@@ -71,7 +68,6 @@ def C : Contract := contract!{
 local instance : InContract := ⟨C⟩
 
 open scoped Scoped
-
 /-- `f2()` sets bit `0x20`. -/
 theorem f2_spec : ⊢ dl!{ [ uint e = data | 32; f2(); ] data == e } := by
   sol_prove

@@ -3,7 +3,6 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
 # Benchmark: virtual dispatch beside an explicit base call
 
@@ -12,10 +11,10 @@ Source: solc's semantic test `inheritance/explicit_base_class.sol`,
 (expected `g() -> 3`, `f() -> 1`).
 
 `Derived` is written linearized (`Derived, Base, BaseBase`), each version
-of `g` its own internal function named after its contract.  `BaseBase.g()`
+of `g` its own function named after its contract, with the source's
+attributes (which `contract!{ … }` drops).  `BaseBase.g()`
 names `BaseBase`'s version statically, past both overrides, and `g` itself is
 `Derived`'s.  Nothing else is changed.
-
 ```solidity
 contract BaseBase { function g() public virtual returns (uint256 r) { return 1; } }
 contract Base is BaseBase {
@@ -30,7 +29,6 @@ Verdicts: `BaseBase_g`, `Base_g`, `f`, `g`: proved.
 -/
 
 namespace Solidity.Examples.Benchmark.Inheritance.ExplicitBase
-
 /-- `Derived`, linearized `Derived, Base, BaseBase`, with the clauses. -/
 def Derived : Contract := contract!{
   ensures \result == 1;
@@ -46,7 +44,6 @@ def Derived : Contract := contract!{
 local instance : InContract := ⟨Derived⟩
 
 open scoped Scoped
-
 /-- `BaseBase.g()` returns `1`. -/
 theorem spec_BaseBase_g : ⊢ spec!{ BaseBase_g } := by
   sol_prove

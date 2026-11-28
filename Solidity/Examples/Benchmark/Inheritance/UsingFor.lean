@@ -3,7 +3,6 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
 # Benchmark: a library function bound with `using … for`
 
@@ -13,11 +12,10 @@ Source: solc's semantic test `libraries/using_for_function_on_int.sol`,
 
 `using D for uint;` makes `a.double()` the call `D.double(a)`, the receiver
 the first argument.  `contract!{ … }` has no libraries, so `D.double` is
-written as an internal function `D_double` of `C` and the bound call as
+written as a function `D_double` of `C` and the bound call as
 `D_double(a)`.  `double` is `public`, which solc compiles to a
 `DELEGATECALL` into the deployed library; the model inlines it, so the
 library's address and linking are not modeled.  Nothing else is changed.
-
 ```solidity
 library D { function double(uint self) public returns (uint) { return 2 * self; } }
 contract C {
@@ -30,7 +28,6 @@ Verdicts: `D_double`, `f`: proved.
 -/
 
 namespace Solidity.Examples.Benchmark.Inheritance.UsingFor
-
 /-- `C` with `D.double` beside it, with the clauses. -/
 def C : Contract := contract!{
   ensures \result == 2 * self;
@@ -42,7 +39,6 @@ def C : Contract := contract!{
 local instance : InContract := ⟨C⟩
 
 open scoped Scoped
-
 /-- `D.double(self)` is `2 * self` (a product that overflows reverts). -/
 theorem spec_D_double : ⊢ spec!{ D_double } := by
   sol_prove

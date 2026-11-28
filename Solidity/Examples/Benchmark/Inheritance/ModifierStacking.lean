@@ -3,7 +3,6 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
 # Benchmark: one modifier stacked three times
 
@@ -14,8 +13,8 @@ Source: solc's semantic test `modifiers/function_modifier_multiple_times.sol`,
 Unchanged but for the spelling of `contract!{ … }`.  The three applications
 of `mod` are inlined around `f`'s body outermost first, `mod(2)`, `mod(5)`,
 then `mod(x)`, each with its own copy of the parameter `x`, so the body
-reads `a` after all three additions.
-
+reads `a` after all three additions.  The additions commute, so the clause
+does not tell the three orders apart: this module shows stacking, not order.
 ```solidity
 contract C {
     uint256 public a;
@@ -28,7 +27,6 @@ Verdicts: `f`: proved.
 -/
 
 namespace Solidity.Examples.Benchmark.Inheritance.ModifierStacking
-
 /-- `C`, with the clause. -/
 def C : Contract := contract!{
   uint256 public a;
@@ -40,7 +38,6 @@ def C : Contract := contract!{
 local instance : InContract := ⟨C⟩
 
 open scoped Scoped
-
 /-- `f(x)`: the three modifiers add `2 + 5 + x` before the body returns `a`. -/
 theorem spec_f : ⊢ spec!{ f } := by
   sol_prove

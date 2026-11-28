@@ -3,7 +3,6 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
 # Benchmark: a `super` chain over a diamond, in a constructor
 
@@ -13,12 +12,12 @@ Source: solc's semantic test `inheritance/super_in_constructor.sol`,
 
 `contract!{ … }` writes one contract, so `D` is written linearized, as solc
 compiles it: D's C3 order is `D, C, B, A`, and every base version of `f` is
-its own internal function, named after its contract (`A_f`, `B_f`, `C_f`).
+its own function, named after its contract (`A_f`, `B_f`, `C_f`), with the
+source's attributes (which `contract!{ … }` drops).
 `super.f()` in a version calls the next version in *D's* order, not its own
 parent's: `D`'s constructor calls `C_f`, `C`'s `super.f()` is `B_f` (although
 `C is A`), and `B`'s is `A_f`.  D's own `f` overrides all three.  Nothing else
 is changed.
-
 ```solidity
 contract A { function f() public virtual returns (uint256 r) { return 1; } }
 contract B is A {
@@ -36,7 +35,6 @@ Verdicts: `A_f`, `B_f`, `C_f`, the constructor and `f`: proved.
 -/
 
 namespace Solidity.Examples.Benchmark.Inheritance.SuperInConstructor
-
 /-- `D`, linearized `D, C, B, A`, with the clauses. -/
 def D : Contract := contract!{
   uint256 data;
@@ -55,7 +53,6 @@ def D : Contract := contract!{
 local instance : InContract := ⟨D⟩
 
 open scoped Scoped
-
 /-- `A.f()` returns `1`. -/
 theorem spec_A_f : ⊢ spec!{ A_f } := by
   sol_prove

@@ -33,6 +33,7 @@ import Solidity.Examples.Benchmark.Governance.Timelock
 import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Inheritance.AbstractHook
 import Solidity.Examples.Benchmark.Inheritance.ConstructorArgs
+import Solidity.Examples.Benchmark.Inheritance.ConstructorOrder
 import Solidity.Examples.Benchmark.Inheritance.ExplicitBase
 import Solidity.Examples.Benchmark.Inheritance.ModifierOverride
 import Solidity.Examples.Benchmark.Inheritance.ModifierStacking

@@ -3,9 +3,8 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
-# Benchmark: a base constructor's argument, through a chain of bases
+# Benchmark: a base constructor's header argument, then the derived body
 
 Source: solc's semantic test `constructor/base_constructor_arguments.sol`,
 <https://raw.githubusercontent.com/ethereum/solidity/v0.8.26/test/libsolidity/semanticTests/constructor/base_constructor_arguments.sol>
@@ -16,9 +15,9 @@ constructor runs the base constructors' bodies most base first:
 `BaseBase`'s with the argument `7` that `Base`'s header passes
 (`is BaseBase(7)`), then `Base`'s.  Each base constructor is an internal
 function named after its contract (`BaseBase_constructor`,
-`Base_constructor`), and `Derived`'s constructor calls them in that order.
+`Base_constructor`), and `Derived`'s constructor calls them in that order
+(in the source no other code can run a constructor body).
 Nothing else is changed.
-
 ```solidity
 contract BaseBase { uint256 m_a; constructor(uint256 a) { m_a = a; } }
 contract Base is BaseBase(7) { constructor() { m_a *= m_a; } }
@@ -30,7 +29,6 @@ Verdicts: `BaseBase_constructor`, `Base_constructor`, the constructor,
 -/
 
 namespace Solidity.Examples.Benchmark.Inheritance.ConstructorArgs
-
 /-- `Derived`, linearized `Derived, Base, BaseBase`, with the clauses. -/
 def Derived : Contract := contract!{
   uint256 m_a;
@@ -47,7 +45,6 @@ def Derived : Contract := contract!{
 local instance : InContract := ⟨Derived⟩
 
 open scoped Scoped
-
 /-- `BaseBase`'s constructor stores its argument. -/
 theorem spec_BaseBase_constructor : ⊢ spec!{ BaseBase_constructor } := by
   sol_prove
