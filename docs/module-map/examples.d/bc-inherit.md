@@ -6,3 +6,4 @@
 | `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
+| `Examples/Benchmark/Inheritance/ModifierOrder.lean` | solc `modifiers/evaluation_order`: base constructor arguments in linearization order, then modifier arguments in written order, then the body (`[4, 2, 6, 1, 3, 5, 7]`); `f` and constructor proved by `sol_prove`, `query` (memory copy) without a clause. |
