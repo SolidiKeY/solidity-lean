@@ -4,7 +4,6 @@ import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 
-
 /-!
 # Benchmark: two-index queue
 
@@ -69,7 +68,6 @@ def Queue : Contract := contract!{
 }
 local instance : InContract := ⟨Queue⟩
 open scoped Scoped
-
 /-- Unknown: int128 wrap of the `unchecked` increment (module docstring). -/
 def pushBackTarget := spec!{ pushBack }
 /-- Unknown: int128 wrap of the `unchecked` increment (module docstring). -/
@@ -85,5 +83,4 @@ theorem popFront_slot : ⊢ dl!{
 /-- `front()`: returns the front slot. -/
 theorem spec_front : ⊢ spec!{ front } := by
   sol_prove
-
 end Solidity.Examples.Benchmark.DataStructures.Queue

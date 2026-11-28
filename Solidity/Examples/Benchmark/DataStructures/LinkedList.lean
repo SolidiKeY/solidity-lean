@@ -4,7 +4,6 @@ import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 
-
 /-!
 # Benchmark: mapping-linked list
 
@@ -83,7 +82,6 @@ def LinkedList : Contract := contract!{
 }
 local instance : InContract := ⟨LinkedList⟩
 open scoped Scoped
-
 /-- Unknown: outer-key aliasing (module docstring). -/
 def insertAfterTarget := spec!{ insertAfter }
 /-- Component of `remove`: a nonzero node ends with both links cleared. -/
@@ -91,5 +89,4 @@ theorem remove_clears : ⊢ dl!{ n != 0 → [ uint r = remove(n); ] (list[n][fal
   sol_prove
 /-- Unknown: outer-key aliasing (module docstring). -/
 def removeTarget := spec!{ remove }
-
 end Solidity.Examples.Benchmark.DataStructures.LinkedList

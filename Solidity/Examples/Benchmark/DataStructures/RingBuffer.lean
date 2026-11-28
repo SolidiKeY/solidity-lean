@@ -4,7 +4,6 @@ import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 
-
 /-!
 # Benchmark: fixed-size ring buffer
 
@@ -61,7 +60,6 @@ def RingBuffer : Contract := contract!{
 }
 local instance : InContract := ⟨RingBuffer⟩
 open scoped Scoped
-
 /-- `push`: counter and slot. -/
 theorem spec_push : ⊢ spec!{ push } := by
   sol_prove
@@ -71,5 +69,4 @@ theorem spec_count : ⊢ spec!{ count } := by
 /-- `last(i)`: the `i`-th most recent slot. -/
 theorem spec_last : ⊢ spec!{ last } := by
   sol_prove
-
 end Solidity.Examples.Benchmark.DataStructures.RingBuffer

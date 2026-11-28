@@ -4,7 +4,6 @@ import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 
-
 /-!
 # Benchmark: bitmap set
 
@@ -51,7 +50,6 @@ def BitMap : Contract := contract!{
 }
 local instance : InContract := ⟨BitMap⟩
 open scoped Scoped
-
 /-- Unknown: bitwise laws (module docstring). -/
 def setGetTarget := dl!{ [ set(i); bool r = get(i); ] r == true }
 /-- Unknown: bitwise laws (module docstring). -/
@@ -66,5 +64,4 @@ theorem unset_frame : ⊢ dl!{ v == _data[b] → [ uint k = i >> 8; unset(i); ] 
 def setTarget := spec!{ set }
 /-- Unknown: `>> 8` against `/ 256` (module docstring). -/
 def unsetTarget := spec!{ unset }
-
 end Solidity.Examples.Benchmark.DataStructures.BitMap

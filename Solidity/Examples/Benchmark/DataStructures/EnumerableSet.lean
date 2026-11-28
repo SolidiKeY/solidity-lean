@@ -4,7 +4,6 @@ import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 
-
 /-!
 # Benchmark: enumerable set (swap-and-pop)
 
@@ -85,7 +84,6 @@ def EnumerableSet : Contract := contract!{
 }
 local instance : InContract := ⟨EnumerableSet⟩
 open scoped Scoped
-
 /-- Unknown: invariant instantiation, array frame (module docstring). -/
 def addTarget := spec!{ add }
 /-- Unknown: invariant instantiation, array frame (module docstring). -/
@@ -97,5 +95,4 @@ theorem remove_not_contains : ⊢ dl!{ [ bool r = remove(v); bool c = contains(v
 /-- `contains`: reads membership. -/
 theorem spec_contains : ⊢ spec!{ contains } := by
   sol_prove
-
 end Solidity.Examples.Benchmark.DataStructures.EnumerableSet

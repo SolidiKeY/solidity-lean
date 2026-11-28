@@ -3,7 +3,6 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
-
 /-!
 # Benchmark: storage stack
 
@@ -46,7 +45,6 @@ def Stack : Contract := contract!{
 }
 local instance : InContract := ⟨Stack⟩
 open scoped Scoped
-
 /-- Unknown: array element frame (module docstring). -/
 def pushTarget := spec!{ push }
 /-- Unknown: array element frame (module docstring). -/
@@ -65,5 +63,4 @@ theorem push_top : ⊢ dl!{ n == arr.length → [ push(i); ] arr[n] == i } := by
 /-- Component of `pop`: the length shrinks by one. -/
 theorem pop_length : ⊢ dl!{ n == arr.length → [ pop(); ] arr.length == n - 1 } := by
   sol_prove
-
 end Solidity.Examples.Benchmark.DataStructures.Stack
