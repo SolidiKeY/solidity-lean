@@ -2,9 +2,6 @@ import Solidity.Source.Preservation.MemoryBodies
 import Solidity.Source.Preservation.ArrayLiteralControls
 import Solidity.Source.Preservation.EncodingVariantControls
 
-/-! Actual typed allocation nodes composed in admitted memory-body statements.
-The initialized memory prefix survives struct, inline-array and ABI allocations.
-Both pipelines and the encoding-head refusal boundary are retained. -/
 namespace Solidity.Source.Preservation.AllocationBodyControls
 open EM AllocationControls
 
@@ -42,6 +39,8 @@ theorem calls (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     CallsOK (fun _ => False) (glob p fixed) frame.contract := by
   intro d ps rs signature impossible
   cases impossible
+
+example : after.heap.get 0 = EncodingVariantControls.initial.heap.get 0 := by rfl
 
 theorem sequence_run (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     (execS (glob p fixed) frame 16 0 none sequence (.cons (.bool false) .nil)).run

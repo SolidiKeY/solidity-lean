@@ -1,0 +1,14 @@
+| Module | Its examples |
+|---|---|
+| `Examples/SolkeyOpen/SolcArithmetic.lean` | solkey `semantics/open/SolcArithmetic.sol`: five wrapping obligations proved (`sol_prove`); `checkedCalledByUncheckedWraps` unknown (`+%`, `% 2^16` under parameter equations); `uncheckedIncrementWraps` refuted in the model (checked `2**256`). |
+| `Examples/SolkeyOpen/SolcTypes.lean` | solkey `semantics/open/SolcTypes.sol`: twelve cast and enum obligations proved; `nestedTuplesParenthesized` unknown (refused by the front end); `ternaryLiteralOverflow` refuted (`uint8` overflow). |
+| `Examples/SolkeyOpen/SolcSmtControlFlow.lean` | solkey `semantics/open/SolcSmtControlFlow.sol`: both `msg.value` obligations proved. |
+| `Examples/SolkeyOpen/SolcConstructors.lean` | solkey `semantics/open/SolcConstructors.sol`: deployment, `msgValueZero`, `mappingLocalCompoundAssignment` proved; `immutableUninitialized` refuted; `multipleInitializationsAssignExpr` unknown (does not parse). |
+| `Examples/SolkeyOpen/SolcControlFlow.lean` | solkey `semantics/open/SolcControlFlow.sol`: `conditionalExpressionTuples` unknown (conditional of tuples refused by the front end). |
+| `Examples/SolkeyOpen/SolcFunctionCalls.lean` | solkey `semantics/open/SolcFunctionCalls.sol`: `functionsRecursiveUnbounded` unknown (diamond of an unbounded recursion). |
+| `Examples/SolkeyOpen/ArrayRemoveByShifting.lean` | solkey `contracts/real-world/open/ArrayRemoveByShifting.sol`: `remove` unknown (invariant leaves; the use case owes `ensures` the invariant does not carry). |
+| `Examples/SolkeyOpen/SolcPayments.lean` | solkey `semantics/open/SolcPayments.sol` (no `receive`): the five `msg.sender`/`msg.value` obligations, `tryArgumentSideEffect` and `callKeepsStorageUnsound` (no callbacks) proved; `transferUnfundedReverts` refuted; five `try` obligations and `callRunsReceive` unknown (leaves stated); `callWithoutCodeReverts` unknown (refused by the front end). |
+| `Examples/SolkeyOpen/SolcHigherLevel.lean` | solkey `semantics/open/SolcHigherLevel.sol`, the most derived contract only: `creationF3`, `creationF4` unknown (`\|` at a leaf); four base-qualified calls unknown (refused by the front end); the constructor has no reading (no inheritance). |
+| `Examples/SolkeyOpen/SolcStructsMappings.lean` | solkey `semantics/open/SolcStructsMappings.sol`: both obligations unknown (a `calldata` struct written to storage is refused by the front end). |
+| `Examples/SolkeyOpen/SolcArrayMembers.lean` | solkey `semantics/open/SolcArrayMembers.sol`: `copyIncludingArray` unknown (`\|` at the leaf). |
+| `Examples/SolkeyOpen/SolcLoops.lean` | solkey `semantics/open/SolcLoops.sol`: the three never-ending loops' boxes proved; `multiArrayFillByPushLoops`, `pushNoArgs2dLoop` unknown (walk over budget); the two `binomial` obligations are `Examples/Tactics/OpenLoops`'s. |
