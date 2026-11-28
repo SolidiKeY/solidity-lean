@@ -1,7 +1,7 @@
 {
   "_doc": "Lean size budget (scripts/lean-budget/check.py). cap: per-merge net Lean lines outside exempt globs (measured p75 rounded up to 500). frozen: shrink-only globs (minus except). steps: a plan step id or an area key named by budget_root -> globs a `Lean-Budget: <key>` commit trailer lets grow.",
   "cap": 500,
-  "strict_aggregate_steps": ["o1-optimizer-domain"],
+  "strict_aggregate_steps": ["o1-optimizer-domain", "yul-stateful-run"],
   "frozen": [
     {"name": "Backend", "globs": ["Solidity/Backend/**"], "except": ["Solidity/Backend/Passes/**", "Solidity/Backend/Compiler*.lean"]},
     {"name": "Yul", "globs": ["Solidity/Yul/**"], "except": ["Solidity/Yul/Compilation/**"]},
@@ -26,6 +26,7 @@
     "finish-line": ["Solidity/Finish/**"],
     "finish-yul-layout": ["Solidity/Yul/Layout/**"],
     "calls-program-bridge": ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"],
+    "yul-stateful-run": ["Solidity/Yul/StatefulRun.lean", "Solidity/Yul/StatefulImport.lean"],
     "o1-optimizer-domain": ["Solidity/Backend/CompilerOptimizerDomain.lean", "Solidity/Backend/CompilerOptimizerDomain/**"]
   }
 }

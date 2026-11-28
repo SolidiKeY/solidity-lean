@@ -194,6 +194,24 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Governance/Timelock.lean` | Bound Ether-operation timelock: delay, cancellation and permanent completion; all four function specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Governance/EnglishAuction.lean` | Solidity SimpleAuction: constructor proved; bid, refund and final payout obligations retained as unknown, with snapshot/payment closer gaps documented in the module. |
 | `Examples/Benchmark/Governance/Multisig.lean` | Two-owner Ether multisig: constructor, revocation and threshold execution proved; fresh submission and no-double-confirmation specifications retained as unknown with snapshot/Boolean closer gaps. |
+| `Examples/Benchmark/Inheritance/SuperInConstructor.lean` | solc `super_in_constructor`: diamond `D, C, B, A` linearized, `super.f()` chain called from the constructor (`data == 15`); all five specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ModifierStacking.lean` | solc `function_modifier_multiple_times`: one modifier applied three times, outermost first (stacking; the additions commute, so not order); the specification proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ModifierOverride.lean` | solc `function_modifier_calling_functions_in_creation_context`: overridden modifier and virtual hook in the constructor (`0x4300`); all seven function specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/AbstractHook.lean` | solc `call_unimplemented_base`: an abstract contract calls a hook its heir implements; both specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ExplicitBase.lean` | solc `explicit_base_class`: virtual dispatch beside a static `BaseBase.g()` call; all four specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/MemoryAlgorithms/ArrayEquals.lean` | Equality of two memory arrays; result iff equal lengths and elements (unknown: quantified step leaf). |
+| `Examples/Benchmark/MemoryAlgorithms/BubbleSort.lean` | In-place bubble sort of at most eight elements; sortedness clauses, full permutation target (unknown: memory-write loop frame). |
+| `Examples/Benchmark/MemoryAlgorithms/CountOccurrences.lean` | Occurrences of a key; exact counting target retained pending a counting aggregate (unknown). |
+| `Examples/Benchmark/MemoryAlgorithms/Dedupe.lean` | Distinct values of a sorted array into a caller's array; increasing and covering clauses (unknown: memory-write loop frame). |
+| `Examples/Benchmark/MemoryAlgorithms/IsSorted.lean` | Adjacent-pair sortedness scan; result iff every adjacent pair is ordered (unknown: quantified step leaf). |
+| `Examples/Benchmark/MemoryAlgorithms/PairSum.lean` | Two-pointer pair sum on a sorted array; result iff two positions sum to the target (unknown: existential leaf). |
+| `Examples/Benchmark/MemoryAlgorithms/PrefixSums.lean` | Prefix sums into a caller's array; zero entry and recurrence clauses (unknown: memory-write loop frame). |
+| `Examples/Benchmark/MemoryAlgorithms/Rotate.lean` | Rotation by k into a caller's array; placement clause, false when `r` aliases `xs` (counterexample in the docstring). |
 | `Examples/Benchmark/Patterns/CommitReveal.lean` | Solidity by Example SecuredFindThisHash commit-reveal: constructor and commitSolution proved, getMySolution's guard proved, its returns unspecified (an unnamed tuple cannot be named by a clause); revealSolution retained as unknown (heartbeat exhaustion on string hashes and payment branches). |
 | `Examples/Benchmark/Patterns/StateMachine.lean` | Solidity docs StateMachine with timed transitions: forward-only stage clauses for g, h, i proved; bid and reveal retained as unknown (read-after-save stage arithmetic missing in the leaf closer). |
 | `Examples/Benchmark/Patterns/Withdrawal.lean` | Solidity docs WithdrawalContract pull payments: constructor and withdraw proved; becomeRichest retained as unknown (quantified mapping-save leaf against the snapshot). |
@@ -207,6 +225,14 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
 | `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |
 | `Examples/Benchmark/SolkeyGames/SendEther.lean` | solkey's three ways to send ether: `sendViaTransfer`, `sendViaSend` and `sendViaCall` each refuted by `sol_refute`: with `_to == msg.sender == this` the booked `msg.value` is never paid out, so the self-payment clauses fail. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/TokenExtensions/FeeOnTransfer.lean` | Pinned weird-erc20 `TransferFeeToken` (fee credited to the `balanceOf[address(0)]` sink). Constructor proved. `transferFrom`, `transfer`: unknown at the three-slot balance-sum leaf; exact src/dst/sink effects, supply, frame and allowance spend proved as components. |
+| `Examples/Benchmark/TokenExtensions/AllowanceDelta.lean` | Pinned OpenZeppelin 4.9.6 `increaseAllowance`/`decreaseAllowance` with `allowance`/`_approve`. Getter and `_approve` proved. `increaseAllowance`: unknown as one obligation (disjunctive two-key frame), every clause proved as a component. `decreaseAllowance`: unknown at guarded unchecked subtraction; frames proved. |
+| `Examples/Benchmark/TokenExtensions/RoleMint.lean` | Pinned OpenZeppelin 4.9.6 `ERC20PresetMinterPauser.mint` with AccessControl roles. `hasRole`, `_grantRole`, `grantRole` proved. `_mint`, `mint`: unknown at the unchecked balance credit; role guard, supply and frame proved. |
+| `Examples/Benchmark/TokenExtensions/CappedSupply.lean` | Pinned OpenZeppelin 5.0.2 `ERC20Capped` (post-`_update` cap check). Constructor and `cap` proved. `_update`, `_mint`: unknown (cap bound beside unchecked saves, wrapped credit); mint supply and frame proved. |
+| `Examples/Benchmark/TokenExtensions/Burnable.lean` | Pinned OpenZeppelin 5.0.2 `ERC20Burnable` over the `_update` hub. `_approve` proved. `_spendAllowance`, `_burn`, `burn`, `burnFrom`: unknown at guarded unchecked subtractions; burn frame and infinite allowance proved. |
+| `Examples/Benchmark/TokenExtensions/VestingWallet.lean` | Pinned OpenZeppelin 5.0.2 `VestingWallet` ether release. Constructor and `end` proved. `_vestingSchedule`: unknown (ternary, nonlinear bound), before-start clause proved. `release`: unknown at the payment update. |
 | `Examples/Benchmark/Tokens/ERC20.lean` | Pinned Solidity by Example ERC20. Full `transfer`, `_mint`, `_burn`, `mint`, `burn` clauses/frames proved. `approve`, `transferFrom`: unknown guarded two-key allowance frames. Supply equals finite-support balance sum: unknown sum syntax/update laws; approve normal-termination diamond proved; six other no-overflow diamonds unknown at checked-update definedness/range propagation. |
 | `Examples/Benchmark/Tokens/ERC721.lean` | Pinned Solidity by Example non-safe ERC721 core. `ownerOf`, `balanceOf`, `approve`, `getApproved`, `transferFrom`, `_mint`, `_burn` proved, including unique owner slot, transfer approval clearing and frames. `setApprovalForAll`: unknown two-key frame; `_isApprovedOrOwner`: unknown short-circuit Boolean equivalence. Aggregate owner-count invariant and safe receiver callbacks unproved. |
 | `Examples/Benchmark/Tokens/ERC1155.lean` | Pinned OpenZeppelin 5.0.2 callback-free `_update` core. `balanceOf`, `isApprovedForAll` proved. `_setApprovalForAll`, `setApprovalForAll`: unknown two-key frames. `_update`: unknown memory length lower bound, quantified snapshot frame and filtered prefix-sum invariant/update laws (duplicates, self-transfer and zero-address cases retained). |
@@ -232,9 +258,19 @@ At the root, the notation's own tests:
 |---|---|
 | `Examples/Tactics/OpenLoops/RowsNine.lean` | Existing `binomialRowsNine` obligation, checked with chunk 128 and preserved in the non-default H109 slow library and CI/full/lane-end/axiom-audit closure. Scoped CI acceptance uses 600 s; the 300 s default/VM STOP remains. |
 | `Examples/Tactics/OpenLoops/RowsNine/{Checkpoint,Stage1,Stage2,Stage3,Finish}.lean` | Kernel-checked continuation checkpoints for the unchanged nine-row binomial walk; 128-step chunks, the original aggregate iteration allowance, and one slow-library time cap per module. |
+# Storage layout red team
+
+| Module | Its examples |
+|---|---|
+| `Examples/RedTeam/StorageLayout/BoolPacking.lean` | Concrete full-word/solc mismatches for adjacent booleans, fixed and dynamic boolean arrays, packed structs and the following field. External metadata reproduced by `check-solc.cjs` and `Layout.sol` beside the module. |
+| `Examples/RedTeam/StorageLayout/ReferenceChecks.lean` | Executable independent Keccak vectors for dynamic arrays, mappings inside mapped structs, packed boolean array base and ERC-7201 namespace; reference runner `check-reference.py`. |
 | `Examples/RedTeam/Statements/InFragmentNames.lean` | Witness: `Shrink.Lowering.InFragment` (premise of `loweringBySimulation`/`V2`) is name matching alone; a compilation with no entries is `Accepted`. |
 | `Examples/RedTeam/Statements/BackendTotalZeroBound.lean` | Witness: `compilerTotal`'s conclusion holds at array bound `L = 0` for a dynamic-array contract while every input is refused. |
 | `Examples/RedTeam/Statements/GoalPinsUnsat.lean` | Witness: `goalPinsCorrect` is false as stated (`Laws.check_exact` parses as `(Observed → check = out) ↔ CheckGraph`); also the pin graph of a folded definition ignores its body. |
+| Module | Its examples |
+|---|---|
+| `Examples/RedTeam/Syntax/LiteralFolding.lean` | Red-team witness: literal expressions with `%`, `**` or `<<` run as `uint256` arithmetic (`7 % 2 / 2 * 2` returns `0`, `2 ** 256 - 1` reverts) where solc folds them exactly (`1`, `2^256 - 1`). |
+| `Examples/RedTeam/Syntax/NegNegPrinter.lean` | Red-team witness: the program and clause printers write `-(-y)` as `--y`, a Solidity pre-decrement; runs of both programs from `y := 3` disagree. |
 | `Examples/RedTeam/Trust/ExternBoundary.lean` | Controlled kernel/native disagreement exposing the source trust lint's missing external-implementation inventory; no false theorem. Companion Node test pins the weak lint and stronger census boundaries. |
 | `Examples/RedTeam/Trust/HeadlineAxioms.lean` | Exact registered headline/endpoint type checks and transitive axiom queries; intrinsic model and instruction-list boundary only. |
 | `Examples/Panic/Origins.lean` | Typed panic-origin regressions V1 erases the cause of a panic. |
