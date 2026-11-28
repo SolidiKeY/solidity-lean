@@ -152,7 +152,7 @@ theorem fixed_update_combination :
       simp only [SVal.find_atF, fixedSlots, SVec.toList_cons, SVec.toList_nil]
       rfl)
 
-/-- The committed source fixed-array default has represented zero words. -/
+/-- The source fixed-array default has represented zero words. -/
 theorem fixed_default_represented :
     ValueRep (SVal.dflt (.ref (.fixed Ty.uint 2))) (.sarr .word 2) (.root 0) (fun _ => zero) := by
   change ValueRep (.fixed (SVec.replicate (.prim zero) 2)) (.sarr .word 2) (.root 0) (fun _ => zero)
