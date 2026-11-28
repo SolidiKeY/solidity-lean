@@ -1,9 +1,6 @@
 import Solidity.Source.Preservation.AllocationSites
 import Solidity.Source.Semantics
 
-/-! Exact actual allocation-before-success and allocation-before-revert controls.
-The complete caller locals are restored and the grown heap persists on both.
--/
 namespace Solidity.Source.Preservation.FrameControls
 open EM
 variable {E : Env} {Γ : RCtx}
