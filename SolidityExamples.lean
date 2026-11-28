@@ -430,6 +430,13 @@ import Solidity.Examples.Roadmap.V16.MemoryLoopConsumer
 import Solidity.Examples.Roadmap.V16.SessionControls
 import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
+import Solidity.Examples.SolkeyOpen.ArrayRemoveByShifting
+import Solidity.Examples.SolkeyOpen.SolcArithmetic
+import Solidity.Examples.SolkeyOpen.SolcConstructors
+import Solidity.Examples.SolkeyOpen.SolcControlFlow
+import Solidity.Examples.SolkeyOpen.SolcFunctionCalls
+import Solidity.Examples.SolkeyOpen.SolcSmtControlFlow
+import Solidity.Examples.SolkeyOpen.SolcTypes
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.StaticLinear
 import Solidity.Examples.StringLaws
