@@ -282,6 +282,13 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Tokens/ERC20Capped.lean` | Pinned OpenZeppelin 4.9.6 cap constructor/getter and inlined capped base mint; exact unchecked balance-addition cases retained. Constructor and cap getter proved; full mint unknown at wrapped-add piecewise normalization/frame closure. Cap-bound component proved separately; no reachable supply-sum premise assumed. |
 | `Examples/Benchmark/Tokens/ERC20Burnable.lean` | Pinned OpenZeppelin 4.9.6 burn/burnFrom, finite/infinite allowance spending and base burn; exact unchecked supply-underflow case retained. All four full obligations unknown at guarded two-key frames and wrapped-subtraction piecewise normalization; infinite-allowance component proved separately. |
 | `Examples/Benchmark/Tokens/ERC721Burnable.lean` | Pinned OpenZeppelin 4.9.6 authorized NFT burn with owner/approval deletion, former-owner count and full frame; unchecked zero-count case retained. Full burn obligation unknown at guarded wrapped-subtraction/old-owner normalization; owner/approval-clearing component proved separately. |
+| Module | Its examples |
+|---|---|
+| `Examples/Summaries/Vault.lean` | Vault arithmetic helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Token.lean` | Two-slot token transfer and allowance caller; storage-writing symbolic summary unsupported; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/CallChain.lean` | Three call edges and repeated intermediate helper; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Library.lean` | Recursion-free library-style helper used twice per caller; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Pricing.lean` | Shared pricing helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
 | `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `scripts/trust/executable-goal-replay.lean` in Lean CI. |
 | `Examples/ExecutableRequestData.lean` | Shared synthetic request and nondefault raw contract data for quotation and retained-candidate examples; not source admission. |
 | Module | Its examples |
