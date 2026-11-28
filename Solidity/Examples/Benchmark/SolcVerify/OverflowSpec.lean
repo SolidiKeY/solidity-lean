@@ -9,9 +9,8 @@ import Solidity.Tools.Run
 
 Source: <https://github.com/SRI-CSL/solidity/blob/8ea107cecd90ffff0d6a8f276b434b5ac9aa043b/test/solc-verify/overflow/OverflowSpec.sol> (run with `--arithmetic mod-overflow`).
 Changes: the contract `@notice invariant` is `invariant`. Arithmetic is
-checked (0.8), where solc-verify's flag wraps and reports overflow. Unknown:
-the initializers establish the invariant (solc-verify: OK), but `spec!{constructor}`
-refuses an implicit constructor.
+checked (0.8), not wrapping. Unknown: the initializers establish the invariant
+(solc-verify: OK), but `spec!{constructor}` refuses an implicit constructor.
 -/
 
 namespace Solidity.Examples.Benchmark.SolcVerify.OverflowSpec
