@@ -167,6 +167,14 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Algorithms/Sum.lean` | Array prefix sum; exact fold target retained pending specification lowering. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/DataStructures/BitMap.lean` | OpenZeppelin bitmap set; bucket frames proved, membership after set/unset unknown (bitwise laws). |
+| `Examples/Benchmark/DataStructures/EnumerableSet.lean` | OpenZeppelin swap-and-pop set with inverse-index invariant; contains proved, add/remove unknown. |
+| `Examples/Benchmark/DataStructures/LinkedList.lean` | Mapping-linked list insert/remove link consistency; node clearing proved, full specs unknown. |
+| `Examples/Benchmark/DataStructures/Queue.lean` | OpenZeppelin two-index queue; front and slot components proved, int128 index advance unknown. |
+| `Examples/Benchmark/DataStructures/RingBuffer.lean` | OpenZeppelin fixed-size circular buffer; push, count and last proved. |
+| `Examples/Benchmark/DataStructures/Stack.lean` | Storage-array stack; top and length/top components proved, element frames unknown. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/Defi/ConstantProduct.lean` | Uniswap v2 zero-fee reserve kernel: `swap` proved by `sol_prove`, including exact reserve effects and nondecreasing k. No external token/callback claim. |
 | `Examples/Benchmark/Defi/Escrow.lean` | OpenZeppelin v4.9.6 fixed-owner escrow: constructor and `depositsOf` proved. `deposit` unknown: payable old-storage snapshot plus mapping save does not close credit equality/owner frame. `withdraw` unknown: cleared credit, owner frame and oldNet debit/self-payment remain after save/pay; mapping-frame/ledger snapshot closure missing. |
 | `Examples/Benchmark/Defi/FixedRateVault.lean` | EIP-4626-inspired 1:1 native-asset accounting example (not the ERC4626 API): `withdraw` and deposit/withdraw round trip proved. `deposit` unknown: shares/assets/supply = old values + msg.value after payable snapshot and three saves; snapshot normalization across mapping/scalar saves missing. |

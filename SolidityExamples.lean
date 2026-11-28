@@ -16,6 +16,12 @@ import Solidity.Examples.Benchmark.Algorithms.Reverse
 import Solidity.Examples.Benchmark.Algorithms.Sum
 import Solidity.Examples.Benchmark.Coin
 import Solidity.Examples.Benchmark.Counter
+import Solidity.Examples.Benchmark.DataStructures.BitMap
+import Solidity.Examples.Benchmark.DataStructures.EnumerableSet
+import Solidity.Examples.Benchmark.DataStructures.LinkedList
+import Solidity.Examples.Benchmark.DataStructures.Queue
+import Solidity.Examples.Benchmark.DataStructures.RingBuffer
+import Solidity.Examples.Benchmark.DataStructures.Stack
 import Solidity.Examples.Benchmark.Defi.ConstantProduct
 import Solidity.Examples.Benchmark.Defi.Escrow
 import Solidity.Examples.Benchmark.Defi.FixedRateVault
