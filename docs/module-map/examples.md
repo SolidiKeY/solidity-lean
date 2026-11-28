@@ -180,6 +180,14 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Governance/Timelock.lean` | Bound Ether-operation timelock: delay, cancellation and permanent completion; all four function specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Governance/EnglishAuction.lean` | Solidity SimpleAuction: constructor proved; bid, refund and final payout obligations retained as unknown, with snapshot/payment closer gaps documented in the module. |
 | `Examples/Benchmark/Governance/Multisig.lean` | Two-owner Ether multisig: constructor, revocation and threshold execution proved; fresh submission and no-double-confirmation specifications retained as unknown with snapshot/Boolean closer gaps. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/SolkeyData/ArrayRemoveByShifting.lean` | solkey real-world shift-remove with its bounds clause and concrete `test`; both unknown at the loop leaves. |
+| `Examples/Benchmark/SolkeyData/ArrayRemoveByShiftingOpen.lean` | solkey's open variant: full shift specification, unknown (the invariant cannot read the entry state). |
+| `Examples/Benchmark/SolkeyData/ArrayReplaceFromEnd.lean` | Swap-with-last removal; length clause and `test` proved, element clauses unknown past `delAt`. |
+| `Examples/Benchmark/SolkeyData/Enum.lean` | Enum state variable: `get`, `set`, `cancel`, `reset` obligations proved. |
+| `Examples/Benchmark/SolkeyData/IterableMapping.lean` | Struct-of-array-and-mappings with three class invariants; every clause by hand, obligations unknown. |
+| `Examples/Benchmark/SolkeyData/NestedMapping.lean` | solkey real-world clauses with the two-key frame; `get` proved, frame cases by hand. |
 | `Examples/Benchmark/Tokens/ERC20.lean` | Pinned Solidity by Example ERC20. Full `transfer`, `_mint`, `_burn`, `mint`, `burn` clauses/frames proved. `approve`, `transferFrom`: unknown guarded two-key allowance frames. Supply equals finite-support balance sum: unknown sum syntax/update laws; approve normal-termination diamond proved; six other no-overflow diamonds unknown at checked-update definedness/range propagation. |
 | `Examples/Benchmark/Tokens/ERC721.lean` | Pinned Solidity by Example non-safe ERC721 core. `ownerOf`, `balanceOf`, `approve`, `getApproved`, `transferFrom`, `_mint`, `_burn` proved, including unique owner slot, transfer approval clearing and frames. `setApprovalForAll`: unknown two-key frame; `_isApprovedOrOwner`: unknown short-circuit Boolean equivalence. Aggregate owner-count invariant and safe receiver callbacks unproved. |
 | `Examples/Benchmark/Tokens/ERC1155.lean` | Pinned OpenZeppelin 5.0.2 callback-free `_update` core. `balanceOf`, `isApprovedForAll` proved. `_setApprovalForAll`, `setApprovalForAll`: unknown two-key frames. `_update`: unknown memory length lower bound, quantified snapshot frame and filtered prefix-sum invariant/update laws (duplicates, self-transfer and zero-address cases retained). |

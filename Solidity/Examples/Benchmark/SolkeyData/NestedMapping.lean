@@ -17,7 +17,8 @@ clauses: a named result `v` for `get`, and the two-key frame
 `set` and `remove`.  Only the obligations `spec!{f}` are stated (the
 single-entry clauses are proved by hand in `Mapping.lean`).
 
-Changes: none but the spelling of `contract!{ … }`.
+Changes: none but the spelling of `contract!{ … }`.  Verdicts: `get` proved;
+`set` and `remove` unknown (the two-key frame), each frame case proved by hand.
 
 ```solidity
 contract NestedMapping {

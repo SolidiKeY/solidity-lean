@@ -14,7 +14,8 @@ Changes: none but the spelling of `contract!{ … }` (solkey already drops
 the comments and the `require` message, adds the loop invariant, and
 replaces the array literals by `delete arr` and pushes).  solkey's own
 clauses here state only the bounds check; the functional specification is
-the open variant, `ArrayRemoveByShiftingOpen.lean`.
+the open variant, `ArrayRemoveByShiftingOpen.lean`.  Verdicts: `remove` and
+`test` unknown (the loop leaves; see their targets).
 
 ```solidity
 contract ArrayRemoveByShifting {

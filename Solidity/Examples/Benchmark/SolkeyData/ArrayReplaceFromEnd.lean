@@ -12,7 +12,9 @@ Source: <https://github.com/SolidiKeY/solkey/blob/8f0bb7a56bdc7292240250d93bafe9
 
 Changes: none but the spelling of `contract!{ … }` (solkey already drops
 the comments and replaces `arr = [1, 2, 3, 4]` by `delete arr` and four
-pushes).  `test()` calls `remove`, which inlines.
+pushes).  `test()` calls `remove`, which inlines.  Verdicts: `remove`
+unknown (its length clause proved by hand); `test` proved, and it returns
+from every state (its `assert`s hold).
 
 ```solidity
 contract ArrayReplaceFromEnd {

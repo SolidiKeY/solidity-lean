@@ -34,6 +34,12 @@ import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.SolkeyData.ArrayRemoveByShifting
+import Solidity.Examples.Benchmark.SolkeyData.ArrayRemoveByShiftingOpen
+import Solidity.Examples.Benchmark.SolkeyData.ArrayReplaceFromEnd
+import Solidity.Examples.Benchmark.SolkeyData.Enum
+import Solidity.Examples.Benchmark.SolkeyData.IterableMapping
+import Solidity.Examples.Benchmark.SolkeyData.NestedMapping
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Tokens.ERC1155
 import Solidity.Examples.Benchmark.Tokens.ERC20
