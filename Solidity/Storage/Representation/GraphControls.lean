@@ -1,7 +1,5 @@
 import Solidity.Storage.Representation.GraphCompatibility
 
-/-! Recursive graph witnesses and controls. Depth parameters below are
-universally quantified, not a fixed supported-depth bound. -/
 namespace Solidity.Storage.Representation.Graph.Controls
 private def idx : Fin 1 := ⟨0, by decide⟩
 private def zero : PrimTy.uint.Denote := ⟨0, by decide⟩
@@ -40,7 +38,6 @@ theorem inline_node_size : inlineSize schema (.node idx) = 2 := by
   rw [inlineSize_node]
   rfl
 
-/-- All finite recursive mapping depths have successful independent source reads. -/
 theorem empty_find_deep (n : Nat) : empty.find (deep n) = some (.prim zero) := by
   induction n with
   | zero => rfl
@@ -56,7 +53,6 @@ theorem deep_supported (n : Nat) : PathSupported (deep n) := by
   | zero => exact ⟨True.intro, True.intro⟩
   | succ n ih => exact ⟨True.intro, ⟨True.intro, ih⟩⟩
 
-/-- Every finite recursive depth has an inhabited represented observation. -/
 theorem empty_represented_deep (n : Nat) :
     Represented empty [.word (deep n)] (.root 0) (fun _ => zero) := by
   have base : Represented (TypeGraph.Value.prim (G := schema) zero) [.word .nil]
@@ -68,7 +64,6 @@ theorem empty_represented_deep (n : Nat) :
     Represented.prefix (deep n) (empty_find_deep n) (deep_supported n) base
   simpa only [List.map_cons, List.map_nil, Query.prefix, path_append_nil] using composed
 
-/-- The same arbitrary-depth witness transports through any covered finite run. -/
 theorem empty_numeric_deep (n : Nat) {N L R : Nat} {H : Pre → Nat} {P : List Pre}
     {xs : List Loc} (run : FiniteRun N L R H P xs)
     (covered : pathLoc (deep n) (.root 0) ∈ xs) :
@@ -166,7 +161,6 @@ theorem oversized_header_rejected (w : Store) :
   change 0 ≤ lmax ∧ lmax + 1 ≤ lmax at bounds
   omega
 
-/-- The graph relation is deliberately finite/query-local, not full ValueRep. -/
 theorem oversized_word_is_query_local :
     Represented oversized [.word (.cons (.index i0) .nil)] (.root 0) (fun _ => zero) := by
   intro q member
@@ -191,7 +185,6 @@ private def arrayChanged : TypeGraph.Value schema (.array (.prim .uint)) :=
   (smallArray.save (.cons (.index i0) .nil) (.prim nine)).getD smallArray
 private theorem arraySaved : smallArray.save (.cons (.index i0) .nil) (.prim nine) = some arrayChanged := rfl
 
-/-- Ancestor header framing is distinct from divergent-query framing. -/
 theorem recursive_header_frame_control :
     Represented arrayChanged [.length .nil] (.root 0)
       (write (fun _ => one) (.data (.root 0) 0) nine) :=
@@ -222,14 +215,12 @@ theorem legacy_represented : ValueRep legacyValue (.map (.map .word)) (.root 0) 
       simp only [SMap.toList_nil, Semantics.lookupBy, Option.getD_none]
       exact .scalar zero _ _ rfl
 
-/-- This is an extension of the existing whole legacy mapping relation. -/
 theorem legacy_graph_extension :
     Represented (legacyLayout.encode legacyValue) [.word legacyPath.graph] (.root 0) (fun _ => zero) := by
   apply keypath_word_represented legacyPath legacyValue zero legacy_represented
   simp only [legacyPath, TypeGraph.Legacy.KeyPath.legacy, legacyValue,
     SVal.find_key, SVal.find_nil, SMap.toList_nil, Semantics.lookupBy]
 
-/-- Aliasing a written path cannot preserve its old zero representation. -/
 theorem written_not_framed : ¬ Represented changed [.word (deep 3)] (.root 0) (fun _ => zero) := by
   intro h
   have observed : (Query.word (deep 3)).read changed = some nine := by
@@ -249,7 +240,6 @@ private def preimages : List Pre :=
   [.entry 0 1, .entry 0 5, .entry 0 9, .entry 1 1, .entry 0 17, .entry 0 21]
 private noncomputable def touched : List Loc := [pathLoc (deep 3) (.root 0), pathLoc (other 2) (.root 0)]
 
-/-- A nonvacuous two-branch recursive prefix under the original region premise. -/
 theorem recursive_run : FiniteRun 32 2 2 hash preimages touched := by
   constructor
   · intro p
@@ -276,7 +266,6 @@ theorem recursive_run : FiniteRun 32 2 2 hash preimages touched := by
       simp only [List.mem_cons, List.not_mem_nil, or_false] at hp
       rcases hp with rfl | rfl | rfl <;> decide
 
-/-- Actual recursive source save, source frame, symbolic and numeric writes agree. -/
 theorem recursive_numeric_combination : ∃ m : WordStore,
     Transport 32 hash touched
       (write (fun _ => zero) (pathLoc (deep 3) (.root 0)) nine) m ∧
