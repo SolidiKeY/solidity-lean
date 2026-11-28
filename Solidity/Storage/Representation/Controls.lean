@@ -7,7 +7,7 @@ private def seven : PrimTy.uint.Denote := ⟨7, by decide⟩
 private def nine : PrimTy.uint.Denote := ⟨9, by decide⟩
 private def two : Semantics.Word := ⟨2, by decide⟩
 
-/-- A real source struct with a mapping member, using the committed schema. -/
+/-- A real source struct with a mapping member, using the schema. -/
 def wallet : SVal (.ref (.struct "Wallet")) :=
   .struct (.cons (.prim seven) (.cons (.map .nil (.prim nine)) .nil))
 

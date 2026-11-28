@@ -1,25 +1,10 @@
 import Solidity.Evm.Machine
 import Solidity.Storage.HashedLayout
 
-/-!
-# The hashed layout's slot terms and the EVM model's `Slot`
-
-A read-only correspondence: `Solidity.Evm.Slot` (`Solidity/Evm/Machine.lean`,
-not edited here) and `Solidity.Storage.Loc` have the same three shapes, with
-a `Slot`'s mapping key a word (`Fin W`) and a `Loc`'s a `Nat`. `ofSlot` is
-injective, commutes with adding to the offset, and reaches exactly the terms
-whose keys are words (`KeysBelow W`); `lmax` is the EVM model's `Lmax`.
-The machine's store (`WordStore.cells : Slot → Fin W`) is symbolic and never
-computes a slot's word, so `slot_word_inj` does not refine the machine: it is
-`Loc.word_inj` moved along `ofSlot`, the separation a word-addressed
-refinement of the store would need.
--/
-
 namespace Solidity.Storage
 
 open Solidity.Evm (Slot W Lmax)
 
-/-- The slot term of an EVM slot. -/
 def ofSlot : Slot → Loc
   | .root o => .root o
   | .hash k s o => .hash k.val (ofSlot s) o
@@ -45,7 +30,6 @@ theorem ofSlot_injective : ∀ {s t : Slot}, ofSlot s = ofSlot t → s = t
 theorem ofSlot_add (s : Slot) (i : Nat) : ofSlot (s.add i) = (ofSlot s).add i := by
   cases s <;> rfl
 
-/-- Every mapping key of the term is below `n`. -/
 def KeysBelow (n : Nat) : Loc → Prop
   | .root _ => True
   | .hash k s _ => k < n ∧ KeysBelow n s
@@ -56,7 +40,6 @@ theorem keysBelow_ofSlot : ∀ s : Slot, KeysBelow W (ofSlot s)
   | .hash k s _ => ⟨k.isLt, keysBelow_ofSlot s⟩
   | .data s _ => keysBelow_ofSlot s
 
-/-- The terms with word keys are exactly the EVM slots. -/
 theorem exists_ofSlot : ∀ {l : Loc}, KeysBelow W l → ∃ s : Slot, ofSlot s = l
   | .root o, _ => ⟨.root o, rfl⟩
   | .hash k l o, h => by
@@ -69,8 +52,6 @@ theorem exists_ofSlot : ∀ {l : Loc}, KeysBelow W l → ∃ s : Slot, ofSlot s 
 
 theorem lmax_eq_Lmax : lmax = Lmax := rfl
 
-/-- Separation read on EVM slots: under the run's region premise, two bounded
-slots whose preimages the run hashed are one word only if they are one slot. -/
 theorem slot_word_inj {L R : Nat} {H : Pre → Nat} {P : List Pre} (hH : ∀ p, H p < W)
     (hL : L ≤ W) (hR : R ≤ W) (hRD : Solidity.Hash.RegionsDisjoint W L H (List.range R) P)
     {s t : Slot} (hs : Loc.Bounded L R (ofSlot s)) (ht : Loc.Bounded L R (ofSlot t))

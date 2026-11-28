@@ -74,12 +74,30 @@ function validateCurrent(value,runId,target,workspace,trustMode,sourceHead,menuA
  if(value?.anchorAdmission!==menuAnchor)errors.push('Menu anchor launch mode differs');
  try{assert.match(sourceHead,/^[a-f0-9]{40}$/);assert.ok(row?.tabOwnership,'Missing current public tab ownership');require('./menu-tab-ownership.cjs').assertObservation(row.tabOwnership,row.binding,{runId,sourceHead});}catch(error){errors.push('Current public tab contract: '+error.message);}return errors;
 }
+// Strict companion adds replay errors without rewriting the legacy observation.
+function validateTabHitCurrent(value,runId,target,workspace,trustMode,sourceHead,menuAnchor){
+ let errors;
+ try{errors=validateCurrent(value,runId,target,workspace,trustMode,sourceHead,menuAnchor);}
+ catch(error){return ['Malformed tab-hit menu observation: '+String(error?.message??error)];}
+ try{
+  const helper=require('./menu-tab-hit.cjs');
+  assert.equal(trustMode,undefined);assert.equal(menuAnchor,undefined);
+  assert.equal(value?.tabHitAdmissionMode,helper.version,'Tab-hit launch mode differs');
+  for(const row of value.phases){
+   const menu=row.capture?.capture?.contributionMenu;
+   if(row.phase==='tab')helper.assertAdmission(menu?.tabHitAdmission,row.binding,row.tabOwnership,menu?.before,menu?.after);
+   else assert.ok(!menu||!Object.hasOwn(menu,'tabHitAdmission'),'Unexpected non-tab hit admission');
+  }
+ }catch(error){errors.push('Invalid tab-hit admission: '+String(error?.message??error));}
+ return errors;
+}
 async function run({vscode,config,events,sessionFor,requestPhase=require('./phase-capture.cjs').requestPhase}){
+ if(config.menuTabHit!==undefined){assert.equal(config.menuTabHit,require('./menu-tab-hit.cjs').version);assert.equal(config.suite,'contribution-menus');assert.equal(config.menuTrust,undefined);assert.equal(config.menuAnchor,undefined);}
  if(config.menuTrust==='recovery')return runRecovery({vscode,config,events,sessionFor,requestPhase});
  const begin=events.length,target=config.target,language=target==='local'?'solidity':'dafny',source=require('./workloads.cjs').workload(target,1),file=path.join(config.workspace,'menus.'+(target==='local'?'sol':'dfy'));
  fs.writeFileSync(file,source);const doc=await vscode.workspace.openTextDocument(file),rows=[];
  const binding=d=>({uri:d.uri.toString(),version:d.version,sourceHash:createHash('sha256').update(d.getText()).digest('hex'),session:sessionFor(d),language:d.languageId,scheme:d.uri.scheme,trusted:vscode.workspace.isTrusted});
- const result={status:'partial',runId:config.runId,target,...(config.menuAnchor?{anchorAdmission:config.menuAnchor}:{}),phases:rows,untrusted:{status:'missing',reason:'Existing pinned runner disables workspace trust UI; this launch cannot evidence an untrusted window.'},scope:'Actual Linux menu endpoint/AX/PNG observations only; no command, proof, raster/ABA or macOS equivalence.'};
+ const result={status:'partial',runId:config.runId,target,...(config.menuTabHit?{tabHitAdmissionMode:config.menuTabHit}:{}),...(config.menuAnchor?{anchorAdmission:config.menuAnchor}:{}),phases:rows,untrusted:{status:'missing',reason:'Existing pinned runner disables workspace trust UI; this launch cannot evidence an untrusted window.'},scope:'Actual Linux menu endpoint/AX/PNG observations only; no command, proof, raster/ABA or macOS equivalence.'};
  if(config.menuTrust)result.trust={mode:'native-workspace-trust',settings:{enabled:vscode.workspace.getConfiguration('security.workspace.trust').get('enabled'),startupPrompt:vscode.workspace.getConfiguration('security.workspace.trust').get('startupPrompt'),enabledUserValue:vscode.workspace.getConfiguration('security.workspace.trust').inspect('enabled')?.globalValue},steps:[]};
  const save=()=>fs.writeFileSync(path.join(config.dir,'menu-observations.json'),JSON.stringify(result,null,2));
  async function capture(phase,d,kind='editor'){
@@ -108,7 +126,7 @@ async function run({vscode,config,events,sessionFor,requestPhase=require('./phas
   await capture('source',doc);const textFile=path.join(config.workspace,'unrelated.txt');fs.writeFileSync(textFile,'Menu language isolation.\n');const unrelated=await vscode.workspace.openTextDocument(textFile);await capture('unrelated',unrelated);
   const untitled=await vscode.workspace.openTextDocument({language,content:source});await capture('untitled',untitled);await capture('tab',doc,'tab');await capture('restored',doc);
   if(config.menuTrust){await trustStep('deny',false);await trustStep('lost');await trustStep('restore',true);await trustStep('restored');result.untrusted={status:'partial',reason:'Native trust UI/API/menu endpoints only; full parity and reload/matrix coverage remain open.'};}
-  assert.equal(doc.getText(),source);assert.equal(fs.readFileSync(file,'utf8'),source);result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);assert.deepEqual(validateCurrent(result,config.runId,target,config.workspace,config.menuTrust,config.sourceHead,config.menuAnchor),[]);save();return result;
+  assert.equal(doc.getText(),source);assert.equal(fs.readFileSync(file,'utf8'),source);result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);assert.deepEqual((config.menuTabHit?validateTabHitCurrent:validateCurrent)(result,config.runId,target,config.workspace,config.menuTrust,config.sourceHead,config.menuAnchor),[]);save();return result;
  }catch(error){error.observation=result;throw error;}
  finally{result.events=events.slice(begin);result.forbiddenActions=forbidden(result.events);save();}
 }
@@ -165,4 +183,4 @@ function partialEvidence(directory,runId,target){
  try{bytes=fs.readFileSync(file);const observation=JSON.parse(bytes);if(observation.runId!==runId||observation.target!==target)throw Error('Foreign partial menu identity');return{status:'failed-partial',file,diagnostics,diagnosticError,sha256:createHash('sha256').update(bytes).digest('hex'),observation};}
  catch(error){return{status:'unavailable',file,diagnostics,diagnosticError,...(bytes?{sha256:createHash('sha256').update(bytes).digest('hex')}:{}),error:error.message};}
 }
-module.exports={menuMouse,menuAnchorPoint,phases,validate,validateCurrent,run,preparation,trustErrors,partialEvidence,recoveryPredecessor,recoveryErrors,verifyRecoveryReceipts,recoveryPrefixErrors};
+module.exports={menuMouse,menuAnchorPoint,phases,validate,validateCurrent,validateTabHitCurrent,run,preparation,trustErrors,partialEvidence,recoveryPredecessor,recoveryErrors,verifyRecoveryReceipts,recoveryPrefixErrors};

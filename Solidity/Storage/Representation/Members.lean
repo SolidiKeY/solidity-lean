@@ -1,6 +1,6 @@
 import Solidity.Storage.Representation.Updates
 
-/-! Member observations retain the committed source's first-name lookup. -/
+/-! Member observations retain the source's first-name lookup. -/
 namespace Solidity.Storage.Representation
 
 theorem FieldsRep.get {fs : List (Name × Ty)} {vs : SFields fs}

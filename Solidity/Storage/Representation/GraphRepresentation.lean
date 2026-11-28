@@ -2,7 +2,7 @@ import Solidity.Storage.Representation.GraphFrames
 import Solidity.Storage.Representation.Transport
 
 /-! Finite represented observations of existing typed graph values. Source
-reads are the committed Value.observe, including failures. Successful word/
+reads are the Value.observe, including failures. Successful word/
 length observations are transported; presence and extent stay source metadata.
 No finite STy unrolling or public runtime-depth cutoff is required. -/
 namespace Solidity.Storage.Representation.Graph

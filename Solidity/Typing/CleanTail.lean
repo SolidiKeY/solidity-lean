@@ -191,15 +191,7 @@ theorem SVal.find_cleanTail {T U : Ty} {v : SVal T} {w : SVal U} (p : Path T U)
     (hv : v.CleanTail) (hread : v.find p = some w) : w.CleanTail :=
   SVal.find_all p hv hread
 
-/-! ## Clean tails, as the observations show them
 
-The Theory reads a storage by its observations (`Storage.obs`,
-`Theory/Typed/Obs.lean`), and they do not show every slot of the typed
-value (a mapping's shadowed entry, a default every key covers): so what
-`cleanTail(storage)` denotes there is what they show, `TSto.CleanTails`,
-which `Storage.CleanTail` implies (`Storage.cleanTails_obs`). -/
-
-/-- A path with no mapping key step. -/
 def Path.KeyFree : {T U : Ty} → Path T U → Prop
   | _, _, .nil => True
   | _, _, .field _ p => p.KeyFree
@@ -218,15 +210,10 @@ theorem Path.keyFree_append : {T U W : Ty} → (p : Path T U) → (q : Path U W)
     rw [Path.append_atF]; exact Path.keyFree_append p q hp hq
   | _, _, _, .key _ _, _, hp, _ => hp.elim
 
-/-- **A read past an array's live end**, in the observations `o`: `r` goes
-through a dynamic array `a` at an index at or past `a`'s live length, and
-on along no mapping key. -/
 def SRef.Shadowed {C : Contract} (o : TSto C) {T : Ty} (r : SRef C T) : Prop :=
   ∃ (E : Ty) (a : SRef C (.ref (.array E))) (i : PrimTy.uint.Denote) (rest : Path E T),
     rest.KeyFree ∧ o.len (.ref a) ≤ i.1.toNat ∧ r = a.append (.at i rest)
 
-/-- **Clean tails, observed**: a read past an array's live end, along no
-mapping key, shows the default word and the length `0`. -/
 def TSto.CleanTails {C : Contract} (o : TSto C) : Prop :=
   (∀ {P : PrimTy} (r : SRef C (.prim P)), r.Shadowed o → o.word (.ref r) = PrimTy.dflt P) ∧
   (∀ {E : Ty} (r : SRef C (.ref (.array E))), r.Shadowed o → o.len (.ref r) = 0)
@@ -257,7 +244,6 @@ theorem SFields.ordinaryDefault_get {f : Name} : {fs : List (Name × Ty)} → {T
     · simp only [e, dite_false]
       exact SFields.ordinaryDefault_get _ hx.2
 
-/-- An ordinary default read along no mapping key is one. -/
 theorem SVal.ordinaryDefault_findM : {T U : Ty} → (x : SVal T) → (p : Path T U) →
     x.OrdinaryDefault → p.KeyFree → ∀ w, x.findM p = some w → w.OrdinaryDefault
   | _, _, x, .nil, hx, _, w, h => by
@@ -288,8 +274,6 @@ theorem SVal.ordinaryDefault_findM : {T U : Ty} → (x : SVal T) → (p : Path T
     · cases h
   | _, _, .map _ _, .key _ _, _, hp, _, _ => hp.elim
 
-/-- Under clean tails, what a read past an array's live end finds is an
-ordinary default. -/
 theorem Storage.shadowed_findM {C : Contract} {st : Storage C} (hst : st.CleanTail) {T : Ty}
     {r : SRef C T} (hs : r.Shadowed st.obs) :
     ∀ w, (st.get r.hroot).findM r.path = some w → w.OrdinaryDefault := by
@@ -320,7 +304,6 @@ theorem Storage.shadowed_findM {C : Contract} {st : Storage C} (hst : st.CleanTa
           (SVal.cleanTail_shadow hyc x (List.mem_of_getElem? hx)) hk w hw
       · cases hw
 
-/-- **Clean tails show**: a storage with clean tails reads as one. -/
 theorem Storage.cleanTails_obs {C : Contract} {st : Storage C} (hst : st.CleanTail) :
     TSto.CleanTails st.obs := by
   refine ⟨fun {P} r hs => ?_, fun {E} r hs => ?_⟩
@@ -339,7 +322,6 @@ theorem Storage.cleanTails_obs {C : Contract} {st : Storage C} (hst : st.CleanTa
       cases w with
       | array e sh hn => exact ((SVal.ordinaryDefault_array e sh hn).1 hd).1
 
-/-! ## The test `cleanTail(storage)` runs -/
 
 mutual
 theorem SVal.ordinaryDefaultB_iff : {T : Ty} → (v : SVal T) →
@@ -381,8 +363,6 @@ theorem cleanTailHB_decides : cleanTailHB.Decides cleanTailH :=
   ⟨fun _ sh => SList.ordinaryDefaultB_iff sh, fun _ _ => iff_of_true rfl trivial,
     fun _ _ _ _ => iff_of_true rfl trivial⟩
 
-/-- **What `cleanTail(storage)` tests**: every array's shadow an ordinary
-default. -/
 theorem Storage.cleanTailB_iff {C : Contract} (st : Storage C) :
     st.cleanTailB = true ↔ st.CleanTail :=
   SFields.allB_iff cleanTailHB_decides st

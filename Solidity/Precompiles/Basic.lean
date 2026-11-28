@@ -4,7 +4,7 @@ import Solidity.Secp256k1
 /-!
 # Frontier's precompiles: `ECRECOVER` (0x01), `SHA256` (0x02), `RIPEMD160` (0x03), `IDENTITY` (0x04)
 
-The three hashes reuse the approved fixed functions (`Solidity/Hashes.lean`,
+The three hashes reuse the fixed functions (`Solidity/Hashes.lean`,
 `Solidity/Secp256k1.lean`) and add the precompiles' framing, as Osaka's
 execution specification frames them:
 
