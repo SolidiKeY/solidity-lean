@@ -3,6 +3,7 @@ import Solidity.Correctness.Lowering.Sim.CoverageBranch
 import Solidity.Correctness.Lowering.Sim.Coverage.SpellingObstruction
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanBlocksV3
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStatementsV4
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Examples.Lowering.Sim.Match
@@ -1315,6 +1316,120 @@ theorem smoke_blocks_coverage (hk : Solidity.Goals.elabKernelTotal) :
     (BooleanBlocksV3.of_boolean (smoke_in_domain smokeOutput))
     (smoke_production hk) smoke_program_accepted
 
+/-- A standalone assignment admitted by v4 and outside both v3 alternatives. -/
+def statementRaw : List RawStmt := [.assign (.name "i") (.bool true)]
+
+def statementBody : Body :=
+  { blockBody with input :=
+      { blockBody.input with
+        raw := statementRaw
+        resolved := .expr (.assign (.local .here) (.bool true)) } }
+
+/-- Actual assignment elaboration in the caller scope, using the kernel equations. -/
+theorem statement_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    (((@elabStmtP Match.C productionNames (.assign (.name "i") (.bool true))).run
+      { funs := [] }).run (blockLocals, k)).run {} =
+      .ok ((blockProgram, (blockLocals, k)), {}) := by
+  letI : FreshNames := productionNames
+  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
+    (hk.1 Match.C).1.2.2.1
+  have ha : (elabRec Match.C ()).hoistAssign (.name "i") (.bool true) =
+      pure ([], .assign (.name "i") (.bool true)) :=
+    kernel_hoist_assign_bool hk Match.C "i" true
+  rw [hp]
+  conv => lhs; whnf
+  simp only [RawStmt.mapExprsM, fnPure_other]
+  conv => lhs; whnf
+  simp only [bytesStmt, RawStmt.mapExprsM, bytesPure_other]
+  conv => lhs; whnf
+  simp only [RawStmt.exprs, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
+    Bool.false_eq_true, if_false, narrowWholeUse?_other, narrowWholeUse?_name]
+  conv => lhs; whnf
+  simp only [narrowPure_other]
+  conv => lhs; whnf
+  rw [(hk.1 Match.C).1.2.2.2.2.1]
+  unfold hoistStmtWith
+  dsimp only
+  rw [ha]
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind, Pure.pure,
+    ReaderT.pure, StateT.pure, Except.pure]
+  rw [nctx_run]
+  conv => lhs; whnf
+  dsimp only
+  rw [(hk.1 Match.C).1.2.2.2.1]
+  unfold elabStmt1With
+  dsimp only
+  conv => lhs; whnf
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  rw [narrow_block]
+  dsimp only
+  unfold synthM
+  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
+  rw [nctx_run]
+  dsimp only
+  rw [synth_block]
+  dsimp only [ElabM.lift, StateT.lift, Bind.bind, ReaderT.bind, StateT.bind,
+    Pure.pure, ReaderT.pure, StateT.pure, Except.bind, Except.pure]
+  simp only [checkIn, check_bool]
+  rfl
+
+
+/-- Actual singleton-list elaboration, with no block wrapper. -/
+theorem statement_elaborated (hk : Solidity.Goals.elabKernelTotal) :
+    @elabStmtsP Match.C productionNames statementRaw { funs := [] } (blockLocals, 0) {} =
+      .ok ((blockProgram, (blockLocals, 0)), {}) := by
+  letI : FreshNames := productionNames
+  simpa only [List.append_nil] using CoverageBranch.actual_list
+    (CoverageBranch.Children.cons (statement_write hk 0)
+      (CoverageBranch.Children.nil (blockLocals, 0) ({} : CallMemo)))
+
+/-- The same symbolic assignment and placement, with the standalone raw input. -/
+def statementOutput : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool] :=
+  { blockOutput with raw := statementRaw }
+
+def statementEmitted : Emitted := ⟨Match.C, [.val .bool], statementOutput⟩
+
+theorem statement_in_domain : BooleanStatementsV4.Input statementBody statementEmitted := by
+  exact ⟨rfl, rfl, rfl, rfl, ["i"], _, rfl, rfl, .assign (by decide) (.bool true)⟩
+
+/-- Neither the old while boundary nor the v3 block boundary admits this run. -/
+theorem statement_not_v3 : ¬ BooleanBlocksV3.Input statementBody statementEmitted := by
+  intro h
+  rcases h with old | block
+  · obtain ⟨_, _, _, _, names, c, ss, _, raw, _⟩ := old
+    cases raw
+  · obtain ⟨_, _, _, _, names, ss, _, raw, _⟩ := block
+    cases raw
+
+/-- Actual lowering, elaboration and placement of the strict-extension witness. -/
+theorem statement_production (hk : Solidity.Goals.elabKernelTotal) :
+    @ProductionV2 productionNames statementBody statementEmitted := by
+  letI : FreshNames := productionNames
+  refine ⟨⟨rfl, ?_⟩, ⟨statement_elaborated hk, ?_⟩, ?_⟩
+  · exact lowerAt_of_lowersTo (raw := statementRaw) (out := statementRaw)
+      (before := statementBody.input.before) (after := statementOutput.afterLower) ⟨4, rfl⟩
+  · rfl
+  · exact ⟨⟨rfl, rfl, rfl⟩, rfl, rfl⟩
+
+/-- The unchanged production checker accepts the standalone assignment. -/
+theorem statement_accepted : Accepted statementEmitted := by
+  repeat constructor
+
+/-- The new domain is nonvacuous under the authorized kernel-totality hypothesis. -/
+theorem statement_coverage (hk : Solidity.Goals.elabKernelTotal) :
+    ∃ b' : Body, b'.SameInput statementBody ∧ ∃ m, diagram.Assoc b' statementEmitted m :=
+  diagram_total_boolean_statements statementBody statementEmitted statement_in_domain
+    (statement_production hk) statement_accepted
+
+/-- The original Match smoke is still covered, through the two domain inclusions. -/
+theorem smoke_statements_coverage (hk : Solidity.Goals.elabKernelTotal) :
+    ∃ b' : Body, b'.SameInput Match.body ∧
+      ∃ m, diagram.Assoc b' (Match.emitted smokeOutput) m :=
+  diagram_total_boolean_statements Match.body (Match.emitted smokeOutput)
+    (BooleanStatementsV4.of_blocks
+      (BooleanBlocksV3.of_boolean (smoke_in_domain smokeOutput)))
+    (smoke_production hk) smoke_program_accepted
+
 end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Correctness.Lowering.Sim.Coverage.spells_aligned
@@ -1381,3 +1496,6 @@ end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.block_production
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.block_coverage
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.statement_production
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.statement_coverage
