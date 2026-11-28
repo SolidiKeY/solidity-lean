@@ -14,8 +14,8 @@ Changes: none but the spelling of `contract!{ … }`; messages are dropped and
 clauses: one commit per account, stamped with the time; a reveal in a later
 block, matching the commitment, ends the game for the revealer.
 
-Verdicts: constructor, commitSolution proved; getMySolution proved for its
-guard only (its tuple cannot be named by a clause); revealSolution unknown.
+Verdicts: constructor, commitSolution proved; getMySolution's guard proved,
+its returns unspecified (an unnamed tuple cannot be named by a clause); revealSolution unknown.
 -/
 namespace Solidity.Examples.Benchmark.Patterns.CommitReveal
 def SecuredFindThisHash : Contract := contract!{

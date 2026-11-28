@@ -14,7 +14,8 @@ braced); the error and comments are
 dropped by elaboration. Stage members are their positions (0 to 4); a clause spells `10 days`
 as `864000` and `12 days` as `1036800` seconds.
 Natural `@custom:key` clauses: each function runs only at its stage (after the
-timed transitions), and the stage only moves forward (`stage >= \old(stage)`).
+timed transitions), and the stage only moves forward (`stage >= \old(stage)`);
+`bid` and `reveal` also state the deadline that has not passed.
 
 Verdicts: g, h, i proved; bid, reveal unknown. `nextStage` is internal and
 inlined, with no clause of its own.

@@ -14,7 +14,7 @@ Not OpenZeppelin's `Ownable2Step`: a failed check returns an error code
 instead of reverting. Changes: only the admin handover of `Unitroller` is
 kept (no implementation slot or delegation); `fail(Error.UNAUTHORIZED, …)`,
 which logs and returns the code, is `return uint(Error.UNAUTHORIZED);`
-(`1`), and the events are dropped by elaboration. Natural `@custom:key`
+(`1`; the error enum keeps only its first two members, with their values), and the events are dropped by elaboration. Natural `@custom:key`
 clauses: a nomination succeeds for the admin only, acceptance for the nominee
 only, and a failed call changes nothing.
 
@@ -45,7 +45,7 @@ def Unitroller : Contract := contract!{
     return uint(Error.NO_ERROR);
   }
   ensures \result == 0 -> msg.sender == \old(pendingAdmin) && msg.sender != 0 && admin == msg.sender && pendingAdmin == 0;
-  ensures \result != 0 -> admin == \old(admin) && pendingAdmin == \old(pendingAdmin);
+  ensures \result != 0 -> (msg.sender != \old(pendingAdmin) || msg.sender == 0) && admin == \old(admin) && pendingAdmin == \old(pendingAdmin);
   function _acceptAdmin() public returns (uint) {
     if (msg.sender != pendingAdmin || msg.sender == address(0)) {
       return uint(Error.UNAUTHORIZED);

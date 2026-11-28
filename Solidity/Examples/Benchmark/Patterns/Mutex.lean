@@ -15,9 +15,12 @@ Changes: the two contracts are one (the guard's `locked` and `noReentrant`
 beside `EtherStore`), `withdraw` carries `noReentrant`, and
 `msg.sender.call` is `payable(msg.sender).call`. Messages are dropped by
 elaboration. Natural `@custom:key` clauses: `withdraw` starts unlocked,
-releases the lock and clears the caller's balance; `deposit` credits it.
+releases the lock, clears the caller's balance and pays it; `deposit` credits
+it. In this model `call{value: …}` books the payment and runs no recipient code,
+so re-entry is not exercised and the lock clauses state the guard's discipline
+only.
 
-Verdicts: deposit, withdraw, getBalance proved.
+Verdicts: deposit, withdraw (by `sol_auto`), getBalance proved.
 -/
 namespace Solidity.Examples.Benchmark.Patterns.Mutex
 def EtherStore : Contract := contract!{
@@ -34,6 +37,7 @@ def EtherStore : Contract := contract!{
     balances[msg.sender] += msg.value;
   }
   ensures !\old(locked) && !locked && \old(balances[msg.sender]) > 0 && balances[msg.sender] == 0;
+  ensures msg.sender != this -> net(msg.sender) == \old(net(msg.sender)) - \old(balances[msg.sender]);
   function withdraw() public noReentrant {
     uint256 bal = balances[msg.sender];
     require(bal > 0);
@@ -51,7 +55,7 @@ open scoped Scoped
 theorem spec_deposit : ⊢ spec!{ deposit } := by
   sol_auto
 theorem spec_withdraw : ⊢ spec!{ withdraw } := by
-  sol_prove
+  sol_auto
 theorem spec_getBalance : ⊢ spec!{ getBalance } := by
   sol_prove
 end Solidity.Examples.Benchmark.Patterns.Mutex

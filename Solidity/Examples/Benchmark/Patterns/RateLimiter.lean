@@ -11,7 +11,8 @@ Source: ConsenSys Diligence, Smart Contract Best Practices, "Rate Limiting":
 
 Changes: the fragment is wrapped in a contract; `block.number` is
 `block.timestamp` (this model has no block number, so a period is measured
-in seconds, not blocks); the pre-0.7 `constructor(…) public` drops
+in seconds, not blocks; under 0.8 checked arithmetic the addition reverts on
+overflow, so the source's `require(totalAmount >= …)` can no longer fail); the pre-0.7 `constructor(…) public` drops
 `public`, the messages take double quotes,
 `updatePeriod` is declared before its caller (this model inlines a call to an
 earlier function) and `msg.sender.transfer` is `payable(msg.sender).transfer`.
