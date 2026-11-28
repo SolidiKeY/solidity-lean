@@ -2,10 +2,6 @@ import Solidity.Source.Preservation.Fragment
 import Solidity.Source.Preservation.CallerReferenceControls
 import Solidity.Lowering.P9.CatalogControls
 
-/-! Inhabited joint preservation consumers for actually elaborated complete
-call catalogues. A nonempty memory prefix/caller reference is retained through
-nested success and recursive timeout. These are source, not EVM, observations.
--/
 namespace Solidity.Source.Preservation.FragmentControls
 open Solidity.Lowering.P9
 
