@@ -455,10 +455,15 @@ import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
 import Solidity.Examples.SolkeyOpen.ArrayRemoveByShifting
 import Solidity.Examples.SolkeyOpen.SolcArithmetic
+import Solidity.Examples.SolkeyOpen.SolcArrayMembers
 import Solidity.Examples.SolkeyOpen.SolcConstructors
 import Solidity.Examples.SolkeyOpen.SolcControlFlow
 import Solidity.Examples.SolkeyOpen.SolcFunctionCalls
+import Solidity.Examples.SolkeyOpen.SolcHigherLevel
+import Solidity.Examples.SolkeyOpen.SolcLoops
+import Solidity.Examples.SolkeyOpen.SolcPayments
 import Solidity.Examples.SolkeyOpen.SolcSmtControlFlow
+import Solidity.Examples.SolkeyOpen.SolcStructsMappings
 import Solidity.Examples.SolkeyOpen.SolcTypes
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.StaticLinear
@@ -466,6 +471,8 @@ import Solidity.Examples.StringLaws
 import Solidity.Examples.Summaries.CallChain
 import Solidity.Examples.Summaries.Library
 import Solidity.Examples.Summaries.Pricing
+import Solidity.Examples.Summaries.StorageChain
+import Solidity.Examples.Summaries.Support
 import Solidity.Examples.Summaries.Token
 import Solidity.Examples.Summaries.Vault
 import Solidity.Examples.Tactics.AbiFeatures
