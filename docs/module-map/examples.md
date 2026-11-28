@@ -204,6 +204,16 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/MathLib/Average.lean` | OpenZeppelin v4.9.6 `Math.average` (`(a & b) + (a ^ b) / 2`): exact floor-average target, overflow-free form. Unknown: bitwise carry identity over `uintBitwise` missing. |
+| `Examples/Benchmark/MathLib/CeilDiv.lean` | OpenZeppelin v4.9.6 `Math.ceilDiv`: exact ceiling by quotient and remainder. Unknown: division/remainder closer for a symbolic divisor missing. |
+| `Examples/Benchmark/MathLib/Log2.lean` | OpenZeppelin v4.9.6 `Math.log2` (eight unchecked shift steps): natural `2^r <= v < 2^(r+1)` as a Lean `NaturalSpec`. Unknown: no `**`/`>>` in clauses; eight joined conditional updates exceed `sol_close_ite_split`'s six. |
+| `Examples/Benchmark/MathLib/MinMax.lean` | OpenZeppelin v4.9.6 `max`/`min` and Solady v0.1.0 `clamp` (branchless select as conditionals): all three proved. |
+| `Examples/Benchmark/MathLib/MulDiv64.lean` | OpenZeppelin v4.9.6 `mulDiv` contract for `uint64` operands (plain full-precision product, overflowing result reverts): exact floor quotient proved. |
+| `Examples/Benchmark/MathLib/Saturating.lean` | OpenZeppelin v5.4.0 `saturatingAdd`/`saturatingSub` (helpers inlined, branchless arithmetic kept): `saturatingSub` proved. `saturatingAdd` unknown: xor-select closer missing. |
+| `Examples/Benchmark/MathLib/SignedAbs.lean` | OpenZeppelin v4.9.6 `SignedMath.abs` and checked negation at `type(int256).min`: `neg` proved; kernel runs show `abs(min) = 2^255` and `neg(min)` halting. `abs` clause unknown: no `int`/`uint` comparison in clauses. |
+| `Examples/Benchmark/MathLib/Sqrt.lean` | Uniswap v2-core Babylonian `Math.sqrt` with loop invariant and variant: exact floor-root target. Unknown: the `y <= 3` leaf closes; the loop leaves need a nonlinear floor-division closer. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/MemoryAlgorithms/ArrayEquals.lean` | Equality of two memory arrays; result iff equal lengths and elements (unknown: quantified step leaf). |
 | `Examples/Benchmark/MemoryAlgorithms/BubbleSort.lean` | In-place bubble sort of at most eight elements; sortedness clauses, full permutation target (unknown: memory-write loop frame). |
 | `Examples/Benchmark/MemoryAlgorithms/CountOccurrences.lean` | Occurrences of a key; exact counting target retained pending a counting aggregate (unknown). |
@@ -221,10 +231,43 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Patterns/TwoStepOwnership.lean` | Compound Unitroller pending-admin handover with error codes: all three function specifications proved. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/SolkeyBench/AccessRestriction.lean` | solkey 50a1469 `benchmark/AccessRestriction.sol`, modifiers inlined: `changeOwner` proved. `disown` unknown: owner = 0 after `delAt` (delete) not closed. `forceOwnerChange` unknown: `x & 0 == 1` branch not refuted (bitwise-and closer missing) and refund needs the pay ledger rule. |
+| `Examples/Benchmark/SolkeyBench/Fund.lean` | solkey 50a1469 `benchmark/Fund.sol`: `withdraw` unknown: cleared share, oldNet debit and mapping frame after save/pay; mapping-frame closure and pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/SendContract.lean` | solkey 50a1469 `benchmark/SendContract.sol`: constructor proved. `becomeRichest` unknown: net debit of the old richest after `pay`; pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/SendingEther.lean` | solkey 50a1469 `benchmark/SendingEther.sol` (`SendEther` only): `sendViaTransfer`, `sendViaSend`, `sendViaCall` unknown: net clauses after `pay(_to, msg.value)`; pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/SimpleAuction.lean` | solkey 50a1469 `benchmark/SimpleAuction.sol` (solkey variant; distinct from Governance/EnglishAuction): constructor proved. `bid`, `withdraw` unknown: mapping/snapshot closure (and pay for withdraw). `auctionEnd` unknown: pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/Todos.lean` | solkey 50a1469 `benchmark/Todos.sol`: `toggleCompleted` proved (struct array field toggle, length frame). `get`, `updateText` carry no clauses. |
+| `Examples/Benchmark/SolkeyBench/WithdrawalContract.lean` | solkey 50a1469 `benchmark/WithdrawalContract.sol`: constructor proved. `becomeRichest` unknown: credit to old richest and mapping frame; `withdraw` unknown: as Fund. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/SolkeyGames/KingOfEther.lean` | solkey's pull-payment King of the Ether (DoS fix): `claimThrone` proved by `sol_prove`, including the dethroned king's credit and the payable booking. `withdraw` refuted (`¬ ⊢`, kernel-checked): the contract calling itself with a credit pays itself and books nothing, so the `net(msg.sender)` clause fails. |
 | `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
 | `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |
 | `Examples/Benchmark/SolkeyGames/SendEther.lean` | solkey's three ways to send ether: `sendViaTransfer`, `sendViaSend` and `sendViaCall` each refuted by `sol_refute`: with `_to == msg.sender == this` the booked `msg.value` is never paid out, so the self-payment clauses fail. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/SolkeyMisc/Account.lean` | solkey real-world `Account` (solidity-by-example error handling): `deposit` and `withdraw` proved by `sol_prove`. |
+| `Examples/Benchmark/SolkeyMisc/DocsBallot.lean` | solkey real-world `DocsBallot` (Solidity docs delegated Ballot): `giveRightToVote`, `vote` proved. `delegate`, `winningProposal`, `winnerName` unknown: loop leaves print with `‹…›` escapes; closer gaps for struct-member saves under quantifiers and `∃` witnesses. |
+| `Examples/Benchmark/SolkeyMisc/FunctionModifier.lean` | solkey real-world `FunctionModifier`: constructor, `changeOwner` and recursive reentrancy-guarded `decrement` proved. |
+| `Examples/Benchmark/SolkeyMisc/TimeLock.lean` | solkey real-world `TimeLock` (0.8 overflow port): `deposit`, `increaseLockTime` proved. `withdraw` refuted by a kernel run: a self-withdrawal books no net debit. |
+| `Examples/Benchmark/SolkeyMisc/WETH9.lean` | solkey real-world `WETH9` (canonical WETH, 0.8 port): `deposit`, `approve` proved. `withdraw` unknown: the contract's own `transfer` shadows `address.transfer` in the front end. `transferFrom` unknown: closer exhausts heartbeats on consecutive mapping saves. |
+| `Examples/Benchmark/SolkeyOz/OZCounters.lean` | solkey's OpenZeppelin `Counters` port: all four clauses proved (unchecked increment/decrement by the leaf closer). |
+| `Examples/Benchmark/SolkeyOz/OZMath.lean` | solkey's OpenZeppelin `Math` port: `tryAdd`, `max`, `min` proved; `trySub`, `tryMul`, `tryDiv`, `tryMod`, `average`, `ceilDiv` unknown, each with its stuck leaf and missing closer law. |
+| `Examples/Benchmark/SolkeyOz/OZNonces.lean` | solkey's OpenZeppelin `Nonces` port: `nonces`, `useNonce` proved; `useCheckedNonce` unknown (wrapping add with a Boolean `!=` binding). |
+| `Examples/Benchmark/SolkeyOz/OZOwnable2Step.lean` | solkey's OpenZeppelin `Ownable2Step` port: all six clauses proved. |
+| `Examples/Benchmark/SolkeyOz/OZPausable.lean` | solkey's OpenZeppelin `Pausable` mock port: all six clauses proved. |
+| `Examples/Benchmark/SolkeyOz/OZReentrancyGuard.lean` | solkey's OpenZeppelin `ReentrancyGuard` mock port: all five clauses with both contract invariants proved, the recursive re-entry reverting. |
+| `Examples/Benchmark/SolkeyOz/SolmateOwned.lean` | solkey's Solmate `Owned` port: both clauses proved. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/Swc/IntegerOverflowMinimal.lean` | SWC-101 `integer_overflow_minimal.sol` (registry 1b62270), 0.4 wrapping `-=` as `unchecked`: `run` (`count == \old(count) - input`) refuted by a kernel-checked run from `count = 1` wrapping to 2^256-1. |
+| `Examples/Benchmark/Swc/IntegerOverflowMinimalFixed.lean` | SWC-101 `integer_overflow_minimal_fixed.sol`, SafeMath `sub`: `run` proved under the same clause. |
+| `Examples/Benchmark/Swc/WalletRefundNoSub.lean` | SWC-105 `wallet_02_refund_nosub.sol`: `refund` (`balances[msg.sender] == 0`) refuted by a run that pays and keeps the credit. Constructor, `withdraw`, `migrateTo` proved. `deposit` unknown (payable-snapshot leaf, as in WalletOk). |
+| `Examples/Benchmark/Swc/WalletOk.lean` | SWC-105 `wallet_01_ok.sol`: constructor, `withdraw`, `refund`, `migrateTo` proved. `deposit` unknown: `old` is not resolved through the parallel payable update after the mapping save (closer gap, as in Defi/Escrow). |
+| `Examples/Benchmark/Swc/MultiOwnedVulnerable.lean` | SWC-105 `multiowned_vulnerable.sol`, `onlyOwner` missing on `newOwner`: `newOwner` (only an owner adds owners) refuted by a run where a non-owner makes itself owner. Constructor and `deleteOwner` proved. |
+| `Examples/Benchmark/Swc/MultiOwnedFixed.lean` | SWC-105 `multiowned_not_vulnerable.sol`: constructor, `newOwner`, `deleteOwner` proved under the same clauses. |
+| `Examples/Benchmark/Swc/HashForEther.lean` | SWC-100 `visibility_not_set.sol`, default visibility written `public`: `_sendWinnings` (pays only a winner, `uint32(msg.sender) == 0`) refuted by a run paying account 1. `withdrawWinnings` proved. |
+| `Examples/Benchmark/Swc/HashForEtherFixed.lean` | SWC-100 `visibility_not_set_fixed.sol`, `_sendWinnings` internal: `withdrawWinnings`, the only public function, proved. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/TokenExtensions/FeeOnTransfer.lean` | Pinned weird-erc20 `TransferFeeToken` (fee credited to the `balanceOf[address(0)]` sink). Constructor proved. `transferFrom`, `transfer`: unknown at the three-slot balance-sum leaf; exact src/dst/sink effects, supply, frame and allowance spend proved as components. |
@@ -239,6 +282,13 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Tokens/ERC20Capped.lean` | Pinned OpenZeppelin 4.9.6 cap constructor/getter and inlined capped base mint; exact unchecked balance-addition cases retained. Constructor and cap getter proved; full mint unknown at wrapped-add piecewise normalization/frame closure. Cap-bound component proved separately; no reachable supply-sum premise assumed. |
 | `Examples/Benchmark/Tokens/ERC20Burnable.lean` | Pinned OpenZeppelin 4.9.6 burn/burnFrom, finite/infinite allowance spending and base burn; exact unchecked supply-underflow case retained. All four full obligations unknown at guarded two-key frames and wrapped-subtraction piecewise normalization; infinite-allowance component proved separately. |
 | `Examples/Benchmark/Tokens/ERC721Burnable.lean` | Pinned OpenZeppelin 4.9.6 authorized NFT burn with owner/approval deletion, former-owner count and full frame; unchecked zero-count case retained. Full burn obligation unknown at guarded wrapped-subtraction/old-owner normalization; owner/approval-clearing component proved separately. |
+| Module | Its examples |
+|---|---|
+| `Examples/Summaries/Vault.lean` | Vault arithmetic helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Token.lean` | Two-slot token transfer and allowance caller; storage-writing symbolic summary unsupported; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/CallChain.lean` | Three call edges and repeated intermediate helper; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Library.lean` | Recursion-free library-style helper used twice per caller; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Pricing.lean` | Shared pricing helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
 | `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `scripts/trust/executable-goal-replay.lean` in Lean CI. |
 | `Examples/ExecutableRequestData.lean` | Shared synthetic request and nondefault raw contract data for quotation and retained-candidate examples; not source admission. |
 | Module | Its examples |
@@ -258,6 +308,7 @@ At the root, the notation's own tests:
 |---|---|
 | `Examples/Tactics/OpenLoops/RowsNine.lean` | Existing `binomialRowsNine` obligation, checked with chunk 128 and preserved in the non-default H109 slow library and CI/full/lane-end/axiom-audit closure. Scoped CI acceptance uses 600 s; the 300 s default/VM STOP remains. |
 | `Examples/Tactics/OpenLoops/RowsNine/{Checkpoint,Stage1,Stage2,Stage3,Finish}.lean` | Kernel-checked continuation checkpoints for the unchanged nine-row binomial walk; 128-step chunks, the original aggregate iteration allowance, and one slow-library time cap per module. |
+| `Examples/RedTeam/Evm/Dup17.lean` | Red-team witness: `rows.push(one)` of a 16-word static value is in the compiler fragment and compiles to `DUP17`, which the abstract machine runs and the EVM does not have; no false theorem. |
 # Storage layout red team
 
 | Module | Its examples |
@@ -267,6 +318,16 @@ At the root, the notation's own tests:
 | `Examples/RedTeam/Statements/InFragmentNames.lean` | Witness: `Shrink.Lowering.InFragment` (premise of `loweringBySimulation`/`V2`) is name matching alone; a compilation with no entries is `Accepted`. |
 | `Examples/RedTeam/Statements/BackendTotalZeroBound.lean` | Witness: `compilerTotal`'s conclusion holds at array bound `L = 0` for a dynamic-array contract while every input is refused. |
 | `Examples/RedTeam/Statements/GoalPinsUnsat.lean` | Witness: `goalPinsCorrect` is false as stated (`Laws.check_exact` parses as `(Observed → check = out) ↔ CheckGraph`); also the pin graph of a folded definition ignores its body. |
+| Module | Its examples |
+|---|---|
+| `Examples/RedTeam/Syntax/LiteralFolding.lean` | Red-team witness: literal expressions with `%`, `**` or `<<` run as `uint256` arithmetic (`7 % 2 / 2 * 2` returns `0`, `2 ** 256 - 1` reverts) where solc folds them exactly (`1`, `2^256 - 1`). |
+| `Examples/RedTeam/Syntax/NegNegPrinter.lean` | Red-team witness: the program and clause printers write `-(-y)` as `--y`, a Solidity pre-decrement; runs of both programs from `y := 3` disagree. |
 | `Examples/RedTeam/Trust/ExternBoundary.lean` | Controlled kernel/native disagreement exposing the source trust lint's missing external-implementation inventory; no false theorem. Companion Node test pins the weak lint and stronger census boundaries. |
 | `Examples/RedTeam/Trust/HeadlineAxioms.lean` | Exact registered headline/endpoint type checks and transitive axiom queries; intrinsic model and instruction-list boundary only. |
+| `Examples/RedTeam/Typing/AddressRange.lean` | Red team: `address a = 2^200; address b = a + 1;` (both rejected by solc) elaborate and run to an address above `2^160`. |
+| `Examples/RedTeam/Typing/BytesIntMix.lean` | Red team: implicit `uint8`↔`bytes1`, a short hex literal at `bytes2` and `bytes1 + bytes1` (all rejected by solc) elaborate and run. |
+| `Examples/RedTeam/Typing/ConstantWrite.lean` | Red team: assignments to a `constant` and to an `immutable` outside the constructor (rejected by solc) elaborate and change the values. |
+| `Examples/RedTeam/Typing/EnumConversions.lean` | Red team: implicit enum↔`uint` conversions and `E(5)` (rejected by solc) elaborate; the last runs to a panic. |
+| `Examples/RedTeam/Typing/Mutability.lean` | Red team: a `view` body writing storage, a `pure` body reading it and `msg.value` in a non-payable function (rejected by solc) elaborate and run. |
+| `Examples/RedTeam/Typing/NarrowRootWrite.lean` | Red team: widths live outside `Ty`, so the typed statement `s = 300;` at a `uint8` root is a `Stmt` and its run leaves `s > 255`. |
 | `Examples/Panic/Origins.lean` | Typed panic-origin regressions V1 erases the cause of a panic. |
