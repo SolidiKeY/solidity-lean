@@ -20,8 +20,8 @@ def Pricing : Contract := contract!{
 local instance : InContract := ⟨Pricing⟩
 open scoped Solidity.Scoped
 
-/-- `quote(4)` computes eleven units. This is the callee verdict saved below. -/
-def calleeGoal : Fml Pricing [] := dl!{ [ uint y = quote(4); ] y == 11 }
+/-- The helper returns its specified result for every input below 1000. -/
+def calleeGoal : Fml Pricing [] := dl!{ a < 1000 → ⟨ uint y = quote(a); ⟩ y == a + 7 }
 
 /-- Solidity: `function quote(uint units) { return units + 7; }`. -/
 theorem quoteVerified : Fml.Valid calleeGoal := by
@@ -39,7 +39,7 @@ theorem estimateVerified : ⊨ᶠ dl!{ [ uint y = estimate(4); ] y == 11 } := by
 /-- The helper has no calls; all other semantic metadata is retained in context.
 `reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
 def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "quote" C.funs), "[uint y = quote(4);] y == 11",
+  ⟨reprStr (Semantics.lookupBy "quote" C.funs), "a < 1000 -> <uint y = quote(a);> y == a + 7",
     reprStr { C with funs := [] }, []⟩
 def key : Key := keyFor Pricing
 
@@ -65,5 +65,6 @@ theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
 #guard (saved.lookup (keyFor unrelatedEdit)).isSome
 #guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
 #guard (saved.lookup (keyFor calleeEdit)).isNone
+#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
 
 end Solidity.Examples.Summaries.Pricing

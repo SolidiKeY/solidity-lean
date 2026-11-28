@@ -20,13 +20,15 @@ def Vault : Contract := contract!{
 local instance : InContract := ⟨Vault⟩
 open scoped Solidity.Scoped
 
-/-- `shares(4)` computes eight shares. This is the callee verdict saved below. -/
-def calleeGoal : Fml Vault [] := dl!{ [ uint y = shares(4); ] y == 8 }
+/-- The helper returns its specified result for every input below 1000. -/
+def calleeGoal : Fml Vault [] := dl!{ a < 1000 → ⟨ uint y = shares(a); ⟩ y == a + a }
 
 /-- Solidity: `function shares(uint assets) { return assets * 2; }`. -/
 theorem sharesVerified : Fml.Valid calleeGoal := by
   unfold calleeGoal
   sol_prove
+  sol_leaf
+  sol_close
 
 /-- Solidity: `deposit(4)` reuses the symbolic summary of `shares`. -/
 theorem depositVerified : ⊨ᶠ dl!{ [ uint y = deposit(4); ] y == 8 } := by
@@ -39,7 +41,7 @@ theorem previewVerified : ⊨ᶠ dl!{ [ uint y = preview(4); ] y == 8 } := by
 /-- The helper has no calls; all other semantic metadata is retained in context.
 `reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
 def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "shares" C.funs), "[uint y = shares(4);] y == 8",
+  ⟨reprStr (Semantics.lookupBy "shares" C.funs), "a < 1000 -> <uint y = shares(a);> y == a + a",
     reprStr { C with funs := [] }, []⟩
 def key : Key := keyFor Vault
 
@@ -65,5 +67,6 @@ theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
 #guard (saved.lookup (keyFor unrelatedEdit)).isSome
 #guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
 #guard (saved.lookup (keyFor calleeEdit)).isNone
+#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
 
 end Solidity.Examples.Summaries.Vault

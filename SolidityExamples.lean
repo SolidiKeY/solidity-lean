@@ -334,6 +334,11 @@ import Solidity.Examples.SolCases
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.StaticLinear
 import Solidity.Examples.StringLaws
+import Solidity.Examples.Summaries.CallChain
+import Solidity.Examples.Summaries.Library
+import Solidity.Examples.Summaries.Pricing
+import Solidity.Examples.Summaries.Token
+import Solidity.Examples.Summaries.Vault
 import Solidity.Examples.Tactics.AbiFeatures
 import Solidity.Examples.Tactics.AbiFeaturesImport
 import Solidity.Examples.Tactics.AbiHexCall

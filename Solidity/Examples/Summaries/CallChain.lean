@@ -22,8 +22,8 @@ def CallChain : Contract := contract!{
 local instance : InContract := ⟨CallChain⟩
 open scoped Solidity.Scoped
 
-/-- `seed(2)` computes the checked result. This is the callee verdict saved below. -/
-def calleeGoal : Fml CallChain [] := dl!{ [ uint y = seed(2); ] y == 3 }
+/-- The helper returns its specified result for every input below 1000. -/
+def calleeGoal : Fml CallChain [] := dl!{ a < 1000 → ⟨ uint y = seed(a); ⟩ y == a + 1 }
 
 /-- Solidity: `function seed(uint x) { return x + 1; }`. -/
 theorem seedVerified : Fml.Valid calleeGoal := by
@@ -45,7 +45,7 @@ theorem twiceVerified : ⊨ᶠ dl!{ [ uint y = twice(2); ] y == 4 } := by
 /-- The helper has no calls; all other semantic metadata is retained in context.
 `reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
 def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "seed" C.funs), "[uint y = seed(2);] y == 3",
+  ⟨reprStr (Semantics.lookupBy "seed" C.funs), "a < 1000 -> <uint y = seed(a);> y == a + 1",
     reprStr { C with funs := [] }, []⟩
 def key : Key := keyFor CallChain
 
@@ -71,5 +71,6 @@ theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
 #guard (saved.lookup (keyFor unrelatedEdit)).isSome
 #guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
 #guard (saved.lookup (keyFor calleeEdit)).isNone
+#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
 
 end Solidity.Examples.Summaries.CallChain

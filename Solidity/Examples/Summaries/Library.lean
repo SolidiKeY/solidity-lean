@@ -20,8 +20,8 @@ def Library : Contract := contract!{
 local instance : InContract := ⟨Library⟩
 open scoped Solidity.Scoped
 
-/-- `increment(4)` computes the checked result. This is the callee verdict saved below. -/
-def calleeGoal : Fml Library [] := dl!{ [ uint y = increment(4); ] y == 5 }
+/-- The helper returns its specified result for every input below 1000. -/
+def calleeGoal : Fml Library [] := dl!{ a < 1000 → ⟨ uint y = increment(a); ⟩ y == a + 1 }
 
 /-- Solidity: `function increment(uint x) { return x + 1; }`. -/
 theorem incrementVerified : Fml.Valid calleeGoal := by
@@ -39,7 +39,7 @@ theorem rightVerified : ⊨ᶠ dl!{ [ uint y = right(4); ] y == 6 } := by
 /-- The helper has no calls; all other semantic metadata is retained in context.
 `reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
 def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "increment" C.funs), "[uint y = increment(4);] y == 5",
+  ⟨reprStr (Semantics.lookupBy "increment" C.funs), "a < 1000 -> <uint y = increment(a);> y == a + 1",
     reprStr { C with funs := [] }, []⟩
 def key : Key := keyFor Library
 
@@ -65,5 +65,6 @@ theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
 #guard (saved.lookup (keyFor unrelatedEdit)).isSome
 #guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
 #guard (saved.lookup (keyFor calleeEdit)).isNone
+#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
 
 end Solidity.Examples.Summaries.Library

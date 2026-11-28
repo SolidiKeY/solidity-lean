@@ -26,14 +26,17 @@ def Token : Contract := contract!{
 local instance : InContract := ⟨Token⟩
 open scoped Solidity.Scoped
 
-/-- `_transfer(4)` moves four units between the two account slots. This is the callee verdict saved below. -/
-def calleeGoal : Fml Token [] := dl!{ senderBalance == 10 ∧ recipientBalance == 0 →
-  [ _transfer(4); ] (senderBalance == 6 ∧ recipientBalance == 4) }
+/-- The helper transfers any amount at most ten from a ten-unit sender to an empty recipient. This is the callee verdict saved below. -/
+def calleeGoal : Fml Token [] := dl!{
+  senderBalance == 10 ∧ recipientBalance == 0 ∧ a <= 10 →
+  ⟨ _transfer(a); ⟩ (senderBalance == 10 - a ∧ recipientBalance == a) }
 
-/-- Solidity: `_transfer(4)` debits the sender and credits the recipient. -/
+/-- Solidity: `_transfer(a)` debits the sender and credits the recipient. -/
 theorem _transferVerified : Fml.Valid calleeGoal := by
   unfold calleeGoal
   sol_prove
+  sol_leaf
+  sol_close
 
 /-- Solidity: `transfer(4)` executes the common `_transfer` body (summary unsupported). -/
 theorem transferVerified : ⊨ᶠ dl!{ senderBalance == 10 ∧ recipientBalance == 0 →
@@ -48,7 +51,7 @@ theorem transferFromVerified : ⊨ᶠ dl!{ senderBalance == 10 ∧ recipientBala
 /-- The helper has no calls; all other semantic metadata is retained in context.
 `reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
 def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "_transfer" C.funs), "senderBalance=10,recipientBalance=0 -> [_transfer(4)] senderBalance=6,recipientBalance=4",
+  ⟨reprStr (Semantics.lookupBy "_transfer" C.funs), "senderBalance=10,recipientBalance=0,a<=10 -> <_transfer(a)> senderBalance=10-a,recipientBalance=a",
     reprStr { C with funs := [] }, []⟩
 def key : Key := keyFor Token
 
@@ -74,5 +77,6 @@ theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
 #guard (saved.lookup (keyFor unrelatedEdit)).isSome
 #guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
 #guard (saved.lookup (keyFor calleeEdit)).isNone
+#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
 
 end Solidity.Examples.Summaries.Token
