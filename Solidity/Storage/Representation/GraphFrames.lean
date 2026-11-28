@@ -1,7 +1,7 @@
 import Solidity.Storage.Representation.GraphLayout
 import Solidity.Semantics.RecursiveStorage.Observations
 
-/-! Exact observation frames on the committed typed graph paths. All paths
+/-! Exact observation frames on the typed graph paths. All paths
 are arbitrary finite values of the existing Path family; no depth bound. -/
 namespace Solidity.Storage.Representation.Graph
 

@@ -1002,87 +1002,87 @@ def abiEnumBelow? : RawExpr → Option (RawExpr × List (String × Nat))
     pure (t, ← pairs rest)
   | _ => none
 
-omit [FreshNames] in
-/-- A `solcEnumBelow(…)` component's type is one of its arguments. -/
-theorem abiEnumBelow?_nodes (e : RawExpr) (x : RawExpr × List (String × Nat))
-    (h : abiEnumBelow? e = some x) : x.1.nodes < e.nodes := by
-  unfold abiEnumBelow? at h
-  split at h
-  · rename_i f t rest
-    simp only [bind, Option.bind_eq_some_iff, pure, Option.some.injEq] at h
-    obtain ⟨_, _, _, _, rfl⟩ := h
-    simp only [RawExpr.nodes, RawExpr.nodesList]
-    omega
-  · cases h
+section AbiTyExprTotal
+omit [FreshNames]
 
-omit [FreshNames] in
-/-- A string that ends in `[]` is not empty. -/
-theorem length_pos_of_endsWith_brackets (t : String) (h : t.endsWith "[]" = true) :
-    0 < t.length := by
-  rcases Nat.eq_zero_or_pos t.length with h0 | h0
-  · have : t = "" := by cases t; simp_all [String.length]
-    subst this
-    exact absurd h (by decide)
-  · exact h0
+/-- Only the type-bearing spine matters to the ABI type reader. -/
+private def abiTyExprMeasure : RawExpr → Nat
+  | .name t => t.length + 1
+  | .index t _ => abiTyExprMeasure t + 1
+  | .call _ (t :: _) => abiTyExprMeasure t + 1
+  | _ => 0
 
-/-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`.
-Total by the node count, then by the length of a name (`T[]` reads `T`). -/
+private theorem abiEnumBelow_measure (e t : RawExpr) (bs : List (String × Nat))
+    (h : abiEnumBelow? e = some (t, bs)) :
+    abiTyExprMeasure t < abiTyExprMeasure e := by
+  cases e <;> try { simp [abiEnumBelow?] at h }
+  rename_i f args
+  cases args with
+  | nil => simp [abiEnumBelow?] at h
+  | cons a args =>
+    simp only [abiEnumBelow?, guard, Option.bind_eq_bind, Option.pure_def] at h
+    split at h
+    · cases hp : abiEnumBelow?.pairs args <;> simp_all [abiTyExprMeasure]
+    · contradiction
+
+/-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
 def abiTyExpr? : RawExpr → Option RawTy
   | .name t =>
-    if _h : t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array
-    else some (.named t)
+    if _h : t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array else some (.named t)
   | .index t (.num m) => (abiTyExpr? t).map (.fixed · m)
   | .call "#abiArrayType" [t] => (abiTyExpr? t).map .array
-  | e@(.call ..) => (abiEnumBelow? e).pbind fun x _ => abiTyExpr? x.1
+  | .call f args =>
+    match _h : abiEnumBelow? (.call f args) with
+    | some (t, _) => abiTyExpr? t
+    | none => none
   | _ => none
-termination_by e => (e.nodes, match e with | .name t => t.length | _ => 0)
+termination_by e => abiTyExprMeasure e
 decreasing_by
-  · exact Prod.Lex.right 1
-      (StringLaws.length_dropRight_lt t 2 (by decide) (length_pos_of_endsWith_brackets t _h))
-  · exact Prod.Lex.left _ _ (by simp only [RawExpr.nodes]; omega)
-  · exact Prod.Lex.left _ _ (by simp only [RawExpr.nodes, RawExpr.nodesList]; omega)
-  · rename_i he hx
-    exact Prod.Lex.left _ _ (by unfold namedPattern; rw [← he]; exact abiEnumBelow?_nodes e x hx)
+  · simp only [abiTyExprMeasure]
+    apply Nat.add_lt_add_right
+    apply StringLaws.length_dropRight_lt _ _ (by decide)
+    cases t with
+    | mk cs =>
+      cases cs with
+      | nil => contradiction
+      | cons c cs => exact Nat.zero_lt_succ _
+  · simp [abiTyExprMeasure]
+  · simp [abiTyExprMeasure]
+  · exact abiEnumBelow_measure _ _ _ _h
 
-omit [FreshNames] in
-/-- The name arm: `T[]` is an array of `T`. -/
+/-- Named equation for a type name, including every array suffix. -/
 theorem abiTyExpr?_name (t : String) : abiTyExpr? (.name t) =
-    if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array
-    else some (.named t) := by
-  rw [abiTyExpr?]; rfl
+    (if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array
+     else some (.named t)) := by
+  rw [abiTyExpr?]
+  split <;> rfl
 
-omit [FreshNames] in
-/-- The fixed-size arm `T[k]`. -/
+/-- Named equation for a fixed array type. -/
 theorem abiTyExpr?_index (t : RawExpr) (m : Nat) :
-    abiTyExpr? (.index t (.num m)) = (abiTyExpr? t).map (.fixed · m) := by
-  rw [abiTyExpr?]
+    abiTyExpr? (.index t (.num m)) = (abiTyExpr? t).map (.fixed · m) := by rw [abiTyExpr?]
 
-omit [FreshNames] in
-/-- The `#abiArrayType(T)` arm. -/
-theorem abiTyExpr?_arrayType (t : RawExpr) :
-    abiTyExpr? (.call "#abiArrayType" [t]) = (abiTyExpr? t).map .array := by
-  rw [abiTyExpr?]
+/-- Named equation for the imported dynamic array type marker. -/
+theorem abiTyExpr?_array (t : RawExpr) :
+    abiTyExpr? (.call "#abiArrayType" [t]) = (abiTyExpr? t).map .array := by rw [abiTyExpr?]
 
-omit [FreshNames] in
-/-- Any other call: the type of a `solcEnumBelow(…)` component. -/
-theorem abiTyExpr?_call (f : String) (as : List RawExpr)
-    (h : ∀ t, ¬ (f = "#abiArrayType" ∧ as = [t])) :
-    abiTyExpr? (.call f as) =
-      (abiEnumBelow? (.call f as)).bind fun (t, _) => abiTyExpr? t := by
+/-- Other calls use exactly the original enum-wrapper parser. -/
+theorem abiTyExpr?_call (f : String) (args : List RawExpr)
+    (harray : ∀ t, f ≠ "#abiArrayType" ∨ args ≠ [t]) :
+    abiTyExpr? (.call f args) =
+      (abiEnumBelow? (.call f args)).bind (fun (t, _) => abiTyExpr? t) := by
   rw [abiTyExpr?]
-  · cases abiEnumBelow? (.call f as) <;> rfl
-  · intro t hf ha; exact h t ⟨hf, ha⟩
+  · cases abiEnumBelow? (.call f args) <;> rfl
+  · intro t hf ha
+    exact (harray t).elim (fun h => h hf) (fun h => h ha)
 
-omit [FreshNames] in
-/-- The last arm: no other expression is a type. -/
-theorem abiTyExpr?_other (e : RawExpr) (hn : ∀ t, e ≠ .name t)
-    (hi : ∀ t m, e ≠ .index t (.num m)) (hc : ∀ f as, e ≠ .call f as) :
-    abiTyExpr? e = none := by
-  rw [abiTyExpr?]
-  · intro t h; exact hn t h
-  · intro t m h; exact hi t m h
-  · intro t h; exact hc _ _ h
-  · intro f as h; exact hc _ _ h
+/-- Expressions outside the type syntax are refused. -/
+theorem abiTyExpr?_other (e : RawExpr)
+    (hn : ∀ t, e ≠ .name t) (hi : ∀ t m, e ≠ .index t (.num m))
+    (hc : ∀ f args, e ≠ .call f args) : abiTyExpr? e = none := by
+  rw [abiTyExpr?] <;> first | assumption | (intro t; exact hc _ _)
+
+end AbiTyExprTotal
+
 /-- The narrow positions of a value of reference type: a place's
 (`placeShape`), a `new`'s type's, a function's return's, a conditional's
 first branch's (`narrowWholeAt?` admits one whose branches agree). -/
@@ -1966,150 +1966,186 @@ theorem bytesOf?_other (Γ : ECtx) :
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;> intros <;>
     first | rfl | (rename_i op _ h; cases op <;> first | rfl | exact absurd rfl h)
 
-omit [FreshNames] in
-/-- A piece of `splitTop` is no longer than what was read. -/
-theorem splitTop_length_le (sep : Char) : ∀ (cs : List Char) (d : Nat) (acc x : List Char),
-    x ∈ StructEnc.splitTop sep d acc cs → x.length ≤ acc.length + cs.length
-  | [], d, acc, x, h => by
-    simp only [StructEnc.splitTop, List.mem_singleton] at h
-    simp [h]
-  | c :: cs, d, acc, x, h => by
-    rw [StructEnc.splitTop] at h
-    split at h
-    · rcases List.mem_cons.mp h with h | h
-      · simp [h]
-      · have := splitTop_length_le sep cs 0 [] x h
-        simp at this ⊢; omega
-    · have := splitTop_length_le sep cs _ (c :: acc) x h
-      simp at this ⊢; omega
+section AbiFnTotal
+omit [FreshNames]
 
-omit [FreshNames] in
-/-- A component of `splitTopCommas` is no longer than the list. -/
-theorem splitTopCommas_length_le (s x : String) (h : x ∈ splitTopCommas s) :
+private theorem abiSplitTop_length (sep : Char) (d : Nat) (acc cs x : List Char)
+    (h : x ∈ Semantics.StructEnc.splitTop sep d acc cs) :
+    x.length ≤ acc.length + cs.length := by
+  induction cs generalizing d acc with
+  | nil =>
+    simp only [Semantics.StructEnc.splitTop, List.mem_singleton] at h
+    subst x
+    simp
+  | cons c cs ih =>
+    simp only [Semantics.StructEnc.splitTop] at h
+    split at h
+    · simp only [List.mem_cons] at h
+      rcases h with rfl | h
+      · simp
+      · have hb := ih 0 [] h
+        simp only [List.length_nil, Nat.zero_add] at hb
+        simp only [List.length_cons]
+        omega
+    · have hb := ih _ (c :: acc) h
+      simp only [List.length_cons] at hb ⊢
+      omega
+
+private theorem abiSplitTopCommas_length (s x : String) (h : x ∈ splitTopCommas s) :
     x.length ≤ s.length := by
   unfold splitTopCommas at h
   split at h
-  · cases h
-  · obtain ⟨l, hl, rfl⟩ := List.mem_map.mp h
-    have := splitTop_length_le ',' s.toList 0 [] l hl
-    simpa using this
+  · contradiction
+  · obtain ⟨cs, hc, rfl⟩ := List.mem_map.mp h
+    simpa only [List.length_nil, Nat.zero_add] using abiSplitTop_length ',' 0 [] s.toList cs hc
 
-omit [FreshNames] in
-/-- `fnParts?`'s `close` consumes the closing `)`. -/
-theorem close_length : ∀ (cs : List Char) (d : Nat) (acc ps rest : List Char),
-    fnParts?.close d acc cs = some (ps, rest) → ps.length + rest.length < acc.length + cs.length
-  | [], d, acc, ps, rest, h => by simp [fnParts?.close] at h
-  | c :: cs, d, acc, ps, rest, h => by
-    rw [fnParts?.close] at h
+private theorem abiClose_length (d : Nat) (acc cs ps rest : List Char)
+    (h : fnParts?.close d acc cs = some (ps, rest)) :
+    ps.length + rest.length < acc.length + cs.length := by
+  induction cs generalizing d acc with
+  | nil => simp [fnParts?.close] at h
+  | cons c cs ih =>
+    simp only [fnParts?.close] at h
     split at h
-    · simp only [Option.some.injEq, Prod.mk.injEq] at h
-      obtain ⟨rfl, rfl⟩ := h
+    · cases h
       simp
-    · have := close_length cs _ (c :: acc) ps rest h
-      simp at this ⊢; omega
+    · have hb := ih _ (c :: acc) h
+      simp only [List.length_cons] at hb ⊢
+      omega
 
-omit [FreshNames] in
-/-- A function type's parameters and returns are shorter than its spelling. -/
-theorem fnParts?_length_lt (s : String) (ps rs : List String) (ext : Bool)
+private theorem abiFnParts_length (s : String) (ps rs : List String) (ext : Bool)
     (h : fnParts? s = some (ps, rs, ext)) :
-    (∀ p ∈ ps, p.length < s.length) ∧ (∀ r ∈ rs, r.length < s.length) := by
+    (∀ x ∈ ps, x.length < s.length) ∧ (∀ x ∈ rs, x.length < s.length) := by
   unfold fnParts? at h
-  simp only [bind, Option.bind_eq_some_iff, pure] at h
-  obtain ⟨_, _, ⟨qs, rest⟩, hc, h⟩ := h
-  have hcl := close_length _ 0 [] qs rest hc
-  have hd := StringLaws.length_drop_le s 9
-  have ht : (s.drop 9).toList.length = (s.drop 9).length := rfl
-  simp only [List.length_nil, Nat.zero_add] at hcl
-  have hq : (String.mk qs).length < s.length := by simp only [String.length_mk]; omega
-  have hr : ∀ r : String, r.length ≤ (String.mk rest).length → r.length < s.length := by
-    intro r hr; simp only [String.length_mk] at hr; omega
-  have hr' : (if (String.mk rest).startsWith "external" = true then (String.mk rest).drop 8
-      else String.mk rest).length ≤ (String.mk rest).length := by
-    split
-    · exact StringLaws.length_drop_le _ _
-    · exact Nat.le_refl _
-  generalize (if (String.mk rest).startsWith "external" = true then (String.mk rest).drop 8
-      else String.mk rest) = R at h hr'
+  simp only [guard, Option.bind_eq_bind, Option.pure_def, String.toList] at h
   split at h
-  · simp only [Option.bind_some, Option.some.injEq, Prod.mk.injEq] at h
-    obtain ⟨rfl, rfl, _⟩ := h
-    exact ⟨fun p hp => Nat.lt_of_le_of_lt (splitTopCommas_length_le _ p hp) hq, by simp⟩
-  · split at h
-    · simp only [Option.bind_some, Option.some.injEq, Prod.mk.injEq] at h
-      obtain ⟨rfl, rfl, _⟩ := h
-      refine ⟨fun p hp => Nat.lt_of_le_of_lt (splitTopCommas_length_le _ p hp) hq, fun r hr0 => hr r ?_⟩
-      exact Nat.le_trans (splitTopCommas_length_le _ r hr0)
-        (Nat.le_trans (StringLaws.length_dropRight_le _ _) (Nat.le_trans (StringLaws.length_drop_le _ _) hr'))
-    · simp at h
+  next ht =>
+    simp only [Option.bind_some] at h
+    cases hc : fnParts?.close 0 [] (s.drop 9).data with
+    | none => simp [hc] at h
+    | some p =>
+      obtain ⟨as, bs⟩ := p
+      have hb := abiClose_length 0 [] (s.drop 9).toList as bs hc
+      have hd := StringLaws.length_drop_le s 9
+      have ha : (String.mk as).length < s.length := by
+        simp only [List.length_nil, Nat.zero_add] at hb
+        change as.length + bs.length < (s.drop 9).length at hb
+        change as.length < s.length
+        omega
+      have hb' : (String.mk bs).length < s.length := by
+        simp only [List.length_nil, Nat.zero_add] at hb
+        change as.length + bs.length < (s.drop 9).length at hb
+        change bs.length < s.length
+        omega
+      simp only [hc, Option.bind_some] at h
+      have hr : (if (String.mk bs).startsWith "external" then
+          (String.mk bs).drop 8 else String.mk bs).length < s.length := by
+        split
+        · exact Nat.lt_of_le_of_lt (StringLaws.length_drop_le _ _) hb'
+        · exact hb'
+      generalize he : (if (String.mk bs).startsWith "external" then
+        (String.mk bs).drop 8 else String.mk bs) = r at h hr
+      split at h
+      · simp only [Option.some.injEq, Prod.mk.injEq] at h
+        obtain ⟨rfl, rfl, rfl⟩ := h
+        exact ⟨fun x hx => Nat.lt_of_le_of_lt (abiSplitTopCommas_length _ x hx) ha,
+          by intro x hx; cases hx⟩
+      · split at h
+        · simp only [Option.some.injEq, Prod.mk.injEq] at h
+          obtain ⟨rfl, rfl, rfl⟩ := h
+          constructor
+          · exact fun x hx => Nat.lt_of_le_of_lt (abiSplitTopCommas_length _ x hx) ha
+          · intro x hx
+            exact Nat.lt_of_le_of_lt (abiSplitTopCommas_length _ x hx)
+              (Nat.lt_of_le_of_lt (StringLaws.length_dropRight_le _ _)
+                (Nat.lt_of_le_of_lt (StringLaws.length_drop_le _ _) hr))
+        · simp at h
+  next ht =>
+    change (none : Option (List String × List String × Bool)) = some _ at h
+    exact Option.noConfusion h
 
-omit [FreshNames] in
-/-- A string that starts with `(` is not empty. -/
-theorem length_pos_of_startsWith_paren (T : String) (h : T.startsWith "(" = true) :
-    0 < T.length := by
-  rcases Nat.eq_zero_or_pos T.length with h0 | h0
-  · have : T = "" := by cases T; simp_all [String.length]
-    subst this
-    exact absurd h (by decide)
-  · exact h0
-
-omit [FreshNames] in
-/-- `fnParts?_length_lt` on the unsplit result. -/
-theorem fnParts?_length_lt' (s : String) (x : List String × List String × Bool)
-    (h : fnParts? s = some x) :
-    (∀ p ∈ x.1, p.length < s.length) ∧ (∀ r ∈ x.2.1, r.length < s.length) :=
-  fnParts?_length_lt s x.1 x.2.1 x.2.2 h
-
-/-- ABI aliases normalize without erasing integer widths or byte/address kinds.
-Total by the spelling's length; `abiFnType_eq` is its defining equation. -/
-def abiFnType (T : String) : String :=
-  Option.pelim (fnParts? T)
-    (if _hp : T.startsWith "(" && T.endsWith ")" then
+/-- One normalization step; every recursive argument is strictly shorter. -/
+private def abiFnTypeStep (T : String) (parts : Option (List String × List String × Bool))
+    (hp : fnParts? T = parts) (recur : (t : String) → t.length < T.length → String) : String :=
+  match parts with
+  | some (ps, rs, ext) =>
+    fnTyStr (ps.attach.map fun p => recur p.1 ((abiFnParts_length _ _ _ _ hp).1 _ p.2))
+      (rs.attach.map fun r => recur r.1 ((abiFnParts_length _ _ _ _ hp).2 _ r.2)) ext
+  | none =>
+    if ht : T.startsWith "(" && T.endsWith ")" then
+      have hp : 0 < T.length := by
+        cases T with
+        | mk cs =>
+          cases cs with
+          | nil => contradiction
+          | cons c cs => exact Nat.zero_lt_succ _
       "(" ++ ",".intercalate ((splitTopCommas ((T.drop 1).dropRight 1)).attach.map
-        fun ⟨c, _⟩ => abiFnType c) ++ ")"
-    else match _hs : T.splitOn "[" with
-      | base :: rest@(_ :: _) => abiFnType base ++ "[" ++ "[".intercalate rest
-      | _ => if T == "uint" then "uint256" else if T == "int" then "int256" else T)
-    fun x _ => fnTyStr (x.1.attach.map fun ⟨p, _⟩ => abiFnType p)
-      (x.2.1.attach.map fun ⟨r, _⟩ => abiFnType r) x.2.2
-termination_by T.length
-decreasing_by
-  · rename_i hm
-    have h1 := splitTopCommas_length_le ((T.drop 1).dropRight 1) _ hm
-    have h2 := StringLaws.length_dropRight_le (T.drop 1) 1
-    have h3 := StringLaws.length_drop_lt T 1 Nat.zero_lt_one
-      (length_pos_of_startsWith_paren T (Bool.and_eq_true_iff.mp _hp).1)
-    omega
-  · have hl : 1 < (T.splitOn "[").length := by
-      rw [_hs]; exact Nat.succ_lt_succ (Nat.succ_pos _)
-    have hm : base ∈ T.splitOn "[" := by rw [_hs]; exact List.mem_cons_self
-    exact StringLaws.length_splitOn_lt T "[" base hl hm
-  · rename_i hx hm
-    exact (fnParts?_length_lt' T x hx).1 _ hm
-  · rename_i hx hm
-    exact (fnParts?_length_lt' T x hx).2 _ hm
+        fun t => recur t.1 (Nat.lt_of_le_of_lt (abiSplitTopCommas_length _ _ t.2)
+          (Nat.lt_of_le_of_lt (StringLaws.length_dropRight_le _ _)
+            (StringLaws.length_drop_lt _ 1 (by decide) hp)))) ++ ")"
+    else match hs : T.splitOn "[" with
+    | base :: rest@(_ :: _) =>
+      recur base (StringLaws.length_splitOn_lt T "[" base (by simp [hs]) (by simp [hs])) ++
+        "[" ++ "[".intercalate rest
+    | _ => if T == "uint" then "uint256" else if T == "int" then "int256" else T
 
-omit [FreshNames] in
-/-- `abiFnType`'s defining equation. -/
+section AbiFnEquation
+attribute [local irreducible] fnParts? splitTopCommas String.splitOn
+
+/-- A constant-in-the-proof callback recovers the original parser equation. -/
+private theorem abiFnTypeStep_eq (T : String) (parts : Option (List String × List String × Bool))
+    (hp : fnParts? T = parts) (f : String → String) :
+    abiFnTypeStep T parts hp (fun t _ => f t) =
+    (match (generalizing := false) parts with
+    | some (ps, rs, ext) => fnTyStr (ps.map f) (rs.map f) ext
+    | none =>
+      if T.startsWith "(" && T.endsWith ")" then
+        "(" ++ ",".intercalate ((splitTopCommas ((T.drop 1).dropRight 1)).map f) ++ ")"
+      else match T.splitOn "[" with
+      | base :: rest@(_ :: _) => f base ++ "[" ++ "[".intercalate rest
+      | _ => if T == "uint" then "uint256" else if T == "int" then "int256" else T) := by
+  cases parts with
+  | some p =>
+    obtain ⟨ps, rs, ext⟩ := p
+    simp only [abiFnTypeStep, List.attach_map_val]
+  | none =>
+    by_cases ht : (T.startsWith "(" && T.endsWith ")") = true
+    · simp only [abiFnTypeStep, ht, dite_true, if_true, List.attach_map_val]
+    · simp only [abiFnTypeStep, ht, dite_false, if_false, Bool.false_eq_true]
+      cases hs : T.splitOn "[" with
+      | nil => rfl
+      | cons a xs => cases xs <;> rfl
+
+end AbiFnEquation
+
+-- Compare callbacks without reducing the parser or its dependent step.
+attribute [local irreducible] abiFnTypeStep fnParts? splitTopCommas String.splitOn
+
+/-- Keep the parser application outside the recursive equation compiler. -/
+private def abiFnTypeNext (T : String) (recur : (t : String) → t.length < T.length → String) : String :=
+  abiFnTypeStep T (fnParts? T) rfl recur
+
+/-- ABI aliases normalize without erasing integer widths or byte/address kinds. -/
+def abiFnType (T : String) : String :=
+  abiFnTypeNext T (fun t _ => abiFnType t)
+termination_by T.length
+decreasing_by assumption
+
+/-- The defining equation keeps the original parser branches and list order. -/
 theorem abiFnType_eq (T : String) : abiFnType T =
-    match fnParts? T with
+    (match fnParts? T with
     | some (ps, rs, ext) => fnTyStr (ps.map abiFnType) (rs.map abiFnType) ext
     | none =>
       if T.startsWith "(" && T.endsWith ")" then
         "(" ++ ",".intercalate ((splitTopCommas ((T.drop 1).dropRight 1)).map abiFnType) ++ ")"
       else match T.splitOn "[" with
       | base :: rest@(_ :: _) => abiFnType base ++ "[" ++ "[".intercalate rest
-      | _ => if T == "uint" then "uint256" else if T == "int" then "int256" else T := by
-  rewrite [abiFnType.eq_1 T]
-  generalize fnParts? T = o
-  cases o with
-  | some x =>
-    obtain ⟨ps, rs, ext⟩ := x
-    simp only [Option.pelim, List.map_attach_eq_pmap, List.pmap_eq_map]
-  | none =>
-    simp only [Option.pelim]
-    split
-    · simp only [List.map_attach_eq_pmap, List.pmap_eq_map]
-    · split <;> rename_i hs <;> simp only [hs]
+      | _ => if T == "uint" then "uint256" else if T == "int" then "int256" else T) := by
+  rw [abiFnType]
+  exact abiFnTypeStep_eq T (fnParts? T) rfl abiFnType
+
+end AbiFnTotal
+
 /-- Check the implicit conversion before contextual ABI encoding. The raw
 syntax retains widths/byte markers, but not nominal enum identity; that limit
 is shared with declaration metadata, not repaired by an explicit narrowing cast. -/

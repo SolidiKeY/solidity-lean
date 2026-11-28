@@ -2,8 +2,7 @@ import Solidity.Storage.Representation.Model
 import Solidity.Storage.HashedSeparation
 
 /-! Source reads from represented scalar, mapping and array values.
-The symbolic read laws use no hash premise. Physical transport must later
-restrict observations to a covered finite touched set. -/
+The symbolic read laws use no hash premise. -/
 namespace Solidity.Storage.Representation
 
 /-- One symbolic full-word write. -/
@@ -106,7 +105,7 @@ theorem array_missing {E : Ty} {n : Nat} (vs : SVec E n) (sh : SList E)
     (SVal.array vs sh hn).find (.at i .nil) = none := by
   rw [SVal.find_at, List.getElem?_eq_none hi]
 
-/-- Reuse the committed source frame law at arbitrary typed paths. -/
+/-- Reuse the source frame law at arbitrary typed paths. -/
 theorem source_frame {T U V : Ty} {start changed : SVal T} {new : SVal U}
     {p : Path T U} {q : Path T V} (saved : start.save p new = some changed)
     (apart : Path.Diverges p q) : changed.find q = start.find q := by

@@ -2,38 +2,6 @@ import Solidity.Theory.Progress.Fragment
 import Solidity.Source.Progress.BuiltinStatements
 import Solidity.Source.Progress.EmitBuiltins
 
-/-!
-# Leaf statements as extensions (S4.2)
-
-Three statement kinds the source interpreter runs, each an instance of the
-extension lemma shape `StmtExt.Sound` (`Theory/Progress/Fragment.lean`), so
-they are admitted inside every block, loop and body of the closure:
-
-* `emit E(args);` with arguments of the call fragment and event parameters
-  of elementary keyable types (`emitExt`, sound for every program,
-  `emitExt_sound`; the static-frame revert is kept);
-* `revert E(args);` of a custom error, under the same conditions
-  (`revertErrorExt`, `revertErrorExt_sound`): it always reverts;
-* a builtin statement (`require`, `assert`, `revert`, the hashes of a
-  string literal, `addmod`/`mulmod`, `ecrecover`) of
-  `Source/Progress/BuiltinAdmission.lean`'s `BuiltinFragment`
-  (`builtinExt`). Its soundness (`builtinExt_sound`) asks expression
-  progress at **every** horizon, which the call-free fragment (`exprNSAt`,
-  `leafExt_sound_callFree`) and checked elaborated programs
-  (`checked_fragments`, `elaborated_leafExt_sound` in
-  `Theory/Progress/Program.lean`) give, but the joint induction of
-  `Theory/Progress/Calls.lean` does not (it has only the horizons up to the
-  current one). With calls, then, a builtin statement is admitted at a call
-  site of a checked elaborated program, not inside the called bodies
-  (which `CallsOK` keeps in the value fragment). The step lemmas the existing direct-node adapters prove
-  (`execS_emit_ns`, `checked_builtin_statement`) give `NS` only; the ones
-  here add the postcondition the closure needs (a simple statement ends
-  normally; nothing escapes).
-
-`leafExt` combines the three (`leafExt_sound`, by `StmtExt.Sound.or`);
-`effectExt` the first two, sound with no further premise
-(`effectExt_sound`).
--/
 
 namespace Solidity.Theory.Progress
 
@@ -41,39 +9,30 @@ open Solidity.Source Solidity.Source.Progress EM
 
 variable {E : Env}
 
-/-- `emit ev(args);` with fragment arguments and keyable parameters. -/
 inductive EmitNode (A : Decl → Prop) {R : List STy} {M : Bool} :
     {k : SCtx} → {Γ Γ' : RCtx} → RStmt E R M k Γ Γ' → Prop where
   | mk {k : SCtx} {Γ : RCtx} {ps : List STy} (ev : Decl) (he : ev.paramTys E = some ps) (args : RConvArgs E Γ ps) :
       ps.all STy.keyable = true → RConvArgs.ValFragC A args →
       EmitNode A (RStmt.emit (R := R) (M := M) (k := k) ev he args)
 
-/-- `revert er(args);` with fragment arguments and keyable parameters. -/
 inductive RevertErrorNode (A : Decl → Prop) {R : List STy} {M : Bool} :
     {k : SCtx} → {Γ Γ' : RCtx} → RStmt E R M k Γ Γ' → Prop where
   | mk {k : SCtx} {Γ : RCtx} {ps : List STy} (er : Decl) (he : er.paramTys E = some ps) (args : RConvArgs E Γ ps) :
       ps.all STy.keyable = true → RConvArgs.ValFragC A args →
       RevertErrorNode A (RStmt.revertError (R := R) (M := M) (k := k) er he args)
 
-/-- A builtin statement of the builtins' fragment. -/
 inductive BuiltinNode (A : Decl → Prop) {R : List STy} {M : Bool} :
     {k : SCtx} → {Γ Γ' : RCtx} → RStmt E R M k Γ Γ' → Prop where
   | mk {k : SCtx} {Γ : RCtx} {ts : List STy} {t : STy} (b : Builtin) (args : RArgs E Γ ts)
       (ht : b.callTy E.isBase E.mapFree ts = some t) :
       BuiltinFragment A b args t → BuiltinNode A (RStmt.expr (R := R) (M := M) (k := k) (.builtin b args ht))
 
-/-- `emit` nodes as an extension. -/
 def emitExt (A : Decl → Prop) : StmtExt E := ⟨fun s _ => EmitNode A s⟩
-/-- Custom-error reverts as an extension. -/
 def revertErrorExt (A : Decl → Prop) : StmtExt E := ⟨fun s _ => RevertErrorNode A s⟩
-/-- Builtin statements as an extension. -/
 def builtinExt (A : Decl → Prop) : StmtExt E := ⟨fun s _ => BuiltinNode A s⟩
 
-/-- The three leaf extensions. -/
 def leafExt (A : Decl → Prop) : StmtExt E := (emitExt A).or ((revertErrorExt A).or (builtinExt A))
 
-/-- **`emit` is sound**: never `stuck`; it completes normally or reverts
-(static frame). -/
 theorem emitExt_sound (G : Glob E) (A : Decl → Prop) (Q : String → Prop) : (emitExt A).Sound G A Q := by
   intro _ _ n _ hX F hP nps ph R M k Γ Γ' s _ l hs _ ho _
   cases hs with
@@ -89,7 +48,6 @@ theorem emitExt_sound (G : Glob E) (A : Decl → Prop) (Q : String → Prop) : (
         (F.this, G.selector (sigOf E.layout ev.name ps) ++ data) :: s.logs }))) fun _ _ =>
         NSP.pure' ⟨fun h => h.elim, fun _ => rfl⟩
 
-/-- **A custom-error revert is sound**: it is never `stuck`; it reverts. -/
 theorem revertErrorExt_sound (G : Glob E) (A : Decl → Prop) (Q : String → Prop) :
     (revertErrorExt A).Sound G A Q := by
   intro _ _ n _ hX F hP nps ph R M k Γ Γ' s _ l hs _ ho _
@@ -100,8 +58,6 @@ theorem revertErrorExt_sound (G : Glob E) (A : Decl → Prop) (Q : String → Pr
       (NSP.of_ns ((hX n (Nat.le_refl n) F hP).convArgs args hf ho)) fun _ _ _ => trivial)) fun p _ => ?_
     exact NSP.bind (NSP.of_ns (encodeVals_key_ns F n false hp p.1)) fun _ _ => NSP.halt' trivial
 
-/-- **A builtin statement is sound** where expression progress holds at
-every horizon; it completes normally, reverts or panics. -/
 theorem builtinExt_sound {G : Glob E} {A : Decl → Prop} {Q : String → Prop}
     (hAll : ∀ n F, Q F.contract → ExprNSAt A G F n) : (builtinExt A).Sound G A Q := by
   intro _ _ n _ _ F hP nps ph R M k Γ Γ' s _ l hs _ _ _
@@ -115,22 +71,15 @@ theorem builtinExt_sound {G : Glob E} {A : Decl → Prop} {Q : String → Prop}
     exact NSP.bind (NSP.sub' (Q := fun _ => True) (NSP.weaken (NSP.of_ns hb) fun _ _ _ => trivial)) fun _ _ =>
       NSP.pure' ⟨fun _ => ⟨_, rfl⟩, fun _ => rfl⟩
 
-/-- **The leaf extensions together are sound**, given expression progress
-at every horizon. -/
 theorem leafExt_sound {G : Glob E} {A : Decl → Prop} {Q : String → Prop}
     (hAll : ∀ n F, Q F.contract → ExprNSAt A G F n) : (leafExt A).Sound G A Q :=
   (emitExt_sound G A Q).or ((revertErrorExt_sound G A Q).or (builtinExt_sound hAll))
 
-/-- The two effect leaves, `emit` and custom-error reverts. -/
 def effectExt (A : Decl → Prop) : StmtExt E := (emitExt A).or (revertErrorExt A)
 
-/-- **The effect leaves are sound in every program**, with calls: unlike
-builtin statements they need expression progress only up to the current
-horizon, so they may occur inside called bodies of `fragXAt`. -/
 theorem effectExt_sound (G : Glob E) (A : Decl → Prop) (Q : String → Prop) : (effectExt A).Sound G A Q :=
   (emitExt_sound G A Q).or (revertErrorExt_sound G A Q)
 
-/-- Call-free programs have expression progress at every horizon. -/
 theorem leafExt_sound_callFree (G : Glob E) (Q : String → Prop) : (leafExt (fun _ => False)).Sound G (fun _ => False) Q :=
   leafExt_sound fun n F _ => exprNSAt G F n
 

@@ -48,24 +48,7 @@ theorem array_word (D : Source.Layout) (f : Source.FixTy) (n : Nat)
     (m : ByteView) (base : Nat) (values : Fin n → Source.Val D (.fixed f))
     (decoded : decodeArray D f n m base=some values) :
     ∀ i,(values i).word=some (mload m (base+i.val*32)) := by
-  unfold Solidity.Yul.Views.FixedMemory.decodeArray at decoded
-  induction n generalizing base with
-  | zero => intro i; exact Fin.elim0 i
-  | succ n ih =>
-    change (do let head ← Solidity.Yul.Views.FixedMemory.decode D f (Solidity.Yul.Views.mload m base); let tail ← Solidity.Yul.Views.decodeArrayWith (Solidity.Yul.Views.FixedMemory.decode D f) n m (base+32); pure (Fin.cases head tail))=some values at decoded
-    cases dh : Solidity.Yul.Views.FixedMemory.decode D f (Solidity.Yul.Views.mload m base) with
-    | none => rw [dh] at decoded; cases decoded
-    | some head =>
-      cases dt : Solidity.Yul.Views.decodeArrayWith (Solidity.Yul.Views.FixedMemory.decode D f) n m (base+32) with
-      | none => rw [dh,dt] at decoded; cases decoded
-      | some tail =>
-        rw [dh,dt] at decoded
-        cases decoded
-        intro i
-        refine Fin.cases ?_ (fun j => ?_) i
-        · simpa only [Fin.cases_zero,Fin.val_zero,Nat.zero_mul,Nat.add_zero] using Solidity.Yul.Views.FixedMemory.word D f _ head dh
-        · have eq : base+j.succ.val*32=base+32+j.val*32 := by simp only [Fin.val_succ]; omega
-          simpa only [Fin.cases_succ,eq] using ih (base+32) tail dt j
+  exact decodeArrayWith_word (decode D f) (word D f) n m base values decoded
 
 theorem array_decode_encode (D : Source.Layout) (f : Source.FixTy) (n : Nat) (m : ByteView) (base : Nat)
     (old : Fin n → Source.Val D (.fixed f))

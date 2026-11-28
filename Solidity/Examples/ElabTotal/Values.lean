@@ -3,12 +3,12 @@ import Solidity.Syntax.Elab.Values
 /-!
 # Checks: the value rewrites' equations
 
-The functions of `Syntax/Elab/Values.lean` checked here are total, so each
-unfolds by its named equations with no `native_decide`: structural ones
-(`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`) also reduce in the kernel (`rfl`),
-the well-founded ones (`narrowPure`, the three mutual `narrow…?`, `abiTyName`,
-`bytesPure`, `fnPure`, `abiTyExpr?`, `abiFnType`) by rewriting. The `#guard`s
-pin the compiled functions.
+The functions of `Syntax/Elab/Values.lean` checked here are total,
+so each unfolds by its named equations with no
+`native_decide`: structural ones (`fnTyOfExpr`, `rawFnTyOfExpr?`, `bytesOf?`)
+also reduce in the kernel (`rfl`), the well-founded ones (`narrowPure`, the
+three mutual `narrow…?`, `abiTyName`, `bytesPure`, `fnPure`) by rewriting. The `#guard`s pin the
+compiled functions.
 -/
 
 namespace Solidity.Examples.ElabTotal.Values
@@ -418,50 +418,54 @@ example (ty : String) (h : fnParts? ty = none) :
   "error: abi.encodeCall: the function's ABI parameter types are unavailable"
 #guard shown (fnPure C0 [] (.call "abi.encode" [.num 1, .name "a"])) == "abi.encode(1, a)"
 
-/-! ### `abiTyExpr?`, `abiFnType`: by node count and by length -/
+section AbiTotal
+omit [FreshNames]
 
-omit [FreshNames] in
-/-- A name that does not end in `[]` is the named type. -/
-theorem abiTyExpr?_plain (t : String) (h : t.endsWith "[]" = false) :
-    abiTyExpr? (.name t) = some (.named t) := by
-  rw [abiTyExpr?_name, h]; rfl
+/-- ABI type expressions retain dynamic and fixed array nesting. -/
+theorem abiTyExpr?_nested (t : RawExpr) (n : Nat) :
+    abiTyExpr? (.call "#abiArrayType" [.index t (.num n)]) =
+      ((abiTyExpr? t).map (.fixed · n)).map .array := by
+  rw [abiTyExpr?_array, abiTyExpr?_index]
 
-omit [FreshNames] in
-/-- `T[k]` over a plain name, then under `#abiArrayType`: `T[k][]`. -/
-theorem abiTyExpr?_fixed_array (t : String) (k : Nat) (h : t.endsWith "[]" = false) :
-    abiTyExpr? (.call "#abiArrayType" [.index (.name t) (.num k)]) =
-      some (.array (.fixed (.named t) k)) := by
-  rw [abiTyExpr?_arrayType, abiTyExpr?_index, abiTyExpr?_plain t h]; rfl
+/-- A suffix-bearing name follows the same recursive array equation. -/
+theorem abiTyExpr?_name_array (t : String) (h : t.endsWith "[]" = true) :
+    abiTyExpr? (.name t) = (abiTyExpr? (.name (t.dropRight 2))).map .array := by
+  rw [abiTyExpr?_name, if_pos h]
 
-/-- A literal is no type. -/
-example (n : Nat) : abiTyExpr? (.num n) = none :=
-  abiTyExpr?_other _ (fun _ h => by cases h) (fun _ _ h => by cases h) (fun _ _ h => by cases h)
+/-- Empty enum metadata still delegates to the wrapped type. -/
+theorem abiTyExpr?_enum (t : RawExpr) :
+    abiTyExpr? (.call "solcEnumBelow" [t]) = abiTyExpr? t := by
+  rw [abiTyExpr?_call]
+  · rfl
+  · intro x; exact Or.inl (by decide)
 
-/-- A call that is no `solcEnumBelow(…)` component is no type. -/
-example (f : String) (as : List RawExpr) (h : ∀ t, ¬ (f = "#abiArrayType" ∧ as = [t]))
-    (he : abiEnumBelow? (.call f as) = none) : abiTyExpr? (.call f as) = none := by
-  rw [abiTyExpr?_call f as h, he]; rfl
+/-- Booleans cannot denote ABI types. -/
+theorem abiTyExpr?_refused : abiTyExpr? (.bool true) = none := by
+  apply abiTyExpr?_other <;> simp
 
-omit [FreshNames] in
-/-- A spelling that is no function type, tuple or array is a leaf: `uint` and
-`int` take their widths, any other stays. -/
-theorem abiFnType_leaf (T : String) (h : fnParts? T = none)
-    (hp : (T.startsWith "(" && T.endsWith ")") = false) (hs : T.splitOn "[" = [T]) :
-    abiFnType T = if T == "uint" then "uint256" else if T == "int" then "int256" else T := by
-  rw [abiFnType_eq, h]
-  simp only [hp, hs, Bool.false_eq_true, ↓reduceIte]
+/-- Tuple components retain their order in the named normalization equation. -/
+theorem abiFnType_tuple (T : String) (hn : fnParts? T = none)
+    (ht : (T.startsWith "(" && T.endsWith ")") = true) :
+    abiFnType T = "(" ++ ",".intercalate
+      ((splitTopCommas ((T.drop 1).dropRight 1)).map abiFnType) ++ ")" := by
+  rw [abiFnType_eq, hn, if_pos ht]
 
-/-- A function type normalizes its parameters and returns. -/
-example (T : String) (ps rs : List String) (ext : Bool) (h : fnParts? T = some (ps, rs, ext)) :
+/-- Both parameter and return lists are mapped, retaining the external flag. -/
+theorem abiFnType_function (T : String) (ps rs : List String) (ext : Bool)
+    (h : fnParts? T = some (ps, rs, ext)) :
     abiFnType T = fnTyStr (ps.map abiFnType) (rs.map abiFnType) ext := by
   rw [abiFnType_eq, h]
 
-#guard (abiTyExpr? (.name "uint8[][]")) matches some (.array (.array (.named "uint8")))
-#guard (abiTyExpr? (.index (.name "S[]") (.num 3))) matches some (.fixed (.array (.named "S")) 3)
-#guard (abiTyExpr? (.call "f" [.name "uint"])).isNone
-#guard abiFnType "uint[][3]" == "uint256[][3]"
-#guard abiFnType "(uint,int8,(int,bytes))" == "(uint256,int8,(int256,bytes))"
-#guard abiFnType "function(uint)externalreturns(int[])" ==
-  "function(uint256)externalreturns(int256[])"
+#guard abiFnType "(uint,int[2],uint8)" == "(uint256,int256[2],uint8)"
+#guard abiFnType "function(uint)externalreturns(int)" == "function(uint256)externalreturns(int256)"
+#guard reprStr (abiTyExpr? (.name "uint[][]")) ==
+  reprStr (some (.array (.array (.named "uint"))) : Option RawTy)
+#guard (abiTyExpr? (.call "solcEnumBelow" [.name "uint", .num 1])).isNone
+#guard abiFnType "function((uint,int[]))returns(uint8)" == "function((uint256,int256[]))returns(uint8)"
+#guard abiFnType "" == ""
+#guard abiFnType "function(" == "function("
+#guard abiFnType "λ[2]" == "λ[2]"
+
+end AbiTotal
 
 end Solidity.Examples.ElabTotal.Values

@@ -6,18 +6,16 @@ import Solidity.Precompiles.P256
 import Solidity.Precompiles.PointEval
 
 /-!
-# The Osaka precompiles as G06's `Fixed`
+# The Osaka precompiles as `Fixed`
 
-`run` and `gas` dispatch G06's `Precompile` table
+`run` and `gas` dispatch `Precompile` table
 (`Solidity/Roadmap/Evm.lean`) to the computed precompiles of this
 directory; `fixed` instantiates `Fixed` with them and the core Keccak-256
-(`keccakWord`).  Each function is a definition, checked against vectors
-that Osaka's execution specification computed, not an assumption: the
-public theorem quantifies over `Fixed.precompile` (decision "precompile
-addresses"), and `fixed` is the instance a bridge lemma (B16) identifies
+(`keccakWord`).  Each function is a definition, not an assumption: the
+public theorem quantifies over `Fixed.precompile`, and `fixed` is the instance a bridge lemma identifies
 with the pinned EVM's.
 
-The laws G06 asks of the table:
+The laws of the table:
 
 - **Failure exactly on malformed input** (`run_eq_none_iff`): `Malformed`
   states, per precompile, the decoding failures of its EIP, and for point

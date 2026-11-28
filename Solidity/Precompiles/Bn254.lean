@@ -6,20 +6,19 @@ import Solidity.Precompiles.Pairing
 EIP-196 and EIP-197 with Istanbul's gas (EIP-1108), as Osaka's execution
 specification (`alt_bn128.py`) runs them:
 
-- **Encoding.**  A `G1` point is two 32-byte big-endian coordinates below
-  `p`, `(0, 0)` being infinity; a `G2` point is four, each `Fp2` element
+- **Encoding.**  A point is two 32-byte big-endian coordinates below
+  `p`, `(0, 0)` being infinity; a point is four, each `Fp2` element
   written imaginary part first.  A coordinate at or above `p`, or a point
   off its curve, is malformed: the call halts exceptionally.
 - **`ECADD`** reads 128 bytes (zero-padded, the rest ignored) and returns
   the sum's 64 bytes; 150 gas.
 - **`ECMUL`** reads 96 bytes, the scalar a full 256-bit word; 6000 gas.
-- **The pairing check** takes `k` pairs of 192 bytes (`G1` then `G2`),
+- **The pairing check** takes `k` pairs of 192 bytes,
   failing when the length is not a multiple of 192 or a point is malformed
   or outside the order-`r` subgroup; it returns the word `1` when the
   pairings multiply to one, else `0`; `45000 + 34000·k` gas.
 
-`add_eq_none_iff`, `mul_eq_none_iff` and `pairing_eq_none_iff` state the failure cases exactly; the `#guard`s are
-vectors computed by the execution specification (Osaka) itself.
+`add_eq_none_iff`, `mul_eq_none_iff` and `pairing_eq_none_iff` state the failure cases exactly.
 -/
 
 namespace Solidity.Precompiles.Bn254
@@ -38,13 +37,13 @@ abbrev Fp := Fin p
 /-- `ξ = 9 + u`, the twist's non-residue. -/
 def ξ : Fp2 p := ⟨9, 1⟩
 
-/-- `G1`: `y² = x³ + 3`. -/
+/-- `y² = x³ + 3`. -/
 def curve : Curve Fp := ⟨0, 3⟩
 
-/-- The D-twist `y² = x³ + 3/ξ` over `Fp2`, carrying `G2`. -/
+/-- The D-twist `y² = x³ + 3/ξ` over `Fp2`. -/
 def twist : Curve (Fp2 p) := ⟨FieldOps.zero, FieldOps.ofNat 3 * FieldOps.inv ξ⟩
 
-/-- The generator of `G2` (EIP-197). -/
+/-- The generator of (EIP-197). -/
 def g2 : Pt (Fp2 p) :=
   .aff ⟨10857046999023057135944570762232829481370756359578518086990519993285655852781,
         11559732032986387107991004021392285783925812861821192530917403151452391805634⟩
@@ -69,23 +68,23 @@ def pairingCurve : PairingCurve p where
 
 /-! ## Encoding -/
 
-/-- A decoded `G1` point: on the curve. -/
+/-- A decoded point: on the curve. -/
 abbrev G1 := { P : Pt Fp // curve.onCurve P = true }
 
-/-- A decoded `G2` point: on the twist and in the order-`r` subgroup. -/
+/-- A decoded point: on the twist and in the order-`r` subgroup. -/
 abbrev G2 := { Q : Pt (Fp2 p) // twist.onCurve Q = true ∧ twist.mul r Q = .inf }
 
 /-- A coordinate: a number below `p`. -/
 def coord (n : Nat) : Option Fp := if h : n < p then some ⟨n, h⟩ else none
 
-/-- The `G1` point in 64 bytes, if well formed. -/
+/-- The point in 64 bytes, if well formed. -/
 def decodeG1 (b : List Nat) : Option G1 := do
   let x ← coord (ofBE (b.take 32))
   let y ← coord (ofBE ((b.drop 32).take 32))
   let P : Pt Fp := if x.val = 0 ∧ y.val = 0 then .inf else .aff x y
   if h : curve.onCurve P = true then some ⟨P, h⟩ else none
 
-/-- The `G2` point in 128 bytes (`x.im, x.re, y.im, y.re`), if well formed. -/
+/-- The point in 128 bytes (`x.im, x.re, y.im, y.re`), if well formed. -/
 def decodeG2 (b : List Nat) : Option G2 := do
   let xi ← coord (ofBE (b.take 32))
   let xr ← coord (ofBE ((b.drop 32).take 32))
@@ -95,7 +94,7 @@ def decodeG2 (b : List Nat) : Option G2 := do
     if xi.val = 0 ∧ xr.val = 0 ∧ yi.val = 0 ∧ yr.val = 0 then .inf else .aff ⟨xr, xi⟩ ⟨yr, yi⟩
   if h : twist.onCurve Q = true ∧ twist.mul r Q = .inf then some ⟨Q, h⟩ else none
 
-/-- A `G1` point's 64 bytes. -/
+/-- A point's 64 bytes. -/
 def encodeG1 : Pt Fp → Bytes
   | .inf => word 0 ++ word 0
   | .aff x y => word x.val ++ word y.val
@@ -119,8 +118,8 @@ def mul (d : Bytes) : Option Bytes := do
 
 def pairingGas (d : Bytes) : Nat := 45000 + 34000 * (d.length / 192)
 
-/-- One 192-byte pair of the pairing check, if well formed (`G1` in the
-order-`r` subgroup too, which every point of BN254's `G1` is). -/
+/-- One 192-byte pair of the pairing check, if well formed (in the
+order-`r` subgroup too, which every point of BN254's is). -/
 def decodePair (b : List Nat) : Option (G1 × G2) := do
   let P ← decodeG1 (b.take 64)
   if curve.mul r P.1 ≠ .inf then none
@@ -155,7 +154,7 @@ theorem onCurve_aff (x y : Fp) :
   rw [Nat.mod_mod, Nat.mod_mul_mod, Nat.mod_add_mod]
   rfl
 
-/-- `G1` decoding fails exactly on a coordinate at or above `p`, or a point
+/-- decoding fails exactly on a coordinate at or above `p`, or a point
 other than `(0, 0)` off the curve. -/
 theorem decodeG1_eq_none_iff (b : List Nat) :
     decodeG1 b = none ↔

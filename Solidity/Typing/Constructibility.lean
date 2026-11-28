@@ -1,29 +1,5 @@
 import Solidity.Typing.Fits
 
-/-!
-# Which storages are reachable, exactly
-
-`Typing/Reachability.lean` and `Typing/Tight.lean` prove reachable ⇒
-canonical and tight.  The converse: everything canonical and tight is
-reachable when its mapping keys and array slots are in range
-(`SVal.Fits`: what a literal can write, `Simple.lit`), by one scoped program
-(`Build.rootsProg`, over `Syntax/Scoped.lean`): a word is assigned; a struct
-is filled member by member through an alias bound to it; a dynamic array is
-pushed to its whole run of slots, then each slot past the end is bound to an
-alias, popped, and filled through the alias (the only way to write past an
-end), then the live elements are filled; a fixed-size array element by
-element; a mapping entry by entry, each created by a `delete` so that an
-entry holding the default is there too.  Each alias is declared in a block
-of its own (`Build.bound`), so a fill leaves the context it starts in and
-its caller's aliases, read by position, as they were.
-
-The builder runs by the typed run (`TRuns`), each step read on `TRun.*`
-(`run_push`, `run_pop`, …): no step loops or pushes onto `2^256 - 1`
-elements, and none allocates, so a fill ends in its start state with only
-the storage replaced.  The proof tracks the value at the path being filled
-as a chain of saves at that path (`Wrote`), which is why every fill starts
-from the default, at a path where saving the default changes nothing.
--/
 
 namespace Solidity
 
@@ -31,7 +7,6 @@ open Semantics (structDef lookupBy setBy nodupKeysB lookupBy_eq_some_mem)
 
 variable {C : Contract}
 
-/-- One statement `n` times. -/
 def Prog.rep {Γ : Ctx} (n : Nat) (s : Stmt C Γ Γ) : Prog C Γ Γ :=
   match n with
   | 0 => .nil
@@ -39,13 +14,9 @@ def Prog.rep {Γ : Ctx} (n : Nat) (s : Stmt C Γ Γ) : Prog C Γ Γ :=
 
 namespace Build
 
-/-! ## The builder -/
 
-/-- The name of the alias a fill at depth `d` binds. -/
 def slot (d : Nat) : Var := .fresh "slot" d
 
-/-- The literal `n` at the numeric type `p`, or `0` where `n` is out of its
-range (an index the builder writes has none, `SVal.Fits`). -/
 def numLit {Γ : Ctx} (p : PrimTy) (hp : p.isNumeric = true) (n : Int) : Simple C Γ p :=
   if h : p.inRange n = true then .lit n h
   else .lit 0 (by cases p <;> first | rfl | exact absurd hp (by decide))
@@ -53,31 +24,20 @@ def numLit {Γ : Ctx} (p : PrimTy) (hp : p.isNumeric = true) (n : Int) : Simple 
 theorem numLit_eq {Γ : Ctx} {p : PrimTy} {hp : p.isNumeric = true} {n : Int}
     (h : p.inRange n = true) : numLit (C := C) (Γ := Γ) p hp n = .lit n h := dif_pos h
 
-/-- A word as a literal. -/
 def litOf {Γ : Ctx} : (p : PrimTy) → p.Denote → Simple C Γ p
   | .bool, b => .bool b
   | .uint, v => .lit v.1 v.2
   | .int, v => .lit v.1 v.2
 
-/-- An index below `2^256` as a `uint`. -/
 def idxU (j : Nat) (hb : j < 2 ^ 256) : PrimTy.uint.Denote :=
   (⟨(j : Int), lenU_inRange hb⟩ : {n : Int // PrimTy.uint.inRange n = true})
 
-/-- `{ R storage slot d = q; body }`: the alias bound for the body, which
-fills through it, and ended with the block. -/
 def bound {Γ : Ctx} (d : Nat) (R : RefTy) (q : SPath C Γ (.ref R))
     (body : Prog C (.alias R :: Γ) (.alias R :: Γ)) : Prog C Γ Γ :=
   .cons (.block (.cons (.declStorage R (slot d) (some (.path q))) body)) .nil
 
 mutual
 
-/-- A program that turns the default at `q : T` into `v`.  A word is
-assigned.  Anything else binds an alias to `q` in a block and fills through
-it: a struct member by member; a dynamic array by pushing every slot it has,
-popping those past its end one at a time (each bound to a deeper alias
-before its `pop`, and filled through it after), then filling the live
-elements; a fixed-size array element by element; a mapping entry by entry,
-each created by a `delete` first. -/
 def fill {Γ : Ctx} (d : Nat) : {T : Ty} → SPath C Γ T → SVal T → Prog C Γ Γ
   | .prim _, .loc l, .prim v => .cons (.assign l (.val (.simple (litOf _ v)))) .nil
   | .ref (.struct _), q, .struct fs =>
@@ -93,7 +53,6 @@ def fill {Γ : Ctx} (d : Nat) : {T : Ty} → SPath C Γ T → SVal T → Prog C 
   | .ref (.fixed E n), q, .fixed e => bound d _ q (fillElems d (ArrTy.fixed (E := E) (n := n)) .here 0 e)
   | .ref (.mapping K _), q, .map m _ => bound d _ q (fillEntries d K .here m)
 
-/-- The members of a struct bound to `a`, one after another. -/
 def fillFields {Γ : Ctx} (d : Nat) {s : Name} (a : Idx Γ (.alias (.struct s))) :
     {fs : List (Name × Ty)} → (∀ f T, (f, T) ∈ fs → lookupBy f (structDef s) = some T) →
     SFields fs → Prog C Γ Γ
@@ -102,9 +61,6 @@ def fillFields {Γ : Ctx} (d : Nat) {s : Name} (a : Idx Γ (.alias (.struct s)))
       (fill (d + 1) (.loc (.field (.alias a) f (hsub f T List.mem_cons_self))) v).join
         (fillFields d a (fun g U hm => hsub g U (List.mem_cons_of_mem _ hm)) rest)
 
-/-- The slots past the end of the array bound to `a`, from the last: slot
-`i` bound, popped, then filled through its alias.  A word slot is only
-popped (it is cleared). -/
 def fillShadow {Γ : Ctx} (d : Nat) {E : Ty} (a : Idx Γ (.alias (.array E))) (i : Nat) :
     SList E → Prog C Γ Γ
   | .nil => .nil
@@ -116,7 +72,6 @@ def fillShadow {Γ : Ctx} (d : Nat) {E : Ty} (a : Idx Γ (.alias (.array E))) (i
              (hE ▸ .loc (.index (.arr .dyn) (.alias a) (.simple (numLit .uint rfl (i : Int)))))
              (.cons (.pop (.alias a.there)) (fill (d + 1) (hE ▸ .alias .here) w)))
 
-/-- The live elements of the array bound to `a`, from index `j`. -/
 def fillElems {Γ : Ctx} (d : Nat) {R : RefTy} {E : Ty} (ak : ArrTy R E) (a : Idx Γ (.alias R))
     (j : Nat) : {n : Nat} → SVec E n → Prog C Γ Γ
   | _, .nil => .nil
@@ -124,8 +79,6 @@ def fillElems {Γ : Ctx} (d : Nat) {R : RefTy} {E : Ty} (ak : ArrTy R E) (a : Id
       (fill (d + 1) (.loc (.index (.arr ak) (.alias a) (.simple (numLit .uint rfl (j : Int))))) w).join
         (fillElems d ak a (j + 1) rest)
 
-/-- The entries of the mapping bound to `a`: each created by `delete`, then
-filled. -/
 def fillEntries {Γ : Ctx} (d : Nat) (k : PrimTy) {V : Ty}
     (a : Idx Γ (.alias (.mapping k V))) : SMap k V → Prog C Γ Γ
   | .nil => .nil
@@ -136,19 +89,16 @@ def fillEntries {Γ : Ctx} (d : Nat) (k : PrimTy) {V : Ty}
 
 end
 
-/-! ## Saves at one path -/
 
 section Wrote
 
 variable {st₀ st st' : Storage C} {U : Ty} {r : SRef C U}
 
-/-- A save, by its compiled form. -/
 theorem Storage.save_eq {X : SVal U} :
     st.save r X = ((st.get r.hroot).saveM r.path X).map (st.set r.hroot) := by
   simp only [Storage.save, SVal.save_eq_saveM, Option.bind_eq_bind]
   cases (st.get r.hroot).saveM r.path X <;> rfl
 
-/-- `st` is `st₀` with `X` saved at `r`. -/
 def Wrote (st₀ st : Storage C) {U : Ty} (r : SRef C U) (X : SVal U) : Prop := st₀.save r X = some st
 
 theorem Wrote.find {X : SVal U} (h : Wrote st₀ st r X) : st.find r = some X := by
@@ -192,7 +142,6 @@ theorem Wrote.trans {X Y : SVal U} (h : Wrote st₀ st r X) (h' : st.save r Y = 
       rw [SVal.saveM_saveM _ _ _ _ hv hv']
       simp only [Option.map_some, SFields.set_set]
 
-/-- A child saved below a path written: the value written there changes. -/
 theorem Wrote.child {N : SVal U} {W : Ty} {q : Path U W} {w : SVal W} (h : Wrote st₀ st r N)
     (h' : st.save (r.append q) w = some st') :
     ∃ N', N.saveM q w = some N' ∧ Wrote st₀ st' r N' := by
@@ -216,8 +165,6 @@ theorem Wrote.child {N : SVal U} {W : Ty} {q : Path U W} {w : SVal W} (h : Wrote
     rw [Storage.save_eq, hv']
     rfl
 
-/-- Saving the value a child already holds, below a path written, changes
-nothing. -/
 theorem Wrote.childNoop {N : SVal U} {W : Ty} {q : Path U W} {D : SVal W} (h : Wrote st₀ st r N)
     (hq : N.saveM q D = some N) : st.save (r.append q) D = some st := by
   have hf := h.find
@@ -233,17 +180,14 @@ theorem Wrote.childNoop {N : SVal U} {W : Ty} {q : Path U W} {D : SVal W} (h : W
 
 end Wrote
 
-/-! ## Runs -/
 
 section Steps
 
 variable {Γ : Ctx}
 
-/-- `P` runs, by the typed run, from `σ` to `τ`. -/
 def TRuns {Γ' : Ctx} (σ : State C Γ) (P : Prog C Γ Γ') (τ : State C Γ') : Prop :=
   ∃ o : Out C σ.H Γ', P.run σ = .ok o ∧ o.st = τ
 
-/-- `s` runs, by the typed run, from `σ` to `τ`. -/
 def SRuns {Γ' : Ctx} (σ : State C Γ) (s : Stmt C Γ Γ') (τ : State C Γ') : Prop :=
   ∃ o : Out C σ.H Γ', s.run σ = .ok o ∧ o.st = τ
 
@@ -291,7 +235,6 @@ theorem TRuns.single {Γ' : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ'} {τ : Sta
     (h : SRuns σ s τ) : TRuns σ (.cons s .nil) τ :=
   TRuns.cons h (TRuns.nil _)
 
-/-! ### Paths the builder resolves -/
 
 theorem resolveT_alias {σ : State C Γ} {R : RefTy} {a : Idx Γ (.alias R)} {ref : SRef C (.ref R)}
     (h : TEnv.get a σ.env = some ref) : (SPath.alias a).resolveT σ = .ok ref := by
@@ -312,7 +255,6 @@ theorem litOf_evalT (σ : State C Γ) : (p : PrimTy) → (v : p.Denote) →
     (litOf (C := C) (Γ := Γ) p v).evalT σ = v
   | .bool, _ | .uint, _ | .int, _ => rfl
 
-/-- An index the storage takes, at a literal. -/
 theorem resolveT_index_lit {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R E)
     {a : Idx Γ (.alias R)} {ref : SRef C (.ref R)} {j : Nat} (hb : j < 2 ^ 256)
     (h : TEnv.get a σ.env = some ref)
@@ -350,20 +292,13 @@ theorem resolveT_index_map {σ : State C Γ} {k : PrimTy} {V : Ty} {key : k.Deno
   rw [litOf_evalT σ, hck]
   rfl
 
-/-! ### One statement at a time
 
-Each step of the builder, from a state whose storage is `st₀` with `X`
-written at a reference, leaves the state with only its storage replaced, by
-`st₀` with what the step makes of `X` written there. -/
-
-/-- A save lands where a value is found. -/
 theorem Wrote.save_exists {st₀ st : Storage C} {U : Ty} {r : SRef C U} {X : SVal U}
     (h : Wrote st₀ st r X) (Y : SVal U) : ∃ st', st.save r Y = some st' := by
   have hf : (st.get r.hroot).findM r.path = some X := by rw [← SVal.find_eq_findM]; exact h.find
   obtain ⟨v, hv⟩ := SVal.saveM_of_findM _ _ hf Y
   exact ⟨_, by rw [Storage.save_eq, hv]; rfl⟩
 
-/-- `l = v;` for a word `v`. -/
 theorem run_assign {σ : State C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {ref : SRef C (.prim p)}
     (hl : l.resolveT σ = .ok ref) {st₀ : Storage C} {X : SVal (.prim p)}
     (hW : Wrote st₀ σ.storage ref X) (v : p.Denote) :
@@ -376,7 +311,6 @@ theorem run_assign {σ : State C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {ref 
   rw [hl]
   simp only [Storage.write, SVal.isPrim, Ty.isPrimitive, ↓reduceIte, hs, TRes.ofOpt]
 
-/-- The literal array of `L` and `S`. -/
 def arrOf {E : Ty} (L S : List (SVal E)) (h : L.length < 2 ^ 256) : SVal (.ref (.array E)) :=
   .array (SVec.ofList L) (SList.ofList S) h
 
@@ -393,7 +327,6 @@ theorem len_snoc {α : Type} {L : List α} {x : α} (hb : L.length + 1 < 2 ^ 256
     (L ++ [x]).length < 2 ^ 256 := by
   rw [List.length_append, List.length_singleton]; exact hb
 
-/-- `a.push();` on an array with nothing past its end, below the bound. -/
 theorem run_push {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))}
     {ref : SRef C (.ref (.array E))} (hd : (none.isSome || E.defaultOkS) = true)
     (ha : TEnv.get a σ.env = some ref) {st₀ : Storage C} {L : List (SVal E)}
@@ -423,7 +356,6 @@ theorem run_push {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))}
   rw [hX, hs]
   rfl
 
-/-- `a.pop();` on an array whose live elements end in `last`. -/
 theorem run_pop {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))}
     {ref : SRef C (.ref (.array E))} (ha : TEnv.get a σ.env = some ref) {st₀ : Storage C}
     {L S : List (SVal E)} {last : SVal E} {hL : (L ++ [last]).length < 2 ^ 256}
@@ -449,7 +381,6 @@ theorem run_pop {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))}
   rw [hX, hs]
   rfl
 
-/-- `delete l;`. -/
 theorem run_delete {σ : State C Γ} {T : Ty} {l : Loc C Γ T} {ref : SRef C T}
     (hl : l.resolveT σ = .ok ref) {cur : SVal T} (hf : σ.storage.find ref = some cur)
     {st' : Storage C} (hs : σ.storage.save ref cur.defaultOf = some st') :
@@ -461,7 +392,6 @@ theorem run_delete {σ : State C Γ} {T : Ty} {l : Loc C Γ T} {ref : SRef C T}
   simp only [Storage.delete, hf, Option.bind_eq_bind, Option.bind_some, hs, TRes.ofOpt]
   rfl
 
-/-- The alias a `bound` block declares, bound to `q`. -/
 theorem run_decl {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref R)}
     {ref : SRef C (.ref R)} (hq : q.resolveT σ = .ok ref) :
     SRuns σ (.declStorage R (slot d) (some (.path q))) (σ.push (t := .alias R) (some ref)) := by
@@ -474,8 +404,6 @@ theorem run_decl {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref R
 theorem run_block {Γ₁ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁) :
     Stmt.run σ (.block P) = (Prog.run σ P).map fun o => ⟨o.st.drop P.ext, o.ext⟩ := rfl
 
-/-- A block that binds an alias to `q` and runs `body` through it, changing
-only the storage. -/
 theorem run_bound {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref R)}
     {ref : SRef C (.ref R)} (hq : q.resolveT σ = .ok ref)
     {body : Prog C (.alias R :: Γ) (.alias R :: Γ)} {st' : Storage C}
@@ -490,7 +418,6 @@ theorem run_bound {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref 
   rw [he] at h
   exact h
 
-/-- `run_bound` at a location. -/
 theorem run_boundL {d : Nat} {R : RefTy} {σ : State C Γ} {l : Loc C Γ (.ref R)}
     {ref : SRef C (.ref R)} (hq : l.resolveT σ = .ok ref)
     {body : Prog C (.alias R :: Γ) (.alias R :: Γ)} {st' : Storage C}
@@ -501,11 +428,9 @@ theorem run_boundL {d : Nat} {R : RefTy} {σ : State C Γ} {l : Loc C Γ (.ref R
 
 end Steps
 
-/-! ## The builder writes what it is given -/
 
 section Fills
 
-/-! ### Saves at one slot -/
 
 theorem arrOf_saveM_live {E : Ty} {L S : List (SVal E)} (h : L.length < 2 ^ 256) {i : Nat}
     (hi : i < L.length) (x : SVal E) :
@@ -547,11 +472,7 @@ theorem map_saveM {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denot
   simp only [SVal.saveM]
   split <;> simp only [Option.bind_eq_bind, Option.bind_some]
 
-/-! ### A child filled -/
 
-/-- What `fill` does for one value `v`: from a path where saving the default
-changes nothing, in any context, it leaves `v` there, changing nothing but
-the storage. -/
 def FillOK (C : Contract) {T : Ty} (v : SVal T) : Prop :=
   ∀ (d : Nat) (Γ : Ctx) (q : SPath C Γ T) (σ : State C Γ) (ref : SRef C T),
     v.Canon → v.Tight → v.Fits → q.resolveT σ = .ok ref →
@@ -560,8 +481,6 @@ def FillOK (C : Contract) {T : Ty} (v : SVal T) : Prop :=
 
 variable {Γ : Ctx}
 
-/-- A child filled below the node written at `ref`: the node, `N`, becomes
-`N'`. -/
 theorem child_step {d : Nat} {T W : Ty} {q : SPath C Γ W} {σ : State C Γ} {st₀ : Storage C}
     {ref : SRef C T} {N N' : SVal T} {p : Path T W} {w : SVal W}
     (hw : FillOK C w) (hc : w.Canon) (ht : w.Tight) (hf : w.Fits)
@@ -574,7 +493,6 @@ theorem child_step {d : Nat} {T W : Ty} {q : SPath C Γ W} {σ : State C Γ} {st
   cases hN''
   exact ⟨st', hrun, hW'⟩
 
-/-- `child_step` at a location. -/
 theorem child_stepL {d : Nat} {T W : Ty} {l : Loc C Γ W} {σ : State C Γ} {st₀ : Storage C}
     {ref : SRef C T} {N N' : SVal T} {p : Path T W} {w : SVal W}
     (hw : FillOK C w) (hc : w.Canon) (ht : w.Tight) (hf : w.Fits)
@@ -583,8 +501,6 @@ theorem child_stepL {d : Nat} {T W : Ty} {l : Loc C Γ W} {σ : State C Γ} {st�
     ∃ st', TRuns σ (fill (d + 1) (.loc l) w) (σ.withStorage st') ∧ Wrote st₀ st' ref N' :=
   child_step hw hc ht hf hq hW hnoop hs
 
-/-- `a.push();` `k` times on an array with nothing past its end, below the
-bound. -/
 theorem pushes_run {E : Ty} {a : Idx Γ (.alias (.array E))} {ref : SRef C (.ref (.array E))}
     (hd : (none.isSome || E.defaultOkS) = true) {st₀ : Storage C} :
     ∀ (k : Nat) (L : List (SVal E)) (σ : State C Γ) (hL : L.length < 2 ^ 256),
@@ -603,11 +519,7 @@ theorem pushes_run {E : Ty} {a : Idx Γ (.alias (.array E))} {ref : SRef C (.ref
     refine ⟨st', TRuns.cons hs₁ hrun, ?_⟩
     simpa only [List.append_assoc, List.replicate_succ, List.singleton_append] using hW'
 
-/-! ### Structs, member by member -/
 
-/-- What `fillFields` does for the members `x` (a suffix of the struct's):
-from a node `N` holding the default at each member still to fill and the
-target `tgt` at every other, it leaves the target there. -/
 def FieldsOK (C : Contract) {fs : List (Name × Ty)} (x : SFields fs) : Prop :=
   ∀ (s : Name) (d : Nat) (Γ : Ctx) (a : Idx Γ (.alias (.struct s)))
     (hsub : ∀ f T, (f, T) ∈ fs → lookupBy f (structDef s) = some T) (σ : State C Γ)
@@ -676,7 +588,6 @@ theorem fields_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} {v : SVal T} {r
     hc.2 ht.2 hf.2 hnd.2
   exact ⟨st', TRuns.append hrun₁ hrun₂, hW'⟩
 
-/-- A struct filled member by member through an alias bound to it. -/
 theorem fill_struct {s : Name} {fs : SFields (structDef s)} (hfs : FieldsOK C fs) :
     FillOK C (SVal.struct fs) := by
   intro d Γ q σ ref hc ht hf hq h0
@@ -690,7 +601,6 @@ theorem fill_struct {s : Name} {fs : SFields (structDef s)} (hfs : FieldsOK C fs
     (structDef_nodup s)
   exact ⟨st', run_bound hq hrun, hW⟩
 
-/-! ### Arrays, element by element -/
 
 theorem checkIndex_dyn {st : Storage C} {E : Ty} {ref : SRef C (.ref (.array E))}
     {L S : List (SVal E)} {hL : L.length < 2 ^ 256} (hf : st.find ref = some (arrOf L S hL))
@@ -707,8 +617,6 @@ theorem checkIndex_fixed {st : Storage C} {E : Ty} {n : Nat} {ref : SRef C (.ref
   show (if (j : Int).toNat < n then some () else none) = some ()
   rw [if_pos (by rw [Int.toNat_natCast]; exact hj)]
 
-/-- What `fillElems` does for the live elements `x` of a dynamic array, from
-index `pre.length`. -/
 def ElemsOK (C : Contract) {E : Ty} {n : Nat} (x : SVec E n) : Prop :=
   ∀ (d : Nat) (Γ : Ctx) (a : Idx Γ (.alias (.array E))) (σ : State C Γ)
     (ref : SRef C (.ref (.array E))) (st₀ : Storage C) (pre S : List (SVal E))
@@ -761,8 +669,6 @@ theorem elems_cons {E : Ty} {n : Nat} {v : SVal E} {rest : SVec E n}
   · simpa only [List.length_append, List.length_singleton] using hrun₂
   · simpa only [SVec.toList_cons, List.append_assoc, List.singleton_append] using hW'
 
-/-- What `fillElems` does for the elements `x` of a fixed-size array, from
-index `pre.length`. -/
 def FixedOK (C : Contract) {E : Ty} {m : Nat} (x : SVec E m) : Prop :=
   ∀ (d : Nat) (Γ : Ctx) {N : Nat} (a : Idx Γ (.alias (.fixed E N))) (σ : State C Γ)
     (ref : SRef C (.ref (.fixed E N))) (st₀ : Storage C) (pre : List (SVal E)) (cur : SVec E N),
@@ -810,10 +716,7 @@ theorem fixedElems_cons {E : Ty} {m : Nat} {v : SVal E} {rest : SVec E m}
       using hcur', TRuns.append hrun₁ ?_, hW'⟩
   simpa only [List.length_append, List.length_singleton] using hrun₂
 
-/-! ### Slots past the end -/
 
-/-- What `fillShadow` does for the slots `x` past the end, from slot `i`:
-pushed as defaults, it leaves `i` live defaults and `x` past them. -/
 def ShadowOK (C : Contract) {E : Ty} (x : SList E) : Prop :=
   ∀ (d : Nat) (Γ : Ctx) (a : Idx Γ (.alias (.array E))) (i : Nat) (σ : State C Γ)
     (ref : SRef C (.ref (.array E))) (st₀ : Storage C) (SH : List (SVal E))
@@ -895,7 +798,6 @@ theorem shadow_cons {E : Ty} {v : SVal E} {rest : SList E}
     rw [hres]
     exact hW₃
 
-/-! ### Mappings, entry by entry -/
 
 theorem Storage.find_append {st : Storage C} {U W : Ty} (r : SRef C U) (q : Path U W) :
     st.find (r.append q) = (st.find r).bind (·.findM q) := by
@@ -908,7 +810,6 @@ theorem Storage.save_exists_of_find {st : Storage C} {U : Ty} {r : SRef C U} {y 
   obtain ⟨v, hv⟩ := SVal.saveM_of_findM _ _ hf X
   exact ⟨_, by rw [Storage.save_eq, hv]; rfl⟩
 
-/-- What `fillEntries` does for the entries `x`, after the entries `done`. -/
 def EntriesOK (C : Contract) {K : PrimTy} {V : Ty} (x : SMap K V) : Prop :=
   ∀ (d : Nat) (Γ : Ctx) (a : Idx Γ (.alias (.mapping K V)))
     (σ : State C Γ) (ref : SRef C (.ref (.mapping K V))) (st₀ : Storage C)
@@ -968,7 +869,6 @@ theorem entries_cons {K : PrimTy} {V : Ty} {key : K.Denote} {w : SVal V} {rest :
   rw [SMap.toList_cons]
   simpa only [List.append_assoc, List.singleton_append] using hW₃
 
-/-! ### Every value -/
 
 theorem fill_prim {p : PrimTy} {x : p.Denote} : FillOK C (SVal.prim x) := by
   intro d Γ q σ ref _ _ _ hq h0
@@ -1043,8 +943,6 @@ theorem fill_map {K : PrimTy} {V : Ty} {m : SMap K V} {dv : SVal V} (hm : Entrie
 
 mutual
 
-/-- **The builder writes what it is given**: from the default at a typed
-path, `fill` leaves any canonical, tight value that fits there. -/
 theorem fill_ok : {T : Ty} → (v : SVal T) → FillOK C v
   | _, .prim _ => fill_prim
   | _, .struct fs => fill_struct (fillFields_ok fs)
@@ -1076,9 +974,7 @@ end
 
 end Fills
 
-/-! ### Every root -/
 
-/-- The whole program: every root filled with its value in `st`. -/
 def rootsProg (st : Storage C) :
     (vs : List (Name × Ty)) → (∀ r T, (r, T) ∈ vs → C.rootType r = some T) → Prog C [] []
   | [], _ => .nil
@@ -1143,13 +1039,9 @@ theorem rootsProg_run (st : Storage C) :
 
 end Build
 
-/-! ## The characterisation -/
 
 open Build
 
-/-- **Canonical and tight ⇒ reachable, by one program**: `Build.rootsProg`,
-run by the typed run from `C`'s initial state, leaves exactly `st`, for keys
-and slots in range. -/
 theorem storage_reachable {st : Storage C} (hc : st.Canon)
     (ht : st.Tight) (hf : st.Fits) :
     TRuns (State.init C) (rootsProg st C.vars fun _ _ hm => lookupBy_of_nodup C.vars_nodup hm)
@@ -1157,17 +1049,11 @@ theorem storage_reachable {st : Storage C} (hc : st.Canon)
   rootsProg_run st C.vars _ (State.init C) (fun _ _ hr _ => SFields.dflt_get hr)
     (fun _ T hr hm => absurd ⟨T, lookupBy_eq_some_mem hr⟩ hm) hc ht hf C.vars_nodup
 
-/-- **Canonical and tight ⇒ reachable**, for keys and slots in range. -/
 theorem canon_reachable {st : Storage C} (hc : st.Canon)
     (ht : st.Tight) (hf : st.Fits) : Reachable C st := by
   obtain ⟨o, ho, he⟩ := storage_reachable hc ht hf
   exact ⟨[], _, o, ho, by rw [he]; rfl⟩
 
-/-- **Nothing inferable is missing**: a property of storage that holds
-initially and that every program keeps, by the typed run from any typed
-state whose storage is canonical, holds of every canonical, tight storage
-whose keys and slots fit.  The typed state is well-typed by construction,
-so the step asks only the storage's canonicity. -/
 theorem no_hidden_invariant (P : Storage C → Prop)
     (hinit : P (Storage.init C))
     (hstep : ∀ (Γ' : Ctx) (σ : State C []) (o : Out C σ.H Γ') (prog : Prog C [] Γ'),
@@ -1178,45 +1064,30 @@ theorem no_hidden_invariant (P : Storage C → Prop)
   rw [he] at this
   exact this
 
-/-- **Reachable ⇒ canonical and tight**, for every contract. -/
 theorem reachable_shape {st : Storage C}
     (h : Reachable C st) : st.Canon ∧ st.Tight :=
   ⟨reachable_canon h, reachable_tight h⟩
 
-/-- **The reachable storages, exactly**: a storage whose keys and slots are in
-range (`SVal.Fits`, what a literal can write) is reachable by a program iff
-it is canonical and tight. -/
 theorem reachable_iff {st : Storage C} (hf : st.Fits) : Reachable C st ↔ st.Canon ∧ st.Tight :=
   ⟨reachable_shape, fun ⟨hc, ht⟩ => canon_reachable hc ht hf⟩
 
-/-- **The reachable storages, exactly, with no premise on the storage**: for
-a contract whose fixed sizes fit, a storage is reachable iff it is canonical,
-tight and fits. -/
 theorem reachable_iff_fits (hf : FixedFits C) {st : Storage C} :
     Reachable C st ↔ st.Canon ∧ st.Tight ∧ st.Fits :=
   ⟨fun h => ⟨(reachable_shape h).1, (reachable_shape h).2, reachable_fits hf h⟩,
     fun ⟨hc, ht, hfs⟩ => canon_reachable hc ht hfs⟩
 
-/-! ## What is reachable and what is not -/
 
 section Witnesses
 
-/-- One `uint[]` root. -/
 def Words : Contract := contract!{ uint[] xs; }
 
-/-- One `bool`-keyed mapping root. -/
 def BoolKeyed : Contract := contract!{ mapping(bool => uint) flags; }
 
-/-- One `Token[]` root. -/
 def Tokens : Contract := contract!{ Token[] tokens; }
 
-/-- `xs` empty, with a `5` past its end. -/
 def Words.dirty : Storage Words :=
   .cons (.array .nil (.cons (.prim (PrimTy.ofLit .uint 5 rfl)) .nil) SVal.zero_lt_bound) .nil
 
-/-- A word past the end of a `uint[]` that is not cleared: canonical, not
-reachable, since `pop`, `delete` and a shorter copy clear the words they
-leave behind and nothing writes past the end of an array of words. -/
 theorem dirty_word_not_reachable : Words.dirty.Canon ∧ ¬ Reachable Words Words.dirty := by
   refine ⟨?_, fun h => ?_⟩
   · simp only [Words.dirty, SFields.All, SVal.All, SVec.All, SList.All, canonH,
@@ -1227,17 +1098,8 @@ theorem dirty_word_not_reachable : Words.dirty.Canon ∧ ¬ Reachable Words Word
     rw [SVal.dflt_prim] at h5
     cases h5
 
-/-- One `uint[2^256 + 1]` root: more slots than a `uint` index reaches
-(solc refuses a storage type that large). -/
 def Huge : Contract := { vars := [("big", .ref (.fixed .uint (2 ^ 256 + 1)))] }
 
-/-- **Reachable does not imply `Fits`** (decision 77): `Huge`'s initial
-storage is reached by the empty program, and its root has `2^256 + 1`
-elements, past what `Fits` allows a fixed-size array (the builder writes
-each element at a literal index).  So `reachable_iff` keeps its `Fits`
-premise.  Under solc's bound on fixed sizes (`FixedFits`, which `Huge`
-fails) every reachable storage fits, and `reachable_iff_fits` drops the
-premise (`Typing/Fits.lean`). -/
 theorem huge_reachable_not_fits :
     Reachable Huge (Storage.init Huge) ∧ ¬ (Storage.init Huge).Fits := by
   refine ⟨⟨[], .nil, ⟨State.init Huge, List.prefix_refl _⟩, Prog.run_nil _, rfl⟩, fun hf => ?_⟩
@@ -1247,20 +1109,15 @@ theorem huge_reachable_not_fits :
   simp only [SVal.All] at h
   exact Nat.not_succ_le_self _ h.1
 
-/-- `Huge`'s one root is past solc's bound, so it is no counterexample to
-`reachable_fits`. -/
 theorem huge_not_fixedFits : ¬ FixedFits Huge := by
   intro hf
   have h := hf ("big", _) List.mem_cons_self .uint (2 ^ 256 + 1) .nil
   omega
 
-/-- `flags[true] = 3`. -/
 def BoolKeyed.flag : Storage BoolKeyed :=
   .cons (.map (.cons (true : Bool) (.prim (PrimTy.ofLit .uint 3 rfl)) .nil)
     (.prim (PrimTy.dflt .uint))) .nil
 
-/-- An entry in a `bool`-keyed mapping, at the key `1` that `true` hashes
-to (decisions 10 and 14): reachable, by the builder (`flags[true] = 3;`). -/
 theorem bool_key_reachable : Reachable BoolKeyed BoolKeyed.flag := by
   refine canon_reachable ?_ ?_ ?_
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, canonH, and_true]
@@ -1270,13 +1127,10 @@ theorem bool_key_reachable : Reachable BoolKeyed BoolKeyed.flag := by
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, tightH, and_true]
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, fitsH, and_true]
 
-/-- A `Token` past the end of `tokens`. -/
 def Tokens.dangling : Storage Tokens :=
   .cons (.array .nil (.cons (.struct (.cons (.prim (PrimTy.ofLit .uint 7 rfl)) .nil)) .nil)
     SVal.zero_lt_bound) .nil
 
-/-- A `Token` past the end of `tokens`, written through a reference taken
-before its `pop`: reachable, by the builder. -/
 theorem dangling_slot_reachable : Reachable Tokens Tokens.dangling := by
   refine canon_reachable ?_ ?_ ?_
   · simp only [Tokens.dangling, SFields.All, SVal.All, SVec.All, SList.All, canonH,

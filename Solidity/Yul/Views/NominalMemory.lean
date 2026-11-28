@@ -1,4 +1,4 @@
-import Solidity.Yul.Views.CanonicalMemory
+import Solidity.Yul.Views.ScalarArrayDecode
 
 /-! Additive canonical nominal memory words over the ACTUAL Source UDVT
 constructor and layout lookup. No old codec/guard changes, dirty cleaning,
@@ -67,24 +67,7 @@ theorem array_word (D : Source.Layout) (name : Source.DeclName) (n : Nat)
     (m : ByteView) (base : Nat) (values : Fin n → Source.Val D (.udvt name))
     (decoded : decodeArray D name n m base=some values) :
     ∀ i,(values i).word=some (mload m (base+i.val*32)) := by
-  unfold Solidity.Yul.Views.NominalMemory.decodeArray at decoded
-  induction n generalizing base with
-  | zero => intro i; exact Fin.elim0 i
-  | succ n ih =>
-    change (do let head ← Solidity.Yul.Views.NominalMemory.decode D name (Solidity.Yul.Views.mload m base); let tail ← Solidity.Yul.Views.decodeArrayWith (Solidity.Yul.Views.NominalMemory.decode D name) n m (base+32); pure (Fin.cases head tail))=some values at decoded
-    cases dh : Solidity.Yul.Views.NominalMemory.decode D name (Solidity.Yul.Views.mload m base) with
-    | none => rw [dh] at decoded; cases decoded
-    | some head =>
-      cases dt : Solidity.Yul.Views.decodeArrayWith (Solidity.Yul.Views.NominalMemory.decode D name) n m (base+32) with
-      | none => rw [dh,dt] at decoded; cases decoded
-      | some tail =>
-        rw [dh,dt] at decoded
-        cases decoded
-        intro i
-        refine Fin.cases ?_ (fun j => ?_) i
-        · simpa only [Fin.cases_zero,Fin.val_zero,Nat.zero_mul,Nat.add_zero] using Solidity.Yul.Views.NominalMemory.word D name _ head dh
-        · have eq : base+j.succ.val*32=base+32+j.val*32 := by simp only [Fin.val_succ]; omega
-          simpa only [Fin.cases_succ,eq] using ih (base+32) tail dt j
+  exact decodeArrayWith_word (decode D name) (word D name) n m base values decoded
 
 /-- A raw snapshot encoding the actual nominal values decodes to those values.
 The only representation premise is the existing canonical underlying codec. -/
