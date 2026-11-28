@@ -196,6 +196,23 @@ class Fixture(unittest.TestCase):
                     check.load_allow(allow)
 
 
+    def test_yul_stateful_exact_registration_and_cap(self):
+        self.write("Solidity/Yul/StatefulRun.lean", 25)
+        self.write("Solidity/Yul/StatefulImport.lean", 25)
+        self.commit("H2237\n\nLean-Budget: yul-stateful-run")
+        ok, rep = self.run_check(); self.assertTrue(ok, rep)
+        self.write("Solidity/Yul/StatefulImport.lean", 26)
+        self.commit("one line over cap")
+        ok, rep = self.run_check(); self.assertFalse(ok, rep)
+        self.assertIn("FAIL strict aggregate non-generated Lean lines +51", rep)
+
+    def test_yul_stateful_keeps_other_yul_frozen(self):
+        self.write("Solidity/Yul/Unrelated.lean", 1)
+        self.commit("H2237\n\nLean-Budget: yul-stateful-run")
+        ok, rep = self.run_check(); self.assertFalse(ok, rep)
+        self.assertIn("FAIL frozen area Yul", rep)
+
+
 class Globs(unittest.TestCase):
     def test_globs(self):
         m = check.matches
@@ -211,7 +228,7 @@ class Globs(unittest.TestCase):
                                              "e2b-loops-producer", "yv1-yul-layout-view",
                                              "finish-intrinsic-session", "finish-lowering-sim", "finish-panic",
                                              "finish-line", "finish-yul-layout", "calls-program-bridge",
-                                             "o1-optimizer-domain"})
+                                             "o1-optimizer-domain", "yul-stateful-run"})
         self.assertEqual(CFG["steps"]["yv1-yul-layout-view"], ["Solidity/Yul/Layout/**"])
         self.assertEqual(CFG["steps"]["finish-intrinsic-session"], ["Solidity/Correctness/IntrinsicSession/**", "Solidity/Semantics/IntrinsicSession/**"])
         self.assertEqual(CFG["steps"]["finish-lowering-sim"], ["Solidity/Correctness/Lowering/Sim/**"])
@@ -219,7 +236,8 @@ class Globs(unittest.TestCase):
         self.assertEqual(CFG["steps"]["finish-line"], ["Solidity/Finish/**"])
         self.assertEqual(CFG["steps"]["finish-yul-layout"], ["Solidity/Yul/Layout/**"])
         self.assertEqual(CFG["steps"]["calls-program-bridge"], ["Solidity/Backend/InternalFlow/CallsProgramBridge*.lean"])
-        self.assertEqual(CFG["strict_aggregate_steps"], ["o1-optimizer-domain"])
+        self.assertEqual(CFG["strict_aggregate_steps"], ["o1-optimizer-domain", "yul-stateful-run"])
+        self.assertEqual(CFG["steps"]["yul-stateful-run"], ["Solidity/Yul/StatefulRun.lean", "Solidity/Yul/StatefulImport.lean"])
         self.assertEqual(CFG["steps"]["o1-optimizer-domain"], ["Solidity/Backend/CompilerOptimizerDomain.lean", "Solidity/Backend/CompilerOptimizerDomain/**"])
 
 
