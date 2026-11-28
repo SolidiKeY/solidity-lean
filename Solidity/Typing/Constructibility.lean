@@ -1231,7 +1231,7 @@ theorem dirty_word_not_reachable : Words.dirty.Canon ∧ ¬ Reachable Words Word
 (solc refuses a storage type that large). -/
 def Huge : Contract := { vars := [("big", .ref (.fixed .uint (2 ^ 256 + 1)))] }
 
-/-- **Reachable does not imply `Fits`** (decision 77): `Huge`'s initial
+/-- **Reachable does not imply `Fits`**: `Huge`'s initial
 storage is reached by the empty program, and its root has `2^256 + 1`
 elements, past what `Fits` allows a fixed-size array (the builder writes
 each element at a literal index).  So `reachable_iff` keeps its `Fits`
@@ -1260,7 +1260,7 @@ def BoolKeyed.flag : Storage BoolKeyed :=
     (.prim (PrimTy.dflt .uint))) .nil
 
 /-- An entry in a `bool`-keyed mapping, at the key `1` that `true` hashes
-to (decisions 10 and 14): reachable, by the builder (`flags[true] = 3;`). -/
+to: reachable, by the builder (`flags[true] = 3;`). -/
 theorem bool_key_reachable : Reachable BoolKeyed BoolKeyed.flag := by
   refine canon_reachable ?_ ?_ ?_
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, canonH, and_true]
