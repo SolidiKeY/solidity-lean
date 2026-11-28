@@ -19,7 +19,11 @@ no entries (`accepted_of_no_entries`); only `BodiesBound` and `Lift` carry conte
 
 **Suggested fix.** State the fragment on the Source program itself, or bind `ctorArgs`/`entries`
 to the Source program's ABI (every external function selected, `ctorArgs` total) before
-asking `Accepted`. -/
+asking `Accepted`.
+
+**Status.** Decision H2228: an additive v2 statement binds `ctorArgs`/`entries` to the program's
+ABI (versioned pair, a Goals-owned step, then consumer migration). This v1 statement stays as it
+is; the witness stays as its evidence. -/
 
 namespace Solidity.Examples.RedTeam.Statements.InFragmentNames
 
