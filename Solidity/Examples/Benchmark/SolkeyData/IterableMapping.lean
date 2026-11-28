@@ -18,7 +18,6 @@ The three class invariants are `invariant` clauses, assumed and owed by
 every `spec!{f}`.  Verdicts: all five obligations unknown (the quantified
 invariants; see "The obligations"); every `ensures` clause proved by hand
 without the invariants.
-
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyData.IterableMapping
@@ -96,7 +95,7 @@ theorem getFromMap_clause : ⊢ dl!{ [ uint y = getFromMap(); ] y == map.values[
 /-- `sizeOfMapping()`: `ensures s == map.keys.length`. -/
 theorem sizeOfMapping_clause : ⊢ dl!{ [ uint y = sizeOfMapping(); ] y == map.keys.length } := by sol_prove
 /-- `getKeyAtIndex(index)`: `ensures k == map.keys[index]`. -/
-theorem getKeyAtIndex_clause : ⊢ dl!{ [ uint y = getKeyAtIndex(i); ] y == map.keys[i] } := by sol_prove
+theorem getKeyAtIndex_clause : ⊢ dl!{ [ address y = getKeyAtIndex(i); ] y == map.keys[i] } := by sol_prove
 /-- `setInMapping(val)`: `ensures map.values[msg.sender] == val && map.inserted[msg.sender]`. -/
 theorem setInMapping_entry :
     ⊢ dl!{ [ setInMapping(x); ] map.values[msg.sender] == x && map.inserted[msg.sender] == true } := by sol_prove

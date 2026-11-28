@@ -1,8 +1,5 @@
-import Solidity.Calculus.ProvesDerive
-import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
-import Solidity.Calculus.Closers
 
 /-!
 # Benchmark: `ArrayRemoveByShifting`, open variant (solkey real-world)
@@ -23,7 +20,6 @@ and the invariant rule anonymises `arr` (`{ storage := anon(storage, arr, …) }
 so the `ensures` clauses are lost past the loop.  Missing: entry-state reads
 in loop invariants (as `Examples/Benchmark/Algorithms/Reverse.lean` notes);
 a stronger invariant would change the source.
-
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyData.ArrayRemoveByShiftingOpen

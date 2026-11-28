@@ -1,8 +1,5 @@
-import Solidity.Calculus.ProvesDerive
-import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
-import Solidity.Calculus.Closers
 
 /-!
 # Benchmark: `ArrayRemoveByShifting` (solkey real-world)
@@ -16,7 +13,6 @@ replaces the array literals by `delete arr` and pushes).  solkey's own
 clauses here state only the bounds check; the functional specification is
 the open variant, `ArrayRemoveByShiftingOpen.lean`.  Verdicts: `remove` and
 `test` unknown (the loop leaves; see their targets).
-
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyData.ArrayRemoveByShifting

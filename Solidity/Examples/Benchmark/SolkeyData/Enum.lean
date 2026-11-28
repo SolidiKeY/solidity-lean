@@ -14,7 +14,6 @@ Changes: none but the spelling of `contract!{ … }` (solkey already drops
 the comments and names `get`'s result `s`).  An enum member is its
 position, a `uint` (`Examples/Benchmark/Syntax.lean`).  Verdicts: every
 function proved (`spec_get`, `spec_set`, `spec_cancel`, `spec_reset`).
-
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyData.Enum

@@ -15,7 +15,6 @@ the comments and replaces `arr = [1, 2, 3, 4]` by `delete arr` and four
 pushes).  `test()` calls `remove`, which inlines.  Verdicts: `remove`
 unknown (its length clause proved by hand); `test` proved, and it returns
 from every state (its `assert`s hold).
-
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyData.ArrayReplaceFromEnd
