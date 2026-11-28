@@ -271,6 +271,7 @@ At the root, the notation's own tests:
 |---|---|
 | `Examples/RedTeam/Syntax/LiteralFolding.lean` | Red-team witness: literal expressions with `%`, `**` or `<<` run as `uint256` arithmetic (`7 % 2 / 2 * 2` returns `0`, `2 ** 256 - 1` reverts) where solc folds them exactly (`1`, `2^256 - 1`). |
 | `Examples/RedTeam/Syntax/NegNegPrinter.lean` | Red-team witness: the program and clause printers write `-(-y)` as `--y`, a Solidity pre-decrement; runs of both programs from `y := 3` disagree. |
+| `Examples/RedTeam/Evm/Dup17.lean` | Red-team witness: `rows.push(one)` of a 16-word static value is in the compiler fragment and compiles to `DUP17`, which the abstract machine runs and the EVM does not have; no false theorem. |
 | `Examples/RedTeam/Trust/ExternBoundary.lean` | Controlled kernel/native disagreement exposing the source trust lint's missing external-implementation inventory; no false theorem. Companion Node test pins the weak lint and stronger census boundaries. |
 | `Examples/RedTeam/Trust/HeadlineAxioms.lean` | Exact registered headline/endpoint type checks and transitive axiom queries; intrinsic model and instruction-list boundary only. |
 | `Examples/Panic/Origins.lean` | Typed panic-origin regressions V1 erases the cause of a panic. |

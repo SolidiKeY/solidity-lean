@@ -369,6 +369,7 @@ import Solidity.Examples.RedTeam.StorageLayout.BoolPacking
 import Solidity.Examples.RedTeam.StorageLayout.ReferenceChecks
 import Solidity.Examples.RedTeam.Syntax.LiteralFolding
 import Solidity.Examples.RedTeam.Syntax.NegNegPrinter
+import Solidity.Examples.RedTeam.Evm.Dup17
 import Solidity.Examples.RedTeam.Trust.ExternBoundary
 import Solidity.Examples.RedTeam.Trust.HeadlineAxioms
 import Solidity.Examples.Roadmap.V16.AbiEntryConsumer
