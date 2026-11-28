@@ -11,7 +11,7 @@ resp. `1`), and a point `(x, y)` of the sextic twist maps to `(x·t₂, y·t₃)
 with `t_k = w^k` (BN254's D-twist) or `w^(-k)` (BLS12-381's M-twist).
 
 The Miller loop runs on the twist over `Fp2` (affine, so a line's slope is
-an `Fp2` division) and evaluates each line at the `G1` point into `Fp12`;
+an `Fp2` division) and evaluates each line at the point into `Fp12`;
 BN254 adds the two Frobenius lines of its optimal ate loop.  The check
 multiplies the loops of every pair and raises the product to
 `(p¹² - 1) / r` once (`check`): the pairings multiply to one exactly when
@@ -73,7 +73,7 @@ where
 
 end Fp12
 
-/-- A pairing-friendly curve as the check needs it: `G1` over `Fp`, its
+/-- A pairing-friendly curve as the check needs it: over `Fp`, its
 sextic twist over `Fp2`, `Fp12`'s reduction, `Fp2`'s embedding, the twist's
 powers of `w`, the ate loop count, and BN254's Frobenius constants. -/
 structure PairingCurve (p : Nat) where
@@ -106,7 +106,7 @@ def mul (a b : Fp12 p) : Fp12 p := Fp12.mul E.k₆ E.k₀ a b
 def emb (a : Fp2 p) : Fp12 p := Fp12.lift (a.re - Fin.ofNat p E.ξ * a.im) a.im
 
 /-- The line through `R₁` and `R₂` (the tangent when equal) of the twist,
-mapped to `Fp12`, at the `G1` point `(xp, yp)`. -/
+mapped to `Fp12`, at the point `(xp, yp)`. -/
 def line (R₁ R₂ : Pt (Fp2 p)) (xp yp : Fin p) : Fp12 p :=
   match R₁, R₂ with
   | .aff x₁ y₁, .aff x₂ y₂ =>
@@ -128,7 +128,7 @@ def frobPt (γ : Fp2 p × Fp2 p) : Pt (Fp2 p) → Pt (Fp2 p)
   | .inf => .inf
   | .aff x y => .aff (Fp2.conj x * γ.1) (Fp2.conj y * γ.2)
 
-/-- The Miller loop of `Q` (on the twist) and `P` (in `G1`), without the
+/-- The Miller loop of `Q` (on the twist) and `P`, without the
 final exponentiation; `1` when either is infinity. -/
 def miller (Q : Pt (Fp2 p)) (P : Pt (Fin p)) : Fp12 p :=
   match P with

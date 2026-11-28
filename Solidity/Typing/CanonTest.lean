@@ -1,16 +1,5 @@
 import Solidity.Typing.Constructibility
 
-/-!
-# What the tests of `wt(storage)` decide
-
-`SVal.Canon`, `SVal.Tight` (`Typing/Reachability.lean`, `Typing/Tight.lean`)
-are propositions; `wt(storage)` (`Calculus/Problem.lean`)
-asks them as tests the kernel evaluates (`Semantics/StorageWt.lean`:
-`SVal.allB B`, a fold of node tests `B : HeredB`).  Here each test decides
-its `Hered`'s node conditions clause for clause (`SVal.allB_iff`,
-`Typing/Values.lean`):
-`Storage.shapeB` is canonical and tight.
--/
 
 namespace Solidity
 
@@ -18,7 +7,6 @@ open Semantics (structDef lookupBy setBy nodupKeysB)
 
 variable {C : Contract}
 
-/-! ## The three tests -/
 
 theorem canonHB_decides : canonHB.Decides canonH :=
   ⟨fun _ _ => by simp only [canonHB, canonH],

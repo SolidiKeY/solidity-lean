@@ -1,23 +1,6 @@
 import Solidity.Typing.Values
 import Solidity.Typing.TypedRunInv
 
-/-!
-# A hereditary predicate the typed run keeps
-
-`Typing/Values.lean`'s `SVal.All P` holds of a run's storage when each
-storage operation keeps `P`'s node conditions: a slot or entry replaced
-(`save`), an array's slots dropped (`strip`) or cleared (`delete`), copied
-over (`overlay`), an element pushed or popped, a word or a copy out of
-memory written.  `HeredRun P G` is that list, over the node conditions
-alone; `G` is a property of every type the contract reaches (`Ty.okDeep`
-for `Typing/Tight.lean`'s tight storage, nothing otherwise),
-which only a push and a copy out of memory read.
-
-The invariant (`heredInv P`) is the storage's `All P`.  It is carried along
-the typed run statement by statement (`Stmt.keeps_all`), each leaf on
-`TRun.*`, once for all three predicates of `Typing/Reachability.lean`,
-`Typing/Tight.lean` and `Typing/Fits.lean`.
--/
 
 namespace Solidity
 
@@ -25,43 +8,31 @@ open Semantics (structDef lookupBy setBy nodupKeysB)
 
 variable {C : Contract}
 
-/-- What a run's storage operations ask of a hereditary predicate's node
-conditions, `G` holding of the types the contract reaches. -/
 structure HeredRun (P : Hered) (G : Ty → Prop) : Prop where
-  /-- A slot replaced, live if the array holds words. -/
   save : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (i : Nat) (x : SVal E),
     i < e.toList.length + sh.toList.length → (E.isPrimitive = true → i < n) → P.arr e sh →
     x.All P →
     P.arr (SVec.ofList (((e.toList ++ sh.toList).set i x).take n))
       (SList.ofList (((e.toList ++ sh.toList).set i x).drop n))
-  /-- An entry written, at a key a program writes. -/
   map : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V),
     x.All P → P.map K m d → P.map K (SMap.ofList (setBy k x m.toList)) d
-  /-- The slots past the end dropped (a copy's source). -/
   strip : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
     P.arr e.strip SList.nil
-  /-- The elements cleared into the slots past the end (`delete`). -/
   del : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
     P.arr SVec.nil (SList.ofList (e.defaultOf.toList ++ sh.toList))
-  /-- An array copied over another. -/
   ov : ∀ {E : Ty} {m n : Nat} (oel : SVec E m) (osh : SList E) (nel : SVec E n) (nsh : SList E),
     P.arr oel osh → P.arr nel nsh → oel.All P → osh.All P → nel.All P →
     P.arr (SVec.overlayOn (oel.toList ++ osh.toList) nel)
       (SList.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m)))
-  /-- An element pushed onto the slot `pushSlot` hands it, below the bound. -/
   push : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (x : SVal E),
     G (.ref (.array E)) → n + 1 < 2 ^ 256 → P.arr e sh → e.All P → sh.All P → x.All P →
     P.arr (SVec.ofList (e.toList ++ [x])) (SList.ofList (pushSlot E sh.toList).2)
-  /-- The last element popped into the slots past the end: kept as it is
-(an element of a mapping type) or cleared. -/
   pop : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (last : SVal E) (keep : Bool),
     last ∈ e.toList → (keep = true → E.isPrimitive = false) → P.arr e sh → e.All P →
     sh.All P →
     P.arr (SVec.ofList e.toList.dropLast)
       (SList.ofList ((if keep then last else last.defaultOf) :: sh.toList))
-  /-- A default. -/
   dflt : ∀ T, (SVal.dflt T).All P
-  /-- A copy out of memory. -/
   plain : ∀ {T : Ty} (v : SVal T), G T → v.Plain → v.All P
 
 namespace HeredRun
@@ -85,7 +56,6 @@ theorem saveM_all {T U : Ty} {x : SVal T} {p : Path T U} {new : SVal U} {x' : SV
     (h : x.saveM p new = some x') : x'.All P :=
   SVal.saveM_all hP.save hP.map p hx hn hl h
 
-/-- The slot a push lands on. -/
 theorem pushSlot_all {E : Ty} {sh : List (SVal E)} (h : ∀ w ∈ sh, w.All P) :
     (pushSlot E sh).1.All P ∧ ∀ w ∈ (pushSlot E sh).2, w.All P := by
   cases sh with
@@ -99,7 +69,6 @@ theorem pushSlot_all {E : Ty} {sh : List (SVal E)} (h : ∀ w ∈ sh, w.All P) :
 
 end HeredRun
 
-/-! ## The storage operations -/
 
 namespace Storage
 
@@ -107,8 +76,6 @@ variable {P : Hered} {G : Ty → Prop} (hP : HeredRun P G)
 
 include hP
 
-/-- **A save keeps the predicate**, along keys a program writes, entering
-arrays of words at live slots. -/
 theorem save_all {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
     (hs : st.All P) (hn : new.All P)
     (hl : (st.get r.hroot).Live r.path) (h : st.save r new = some st') : st'.All P := by
@@ -196,7 +163,6 @@ theorem pop_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {ke
 
 end Storage
 
-/-! ## Resolved references -/
 
 theorem SVal.live_nil {T : Ty} (x : SVal T) : x.Live .nil := by cases x <;> simp only [SVal.Live]
 
@@ -205,16 +171,12 @@ section Resolve
 variable {Γ : Ctx} (σ : State C Γ)
 
 
-/-- An index the program takes is in bounds where it takes it. -/
 theorem Storage.checkIndex_some {st : Storage C} {R : RefTy} {k : PrimTy} {V : Ty}
     {r : SRef C (.ref R)} {it : IndexTy R k V} {i : k.Denote} (h : st.checkIndex r it i = some ()) :
     ∃ y, st.find r = some y ∧ Storage.inBounds it i y = some () := by
   simp only [Storage.checkIndex, Option.bind_eq_bind, Option.bind_eq_some_iff] at h
   exact h
 
-/-- **A location resolves to live slots**: an index the program takes was
-checked against the length where it took it, and a reference reaches no
-array of words but at its last step. -/
 theorem Loc.resolveT_live : {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T},
     l.resolveT σ = .ok r → (σ.storage.get r.hroot).Live r.path
   | _, .root _ _, r, h => by
@@ -263,8 +225,6 @@ theorem Loc.resolveT_live : {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T}
         cases y with
         | fixed e => simp only [SVal.Live]; exact fun _ _ => trivial
 
-/-- A path resolves to live slots: an alias names a reference, which reaches
-no array of words. -/
 theorem SPath.resolveT_live : {T : Ty} → (b : SPath C Γ T) → ∀ {r : SRef C T},
     b.resolveT σ = .ok r → (σ.storage.get r.hroot).Live r.path
   | _, .alias _, _, _ => SVal.live_of_ref _ _ rfl
@@ -272,8 +232,6 @@ theorem SPath.resolveT_live : {T : Ty} → (b : SPath C Γ T) → ∀ {r : SRef 
 
 end Resolve
 
-/-- In `values.push() += e`, the newly appended primitive slot is live
-before the arithmetic write, even if it was recycled from the shadow. -/
 theorem Storage.pushPlace_live {p : PrimTy} {st st' : Storage C}
     {r : SRef C (.array (.prim p))} {k : PrimTy.uint.Denote}
     (h : st.pushPlace r = some (st', k)) :
@@ -294,9 +252,7 @@ theorem Storage.pushPlace_live {p : PrimTy} {st st' : Storage C}
     SVec.length_toList]
   omega
 
-/-! ## The invariant -/
 
-/-- What a run keeps of a hereditary predicate: the storage satisfies it. -/
 def heredInv (C : Contract) (P : Hered) : RunInv C where
   glob st := st.All P
   loc _ _ := True
@@ -311,7 +267,6 @@ variable {P : Hered} {G : Ty → Prop} (hP : HeredRun P G) (hG : ∀ {U : Ty}, S
   {Γ : Ctx}
 
 include hP in
-/-- The storage value a source stores satisfies what the storage does. -/
 theorem Src.valueT_all {σ : State C Γ} {T : Ty} (hg : G T) (hs : σ.storage.All P) :
     (r : Src C Γ T) → {v : SVal T} → r.valueT σ = .ok v → v.All P
   | .val _, v, h => by
@@ -588,7 +543,6 @@ theorem keeps_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
     | none => exact hs
     | some x0 => exact hx x0 rfl
 
-/-- The deferred operand of `f().push(e)` retains hereditary storage facts. -/
 theorem keeps_pushAfterPrefix {Γv : Ctx} {E : Ty} (he : Ext Γ Γv)
     (code : TStep C Γ Γv) (value : Src C Γv E) (ref : SRef C (.array E))
     (hc : (heredInv C P).TKeeps code) :
@@ -617,8 +571,6 @@ theorem keeps_assignLocalPush {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ
   cases h
   exact (keeps_push hP hG b none σ o' hσ ho').setLocal i trivial
 
-/-- `values.push() += e` preserves the hereditary storage invariant through
-the append/reset and then the primitive arithmetic save. -/
 theorem keeps_pushOpAssign {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
     (r : Val C Γ p) : (heredInv C P).TKeeps (TRun.pushOpAssign op b r) := by
   intro σ o hσ h
@@ -632,8 +584,6 @@ theorem keeps_pushOpAssign {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.p
     have hst := hσ.withStorage (Storage.pushPlace_all hP hσ.1 (hG ref) hs')
     exact opStoreT_holds hP hst op (Storage.pushPlace_live hs') v h
 
-/-- Standalone prefix/postfix `values.push()++` preserves the hereditary
-storage invariant; the returned numeric value is discarded. -/
 theorem keeps_pushIncDec {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p))) :
     (heredInv C P).TKeeps (TRun.pushIncDec op b) := by
   intro σ o hσ h
@@ -789,8 +739,6 @@ theorem keeps_litBytesT {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
   · exact RunInv.tkeeps_seq (keeps_declMem _ _ _) (keeps_litWritesT hk bs 0)
   · exact RunInv.tkeeps_seq (keeps_declMem _ _ _) hk
 
-/-- A `catch` clause binding the data keeps a hereditary predicate as its
-body does: the data is a fresh memory object. -/
 theorem keeps_catchData {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
     (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) {body : TStep C (.mem bytesR :: Γ) Γ₁}
@@ -803,7 +751,6 @@ theorem keeps_catchData {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binde
   · cases h
   · exact (keeps_litBytesT hb _).drop _ σ o hσ h
 
-/-- A revert with data ends in no state. -/
 theorem keeps_revertData (d : List (RevPart C Γ)) : (heredInv C P).TKeeps (TRun.revertData d) := by
   intro σ o _ h
   unfold TRun.revertData at h
@@ -818,9 +765,6 @@ variable {P : Hered} {G : Ty → Prop}
 
 mutual
 
-/-- **A hereditary predicate, statement level.**  A statement run from a
-state whose storage satisfies it, its aliases bound along keys a program
-writes, ends in one. -/
 theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U) :
     {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (heredInv C P).TKeeps (Stmt.runR s)
   | _, _, .assign l r => keeps_assign hP hG l r
@@ -890,7 +834,6 @@ theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
   | _, _, .catchData c rets sargs sbody self kind _ body =>
     keeps_catchData c rets sargs sbody.ext sbody.runR self kind body.ext (Prog.keeps_all hP hG body)
 
-/-- **A hereditary predicate, block level.** -/
 theorem Prog.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U) :
     {Γ Γ' : Ctx} → (P' : Prog C Γ Γ') → (heredInv C P).TKeeps (Prog.runR P')
   | _, _, .nil => RunInv.tkeeps_nil
@@ -898,9 +841,6 @@ theorem Prog.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
 
 end
 
-/-- **What a run keeps**: a block run from a state whose storage satisfies
-the predicate, with no alias bound off the keys a program writes, ends, if in
-a state, in one whose storage satisfies it. -/
 theorem Prog.run_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U) {Γ Γ' : Ctx} (P' : Prog C Γ Γ') {σ : State C Γ} {o : Out C σ.H Γ'}
     (hσ : (heredInv C P).HoldsT σ) (h : P'.run σ = .ok o) : o.st.storage.All P :=
   (Prog.keeps_all hP hG P' σ o hσ h).1
