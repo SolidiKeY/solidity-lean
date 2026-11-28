@@ -337,6 +337,8 @@ import Solidity.Examples.StringLaws
 import Solidity.Examples.Summaries.CallChain
 import Solidity.Examples.Summaries.Library
 import Solidity.Examples.Summaries.Pricing
+import Solidity.Examples.Summaries.StorageChain
+import Solidity.Examples.Summaries.Support
 import Solidity.Examples.Summaries.Token
 import Solidity.Examples.Summaries.Vault
 import Solidity.Examples.Tactics.AbiFeatures
