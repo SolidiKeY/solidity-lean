@@ -191,12 +191,12 @@ At the root, the notation's own tests:
 | Module | Its examples |
 |---|---|
 | `Examples/FrontendValidation/SolcJson.lean` | Accepted and rejected literal controls for `J.get`, `J.opt`, `J.str`, `J.arr`, `J.str?`, `J.arr?`, `J.ref?`, `J.id?`, `J.hasOperatorFunction`, `J.operatorFunction?`, and `J.typeRef?`. |
-| `Examples/FrontendValidation/SolcValidation.lean` | Inline accepted and rejected controls for the frozen solc literal, lexer, parser, data lookup, structural and renaming validators. |
 | `Examples/FrontendValidation/SolcJson/Ir.lean` | Literal accepting/rejecting controls for IR channel selection, source/contract paths, lookup, and extracted text. |
 | `Examples/FrontendValidation/SolcJson/CallMetadata.lean` | Literal profile, call-shape, static-target, location and attachment controls; structural metadata only. |
 | `Examples/FrontendValidation/SolcJson/YulIngress.lean` | Literal JSON grammar, metadata, documentation safety and closed/scoped ingress controls; no source or execution authentication. |
 | `Examples/FrontendValidation/SolcJson/BodyHelpers.lean` | Literal rational, expression, tuple, storage-reference, aggregate and declaration-owner acceptance/refusal controls. |
 | `Examples/FrontendValidation/SolcJson/YulReferences.lean` | Literal declaration IDs, namespace selection, shadowing, source spans, occurrence collection and unique reference coverage controls. |
+| `Examples/FrontendValidation/SolcValidation.lean` | Inline accepted and rejected controls for the frozen solc literal, lexer, parser, data lookup, structural and renaming validators. |
 | `Examples/DecisionResidue.lean` | M7-next: residue members (halting `||` APF guard valid and false; VA1 mapping-field and normalization-budget labels; a leaf every hash try refuses), witness controls (in-target non-residue feature fixtures of earlier milestones answered through `DecisionTheorem'`; the answering route is not pinned) and the negative control (a valid and a false residue leaf, neither claimed). |
 
 ## H109 slow loop obligations
