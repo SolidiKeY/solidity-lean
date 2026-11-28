@@ -159,5 +159,3 @@ end Solidity.Backend
 #print axioms Solidity.Backend.compiler_optimized_correct
 #print axioms Solidity.Backend.compileOptimized_ne_none
 #print axioms Solidity.Backend.compileOptimized_accepts
-
-#print axioms Solidity.Backend.compiler_optimized_endpoint
