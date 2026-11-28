@@ -38,7 +38,7 @@ def BubbleSort : Contract := contract!{
       /// @custom:key invariant j + 1 <= i && i <= n && n == _arr.length
       /// @custom:key invariant \forall uint p; p < j -> _arr[p] <= _arr[j]
       /// @custom:key invariant \forall uint p; \forall uint q; p < q && q < n && i <= q -> _arr[p] <= _arr[q]
-      /// @custom:key invariant \forall uint p; noSwaps && p < j -> _arr[p] <= _arr[p + 1]
+      /// @custom:key invariant \forall uint p; \forall uint q; noSwaps && p < q && q <= j -> _arr[p] <= _arr[q]
       /// @custom:key decreases i - 1 - j
       for (uint256 j = 0; j < (i - 1); j++) {
         if (_arr[j] > _arr[j + 1]) {

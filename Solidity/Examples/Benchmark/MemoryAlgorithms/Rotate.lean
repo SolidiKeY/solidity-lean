@@ -33,11 +33,15 @@ def Rotate : Contract := contract!{
 local instance : InContract := ⟨Rotate⟩
 open scoped Scoped
 
-/-- Unknown, not refuted. `sol_prove` leaves `leaf1` as `… ⟹ false`: the loop
-cut over a body that writes memory has no frame (`Blocks.loopStep` needs
-`Prog.frame`; a memory write has none), so the walk keeps the unprovable
-leaf instead of the invariant's obligations. Needed: a sound heap
-modifies/havoc frame for loop bodies with memory writes. -/
+/-- False as stated, by aliasing; no formal counterexample yet. Two memory
+inputs may be one array (`NRead.refInputs` asks only that each exists), and
+the clause `r.length == xs.length` allows `r = xs`: with `n = 3`, `k = 2` and
+`xs = r = [1, 2, 3]` the writes give `[1, 2, 1]`, `[2, 2, 1]`, `[2, 1, 1]`, and
+`r[2] = 1 ≠ 2 = xs[0]`. Dafny's version needs `requires r != xs`, which
+SolSpec cannot state (no reference disequality). Not written as an
+`example`: no tactic refutes a box postcondition at a typed state with two
+aliased memory inputs. Separately, `sol_prove` leaves `leaf1` as
+`… ⟹ false` (no frame for a loop body that writes memory). -/
 def correctnessTarget := spec!{ rotate }
 
 end Solidity.Examples.Benchmark.MemoryAlgorithms.Rotate

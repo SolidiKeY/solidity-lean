@@ -16,7 +16,8 @@ returns value types only and the surface does not snapshot a memory heap.
 Natural specification: on a sorted input, `out[0..result)` is strictly
 increasing, every input element occurs in it, and every element of it
 occurs in the input.  Invariant: the same three facts for `xs[0..i)` and
-`out[0..m)`, and `out[m - 1] == xs[i - 1]`; variant `xs.length - i`.  The two
+`out[0..m)`, and `out[m - 1] == xs[i - 1]`, and the input still sorted from `i - 1` (the
+heap is anonymized at the cut, and `out` may be `xs`); variant `xs.length - i`.  The two
 covering facts are existential, which a loop clause cannot state
 (`sol_loop_inv`: `\forall`, `a -> c`, or an expression), so the annotation
 carries the other two.
@@ -35,6 +36,7 @@ def Dedupe : Contract := contract!{
     /// @custom:key invariant i <= xs.length && m <= i && out.length == xs.length
     /// @custom:key invariant \forall uint p; \forall uint q; p < q && q < m -> out[p] < out[q]
     /// @custom:key invariant m == 0 || i == 0 || out[m - 1] == xs[i - 1]
+    /// @custom:key invariant \forall uint p; \forall uint q; p < q && q < xs.length && i <= p + 1 -> xs[p] <= xs[q]
     /// @custom:key decreases xs.length - i
     while (i < xs.length) {
       if (i == 0 || xs[i] != xs[i - 1]) { out[m] = xs[i]; m++; }
