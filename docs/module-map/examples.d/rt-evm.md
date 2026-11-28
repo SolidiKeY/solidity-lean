@@ -1,0 +1,1 @@
+| `Examples/RedTeam/Evm/Dup17.lean` | Red-team witness: `rows.push(one)` of a 16-word static value is in the compiler fragment and compiles to `DUP17`, which the abstract machine runs and the EVM does not have; no false theorem. |

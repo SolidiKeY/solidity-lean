@@ -312,6 +312,7 @@ import Solidity.Examples.ReadRealization
 import Solidity.Examples.ReadTrace
 import Solidity.Examples.RecursiveCopy
 import Solidity.Examples.RecursiveStorage
+import Solidity.Examples.RedTeam.Evm.Dup17
 import Solidity.Examples.RedTeam.Trust.ExternBoundary
 import Solidity.Examples.RedTeam.Trust.HeadlineAxioms
 import Solidity.Examples.Roadmap.V16.AbiEntryConsumer
