@@ -227,7 +227,7 @@ def build_olean_matches(stem, hashes):
     if not olean.is_file(): return False
     if not hashes: return True
     hf = stem.parent / (stem.name + ".olean.hash")
-    try: return hex_hash(hf.read_text().strip()) in hashes
+    try: return hex_hash(hf.read_text().strip()) in {hex_hash(h) for h in hashes}
     except OSError: return True  # a local build clears .olean.hash; mtime cannot tell stale apart
 
 
