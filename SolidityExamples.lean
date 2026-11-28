@@ -115,6 +115,12 @@ import Solidity.Examples.Benchmark.Swc.MultiOwnedFixed
 import Solidity.Examples.Benchmark.Swc.MultiOwnedVulnerable
 import Solidity.Examples.Benchmark.Swc.WalletOk
 import Solidity.Examples.Benchmark.Swc.WalletRefundNoSub
+import Solidity.Examples.Benchmark.SolkeyData.ArrayRemoveByShifting
+import Solidity.Examples.Benchmark.SolkeyData.ArrayRemoveByShiftingOpen
+import Solidity.Examples.Benchmark.SolkeyData.ArrayReplaceFromEnd
+import Solidity.Examples.Benchmark.SolkeyData.Enum
+import Solidity.Examples.Benchmark.SolkeyData.IterableMapping
+import Solidity.Examples.Benchmark.SolkeyData.NestedMapping
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.TokenExtensions.AllowanceDelta
 import Solidity.Examples.Benchmark.TokenExtensions.Burnable
