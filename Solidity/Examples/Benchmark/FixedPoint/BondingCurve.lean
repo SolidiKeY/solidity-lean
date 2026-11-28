@@ -16,7 +16,10 @@ Price `slope * supply + initialPrice`; its integral, the pool balance, is
 `getPoolBalance(s) = slope.mul(powu(s, 2)).div(2e18).add(s.mul(initialPrice))`
 in PRB-math `UD60x18`, spelled here in `uint256` as PRB defines the
 operations: `a.mul(b) = a * b / 1e18`, `a.div(b) = a * 1e18 / b`,
-`powu(s, 2) = s.mul(s)` (all truncating, checked). `buy` charges
+`powu(s, 2) = s.mul(s)` (all truncating). PRB computes these with a
+512-bit intermediate (`mulDiv18`, `mulDiv`) and reverts only when the
+result overflows; here the intermediate product is checked, so the model
+reverts on more inputs and returns the same value wherever it does not. `buy` charges
 `getPoolBalance(totalPurchased + amount) - getPoolBalance(totalPurchased)`,
 the source's `calculatePurchaseAmountOut`, and records supply and reserve.
 The source sells only (no redemption); `sell` is its mirror, added for the

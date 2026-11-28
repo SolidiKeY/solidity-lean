@@ -16,7 +16,14 @@ Source: Aave protocol v2 `contracts/protocol/libraries/math/WadRayMath.sol`:
 which a `require` drops. The WAD variants differ only in the constant.
 
 Natural specifications state rounding to nearest, ties up: `q` rounds
-`n / d` half up iff `q * d <= n + d / 2 < (q + 1) * d`.
+`n / d` half up iff `q * d <= n + d / 2 < (q + 1) * d`, the upper bound
+written `n + d / 2 - q * d < d`, which cannot overflow where the body
+returns (clause arithmetic is checked at `uint256`; `(q + 1) * d` overflows
+at `rayMul(max - 5e26, 1)`).
+
+The source is `pragma solidity 0.6.12`, unchecked; here arithmetic is
+checked (0.8). The `require` guards exclude every overflow, so the two
+agree.
 
 Status (every clause kept exactly):
 * `rayMul`, `rayDiv` unknown: the leaves `q = (a * b + halfRAY) / RAY ⟹ …`
@@ -30,7 +37,7 @@ namespace Solidity.Examples.Benchmark.FixedPoint.RayMath
 /-- Aave v2 `WadRayMath.rayMul`/`rayDiv`, with half-up rounding clauses. -/
 def RayMath : Contract := contract!{
   ensures \result * 1000000000000000000000000000 <= a * b + 500000000000000000000000000;
-  ensures a * b + 500000000000000000000000000 < (\result + 1) * 1000000000000000000000000000;
+  ensures a * b + 500000000000000000000000000 - \result * 1000000000000000000000000000 < 1000000000000000000000000000;
   function rayMul(uint256 a, uint256 b) public pure returns (uint256) {
     if (a == 0 || b == 0) {
       return 0;
@@ -39,7 +46,7 @@ def RayMath : Contract := contract!{
     return (a * b + 500000000000000000000000000) / 1000000000000000000000000000;
   }
   ensures \result * b <= a * 1000000000000000000000000000 + b / 2;
-  ensures a * 1000000000000000000000000000 + b / 2 < (\result + 1) * b;
+  ensures a * 1000000000000000000000000000 + b / 2 - \result * b < b;
   function rayDiv(uint256 a, uint256 b) public pure returns (uint256) {
     require(b != 0, "50");
     uint256 halfB = b / 2;

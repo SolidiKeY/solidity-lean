@@ -26,8 +26,7 @@ Status (every clause kept exactly):
   the quotient-of-product bound;
 * `splitTwo` unknown: leaf `R * s1 / (s1 + s2) + R * s2 / (s1 + s2) <= R`;
   `sol_close` exhausts its heartbeats; missing the same bound and
-  `a / d + b / d <= (a + b) / d`. Even `R * 0 / T == 0` stays open
-  (symbolic divisor).
+  `a / d + b / d <= (a + b) / d`.
 -/
 
 namespace Solidity.Examples.Benchmark.FixedPoint.FeeSplit

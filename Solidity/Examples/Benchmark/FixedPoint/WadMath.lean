@@ -20,13 +20,23 @@ benchmark.
 
 Natural specifications state the rounding direction: a rounded-down
 quotient `q` of `n / d` has `q * d <= n < (q + 1) * d`; a rounded-up one
-has `n <= q * d < n + d`. Checked overflow and division by zero revert;
-the box clauses do not claim totality.
+has `(q - 1) * d < n <= q * d`. Clause arithmetic is checked at `uint256`
+(`docs/function-specs.md`: a side that overflows halts and makes the
+comparison false), so each bound is written in a form that cannot overflow
+where the body returns: `n - q * d < d` for the rounded-down upper bound,
+and, rounded up, `q == 0 -> n == 0` and
+`q > 0 -> (q - 1) * d < n && n - (q - 1) * d <= d`. The literal forms
+`n < (q + 1) * d` and `n <= q * d` are false at the edge (e.g.
+`mulDivDown(1, 2^256 - 1, 2^255)` returns `1` and `2 * 2^255` overflows).
+Checked overflow and division by zero revert; the box clauses do not claim
+totality.
 
 Status (every clause kept exactly):
-* all five obligations unknown: `sol_prove` leaves the arithmetic leaf
-  `q = (x * y) / d ⟹ q * d <= x * y ∧ …` and `sol_close` fails in `grind`
-  (literal divisor) or stops its bounded nonlinear search (symbolic divisor):
+* `wMulDown` proved (`sol_prove`, its leaf by `sol_close`);
+* `mulDivDown`, `mulDivUp`, `wDivDown`, `wDivUp` unknown: `sol_prove` leaves
+  the arithmetic leaf `q = (x * y) / d ⟹ q * d <= x * y ∧ x * y - q * d < d`
+  (or its round-up form) and `sol_close` fails in `grind` or stops its
+  bounded nonlinear search (symbolic divisor):
   the closer lacks SolKey's `div_axiom`-style bounds for a quotient of a
   product, `0 <= n → 0 < d → (n / d) * d <= n < (n / d + 1) * d`, with
   `n` a nonlinear atom;
@@ -40,27 +50,27 @@ namespace Solidity.Examples.Benchmark.FixedPoint.WadMath
 /-- Morpho Blue `MathLib`, with rounding-direction clauses. -/
 def WadMath : Contract := contract!{
   ensures \result * d <= x * y;
-  ensures x * y < (\result + 1) * d;
+  ensures x * y - \result * d < d;
   function mulDivDown(uint256 x, uint256 y, uint256 d) public pure returns (uint256) {
     return (x * y) / d;
   }
-  ensures x * y <= \result * d;
-  ensures \result * d < x * y + d;
+  ensures \result == 0 -> x * y == 0;
+  ensures \result > 0 -> (\result - 1) * d < x * y && x * y - (\result - 1) * d <= d;
   function mulDivUp(uint256 x, uint256 y, uint256 d) public pure returns (uint256) {
     return (x * y + (d - 1)) / d;
   }
   ensures \result * 1000000000000000000 <= x * y;
-  ensures x * y < (\result + 1) * 1000000000000000000;
+  ensures x * y - \result * 1000000000000000000 < 1000000000000000000;
   function wMulDown(uint256 x, uint256 y) public pure returns (uint256) {
     return mulDivDown(x, y, 1000000000000000000);
   }
   ensures \result * y <= x * 1000000000000000000;
-  ensures x * 1000000000000000000 < (\result + 1) * y;
+  ensures x * 1000000000000000000 - \result * y < y;
   function wDivDown(uint256 x, uint256 y) public pure returns (uint256) {
     return mulDivDown(x, 1000000000000000000, y);
   }
-  ensures x * 1000000000000000000 <= \result * y;
-  ensures \result * y < x * 1000000000000000000 + y;
+  ensures \result == 0 -> x * 1000000000000000000 == 0;
+  ensures \result > 0 -> (\result - 1) * y < x * 1000000000000000000 && x * 1000000000000000000 - (\result - 1) * y <= y;
   function wDivUp(uint256 x, uint256 y) public pure returns (uint256) {
     return mulDivUp(x, 1000000000000000000, y);
   }
@@ -68,8 +78,10 @@ def WadMath : Contract := contract!{
 local instance : InContract := ⟨WadMath⟩
 open scoped Scoped
 
-/-- `wMulDown`: rounded down. Unknown (quotient-of-product bounds). -/
-def wMulDown_obligation : Fml WadMath [] := spec!{ wMulDown }
+/-- `wMulDown`: rounded down. -/
+theorem wMulDown_spec : ⊢ spec!{ wMulDown } := by
+  sol_prove
+  all_goals (sol_leaf; sol_close)
 /-- `wDivDown`: rounded down. Unknown (quotient-of-product bounds). -/
 def wDivDown_obligation : Fml WadMath [] := spec!{ wDivDown }
 /-- `wDivUp`: rounded up. Unknown (quotient-of-product bounds). -/
