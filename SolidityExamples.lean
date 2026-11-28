@@ -47,6 +47,7 @@ import Solidity.Examples.Benchmark.Inheritance.AbstractHook
 import Solidity.Examples.Benchmark.Inheritance.ConstructorArgs
 import Solidity.Examples.Benchmark.Inheritance.ConstructorOrder
 import Solidity.Examples.Benchmark.Inheritance.ExplicitBase
+import Solidity.Examples.Benchmark.Inheritance.ModifierOrder
 import Solidity.Examples.Benchmark.Inheritance.ModifierOverride
 import Solidity.Examples.Benchmark.Inheritance.ModifierStacking
 import Solidity.Examples.Benchmark.Inheritance.SuperInConstructor
