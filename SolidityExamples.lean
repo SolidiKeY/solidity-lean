@@ -54,6 +54,7 @@ import Solidity.Examples.Benchmark.Inheritance.AbstractHook
 import Solidity.Examples.Benchmark.Inheritance.ConstructorArgs
 import Solidity.Examples.Benchmark.Inheritance.ConstructorOrder
 import Solidity.Examples.Benchmark.Inheritance.ExplicitBase
+import Solidity.Examples.Benchmark.Inheritance.ModifierOrder
 import Solidity.Examples.Benchmark.Inheritance.ModifierOverride
 import Solidity.Examples.Benchmark.Inheritance.ModifierStacking
 import Solidity.Examples.Benchmark.Inheritance.SuperInConstructor
@@ -84,6 +85,14 @@ import Solidity.Examples.Benchmark.Patterns.TwoStepOwnership
 import Solidity.Examples.Benchmark.Patterns.Withdrawal
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.SolcVerify.CaseAnalysisSimple
+import Solidity.Examples.Benchmark.SolcVerify.DoWhile
+import Solidity.Examples.Benchmark.SolcVerify.LoopInvar
+import Solidity.Examples.Benchmark.SolcVerify.OldExpr
+import Solidity.Examples.Benchmark.SolcVerify.OverflowSpec
+import Solidity.Examples.Benchmark.SolcVerify.Simple
+import Solidity.Examples.Benchmark.SolcVerify.Storage
+import Solidity.Examples.Benchmark.SolcVerify.StructMapping
 import Solidity.Examples.Benchmark.SolkeyBench.AccessRestriction
 import Solidity.Examples.Benchmark.SolkeyBench.Fund
 import Solidity.Examples.Benchmark.SolkeyBench.SendContract
@@ -446,10 +455,15 @@ import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
 import Solidity.Examples.SolkeyOpen.ArrayRemoveByShifting
 import Solidity.Examples.SolkeyOpen.SolcArithmetic
+import Solidity.Examples.SolkeyOpen.SolcArrayMembers
 import Solidity.Examples.SolkeyOpen.SolcConstructors
 import Solidity.Examples.SolkeyOpen.SolcControlFlow
 import Solidity.Examples.SolkeyOpen.SolcFunctionCalls
+import Solidity.Examples.SolkeyOpen.SolcHigherLevel
+import Solidity.Examples.SolkeyOpen.SolcLoops
+import Solidity.Examples.SolkeyOpen.SolcPayments
 import Solidity.Examples.SolkeyOpen.SolcSmtControlFlow
+import Solidity.Examples.SolkeyOpen.SolcStructsMappings
 import Solidity.Examples.SolkeyOpen.SolcTypes
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.StaticLinear
@@ -457,6 +471,8 @@ import Solidity.Examples.StringLaws
 import Solidity.Examples.Summaries.CallChain
 import Solidity.Examples.Summaries.Library
 import Solidity.Examples.Summaries.Pricing
+import Solidity.Examples.Summaries.StorageChain
+import Solidity.Examples.Summaries.Support
 import Solidity.Examples.Summaries.Token
 import Solidity.Examples.Summaries.Vault
 import Solidity.Examples.Tactics.AbiFeatures

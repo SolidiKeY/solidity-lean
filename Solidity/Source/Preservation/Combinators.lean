@@ -1,9 +1,6 @@
 import Solidity.Source.Preservation.Encoding
 import Solidity.Source.StmtProgress
 
-/-! Memory-preservation combinators for the joint fragment induction.
-`MemPres` is preservation on success AND every halt, never a progress claim.
--/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {Γ : RCtx} {α β : Type}
@@ -66,6 +63,10 @@ theorem keyStep' (F : Fr) (n : Nat) {t : STy} (v : RVal E.layout t) :
   · exact halt' _
 
 end MemPres
+
+example {E : Env} {Γ : RCtx} {α : Type} (h : Halt) (y : EMState E Γ) :
+    MemPres (halt h : EM E Γ α) ∧ (halt h : EM E Γ α).run y = (.error h, y) :=
+  ⟨MemPres.halt' h, rfl⟩
 
 #print axioms MemPres.subNil
 #print axioms MemPres.writeLoc'
