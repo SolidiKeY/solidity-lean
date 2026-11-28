@@ -1,8 +1,5 @@
 import Solidity.Source.Preservation.MemoryBodies
 
-/-! Actual modifier-free internal calls with syntactically admitted memory
-bodies. Parameters, returns and local-frame layout remain explicit typed facts;
-body preservation is derived from MemoryItems, not assumed. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
@@ -32,8 +29,6 @@ theorem call_memory_body_mem {A : Decl → Prop} {G : Glob E} {c : String}
     exact callFrame_mem G F n d vs rs b body frame mods
       (fun H' l => run_memory_body_mem calls {F with checked := true} hc b admitted l H' n) H
 
-/-- The source call expression's actual sub restores arbitrary caller locals
-and retains the reached heap and returned-reference witnesses on every path. -/
 theorem sub_memory_body_mem {A : Decl → Prop} {G : Glob E} {c : String}
     (calls : CallsOK A G c) (F : Fr) (hc : F.contract = c) (d : Decl)
     (ps rs : List STy) (b : RBody E)

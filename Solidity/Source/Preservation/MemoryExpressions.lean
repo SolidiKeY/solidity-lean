@@ -3,9 +3,6 @@ import Solidity.Source.Preservation.EncodingArguments
 import Solidity.Source.Preservation.ArrayLiterals
 import Solidity.Source.Preservation.MemberPacking
 
-/-! Memory body expressions over the existing intrinsic source syntax.
-Reference rebinding and primitive memory-array writes retain actual bounds,
-type and horizon halts. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
