@@ -193,6 +193,15 @@ async function captureContributionMenu(client,directory,metadata,context={}){
   const cleanupDeadline=Date.now()+3000;try{for(let i=0;i<2;i++)for(const type of ['keyDown','keyUp'])await require('./menu-lifecycle.cjs').preparation(()=>client.request('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27}),cleanupDeadline);}catch(error){const decisive=primary??finalError??error;if(decisive!==error)(decisive.cleanupErrors??=[]).push(error.message);try{writeFileSync(join(directory,'menu-cleanup-error.json'),JSON.stringify({error:error.message,primary:primary?.message??null}));}catch(reporting){(decisive.reportingErrors??=[]).push(reporting.message);}if(!primary&&!finalError)finalError=error;}if(!primary&&finalError)throw finalError;}
 
 }
+// Companion transports only the original capture's phase-local recorded tuple.
+async function captureContributionMenuWithTabHit(client,directory,metadata,context={}){
+ const captured=await captureContributionMenu(client,directory,metadata,context);
+ if(metadata.kind!=='tab')return captured;
+ const fs=require('node:fs'),helper=require('./menu-tab-hit.cjs');
+ const admission={version:helper.version,anchorRecord:JSON.parse(fs.readFileSync(join(directory,'menu-anchor.json'),'utf8')),hitRecord:JSON.parse(fs.readFileSync(join(directory,'menu-tab-hit.json'),'utf8'))};
+ helper.assertAdmission(admission,metadata.binding,metadata.tabOwnership,captured.contributionMenu.before,captured.contributionMenu.after);
+ return{...captured,contributionMenu:{...captured.contributionMenu,tabHitAdmission:admission}};
+}
 // Only built-in Workspace Trust UI is operated; no context-key or service injection.
 async function captureTrustControl(client,directory,metadata,captureSurface=capture){
  const desired=metadata.desired,label=desired?'Trust':"Don't Trust",opposite=desired?"Don't Trust":'Trust';
@@ -361,4 +370,4 @@ async function captureCompilerConfiguration(client,directory,metadata){
  const deadline=Date.now()+15000;let before;do{before=await read();if(valid(before))break;await new Promise(resolve=>setTimeout(resolve,50));}while(Date.now()<deadline);writeFileSync(join(directory,'configuration-before.json'),JSON.stringify(before,null,2));const rendered=await capture(client,directory,true),after=await read();writeFileSync(join(directory,'configuration-after.json'),JSON.stringify(after,null,2));
  if(!valid(before)||!valid(after)||JSON.stringify(before)!==JSON.stringify(after))throw Error('Rendered output directory configuration/source changed or missing');return{...rendered,configuration:{before,after,metadata,scope:'Actual Settings UI default or resource JSON DOM/AX/PNG; not full glyph/raster equivalence.'}};
 }
-module.exports={withPhaseRenderer,phaseDiagnostic,captureTrustControl,captureContributionMenu,testingLabel,captureProblems,captureProblemsScroll:require('./diagnostic-problems-scroll.cjs').capture,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
+module.exports={withPhaseRenderer,phaseDiagnostic,captureTrustControl,captureContributionMenu,captureContributionMenuWithTabHit,testingLabel,captureProblems,captureProblemsScroll:require('./diagnostic-problems-scroll.cjs').capture,captureTesting,availablePort,DevTools,connect,capture,inputProbe,buildKeybinding,contextSubmenu,captureTrace,captureProofHelp,captureProofHover,captureOutput,captureCompilerConfiguration};
