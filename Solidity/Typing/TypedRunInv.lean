@@ -1,38 +1,18 @@
 import Solidity.Typing.Soundness
 import Solidity.Semantics.RunFrame
 
-/-!
-# Invariants of the typed run
-
-`Typing/Soundness.lean`'s `RunInv` (a part on the storage, a part on each
-local at its type) read of a typed state (`RunInv.HoldsT`: its storage, and
-`TEnv.All` over its locals) and carried along the typed run
-(`Semantics/Run.lean`): `RunInv.TKeeps t` says the step `t`, from a typed
-state the invariant holds of, ends, if in a state, in one it holds of.  The
-scopes (a branch, a block, a loop's iteration, a call's frame, a `try`'s
-clause) only push and pop locals, so they keep any such invariant once their
-sub-programs do (`tkeeps_ite` … `tkeeps_tryCall`, a loop by
-`TLoop.run_induct`); a call's arguments, return variables and decoded data
-are values, memory references or storage aliases, which every invariant here accepts
-(`RunInv.ValMemOk`).  A statement without sub-programs is proved once for
-every hereditary invariant (`Stmt.keeps_all`, `Typing/HeredRun.lean`), read
-on `TRun.*`.
--/
 
 namespace Solidity
 
 variable {C : Contract}
 
-/-! ## Typed locals that satisfy a predicate -/
 
-/-- Locals of value and memory types only. -/
 def Ctx.ValMem : Ctx → Prop
   | [] => True
   | .val _ :: Γ => Ctx.ValMem Γ
   | .mem _ :: Γ => Ctx.ValMem Γ
   | _ :: _ => False
 
-/-- Every local of `e` satisfies `P` at its type. -/
 def TEnv.All {H : HTy} (P : (t : LTy) → t.TDenote C H → Prop) : {Γ : Ctx} → TEnv C H Γ → Prop
   | [], _ => True
   | t :: _, e => P t e.1 ∧ TEnv.All P e.2
@@ -76,8 +56,6 @@ theorem set : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → {e : TEnv C H Γ} 
   | here => intro e v h hv; exact ⟨hv, h.2⟩
   | there i ih => intro e v h hv; exact ⟨h.1, ih h.2 hv⟩
 
-/-- A predicate that every value and every memory local satisfies holds of
-locals of those types. -/
 theorem of_valMem (hv : ∀ p v, P (.val p) v) (hm : ∀ R v, P (.mem R) v) :
     {Γ : Ctx} → Ctx.ValMem Γ → (e : TEnv C H Γ) → TEnv.All P e
   | [], _, _ => trivial
@@ -107,8 +85,6 @@ theorem Binders.valMem : {ρ : Ctx} → Binders ρ → Ctx.ValMem ρ
 theorem CodeBinder.valMem {κ : Ctx} (code : CodeBinder κ) : Ctx.ValMem κ := by
   cases code <;> trivial
 
-/-- Leaving a call keeps every local satisfying `P` when the caller's and the
-frame's return variables do. -/
 theorem CallRet.leaveT_all {H : HTy} {P : (t : LTy) → t.TDenote C H → Prop} {Γ rs Γ' : Ctx}
     (ret : CallRet Γ rs Γ') {e : TEnv C H Γ} {r : TEnv C H rs}
     (he : TEnv.All P e) (hr : TEnv.All P r) :
@@ -123,32 +99,26 @@ theorem CallRet.leaveT_all {H : HTy} {P : (t : LTy) → t.TDenote C H → Prop} 
   | mem R x hd hm => exact ⟨hr.1, he⟩
   | storage R x => exact ⟨hr.1, he⟩
 
-/-- Entering several returns leaves the storage alone. -/
 theorem RetBinders.enterT_storage {ps : Ctx} : {ρ : Ctx} → (bs : RetBinders ρ) →
     (τ : State C ps) → (bs.enterT τ).st.storage = τ.storage
   | _, .nil, _ => rfl
   | _, .snoc bs _ _, τ => RetBinders.enterT_storage bs τ
   | _, .snocMem bs _ _ _ _, τ => RetBinders.enterT_storage bs τ
 
-/-- Entering a call leaves the storage alone. -/
 theorem CallRet.enterT_storage {Γ rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (τ : State C ps) :
     (ret.enterT τ).st.storage = τ.storage := by
   cases ret <;> first | rfl | exact RetBinders.enterT_storage _ τ
 
-/-! ## Invariants of the typed run -/
 
 namespace RunInv
 
 variable {I : RunInv C}
 
-/-- The caller's locals, weakened along the heap a step grew. -/
 theorem env_wk {H H' : HTy} (x : H <+: H') : {Γ : Ctx} → {e : TEnv C H Γ} →
     TEnv.All I.loc e → TEnv.All I.loc (TEnv.wk x Γ e)
   | [], _, _ => trivial
   | _ :: _, _, he => ⟨I.loc_wk x he.1, env_wk x he.2⟩
 
-/-- Entering several returns: value returns and fresh memory objects, on top
-of the parameters. -/
 theorem retEnterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
     (hm : ∀ H R v, I.loc (H := H) (.mem R) v) {ps : Ctx} :
     {ρ : Ctx} → (bs : RetBinders ρ) → (τ : State C ps) → TEnv.All I.loc τ.env →
@@ -157,8 +127,6 @@ theorem retEnterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
   | _, .snoc bs _ _, τ, he => ⟨hv _ _ _, retEnterT_env hv hm bs τ he⟩
   | _, .snocMem bs _ _ _ _, τ, he => ⟨hm _ _ _, env_wk _ (retEnterT_env hv hm bs τ he)⟩
 
-/-- Entering a call: value returns, a fresh memory object or an unset storage
-alias, on top of the parameters. -/
 theorem enterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
     (hm : ∀ H R v, I.loc (H := H) (.mem R) v)
     (ha : ∀ H R, I.loc (H := H) (.alias R) none) {Γ rs Γ' ps : Ctx}
@@ -171,12 +139,9 @@ theorem enterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
   | mem R x hd hm' => exact ⟨hm _ _ _, env_wk _ he⟩
   | storage R x => exact ⟨ha _ _, he⟩
 
-/-- The invariant holds of a typed state: of its storage, and of each local
-at its type. -/
 def HoldsT (I : RunInv C) {Γ : Ctx} (σ : State C Γ) : Prop :=
   I.glob σ.storage ∧ TEnv.All I.loc σ.env
 
-/-- The locals replaced. -/
 theorem HoldsT.withEnv {Γ Δ : Ctx} {σ : State C Γ} (h : I.HoldsT σ)
     {e : TEnv C σ.H Δ} (he : TEnv.All I.loc e) : I.HoldsT (σ.withEnv e) :=
   ⟨h.1, he⟩
@@ -193,23 +158,17 @@ theorem HoldsT.push {Γ : Ctx} {σ : State C Γ} (h : I.HoldsT σ) {t : LTy}
     {v : t.TDenote C σ.H} (hv : I.loc t v) : I.HoldsT (σ.push v) :=
   ⟨h.1, hv, h.2⟩
 
-/-- The storage replaced by one the invariant holds of. -/
 theorem HoldsT.withStorage {Γ : Ctx} {σ : State C Γ} (h : I.HoldsT σ) {st : Storage C}
     (hs : I.glob st) : I.HoldsT (σ.withStorage st) :=
   ⟨hs, h.2⟩
 
-/-- A grown heap adopted: the locals weakened along it. -/
 theorem HoldsT.adopt {Γ : Ctx} {σ : State C Γ} {α : HTy → Type} (h : I.HoldsT σ)
     (g : Grown σ.H α) : I.HoldsT (σ.adopt g).1 :=
   ⟨h.1, env_wk g.ext h.2⟩
 
-/-- A typed step keeps the invariant: from a typed state it holds of, the
-step ends, if in a state, in one it holds of. -/
 def TKeeps {Γ Γ' : Ctx} (I : RunInv C) (t : TStep C Γ Γ') : Prop :=
   ∀ (σ : State C Γ) (o : Out C σ.H Γ'), I.HoldsT σ → t σ = .ok o → I.HoldsT o.st
 
-/-- The invariant accepts values, memory locals and storage aliases: what
-call frames, arguments and decoded external data need. -/
 structure ValMemOk (I : RunInv C) : Prop where
   val : ∀ H p v, I.loc (H := H) (.val p) v
   mem : ∀ H R v, I.loc (H := H) (.mem R) v
@@ -291,9 +250,6 @@ theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {bo
       | error => exact fun _ h => nomatch h
       | ok τ' => exact (hb τ.st τ' h₁ hr).drop x
 
-/-- A call keeps an invariant `ValMemOk` accepts when its body does: the
-arguments are values or references, its returns are values, a fresh memory object or an
-unset alias, and entry keeps storage as it was. -/
 theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (hI : I.ValMemOk) (args : Args C Γ ps)
     (ret : CallRet Γ rs Γ') (x : Ext (rs ++ ps) Γf) {body : TStep C (rs ++ ps) Γf}
     (hb : I.TKeeps body) : I.TKeeps (TRun.call args ret x body) := by
