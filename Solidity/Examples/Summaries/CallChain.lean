@@ -1,15 +1,8 @@
-import Solidity.Calculus.Closers
-import Solidity.Automation.SummaryCache
+import Solidity.Examples.Summaries.Support
 
-/-!
-# CallChain with shared value summaries
-
-The symbolic-call rule summarizes value computations. The verdict cache below
-is a separate, explicitly encoded consumer: it does not claim that the current
-front end extracts canonical keys or consumes `Specification.Certified`.
--/
+/-! CallChain: cached typed helper certificates and actual source-edit key controls. -/
 namespace Solidity.Examples.Summaries.CallChain
-open Solidity.Automation.Summary
+open Solidity.Automation.Summary Solidity.Examples.Summaries.Support
 
 def CallChain : Contract := contract!{
   function seed(uint x) pure returns (uint r) { r = x + 1; }
@@ -22,55 +15,42 @@ def CallChain : Contract := contract!{
 local instance : InContract := ⟨CallChain⟩
 open scoped Solidity.Scoped
 
-/-- The helper returns its specified result for every input below 1000. -/
 def calleeGoal : Fml CallChain [] := dl!{ a < 1000 → ⟨ uint y = seed(a); ⟩ y == a + 1 }
 
-/-- Solidity: `function seed(uint x) { return x + 1; }`. -/
+def spec (m : Modality) : Specification CallChain [.val .uint] [.val .uint] [.val .uint, .val .uint] :=
+  { body := summary_body dl!{ [ y = seed(4); ] true }
+    requires := cdlIn![uint x]{ x < 1000 }
+    ensures := cdlIn![uint x, old, oldNet, uint r]{ r == x + 1 }
+    modality := m, mutability := .pure }
+/-- Solidity: `seed` is certified once for all caller frames, targets and modalities. -/
+theorem certified (m : Modality) : (spec m).Certified := by
+  apply certifyScalar _ ?_ rfl rfl
+  cases m <;> (sol_prove; all_goals (sol_leaf; sol_close))
+
+def keyFor (C : Contract) : Key := leafKey C "seed" "x<1000; r=x+1; pure; box and diamond"
+def key : Key := keyFor CallChain
+private def calleeEdit := editFunction CallChain "seed"
+  (contract!{ function seed(uint x) pure returns (uint r) { r = x + 2; } })
+private def checked : CheckedSummary key (∀ m, (spec m).Certified) := ⟨certified⟩
+/-- Solidity: retrieve the stored `seed` certificate. -/
+private theorem cached : ∀ m, (spec m).Certified := checked.fromCache
+#guard checked.edits (keyFor (editUnrelated CallChain)) (keyFor calleeEdit)
+
+/-- Solidity: the original `seed` result claim consumes the cached certificate. -/
 theorem seedVerified : Fml.Valid calleeGoal := by
   unfold calleeGoal
-  sol_prove
+  summary_calls 1 (spec .diamond) (cached .diamond)
 
-/-- Solidity: `first(2)` reuses the symbolic summary of `seed`. -/
+/-- Solidity: `first` uses the helper certificate 1 time(s). -/
 theorem firstVerified : ⊨ᶠ dl!{ [ uint y = first(2); ] y == 3 } := by
-  sol_prove
+  summary_calls 1 (spec .box) (cached .box)
 
-/-- Solidity: `middle(2)` uses the same helper body at another call site. -/
+/-- Solidity: `middle` uses the helper certificate 1 time(s). -/
 theorem middleVerified : ⊨ᶠ dl!{ [ uint y = middle(2); ] y == 3 } := by
-  sol_prove
+  summary_calls 1 (spec .box) (cached .box)
 
-/-- Solidity: `twice(2)` calls the same intermediate helper twice. -/
+/-- Solidity: `twice` uses the helper certificate 2 time(s). -/
 theorem twiceVerified : ⊨ᶠ dl!{ [ uint y = twice(2); ] y == 4 } := by
-  sol_prove
-
-/-- The helper has no calls; all other semantic metadata is retained in context.
-`reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
-def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "seed" C.funs), "a < 1000 -> <uint y = seed(a);> y == a + 1",
-    reprStr { C with funs := [] }, []⟩
-def key : Key := keyFor CallChain
-
-private def unrelatedEdit : Contract := { CallChain with
-  funs := CallChain.funs.map (fun (n, f) => if n == "version" then
-    (n, (contract!{ function version() pure returns (uint r) { r = 2; } }).funs.head!.2)
-    else (n, f)) }
-private def calleeEdit : Contract := { CallChain with
-  funs := CallChain.funs.map (fun (n, f) => if n == "seed" then
-    (n, (contract!{ function seed(uint x) pure returns (uint r) { r = x + 2; } }).funs.head!.2) else (n, f)) }
-
-private def valid (k : Key) : Prop := k = key ∧ Fml.Valid calleeGoal
-private def verdict : Verdict valid key := .proved ⟨rfl, seedVerified⟩
-private def saved : Cache valid := ({} : Cache valid).insert key verdict
-
-/-- Reusing the saved helper verdict invokes no checker. -/
-theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
-    saved.check key verify = (some verdict, saved, false) :=
-  Cache.check_hit _ _ _ _ (Cache.lookup_insert _ _ _)
-
--- Real source fixtures: change the unrelated declaration, then the helper body.
-#guard keyFor unrelatedEdit == key
-#guard (saved.lookup (keyFor unrelatedEdit)).isSome
-#guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
-#guard (saved.lookup (keyFor calleeEdit)).isNone
-#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
+  summary_calls 2 (spec .box) (cached .box)
 
 end Solidity.Examples.Summaries.CallChain

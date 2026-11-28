@@ -1,8 +1,5 @@
 import Solidity.Source.Preservation.AllocationSites
 
-/-! Memory preservation at the existing inline-array literal allocation site.
-The one-word element boundary and argument-preservation premise are retained.
--/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {H : HeapTy}
