@@ -94,8 +94,8 @@ into conditional updates (`{ se3 := (se6 ? false : se3) }`, …,
 def trySub_obligation := spec!{ trySub }
 /-- UNKNOWN: `ensures success -> r == a * b`, `!success -> r == 0`.  The leaf
 needs `c == a *% b ∧ c / a == b ⟹ c == a * b` (no law relates a wrapping
-product, its quotient and the exact product), under the merged conditional
-updates of `trySub`. -/
+product, its quotient and the exact product), under merged conditional
+updates, as in `trySub`. -/
 def tryMul_obligation := spec!{ tryMul }
 /-- `ensures (r == a || r == b) && r >= a && r >= b`. -/
 theorem spec_max : ⊢ spec!{ max } := by
@@ -108,10 +108,10 @@ theorem spec_min : ⊢ spec!{ min } := by
   sol_leaf
   sol_close
 /-- UNKNOWN: `ensures success <-> b != 0`, `success -> r == a / b`,
-`!success -> r == 0`; the merged conditional updates of `trySub`. -/
+`!success -> r == 0`; merged conditional updates, as in `trySub`. -/
 def tryDiv_obligation := spec!{ tryDiv }
 /-- UNKNOWN: `ensures success <-> b != 0`, `success -> r == a % b`,
-`!success -> r == 0`; the merged conditional updates of `trySub`. -/
+`!success -> r == 0`; merged conditional updates, as in `trySub`. -/
 def tryMod_obligation := spec!{ tryMod }
 /-- UNKNOWN: `ensures r == (a + b) / 2`.  The leaf needs
 `(a & b) + (a ^ b) / 2 == (a + b) / 2` (no closer law for `&`, `^`; the

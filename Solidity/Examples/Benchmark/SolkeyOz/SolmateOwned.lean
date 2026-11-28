@@ -20,7 +20,7 @@ def SolmateOwned : Contract := contract!{
   ensures owner == _owner;
   constructor(address _owner) { owner = _owner; }
   ensures \old(owner) == msg.sender && owner == newOwner;
-  function setOwner(address newOwner) public onlyOwner { owner = newOwner; }
+  function setOwner(address newOwner) public virtual onlyOwner { owner = newOwner; }
 }
 local instance : InContract := ⟨SolmateOwned⟩
 open scoped Scoped
