@@ -1,20 +1,9 @@
 import Solidity.Hash.CollisionBridge
 
-/-!
-# Compiler corollaries of the hash bridge
-
-These corollaries assume the existing PublicCorrectness contract. They do
-not construct a compiler correctness proof. Target-premise runs preserve
-all prefix observations; forward completion keeps the source restrictions.
-The probability statement quantifies over a coherent hash-indexed family,
-including the source fixed parameters, not a single fixed-hash contract.
--/
-
 namespace Solidity.Hash.CollisionBridge.Compiler
 
 open Solidity.Roadmap
 
-/-- Backward refinement of one full target prefix. -/
 def PrefixRefines (S : SourceSpec) (V : EvmSpec) (sp : S.lang.Prog) (vp : V.lang.Prog)
     (se : S.lang.Env) (ve : V.lang.Env) (rt : V.lang.Res) : Prop :=
   ∃ rs, S.lang.Admissible rs ∧ (V.lang.sem vp ve rt).Le (S.lang.sem sp se rs)
@@ -24,8 +13,6 @@ variable {I : IntrinsicSpec} {S : SourceSpec} {V : EvmSpec}
   {compiler : S.Input → Option Artifact} {envAbs : V.lang.Env → S.lang.Env}
   {X : StateExport S I V}
 
-/-- Full guarded refinement, with the guards spelled as their actual
-per-run hash premises. Both directions and observations are unchanged. -/
 theorem refines (h : PublicCorrectness S V compiler envAbs X)
     {i : S.Input} {r : S.Resolved} (adm : S.Admitted i r)
     (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
@@ -43,8 +30,6 @@ theorem refines (h : PublicCorrectness S V compiler envAbs X)
   exact ⟨hal, fun rs hrs hfor hp => hf rs hrs hfor ((S.guard_iff _ _ _).mpr hp),
     fun rt hrt hp => hb rt hrt ((V.guard_iff _ _ _).mpr hp)⟩
 
-/-- The target premise supplies backward prefix refinement, without adding
-a source-forward assumption to this direction. -/
 theorem prefix_refines (h : PublicCorrectness S V compiler envAbs X)
     {i : S.Input} {r : S.Resolved} (adm : S.Admitted i r)
     (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
@@ -54,8 +39,6 @@ theorem prefix_refines (h : PublicCorrectness S V compiler envAbs X)
     PrefixRefines S V (S.meaning r w p art) (V.load art) (envAbs e) e rt :=
   (h.refines i r adm w p art hc e he).2.2 rt hrt ((V.guard_iff _ _ _).mpr hp)
 
-/-- The same guarded premise also gives the existing exact decoded-world
-reachability statement, with no weakened observation. -/
 theorem decode_reach (h : PublicCorrectness S V compiler envAbs X)
     {i : S.Input} {r : S.Resolved} (adm : S.Admitted i r)
     (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
@@ -67,8 +50,6 @@ theorem decode_reach (h : PublicCorrectness S V compiler envAbs X)
         (I.worlds (I.ofWorld (X.lowering.lower r w p art)) (X.envAbs e) ri).map some :=
   h.decode_reach i r adm w p art hc e he rt hrt ((V.guard_iff _ _ _).mpr hp)
 
-/-- Empty actual query lists discharge the hash premise via HashPremise.nil.
-Admissibility and compilation are still the existing contract conditions. -/
 theorem prefix_empty (h : PublicCorrectness S V compiler envAbs X)
     {i : S.Input} {r : S.Resolved} (adm : S.Admitted i r)
     (w : S.WellFormed r) (p : S.InProfile r) {art : Artifact}
@@ -82,17 +63,11 @@ theorem prefix_empty (h : PublicCorrectness S V compiler envAbs X)
 
 end Deterministic
 
-/-- The semantic failure event is a mathematical classifier, not an
-executable decision procedure for compiler correctness. -/
 noncomputable def failure (S : SourceSpec) (V : EvmSpec) (sp : S.lang.Prog) (vp : V.lang.Prog)
     (se : S.lang.Env) (ve : V.lang.Env) (rt : V.lang.Res) : Bool := by
   classical
   exact decide (¬ PrefixRefines S V sp vp se ve rt)
 
-/-- Fraction of random oracles under which the bytes' full target prefix
-can fail refinement. Correctness and run-model relations are required only
-on sampled tuples; no correctness-for-new-hashes claim follows from one
-fixed-hash instance. q counts ALL strategy queries, including offline ones. -/
 theorem failure_le (F : Fixed) {s : List Nat → Bytes} {dom : List Bytes}
     (hs : ∀ t, s t ∈ dom) (hroots : ∀ r ∈ List.range F.rootSlots, r < 2 ^ 256) (q : Nat)
     (I : List Nat → IntrinsicSpec) (S : List Nat → SourceSpec) (V : List Nat → EvmSpec)

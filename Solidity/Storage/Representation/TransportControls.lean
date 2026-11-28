@@ -1,6 +1,5 @@
 import Solidity.Storage.Representation.Transport
 
-/-! Inhabited finite-run controls, exact source observations and alias refusals. -/
 namespace Solidity.Storage.Representation.TransportControls
 open Solidity.Hash
 private def zero : PrimTy.uint.Denote := ⟨0, by decide⟩
@@ -14,7 +13,6 @@ private def preimages : List Pre := [.entry 0 0, .entry 1 0, .data 0]
 private def touched : List Loc := [.root 0, .hash 0 (.root 0) 0, .hash 1 (.root 0) 0,
   .data (.root 0) 0, .data (.root 0) 1]
 
-/-- A genuinely inhabited root/mapping/data finite run; H is not globally injective. -/
 theorem run : FiniteRun 16 2 1 hash preimages touched := by
   constructor
   · intro p
@@ -47,7 +45,6 @@ theorem source_represented : ValueRep source (.map .word) (.root 0) words := by
     · exact .scalar seven _ _ rfl
     · exact .scalar nine _ _ rfl
 
-/-- Existing source observations agree with a constructed numeric store. -/
 theorem source_word_combination : ∃ m : WordStore,
     Transport 16 hash touched words m ∧
     m (Loc.word 16 hash (.hash 0 (.root 0) 0)) = PrimTy.toWord (source.obs.word (.key false .nil)) ∧
@@ -61,7 +58,6 @@ theorem source_word_combination : ∃ m : WordStore,
     cases value with
     | prim v => exact source_word_observation found represented transported (by decide)
 
-/-- A finite sequence preserves covered untouched words and frames all others. -/
 theorem sequence_combination : ∃ m : WordStore,
     let m' := [((Loc.hash 0 (.root 0) 0), zero), ((Loc.data (.root 0) 0), seven)].foldl
       (fun store op => writeWord store (Loc.word 16 hash op.1) op.2) m
@@ -92,7 +88,6 @@ private def arrayValue : SVal (.ref (.array Ty.uint)) :=
 private def arrayWords : Store := fun l => if l = .root 0 then one
   else if l = .data (.root 0) 0 then seven else nine
 
-/-- Header and element observations use the same finite numeric store. -/
 theorem source_length_combination : ∃ m : WordStore,
     Transport 16 hash touched arrayWords m ∧
     (m (Loc.word 16 hash (.root 0))).val = arrayValue.obs.len .nil ∧
@@ -120,7 +115,6 @@ theorem source_length_combination : ∃ m : WordStore,
     · exact transported
     · decide
 
-/-- An actual source mapping save, symbolic write and numeric write commute. -/
 theorem source_save_combination : ∃ (changed : SVal (.ref (.mapping .bool Ty.uint)))
     (w : Store) (m : WordStore),
     source.save (.key false .nil) (.prim zero) = some changed ∧
@@ -152,7 +146,6 @@ theorem source_save_combination : ∃ (changed : SVal (.ref (.mapping .bool Ty.u
     · exact next
     · decide
 
-/-- Failed/default source observations coexist with nonzero numeric garbage. -/
 theorem failure_presence_combination : ∃ m : WordStore,
     Transport 16 hash touched arrayWords m ∧ m 14 = nine ∧
     arrayValue.obs.has (.at (⟨2, by decide⟩ : PrimTy.uint.Denote) .nil) = false ∧
@@ -167,7 +160,6 @@ theorem failure_presence_combination : ∃ m : WordStore,
     source_failed_presence missing, ?_⟩
   exact source_failed_word_default missing
 
-/-- Without touched-set coverage an unconstrained read can disagree. -/
 theorem uncovered_read_can_disagree : ∃ m : WordStore,
     Transport 16 hash [.hash 0 (.root 0) 0] words m ∧ m 8 = zero ∧ zero ≠ nine := by
   refine ⟨realize 16 hash (fun _ => zero) words [.hash 0 (.root 0) 0], ?_, rfl, ?_⟩
@@ -179,7 +171,6 @@ theorem uncovered_read_can_disagree : ∃ m : WordStore,
     have bad : (0 : Int) = 9 := congrArg Subtype.val eq
     omega
 
-/-- The existing offset-alias counterexample blocks transport without bounds. -/
 theorem unbounded_offsets_rejected : ¬ ∃ m : WordStore,
     Transport 16 hash [.data (.root 0) 0] (fun _ => seven) m ∧
     Transport 16 hash [.data (.root 0) 16] (fun _ => nine) m := by
@@ -190,7 +181,6 @@ theorem unbounded_offsets_rejected : ¬ ∃ m : WordStore,
   have bad : (7 : Int) = 9 := congrArg Subtype.val eq
   omega
 
-/-- Without the region premise a numeric alias cannot represent distinct values. -/
 theorem colliding_observations_rejected : ¬ ∃ m : WordStore,
     Transport 16 (fun _ => 0) [.root 0] (fun _ => seven) m ∧
     Transport 16 (fun _ => 0) [.hash 0 (.root 0) 0] (fun _ => nine) m := by

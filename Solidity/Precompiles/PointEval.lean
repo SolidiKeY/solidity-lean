@@ -8,7 +8,7 @@ EIP-4844's KZG point-evaluation precompile, as Osaka's execution
 specification (`point_evaluation.py`, `ethereum/crypto/kzg.py`) runs it.
 The input is exactly 192 bytes: a versioned hash (32), the evaluation point
 `z` and value `y` (32 each, below the BLS12-381 group order `r`), and a
-commitment and a proof (48 each, compressed `G1` points in the zcash format).
+commitment and a proof (48 each, compressed points in the zcash format).
 
 - **Failure**: a length other than 192, a versioned hash other than
   `0x01 ‖ sha256(commitment)[1:]`, `z` or `y` at or above `r`, a commitment
@@ -60,10 +60,10 @@ def setupG2Compressed : Bytes := ofHex
 #guard curve2.onCurve setupG2 && curve2.mul r setupG2 == .inf
 #guard curve1.onCurve g1Gen && curve2.onCurve g2Gen
 
-/-- The zcash encoding of `G1`'s infinity. -/
+/-- The zcash encoding of infinity. -/
 def infinityBytes : List Nat := 0xc0 :: List.replicate 47 0
 
-/-- A compressed `G1` point in 48 bytes, if it decompresses to a point of
+/-- A compressed point in 48 bytes, if it decompresses to a point of
 the order-`r` subgroup (py_ecc's `KeyValidate`), or is the infinity
 encoding. -/
 def decompress (b : List Nat) : Option (Pt Fp) :=
@@ -166,7 +166,7 @@ theorem pointEval_result {d o : Bytes} (h : pointEval d = some o) :
     o = word fieldElementsPerBlob ++ word r :=
   bind_check_eq_some h
 
-/-! ## Vectors (proofs by c-kzg-4844, run by Osaka's execution specification) -/
+/-! ## Vectors -/
 
 #guard pointEval (ofHex "012fbcce4b727c5aac28fa0f5223d397bc6050019d43728e2fbdb8c1c3df659800000000000000000000000000000000000000000000000000000000075bcd1516ea6606c7536a08f3b90ee19580dd81884d539a6c7b13741e8031e2db3188ae9557ada58d1ea7f48806d66720bb05d148ce52dfab866d26b638e3c838db4d390a37ff3ea7fedf29e9c9181b3ea9e5898223d196e9763af85715f1f78d7084c8860316d70df5e0840b535a6f69003cdabfd7f59f307d06a97d1486551e0ced8f") == some (ofHex "000000000000000000000000000000000000000000000000000000000000100073eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001")
 #guard gas (ofHex "012fbcce4b727c5aac28fa0f5223d397bc6050019d43728e2fbdb8c1c3df659800000000000000000000000000000000000000000000000000000000075bcd1516ea6606c7536a08f3b90ee19580dd81884d539a6c7b13741e8031e2db3188ae9557ada58d1ea7f48806d66720bb05d148ce52dfab866d26b638e3c838db4d390a37ff3ea7fedf29e9c9181b3ea9e5898223d196e9763af85715f1f78d7084c8860316d70df5e0840b535a6f69003cdabfd7f59f307d06a97d1486551e0ced8f") == 50000

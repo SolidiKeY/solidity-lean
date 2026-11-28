@@ -4782,6 +4782,8 @@ import Solidity.Yul.SourceBindings
 import Solidity.Yul.SourceBoundary
 import Solidity.Yul.SourceContext
 import Solidity.Yul.SourceTypes
+import Solidity.Yul.StatefulImport
+import Solidity.Yul.StatefulRun
 import Solidity.Yul.StatementTags
 import Solidity.Yul.Static
 import Solidity.Yul.Syntax
