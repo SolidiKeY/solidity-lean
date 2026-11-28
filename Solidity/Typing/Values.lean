@@ -1,36 +1,12 @@
 import Solidity.Theory.Typed.Obs
 import Solidity.Semantics.StorageWt
 
-/-!
-# Typed storage values, hereditarily
-
-The typed storage (`Semantics/Storage.lean`) says by its types what the
-untyped one had to check: a struct has its members, a word is in range, a
-fixed-size array has its length and nothing past it.  What a reachable
-storage satisfies beyond that is a condition on each node of a value (a
-mapping's keys distinct, the slots past an array's end cleared, …), asked
-of every node: `SVal.All L`, for the node conditions `L : Hered`.  The run
-invariants of `Typing/Reachability.lean` (`SVal.Canon`),
-`Typing/Constructibility.lean` (`SVal.Tight`, `SVal.Fits`) and
-`Typing/Fits.lean` (`SVal.Bnd`) are each one `Hered`.
-
-`SVal.All` is a fold (`SVal.fold`, its equations by `rfl` and named,
-`Solidity/Eqns.lean`), so a proof unfolds it one constructor at a time.
-What every such predicate shares is proved here once: it holds of what a
-read finds (`SVal.findM_all`), of a member or element, of a default when
-the node conditions hold of the defaults' nodes (`SVal.dflt_all`).
-
-Also here: the defaults' equations (`SVal.dflt_struct` …, `SVal.dflt` is
-by fuel), the list lemmas the proofs above share, and the live slots along
-a typed path (`SVal.Live`).
--/
 
 namespace Solidity
 
 open Semantics (structDef lookupBy setBy nodupKeysB tyRank fieldsRank lookupBy_setBy_self
   lookupBy_setBy_ne setBy_setBy_self lookupBy_eq_some_mem)
 
-/-! ## Association lists -/
 
 section Lists
 
@@ -48,7 +24,6 @@ theorem lookupBy_isSome_of_mem' {k : κ} {v : α} : {l : List (κ × α)} → (k
       · cases h; exact absurd rfl hk
       · exact lookupBy_isSome_of_mem' h
 
-/-- An entry of a list with distinct keys is what its key looks up. -/
 theorem lookupBy_of_nodup {k : κ} {v : α} : {l : List (κ × α)} → nodupKeysB l = true →
     (k, v) ∈ l → lookupBy k l = some v
   | [], _, h => nomatch h
@@ -65,7 +40,6 @@ theorem lookupBy_of_nodup {k : κ} {v : α} : {l : List (κ × α)} → nodupKey
         exact nomatch this
       · exact lookupBy_of_nodup hnd.2 hm
 
-/-- Every entry of `setBy k v l` is `(k, v)` or one of `l`'s. -/
 theorem mem_setBy {k : κ} {v : α} {e : κ × α} : {l : List (κ × α)} → e ∈ setBy k v l →
     e = (k, v) ∨ e ∈ l
   | [], h => by simp only [setBy, List.mem_cons, List.not_mem_nil, or_false] at h; exact Or.inl h
@@ -85,7 +59,6 @@ theorem lookupBy_none_setBy {k k' : κ} {v : α} (hne : k ≠ k') {l : List (κ 
     (h : lookupBy k l = none) : lookupBy k (setBy k' v l) = none := by
   rw [lookupBy_setBy_ne hne]; exact h
 
-/-- `setBy` keeps the keys distinct. -/
 theorem nodupKeysB_setBy' {k : κ} {v : α} : {l : List (κ × α)} → nodupKeysB l = true →
     nodupKeysB (setBy k v l) = true
   | [], _ => by simp only [setBy, nodupKeysB, lookupBy, Option.isNone_none, Bool.and_self]
@@ -151,11 +124,6 @@ theorem nodupKeysB_mid {k : κ} {v : α} : {l₁ : List (κ × α)} → {l₂ : 
 
 end Lists
 
-/-! ## Defaults by their equations
-
-`SVal.dflt` is by fuel, a bound on the rank; the fuel does not matter
-(`SVal.dfltBelow_irrel`), so a default unfolds one type constructor at a
-time. -/
 
 theorem SFields.dfltBelow_irrel {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
     {ih' : (T : Ty) → tyRank T < k' → SVal T} (hih : ∀ T h h', ih T h = ih' T h') :
@@ -210,7 +178,6 @@ theorem SFields.dfltBelow_eq (k : Nat) :
     simp only [SFields.dfltBelow, SFields.dflt]
     rw [SVal.dfltBelow_dflt, SFields.dfltBelow_eq k fs]
 
-/-- A default unfolded once. -/
 theorem SVal.dflt_eq_at (T : Ty) :
     SVal.dflt T = SVal.dfltAt (rankBound T) (SVal.dfltBelow (rankBound T)) T
       (Nat.lt_succ_of_le (tyRank_le_rankBound T)) := rfl
@@ -240,7 +207,6 @@ theorem SVal.dflt_map (K : PrimTy) (V : Ty) :
   exact congrArg (SVal.map .nil)
     (SVal.dfltAt_irrel (fun T h h' => SVal.dfltBelow_irrel _ _ T h h') V _ _)
 
-/-- A default's subterm at a fuel that defaults agree on is the default. -/
 theorem SVal.dfltAt_eq {k : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
     (heq : ∀ T h, ih T h = SVal.dflt T) (T : Ty) (h : tyRank T < k + 1) :
     SVal.dfltAt k ih T h = SVal.dflt T := by
@@ -248,18 +214,12 @@ theorem SVal.dfltAt_eq {k : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
     (fun T h h' => by rw [heq, SVal.dfltBelow_dflt]) T h h]
   exact SVal.dfltBelow_dflt (k + 1) T h
 
-/-! ## Hereditary predicates -/
 
-/-- What a predicate asks of each node of a value, by kind: of a dynamic
-array its live elements and the slots past its end, of a fixed-size array
-its type, of a mapping its entries and its default.  A word and a struct
-ask nothing of their own. -/
 structure Hered where
   arr : {E : Ty} → {n : Nat} → SVec E n → SList E → Prop
   fix : Ty → Nat → Prop
   map : (K : PrimTy) → {V : Ty} → SMap K V → SVal V → Prop
 
-/-- Every node satisfying `P`'s condition, as a fold. -/
 def allFold (P : Hered) : Fold where
   V _ := Prop
   F _ := Prop
@@ -280,7 +240,6 @@ def allFold (P : Hered) : Fold where
   mnil := True
   mcons := fun _ _ _ iv ir => iv ∧ ir
 
-/-- Every node of `v` satisfies `P`'s condition. -/
 def SVal.All (P : Hered) {T : Ty} (v : SVal T) : Prop := v.fold (allFold P)
 def SFields.All (P : Hered) {fs : List (Name × Ty)} (x : SFields fs) : Prop := x.fold (allFold P)
 def SList.All (P : Hered) {E : Ty} (l : SList E) : Prop := l.fold (allFold P)
@@ -391,7 +350,6 @@ theorem SFields.all_set {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → {
     · simp only [e, dite_false, SFields.All]
       exact ⟨hx.1, SFields.all_set _ hx.2 hy⟩
 
-/-- **What a read finds satisfies what the value does.** -/
 theorem SVal.findM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {w : SVal U} →
     x.All P → x.findM p = some w → w.All P
   | _, _, x, .nil, w, hx, h => by
@@ -430,7 +388,6 @@ theorem SVal.find_all {T U : Ty} {x : SVal T} (p : Path T U) {w : SVal U} (hx : 
     (h : x.find p = some w) : w.All P :=
   SVal.findM_all p hx (by rw [← SVal.find_eq_findM]; exact h)
 
-/-! ### Defaults -/
 
 theorem SFields.dfltBelow_all {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).All P) :
     (fs : List (Name × Ty)) → (h : fieldsRank fs < k) →
@@ -482,8 +439,6 @@ theorem SVal.dfltBelow_all : (k : Nat) → (T : Ty) → (h : tyRank T < k) →
   | 0, _, h => absurd h (Nat.not_lt_zero _)
   | k + 1, T, h => SVal.dfltAt_all harr hfix hmap (SVal.dfltBelow_all k) T h
 
-/-- **A default satisfies a predicate whose conditions the defaults' nodes
-meet**: an empty array, any fixed size, an empty mapping of the default. -/
 theorem SVal.dflt_all (T : Ty) : (SVal.dflt T).All P :=
   SVal.dfltBelow_all harr hfix hmap _ T _
 
@@ -497,14 +452,10 @@ end Dflt
 
 end AllLemmas
 
-/-! ## Live slots along a path -/
 
-/-- A path from a word is empty. -/
 theorem Path.eq_prim {p : PrimTy} {U : Ty} (q : Path (.prim p) U) : U = .prim p := by
   cases q; rfl
 
-/-- Along `p` from `x`, every array of words is entered at a live slot: a
-word is written past an array's end by no program (`Storage.checkIndex`). -/
 def SVal.Live : {T U : Ty} → SVal T → Path T U → Prop
   | _, _, _, .nil => True
   | _, _, .struct fs, .field h p => (fs.get h).Live p
@@ -522,7 +473,6 @@ theorem Ty.isPrimitive_of_path {E U : Ty} (p : Path E U) (hE : E.isPrimitive = t
   | prim q => rw [Path.eq_prim p]; rfl
   | ref _ => exact absurd hE (by simp only [Ty.isPrimitive, Bool.false_eq_true, not_false_eq_true])
 
-/-- A path to a reference enters no array of words. -/
 theorem SVal.live_of_ref : {T U : Ty} → (x : SVal T) → (p : Path T U) → U.isPrimitive = false →
     x.Live p
   | _, _, x, .nil, _ => by cases x <;> simp only [SVal.Live]
@@ -542,7 +492,6 @@ theorem SVal.live_of_ref : {T U : Ty} → (x : SVal T) → (p : Path T U) → U.
     · exact SVal.live_of_ref _ p hU
     · exact SVal.live_of_ref d p hU
 
-/-- Live along a path to a reference, then along what it finds. -/
 theorem SVal.live_append : {T R U : Ty} → (x : SVal T) → (p : Path T R) → (q : Path R U) →
     R.isPrimitive = false → (∀ y, x.findM p = some y → y.Live q) → x.Live (p.append q)
   | _, _, _, x, .nil, q, _, h => by rw [Path.append_nil]; exact h x (SVal.findM_nil' x)
@@ -571,7 +520,6 @@ theorem SVal.live_append : {T R U : Ty} → (x : SVal T) → (p : Path T R) → 
     · rename_i hy
       exact SVal.live_append d p q hR fun z hz => h z (by simp only [SVal.findM, hy]; exact hz)
 
-/-! ## Saves -/
 
 section Save
 
@@ -586,8 +534,6 @@ variable {P : Hered}
 
 include harr hmap
 
-/-- **A save keeps a hereditary predicate** whose node conditions survive a
-slot or an entry replaced, entering arrays of words at live slots. -/
 theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new : SVal U} →
     {x' : SVal T} → x.All P → new.All P → x.Live p → x.saveM p new = some x' →
     x'.All P
@@ -667,24 +613,19 @@ theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new
 
 end Save
 
-/-! ## Deletes, copies -/
 
 section Ops
 
 variable {P : Hered}
 
-/-- An array condition that survives the slots past the end dropped. -/
 def Hered.StripOK (P : Hered) : Prop :=
   ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
     P.arr e.strip SList.nil
 
-/-- An array condition that survives the elements cleared into the slots
-past the end. -/
 def Hered.DelOK (P : Hered) : Prop :=
   ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
     P.arr SVec.nil (SList.ofList (e.defaultOf.toList ++ sh.toList))
 
-/-- An array condition that survives an array copied over another. -/
 def Hered.OvOK (P : Hered) : Prop :=
   ∀ {E : Ty} {m n : Nat} (oel : SVec E m) (osh : SList E) (nel : SVec E n) (nsh : SList E),
     P.arr oel osh → P.arr nel nsh → oel.All P → osh.All P → nel.All P →
@@ -692,8 +633,6 @@ def Hered.OvOK (P : Hered) : Prop :=
       (SList.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m)))
 
 mutual
-/-- A value as nothing wrote it keeps a predicate whose array condition
-survives the slots past the end dropped. -/
 theorem SVal.strip_all (hs : P.StripOK) : {T : Ty} → {v : SVal T} → v.All P → v.strip.All P
   | _, .prim _, _ => by simp only [SVal.strip, SVal.All]
   | _, .struct _, h => by
@@ -720,8 +659,6 @@ theorem SVec.strip_all (hs : P.StripOK) : {E : Ty} → {n : Nat} → {e : SVec E
 end
 
 mutual
-/-- `delete`'s value keeps a predicate whose array condition survives the
-elements cleared into the slots past the end. -/
 theorem SVal.defaultOf_all (hd : P.DelOK) : {T : Ty} → {v : SVal T} → v.All P →
     v.defaultOf.All P
   | _, .prim _, _ => by simp only [SVal.defaultOf, SVal.All]
@@ -753,8 +690,6 @@ theorem SVec.defaultOf_all (hd : P.DelOK) : {E : Ty} → {n : Nat} → {e : SVec
 end
 
 mutual
-/-- **A copy over a value keeps a predicate** whose array condition
-survives an array copied over another. -/
 theorem SVal.overlay_all (hs : P.StripOK) (hd : P.DelOK) (hov : P.OvOK) :
     {T : Ty} → (o v : SVal T) → o.All P → v.All P → (o.overlay v).All P
   | _, _, .prim _, _, _ => by simp only [SVal.overlay, SVal.All]
@@ -803,21 +738,15 @@ end
 
 end Ops
 
-/-! ## Plain values: what memory copies back -/
 
-/-- A value with no slots past an array's end and no mapping: what a copy
-out of memory makes (`MVal.copyMToSt`). -/
 def plainH : Hered where
   arr _ sh := sh = .nil
   fix _ _ := True
   map _ := fun _ _ => False
 
-/-- No slot past an array's end, no mapping. -/
 abbrev SVal.Plain {T : Ty} (v : SVal T) : Prop := v.All plainH
 
 mutual
-/-- Copying a mapping-free storage value, such as a row of arrays, drops
-its source histories and yields a plain value. -/
 theorem SVal.strip_plain : {T : Ty} → (v : SVal T) → T.mapFree = true → v.strip.Plain
   | _, .prim _, _ => by simp only [SVal.strip, SVal.All]
   | _, .struct fs, h => by
@@ -832,7 +761,6 @@ theorem SVal.strip_plain : {T : Ty} → (v : SVal T) → T.mapFree = true → v.
     exact ⟨trivial, SVec.strip_plain e h⟩
   | _, .map _ _, h => by cases h
 
-/-- The fields of a mapping-free struct remain plain when copied. -/
 theorem SFields.strip_plain : {fs : List (Name × Ty)} → (vs : SFields fs) →
     (∀ nt ∈ fs, nt.2.mapFree = true) → vs.strip.All plainH
   | _, .nil, _ => by simp only [SFields.strip, SFields.All]
@@ -841,7 +769,6 @@ theorem SFields.strip_plain : {fs : List (Name × Ty)} → (vs : SFields fs) →
     exact ⟨SVal.strip_plain v (h _ List.mem_cons_self),
       SFields.strip_plain vs (fun nt hn => h nt (List.mem_cons_of_mem _ hn))⟩
 
-/-- Copying the live elements of an array keeps only plain children. -/
 theorem SVec.strip_plain : {E : Ty} → {n : Nat} → (vs : SVec E n) →
     E.mapFree = true → vs.strip.All plainH
   | _, _, .nil, _ => by simp only [SVec.strip, SVec.All]
@@ -850,8 +777,6 @@ theorem SVec.strip_plain : {E : Ty} → {n : Nat} → (vs : SVec E n) →
     exact ⟨SVal.strip_plain v h, SVec.strip_plain vs h⟩
 end
 
-/-- Padding `[a,b]` with a default preserves every hereditary predicate
-held by `a`, `b` and the default. -/
 theorem SVec.padRight_all {E : Ty} {P : Hered} {d : SVal E} (hd : d.All P) :
     {n : Nat} → (vs : SVec E n) → (m : Nat) → vs.All P → (vs.padRight d m).All P
   | _, _, 0, _ => by rw [SVec.padRight, SVec.All_nil]; trivial
@@ -863,8 +788,6 @@ theorem SVec.padRight_all {E : Ty} {P : Hered} {d : SVal E} (hd : d.All P) :
     simp only [SVec.padRight, SVec.All]
     exact ⟨h.1, SVec.padRight_all hd vs m h.2⟩
 
-/-- A map-free fixed-array snapshot converted to its destination shape is
-plain, so the existing memory-copy preservation principle applies to it. -/
 theorem FixedCopy.apply_plain {E : Ty} {n : Nat} {R : RefTy}
     (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n))) (hm : E.mapFree = true) :
     (c.apply v).Plain := by
@@ -932,14 +855,11 @@ theorem MVal.copyBelow_plain : (k : Nat) → (T : Ty) → (h : tyRank T < k) →
   | 0, _, h, _ => absurd h (Nat.not_lt_zero _)
   | k + 1, T, h, v => MVal.copyAt_plain hp (MVal.copyBelow_plain k) T h v
 
-/-- **A copy out of memory is plain**: no slot past an array's end, no
-mapping (memory holds none). -/
 theorem MVal.copyMToSt_plain {T : Ty} (v : MVal H T) : (MVal.copyMToSt hp v).Plain :=
   MVal.copyBelow_plain hp _ T _ v
 
 end Copy
 
-/-! ## Types whose defaults are well-formed all the way down -/
 
 theorem okDeep_defaultOkS : ∀ {T : Ty}, T.okDeep = true → T.defaultOkS = true
   | .prim _, _ => rfl
@@ -950,7 +870,6 @@ theorem okDeep_defaultOkS : ∀ {T : Ty}, T.okDeep = true → T.defaultOkS = tru
   | .ref (.mapping _ V), h => by
     simp only [Ty.okDeep] at h; simpa only [Ty.defaultOkS] using okDeep_defaultOkS (T := V) h
 
-/-- What a path reaches from an `okDeep` type is `okDeep`. -/
 theorem Path.okDeep : {T U : Ty} → Path T U → T.okDeep = true → U.okDeep = true
   | _, _, .nil, h => h
   | _, _, .field hf p, h =>
@@ -960,8 +879,6 @@ theorem Path.okDeep : {T U : Ty} → Path T U → T.okDeep = true → U.okDeep =
   | _, _, .atF _ p, h => Path.okDeep p (by simpa only [Ty.okDeep] using h)
   | _, _, .key _ p, h => Path.okDeep p (by simpa only [Ty.okDeep] using h)
 
-/-- What it takes for `Q`'s node conditions to imply `P`'s, at the types
-`G` holds of, `G` closed under members, elements and values. -/
 structure Hered.Mono (P Q : Hered) (G : Ty → Prop) : Prop where
   gs : ∀ s, G (.ref (.struct s)) → ∀ nt ∈ structDef s, G nt.2
   ga : ∀ E, G (.ref (.array E)) → G E
@@ -978,8 +895,6 @@ section Mono
 variable {P Q : Hered} {G : Ty → Prop}
 
 mutual
-/-- A predicate whose node conditions imply another's, at the types `G`
-holds of. -/
 theorem SVal.all_mono (hm : P.Mono Q G) : {T : Ty} → (v : SVal T) → G T → v.All Q → v.All P
   | _, .prim _, _, _ => by simp only [SVal.All]
   | _, .struct fs, hT, h => by
@@ -1027,7 +942,6 @@ end
 
 end Mono
 
-/-- A predicate whose node conditions imply another's, everywhere. -/
 theorem SVal.all_mono' {P Q : Hered}
     (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → Q.arr e sh →
       P.arr e sh)
@@ -1038,7 +952,6 @@ theorem SVal.all_mono' {P Q : Hered}
     fun _ _ _ => trivial, fun _ _ _ => trivial, fun e sh hn _ => harr e sh hn,
     fun E n _ => hfix E n, fun m d _ => hmap m d⟩ v trivial h
 
-/-- The same at `okDeep` types. -/
 theorem SVal.all_mono_deep {P Q : Hered}
     (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → E.okDeep = true →
       Q.arr e sh → P.arr e sh)
@@ -1054,13 +967,11 @@ theorem SVal.all_mono_deep {P Q : Hered}
       fun E n h => hfix E n (by simpa only [Ty.okDeep] using h),
       fun m d h => hmap m d (by simpa only [Ty.okDeep] using h)⟩ v hT h
 
-/-! ## Storage -/
 
 namespace Storage
 
 variable {C : Contract} {P : Hered}
 
-/-- Every root satisfies `P`. -/
 abbrev All (P : Hered) (st : Storage C) : Prop := SFields.All P st
 
 theorem find_all {st : Storage C} {U : Ty} {r : SRef C U} {w : SVal U} (hs : st.All P)
@@ -1071,7 +982,6 @@ theorem root_all {st : Storage C} {U : Ty} (r : SRef C U) (hs : st.All P) :
     (st.get r.hroot).All P :=
   SFields.all_get r.hroot hs
 
-/-- The value a save at `r` writes into its root. -/
 theorem save_eq_some {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
     (h : st.save r new = some st') :
     ∃ v', (st.get r.hroot).saveM r.path new = some v' ∧ st' = st.set r.hroot v' := by
@@ -1081,14 +991,7 @@ theorem save_eq_some {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
 
 end Storage
 
-/-! ## Saves read back
 
-A save is idempotent (`SVal.saveM_idem`) and the last of two saves at one
-path wins (`SVal.saveM_saveM`); with `SVal.findM_saveM` and the decomposition
-of a save below a path (`SVal.saveM_append`, `Theory/Typed/Obs.lean`) they
-are the algebra `Typing/Constructibility.lean`'s builder is tracked in. -/
-
-/-- Two dynamic arrays with the same live elements and slots are the same. -/
 theorem SVal.array_ext {E : Ty} {n m : Nat} (e : SVec E n) (e' : SVec E m) (sh sh' : SList E)
     (h : n < 2 ^ 256) (h' : m < 2 ^ 256) (he : e.toList = e'.toList) (hs : sh.toList = sh'.toList) :
     SVal.array e sh h = SVal.array e' sh' h' := by
@@ -1096,8 +999,6 @@ theorem SVal.array_ext {E : Ty} {n m : Nat} (e : SVec E n) (e' : SVec E m) (sh s
   subst hnm
   rw [SVec.eq_of_toList_eq e e' he, ← SList.ofList_toList sh, hs, SList.ofList_toList]
 
-/-- **A save is idempotent**: saving again what a save left changes nothing
-(the key a save through a mapping's default added is there now). -/
 theorem SVal.saveM_idem : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v : SVal U) →
     {x' : SVal T} → x.saveM p v = some x' → x'.saveM p v = some x'
   | _, _, x, .nil, v, x', h => by
@@ -1154,7 +1055,6 @@ theorem SVal.saveM_idem : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v 
 
 theorem SVal.saveM_nil {T : Ty} (y z : SVal T) : y.saveM .nil z = some z := by cases y <;> rfl
 
-/-- **The last of two saves at one path wins.** -/
 theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a b : SVal U) →
     {x₁ x₂ : SVal T} → x.saveM p a = some x₁ → x₁.saveM p b = some x₂ → x.saveM p b = some x₂
   | _, _, x, .nil, a, b, x₁, x₂, h₁, h₂ => by
@@ -1224,9 +1124,7 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
       simp only [SVal.saveM, hy, SVal.saveM_saveM d p a b hz hw, Option.bind_eq_bind,
         Option.bind_some, setBy_setBy_self]
 
-/-! ## Defaults, read and cleared -/
 
-/-- Members with distinct names are equal when every member is. -/
 theorem SFields.ext_get : {fs : List (Name × Ty)} → nodupKeysB fs = true → (x y : SFields fs) →
     (∀ f T (h : lookupBy f fs = some T), x.get h = y.get h) → x = y
   | [], _, .nil, .nil, _ => rfl
@@ -1287,13 +1185,10 @@ theorem SVal.dfltBelow_defaultOf : (k : Nat) → (T : Ty) → (h : tyRank T < k)
   | 0, _, h => absurd h (Nat.not_lt_zero _)
   | k + 1, T, h => SVal.dfltAt_defaultOf (SVal.dfltBelow_defaultOf k) T h
 
-/-- `delete` on a default changes nothing. -/
 theorem SVal.defaultOf_dflt (T : Ty) : (SVal.dflt T).defaultOf = SVal.dflt T :=
   SVal.dfltBelow_defaultOf _ T _
 
-/-! ## A test that decides a predicate (`Semantics/StorageWt.lean`'s `HeredB`) -/
 
-/-- Node tests that decide a predicate's node conditions. -/
 structure HeredB.Decides (B : HeredB) (P : Hered) : Prop where
   arr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), B.arr e sh = true ↔ P.arr e sh
   fix : ∀ E n, B.fix E n = true ↔ P.fix E n
@@ -1304,8 +1199,6 @@ section Iff
 variable {P : Hered} {B : HeredB}
 
 mutual
-/-- **The test decides the predicate**, its node tests deciding the node
-conditions. -/
 theorem SVal.allB_iff (hB : B.Decides P) : {T : Ty} → (v : SVal T) → v.allB B = true ↔ v.All P
   | _, .prim _ => by simp only [SVal.allB, SVal.All]
   | _, .struct fs => by simp only [SVal.allB, SVal.All]; exact SFields.allB_iff hB fs
