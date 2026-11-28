@@ -1,7 +1,5 @@
 import Solidity.Storage.Representation.Model
 
-/-! Full-word normalization for the committed primitive/key types.
-No packed-field layout or new arithmetic interface is introduced. -/
 namespace Solidity.Storage.Representation
 
 def keyWord {p : PrimTy} (k : p.Denote) : Nat := (PrimTy.toWord k).val.toNat
@@ -12,12 +10,9 @@ theorem keyWord_lt {p : PrimTy} (k : p.Denote) : keyWord k < 2 ^ 256 := by
   unfold keyWord
   omega
 
-/-- The approved full-word normalization is idempotent on supported values. -/
 theorem word_normalized {p : PrimTy} (v : p.Denote) :
     keyWord v % 2 ^ 256 = keyWord v := Nat.mod_eq_of_lt (keyWord_lt v)
 
-/-- Distinct keys of the same supported type have distinct padded words.
-This is a value-encoding fact, not an assumption about hash outputs. -/
 theorem keyWord_inj {p : PrimTy} {a b : p.Denote} (h : keyWord a = keyWord b) : a = b := by
   cases p with
   | bool =>

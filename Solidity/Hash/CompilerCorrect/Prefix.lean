@@ -1,17 +1,14 @@
 import Solidity.Hash.CompilerCorrect
 
-/-! Finite-prefix transport and divergence-safe composition for the frozen E4A contract. -/
 namespace Solidity.Hash.CompilerCorrect
 
 open Solidity.Evm Solidity.Goals.HashContract
 
-/-- Local safety obligations at an actual instruction or loop-test boundary. -/
 def CursorSafe : Cursor Machine → Prop
   | .running (i :: _) 0 _ m => (∀ c b, i ≠ .loop c b) → i.step m ≠ .fault
   | .running [] 0 (.test _ _ _ :: _) m => ∃ w tail, m.stack = .val w :: tail
   | _ => True
 
-/-- An internal compiler proof obligation, never a public caller premise. -/
 def CodeSafe (c : List Instr) (m : Machine) : Prop :=
   ∀ n, CursorSafe (producer.ideal n c m)
 
@@ -46,7 +43,6 @@ theorem locations_stack (n k : Nat) (c : List Instr) (m : Machine)
   apply List.mem_flatMap.mpr
   exact ⟨k, List.mem_range.mpr (by omega), by simpa only [hrch, slotsAt] using hx⟩
 
-/-- A non-fault complete execution also has valid reached loop-test operands. -/
 theorem reached_test_value (c : List Instr) (m : Machine) (n : Nat)
     (a b rest : List Instr) (fs : List Frame) (s : Machine)
     (hrch : producer.ideal n c m = .running [] 0 (.test a b rest :: fs) s)
@@ -89,8 +85,6 @@ theorem codeSafe_of_nonfault (c : List Instr) (m : Machine)
           | body a b rest => trivial
           | test a b rest => exact reached_test_value c m n a b rest fs s hrch safe
 
-
-/-- One tick on a safe actual cursor retains the complete finite footprint. -/
 theorem safe_tick_related (F : Roadmap.Fixed) (slots : List Slot)
     (hL : F.regionLen ≤ W) (hR : F.rootSlots ≤ W)
     (hb : ∀ s ∈ slots, (Storage.ofSlot s).Bounded F.regionLen F.rootSlots)
@@ -125,8 +119,6 @@ theorem safe_tick_related (F : Roadmap.Fixed) (slots : List Slot)
         subst fs
         exact safe
 
-/-- Prefix induction uses the full reached footprint, then permits observation
-restriction separately. Safety will be discharged by the checked compiler. -/
 theorem finite_related_of_safe (F : Roadmap.Fixed) (n : Nat)
     (c : List Instr) (m : Machine) (v : Numeric) (observed : List Slot)
     (safe : CodeSafe c m)
@@ -146,7 +138,6 @@ theorem finite_related_of_safe (F : Roadmap.Fixed) (n : Nat)
       _ _ (ih (by omega)) (safe k)
     intro code skip fs s hrch
     exact locations_stack n k c m observed (by omega) code skip fs s hrch
-
 
 theorem safe_access_related (F : Roadmap.Fixed) (slots : List Slot)
     (a : Cursor Machine) (b : Cursor Numeric)
@@ -176,8 +167,6 @@ theorem safe_access_related (F : Roadmap.Fixed) (slots : List Slot)
               exact loop ⟨c, b, h⟩
             exact nonfault_access_agrees F slots m v rep i (safe nonloop) rest fs
 
-/-- Full finite-prefix observations and exact access events, conditional only
-on the internal safety obligation that the compiler proof must discharge. -/
 theorem prefix_related_of_safe (F : Roadmap.Fixed) (n : Nat)
     (c : List Instr) (m : Machine) (v : Numeric) (observed : List Slot)
     (safe : CodeSafe c m)
@@ -198,8 +187,6 @@ theorem prefix_related_of_safe (F : Roadmap.Fixed) (n : Nat)
       have := List.mem_range.mp hk
       omega)) (safe k)
 
-
-/-- Extend only the enclosing continuation, never a loop condition or body. -/
 def appendFrameSuffix (suffix : List Instr) : Frame → Frame
   | .test c b rest => .test c b (rest ++ suffix)
   | .body c b rest => .body c b (rest ++ suffix)
@@ -209,13 +196,11 @@ def attachFrames (suffix : List Instr) (outer : List Frame) : List Frame → Lis
   | [f] => appendFrameSuffix suffix f :: outer
   | f :: g :: fs => f :: attachFrames suffix outer (g :: fs)
 
-/-- Embed a segment's exact cursor in its code and frame continuation. -/
 def attachCursor (suffix : List Instr) (outer : List Frame) : Cursor S → Cursor S
   | .running c k [] m => .running (c ++ suffix) k outer m
   | .running c k (f :: fs) m => .running c k (attachFrames suffix outer (f :: fs)) m
   | .halted r => .halted r
 
-/-- The segment boundary precedes its standalone terminal tick. -/
 def AtBoundary : Cursor S → Prop
   | .running [] _ [] _ => True
   | _ => False
@@ -261,8 +246,6 @@ theorem attach_tick (atom : Instr → S → Result S) (test : S → Option (Bool
           all_goals
             cases atom i m <;> rfl
 
-
-/-- Safety from a concrete cursor, including an exact pending skip count. -/
 def SafeFrom (cur : Cursor Machine) : Prop :=
   ∀ n, CursorSafe (iteratePrefix (fun i s => idealResult (i.step s)) idealTest n cur)
 
@@ -274,8 +257,6 @@ theorem boundary_result (c : List Instr) (m : Machine) (n k : Nat) (s : Machine)
   rw [hrch] at hd
   exact hd.symm
 
-/-- Away from completion, attaching a continuation changes no executed operand
-or loop-test value obligation. -/
 theorem attach_safe (suffix : List Instr) (outer : List Frame) (cur : Cursor Machine)
     (inside : ¬ AtBoundary cur) (safe : CursorSafe cur) :
     CursorSafe (attachCursor suffix outer cur) := by
@@ -293,7 +274,6 @@ theorem attach_safe (suffix : List Instr) (outer : List Frame) (cur : Cursor Mac
           cases f <;> cases fs <;> exact safe
     | cons i rest => cases k <;> cases fs <;> exact safe
 
-
 theorem boundary_shape (cur : Cursor S) (h : AtBoundary cur) :
     ∃ k m, cur = .running [] k [] m := by
   cases cur with
@@ -306,8 +286,6 @@ theorem boundary_shape (cur : Cursor S) (h : AtBoundary cur) :
       | cons f fs => exact False.elim h
       | nil => exact ⟨k, m, rfl⟩
 
-/-- Every appended-code prefix is either still inside the first segment or is
-an actual suffix prefix after a concrete successful segment boundary. -/
 theorem append_prefix_phase (a b : List Instr) (m : Machine) (n : Nat) :
     (¬ AtBoundary (producer.ideal n a m) ∧
       producer.ideal n (a ++ b) m = attachCursor b [] (producer.ideal n a m)) ∨
@@ -336,8 +314,6 @@ theorem append_prefix_phase (a b : List Instr) (m : Machine) (n : Nat) :
       rw [producer_produces.ideal_succ, heq]
       rfl
 
-/-- Append composition retains the exact pending jump returned by the segment.
-Compiler certificates, not a new public premise, supply the continuation proof. -/
 theorem safe_append (a b : List Instr) (m : Machine) (ha : CodeSafe a m)
     (hb : ∀ s k, Evm.run a m = .ok s k → SafeFrom (.running b k [] s)) :
     CodeSafe (a ++ b) m := by
@@ -348,8 +324,6 @@ theorem safe_append (a b : List Instr) (m : Machine) (ha : CodeSafe a m)
   · rw [heq]
     exact hb s k hr j
 
-
-/-- Proof phases of the existing loop producer, not an alternative execution. -/
 inductive LoopPhase (I J : Machine → Prop) (c b : List Instr) : Cursor Machine → Prop
   | entry {s} : I s → LoopPhase I J c b (.running [.loop c b] 0 [] s)
   | condition {s n} : I s →
@@ -422,8 +396,6 @@ theorem loopPhase_tick (I J : Machine → Prop) (c b : List Instr)
   | done => exact .halted
   | halted => exact .halted
 
-/-- Loop safety follows from condition/body safety and actual successful-boundary
-invariants, including when a condition or nested body never terminates. -/
 theorem safe_loop (I J : Machine → Prop) (c b : List Instr) (m : Machine)
     (initial : I m)
     (hc : ∀ s, I s → CodeSafe c s)
@@ -443,7 +415,6 @@ theorem safe_loop (I J : Machine → Prop) (c b : List Instr) (m : Machine)
   intro n
   exact loopPhase_safe I J c b hc hcDone hb (phases n)
 
-
 /-- info: 'Solidity.Hash.CompilerCorrect.codeSafe_of_nonfault' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.codeSafe_of_nonfault
 
@@ -455,8 +426,7 @@ theorem safe_loop (I J : Machine → Prop) (c b : List Instr) (m : Machine)
 
 /-- info: 'Solidity.Hash.CompilerCorrect.safe_loop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Hash.CompilerCorrect.safe_loop
-/-- Internal finite-run helper; divergence must be handled separately by
-compiler invariants, never excluded from the public theorem. -/
+
 theorem compilation_safe_of_nondiv {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (r : Evm.Compiler.Compilation b frag P) {base : Nat → Fin W}
@@ -472,8 +442,6 @@ theorem compilation_safe_of_nondiv {C : Contract} {b L frame : Nat}
     cases impossible
   · exact False.elim (finite ho)
 
-/-- Internal assembly only: the compiler proof must supply safety for every
-successful branch without adding it to the frozen caller interface. -/
 theorem compilerBridge_of_safe
     (safe : ∀ {C : Contract} {Γ Δ : Ctx} (b : Nat) (frag : Frag Γ)
       (P : Prog C Γ Δ) (r : Evm.Compiler.Compilation b frag P),
@@ -490,7 +458,6 @@ theorem compilerBridge_of_safe
   intro n
   exact (prefix_related_of_safe F n r.code m v observed hsafe (all n).1 (all n).2).1 n (Nat.le_refl n)
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem memory_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.CompiledProg b frag P) {base : Nat → Fin W}
@@ -504,7 +471,6 @@ theorem memory_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem referenceArrays_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.ReferenceArrays.CompiledProg b frag P) {base : Nat → Fin W}
@@ -518,7 +484,6 @@ theorem referenceArrays_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem objects_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.Objects.CompiledProg b frag P) {base : Nat → Fin W}
@@ -532,7 +497,6 @@ theorem objects_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem construction_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.Construction.CompiledProg b frag P) {base : Nat → Fin W}
@@ -546,7 +510,6 @@ theorem construction_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem memoryCalls_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.Calls.Program b frag P) (hz : Evm.Prog.pushes P = 0) {base : Nat → Fin W}
@@ -560,7 +523,6 @@ theorem memoryCalls_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem memoryCopy_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.StorageCopy.CompiledProg b frag P) {base : Nat → Fin W}
@@ -574,7 +536,6 @@ theorem memoryCopy_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem fixedMemory_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.Fixed.CompiledProg b frag P) {base : Nat → Fin W}
@@ -588,7 +549,6 @@ theorem fixedMemory_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- Safety follows from this branch's actual finite-result certificate. -/
 theorem copyConstruction_safe {C : Contract} {b L frame : Nat}
     {Γ Δ : Ctx} {frag : Frag Γ} {P : Prog C Γ Δ}
     (out : Memory.CopyConstruction.CompiledProg b frag P) {base : Nat → Fin W}
@@ -602,7 +562,6 @@ theorem copyConstruction_safe {C : Contract} {b L frame : Nat}
     rw [hc] at bad
     cases bad
 
-/-- A successful segment retains its exact zero skip and post-state simulation. -/
 theorem stmtOut_success {C : Contract} {L b : Nat} {Γ : Ctx}
     {frag : Frag Γ} {sh pays asserts : Bool} {H : HTy}
     {res : TRes (Solidity.Out C H Γ)} {out : Evm.Out} {m t : Machine} {k : Nat}
@@ -622,8 +581,6 @@ theorem stmtOut_success {C : Contract} {L b : Nat} {Γ : Ctx}
   | diverge h =>
     rcases h.2 with bad | ⟨_, bad⟩ <;> rw [bad] at done <;> cases done
 
-/-- Loop safety follows from a state invariant and safety of every reached body,
-including bodies whose denotational execution diverges. -/
 theorem core_loop_safe {C : Contract} {Γ Δ : Ctx} {L b : Nat}
     {frag : Frag Γ} {post : Frag Δ} (c : Solidity.Val C Γ .bool)
     (body : Prog C Γ Δ) (condition : valIn frag c = true)
@@ -662,7 +619,6 @@ theorem core_loop_safe {C : Contract} {Γ Δ : Ctx} {L b : Nat}
     have dropped := Sim.dropState body.ext hsim
     simpa [pushes, restrict] using dropped
 
-/-- Advance the actual cursor by one safe transition. -/
 theorem safeFrom_tick (cur : Cursor Machine) (now : CursorSafe cur)
     (next : SafeFrom (tick (fun i s => idealResult (i.step s)) idealTest cur)) :
     SafeFrom cur := by
@@ -674,7 +630,6 @@ theorem safeFrom_tick (cur : Cursor Machine) (now : CursorSafe cur)
     rw [Nat.add_comm n 1, prefix_add]
     exact next n
 
-/-- Skipped instructions impose no operand condition and retain the exact tail. -/
 theorem safeFrom_skip (skipCode suffix : List Instr) (m : Machine)
     (safe : CodeSafe suffix m) :
     SafeFrom (.running (skipCode ++ suffix) skipCode.length [] m) := by
@@ -685,7 +640,6 @@ theorem safeFrom_skip (skipCode suffix : List Instr) (m : Machine)
     · trivial
     · simpa only [List.cons_append, List.length_cons, tick] using ih
 
-/-- Sequence safety uses the successful first segment's actual post-state. -/
 theorem core_seq_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
     {frag : Frag Γ} {mid : Frag Δ} (s : Solidity.Stmt C Γ Δ) (tail : Prog C Δ Ξ)
     {σ : State C Γ} {m : Machine} (input : Sim C L b frag σ m)
@@ -701,7 +655,6 @@ theorem core_seq_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
   subst k
   exact rest o.st t hsim
 
-/-- Capacity and safety are required only for the actually selected arm. -/
 theorem branch_safe (yes no : List Instr) (m : Machine) (v : Bool)
     (hy : v = true → CodeSafe yes m) (hn : v = false → CodeSafe no m)
     (hyDone : v = true → ∀ s k, Evm.run yes m = .ok s k → k = 0) :
@@ -736,7 +689,6 @@ theorem branch_safe (yes no : List Instr) (m : Machine) (v : Bool)
       rw [jump] at bad
       cases bad
 
-/-- A compiled conditional is safe even when its selected branch diverges. -/
 theorem core_ite_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
     {frag : Frag Γ} {yesFrag : Frag Δ}
     (c : Solidity.Val C Γ .bool) (yes : Prog C Γ Δ) (no : Prog C Γ Ξ)
@@ -762,8 +714,6 @@ theorem core_ite_safe {C : Contract} {Γ Δ Ξ : Ctx} {L b : Nat}
     · rw [hc] at done
       cases done
 
-/-- Calls enter the actual argument frame, preserve divergent body prefixes,
-and leave through the compiler's finite return code. -/
 theorem core_call_safe {C : Contract} {Γ Γ' ps rs Γf : Ctx} {L b : Nat}
     {frag : Frag Γ} {post : Frag Γ'} (f : Name) (args : Solidity.Args C Γ ps)
     (ret : Solidity.CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf)
@@ -877,11 +827,9 @@ theorem core_call_safe {C : Contract} {Γ Γ' ps rs Γf : Ctx} {L b : Nat}
 
 end Solidity.Hash.CompilerCorrect
 
-
 namespace Solidity.Hash.CompilerCorrect
 open Solidity.Evm Solidity.Goals.HashContract
 
-/-- Alias operations may exhaust storage but cannot themselves diverge. -/
 theorem alias_noDiv {C : Contract} {Γ : Ctx} (σ : State C Γ) {R : RefTy} :
     (r : ARhs C Γ R) → (r.evalT σ).NoDiv
   | .path p => TRes.NoDiv.bind (p.resolveT_ends σ).1 fun _ => TRes.NoDiv.ok _
@@ -911,8 +859,6 @@ theorem push_noDiv {C : Contract} {Γ : Ctx} (σ : State C Γ) {E : Ty}
     · exact fun h => nomatch h
     · exact (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
 
-/-- Internal classification of leaf constructors only; the mutual proof below
-handles the structural constructors without a non-divergence restriction. -/
 def CoreLeaf {C : Contract} {Γ Δ : Ctx} : Solidity.Stmt C Γ Δ → Prop
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage ..
   | .opAssign .. | .incDec .. | .assignIncDec .. | .push .. | .pop ..
@@ -1063,8 +1009,6 @@ theorem core_prog_safe : ∀ {C : Contract} {Γ Δ : Ctx} (P : Prog C Γ Δ)
 
 end
 
-/-- The invariant retains actual reached source prefixes and allocator growth;
-capacity is obtained from the existing full LoopRoom obligation. -/
 theorem memory_loop_safe {C : Contract} {Γ Δ : Ctx} {L b frame : Nat}
     {frag : Frag Γ} {c : Solidity.Val C Γ .bool} {body : Prog C Γ Δ}
     {cond code : List Instr} (cert : Memory.LoopCert b frag c body cond code)
@@ -1123,7 +1067,6 @@ theorem memory_loop_safe {C : Contract} {Γ Δ : Ctx} {L b frame : Nat}
       exact hr'.drop body.ext
     · rw [hc] at done
       cases done
-
 
 theorem loops_stmt_safe {C : Contract} {b L frame Γ Δ F G stmt code}
     (hs : Memory.Loops.StmtCert (C := C) b (Γ := Γ) (Δ := Δ) F G stmt code)
@@ -1194,7 +1137,6 @@ theorem loops_prog_safe {C : Contract} {b L frame Γ Δ F G P code}
     obtain ⟨o, bases, cost, ho, hk, hc, hr, hg⟩ := loops_stmt_success hs repr caps roomHead done
     subst k
     exact ih hr capp (fun amount hd => hg.nextInput (room _ (.tail ho hc hd)))
-
 
 def ScopeStmtSafe {C : Contract} {b Γ Δ F G stmt code}
     (hs : Memory.LoopScopes.StmtCert (C := C) b (Γ := Γ) (Δ := Δ) F G stmt code)
@@ -1286,7 +1228,6 @@ theorem scopes_prog_safe {C : Contract} {b L frame Γ Δ F G P code}
     · rw [hout] at done
       cases done
 
-/-- Every checked compiler certificate supplies local safety from its unchanged Input. -/
 theorem compilation_safe {C : Contract} {Γ Δ : Ctx} {b L frame : Nat}
     {frag : Frag Γ} {P : Prog C Γ Δ} (r : Evm.Compiler.Compilation b frag P)
     {base : Nat → Fin W} {σ : State C Γ} {m : Machine}
@@ -1310,7 +1251,7 @@ theorem compiler_bridge : CompilerBridge producer :=
 end Solidity.Hash.CompilerCorrect
 
 namespace Solidity.Hash
-/-- The frozen E4A compiler collision-free contract, with actual operational prefixes. -/
+
 theorem compiler_correct_collisionFree : Solidity.Goals.compilerCorrectCollisionFree :=
   ⟨Backend.compiler_endpoint_correct, CompilerCorrect.producer,
     CompilerCorrect.producer_produces, CompilerCorrect.producer_idealAdequacy,

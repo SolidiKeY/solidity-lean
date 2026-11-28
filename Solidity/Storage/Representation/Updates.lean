@@ -1,9 +1,6 @@
 import Solidity.Storage.Representation.Frames
 import Solidity.Storage.Representation.Words
 
-/-! Symbolic subtree replacement and mapping source-save laws.
-`patch` is an abstract store update; no runtime copying/allocation cost is
-claimed. Scalar footprints reduce it to a single word write. -/
 namespace Solidity.Storage.Representation
 
 noncomputable def patch (w new : Store) (t : STy) (l : Loc) : Store := by
@@ -20,7 +17,6 @@ theorem patch_outside (w new : Store) (t : STy) (l x : Loc) (h : ¬ Occ t l x) :
   classical
   exact if_neg h
 
-/-- A scalar footprint patch is exactly one full-word write. -/
 theorem patch_word (w replacement : Store) (l : Loc) :
     patch w replacement .word l = write w l (replacement l) := by
   funext x
@@ -30,12 +26,10 @@ theorem patch_word (w replacement : Store) (l : Loc) :
   · rw [patch_outside _ _ _ _ _ (by intro hx; cases hx; exact eq rfl)]
     exact (write_other _ _ _ _ eq).symm
 
-/-- A represented replacement is represented in the patched store. -/
 theorem ValueRep.replace {T : Ty} {v : SVal T} {t : STy} {l : Loc} {w new : Store}
     (h : ValueRep v t l new) : ValueRep v t l (patch w new t l) :=
   h.congr (fun x hx => patch_inside w new t l x hx)
 
-/-- Every disjoint subtree frames a replacement, at arbitrary nested depth. -/
 theorem ValueRep.patch_frame {T : Ty} {v : SVal T} {t u : STy} {l r : Loc}
     {w new : Store} (h : ValueRep v t l w)
     (disjoint : ∀ x, Occ t l x → Occ u r x → False) :
@@ -45,7 +39,6 @@ theorem ValueRep.patch_frame {T : Ty} {v : SVal T} {t u : STy} {l r : Loc}
 theorem saveM_nil {T : Ty} (v new : SVal T) : v.saveM .nil new = some new := by
   cases v <;> rfl
 
-/-- The source's mapping replacement remains independent of word updates. -/
 theorem mapping_source_save {K : PrimTy} {V : Ty} (entries : SMap K V)
     (d new : SVal V) (k : K.Denote) :
     (SVal.map entries d).save (.key k .nil) new =
@@ -53,7 +46,6 @@ theorem mapping_source_save {K : PrimTy} {V : Ty} (entries : SMap K V)
   rw [SVal.save_eq_saveM, SVal.saveM]
   cases Semantics.lookupBy k entries.toList <;> simp only [saveM_nil, Option.bind_eq_bind, Option.bind_some]
 
-/-- A mapping-entry replacement changes exactly its existing occupied region. -/
 theorem mapping_save {K : PrimTy} {V : Ty} {entries : SMap K V} {d new : SVal V}
     {t : STy} {l : Loc} {w replacement : Store}
     (old : ValueRep (.map entries d) (.map t) l w) (k : K.Denote)
@@ -74,7 +66,6 @@ theorem mapping_save {K : PrimTy} {V : Ty} {entries : SMap K V} {d new : SVal V}
       intro x hx hy
       exact occ_keys_disjoint (fun he => eq (keyWord_inj he)) hx hy
 
-/-- One mapping step composes an arbitrary already-proved typed path save. -/
 theorem mapping_path_source_save {K : PrimTy} {V U : Ty} (entries : SMap K V)
     (d changed : SVal V) (k : K.Denote) (p : Path V U) (new : SVal U)
     (inner : ((Semantics.lookupBy k entries.toList).getD d).save p new = some changed) :
@@ -86,7 +77,6 @@ theorem mapping_path_source_save {K : PrimTy} {V U : Ty} (entries : SMap K V)
     simp only [he, Option.getD_none, Option.getD_some] at inner ⊢ <;>
     simp only [inner, Option.bind_eq_bind, Option.bind_some]
 
-/-- Source path composition and symbolic representation compose together. -/
 theorem mapping_path_save {K : PrimTy} {V U : Ty} {entries : SMap K V}
     {d changed : SVal V} {t : STy} {l : Loc} {w replacement : Store}
     (old : ValueRep (.map entries d) (.map t) l w) (k : K.Denote)

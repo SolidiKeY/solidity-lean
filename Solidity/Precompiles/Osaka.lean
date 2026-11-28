@@ -5,39 +5,10 @@ import Solidity.Precompiles.Blake2f
 import Solidity.Precompiles.P256
 import Solidity.Precompiles.PointEval
 
-/-!
-# The Osaka precompiles as G06's `Fixed`
-
-`run` and `gas` dispatch G06's `Precompile` table
-(`Solidity/Roadmap/Evm.lean`) to the computed precompiles of this
-directory; `fixed` instantiates `Fixed` with them and the core Keccak-256
-(`keccakWord`).  Each function is a definition, checked against vectors
-that Osaka's execution specification computed, not an assumption: the
-public theorem quantifies over `Fixed.precompile` (decision "precompile
-addresses"), and `fixed` is the instance a bridge lemma (B16) identifies
-with the pinned EVM's.
-
-The laws G06 asks of the table:
-
-- **Failure exactly on malformed input** (`run_eq_none_iff`): `Malformed`
-  states, per precompile, the decoding failures of its EIP, and for point
-  evaluation also a proof that does not verify (`PointEval.verifies`); five
-  precompiles never fail (`ECRECOVER`, the hashes, `IDENTITY` and
-  `P256VERIFY` answer a bad input with empty output instead).
-- **Gas monotonic in the input length** where the EIP prices by length
-  (`gas_mono`): every precompile but `MODEXP` and `BLAKE2F`, whose gas
-  depends on the input's header, not its length.
-- **The stipend** (`ecrecover_exceeds_stipend`, `stipendFits`): with
-  2300 gas a payment to `ECRECOVER` always fails, while one to `IDENTITY`,
-  `SHA256`, `RIPEMD160`, `MODEXP` or `ECADD` with empty data fits; the source's stipend
-  payments to precompile addresses read these numbers.
--/
-
 namespace Solidity.Precompiles.Osaka
 
 open Solidity.Roadmap.Evm
 
-/-- The Osaka precompiles' results. -/
 def run : Precompile → Bytes → Option Bytes
   | .ecrecover => ecrecover
   | .sha256 => sha256
@@ -58,7 +29,6 @@ def run : Precompile → Bytes → Option Bytes
   | .blsMapFp2ToG2 => Bls12381.mapFp2ToG2
   | .p256Verify => P256.p256Verify
 
-/-- Osaka's gas schedule for the precompiles. -/
 def gas : Precompile → Bytes → Nat
   | .ecrecover => ecrecoverGas
   | .sha256 => sha256Gas
@@ -79,8 +49,6 @@ def gas : Precompile → Bytes → Nat
   | .blsMapFp2ToG2 => Bls12381.mapFp2ToG2Gas
   | .p256Verify => P256.gas
 
-/-- **The fixed functions of the pinned Osaka EVM**: the core Keccak-256 and
-the computed precompiles with Osaka's gas. -/
 def fixed : Fixed where
   keccak := keccakWord
   keccak_lt _ := Nat.mod_lt _ (Nat.pow_pos (by decide))
@@ -89,10 +57,6 @@ def fixed : Fixed where
 
 theorem fixed_precompileGas : fixed.precompileGas = gas := rfl
 
-/-! ## Failure exactly on malformed input -/
-
-/-- The malformed inputs of each precompile, as its EIP states them (for
-point evaluation, also a well-formed proof that does not verify). -/
 def Malformed : Precompile → Bytes → Prop
   | .ecrecover, _ | .sha256, _ | .ripemd160, _ | .identity, _ | .p256Verify, _ => False
   | .modexp, d => Modexp.Malformed d
@@ -123,7 +87,6 @@ def Malformed : Precompile → Bytes → Prop
   | .blsMapFpToG1, d => d.length ≠ 64 ∨ Bls12381.p ≤ ofBE (d.map UInt8.toNat)
   | .blsMapFp2ToG2, d => d.length ≠ 128 ∨ Bls12381.decodeFp2 (d.map UInt8.toNat) = none
 
-/-- **A precompile halts exceptionally exactly on a malformed input.** -/
 theorem run_eq_none_iff (p : Precompile) (d : Bytes) : run p d = none ↔ Malformed p d := by
   cases p
   · exact ⟨(fun h => nomatch h), False.elim⟩
@@ -145,18 +108,12 @@ theorem run_eq_none_iff (p : Precompile) (d : Bytes) : run p d = none ↔ Malfor
   · exact Bls12381.mapFp2ToG2_eq_none_iff d
   · exact ⟨(fun h => nomatch h), False.elim⟩
 
-/-- `fixed`'s precompiles are `run`, so the law holds of the instance. -/
 theorem fixed_precompile_eq_none_iff (p : Precompile) (d : Bytes) :
     fixed.precompile p d = none ↔ Malformed p d :=
   run_eq_none_iff p d
 
-/-! ## Gas -/
-
-/-- The precompiles whose EIP prices the input by its length alone. -/
 def LengthPriced (p : Precompile) : Prop := p ≠ .modexp ∧ p ≠ .blake2f
 
-/-- **Gas is monotonic in the input length** where the EIP prices by
-length. -/
 theorem gas_mono {p : Precompile} (hp : LengthPriced p) {d e : Bytes}
     (h : d.length ≤ e.length) : gas p d ≤ gas p e := by
   cases p
@@ -179,14 +136,10 @@ theorem gas_mono {p : Precompile} (hp : LengthPriced p) {d e : Bytes}
   · exact Nat.le_refl _
   · exact Nat.le_refl _
 
-/-- `ECRECOVER` costs more than the 2300-gas stipend on every input, so a
-stipend payment to address 1 always fails on Osaka. -/
 theorem ecrecover_exceeds_stipend (d : Bytes) : pinned.stipend < gas .ecrecover d := by
   show pinned.stipend < 3000
   exact @of_decide_eq_true _ (Nat.decLt _ _) rfl
 
-/-- The precompiles a stipend payment with empty data reaches successfully:
-they accept the empty input and charge at most 2300. -/
 def stipendFits (p : Precompile) : Bool := (run p []).isSome && gas p [] ≤ pinned.stipend
 
 #guard Precompile.all.filter stipendFits ==

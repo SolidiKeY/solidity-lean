@@ -2073,6 +2073,7 @@ import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanBlocksV3
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDecoding
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
@@ -4782,6 +4783,8 @@ import Solidity.Yul.SourceBindings
 import Solidity.Yul.SourceBoundary
 import Solidity.Yul.SourceContext
 import Solidity.Yul.SourceTypes
+import Solidity.Yul.StatefulImport
+import Solidity.Yul.StatefulRun
 import Solidity.Yul.StatementTags
 import Solidity.Yul.Static
 import Solidity.Yul.Syntax

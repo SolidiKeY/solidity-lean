@@ -1,0 +1,8 @@
+| `Examples/Benchmark/Inheritance/SuperInConstructor.lean` | solc `super_in_constructor`: diamond `D, C, B, A` linearized, `super.f()` chain called from the constructor (`data == 15`); all five specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ModifierStacking.lean` | solc `function_modifier_multiple_times`: one modifier applied three times, outermost first (stacking; the additions commute, so not order); the specification proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ModifierOverride.lean` | solc `function_modifier_calling_functions_in_creation_context`: overridden modifier and virtual hook in the constructor (`0x4300`); all seven function specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/AbstractHook.lean` | solc `call_unimplemented_base`: an abstract contract calls a hook its heir implements; both specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ExplicitBase.lean` | solc `explicit_base_class`: virtual dispatch beside a static `BaseBase.g()` call; all four specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
+| `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
