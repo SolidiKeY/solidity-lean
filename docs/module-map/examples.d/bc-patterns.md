@@ -1,0 +1,7 @@
+| `Examples/Benchmark/Patterns/CommitReveal.lean` | Solidity by Example SecuredFindThisHash commit-reveal: constructor and commitSolution proved, getMySolution's guard proved (its unnamed tuple cannot be named by a clause); revealSolution retained as unknown (heartbeat exhaustion on string hashes and payment branches). |
+| `Examples/Benchmark/Patterns/StateMachine.lean` | Solidity docs StateMachine with timed transitions: forward-only stage clauses for g, h, i proved; bid and reveal retained as unknown (read-after-save stage arithmetic missing in the leaf closer). |
+| `Examples/Benchmark/Patterns/Withdrawal.lean` | Solidity docs WithdrawalContract pull payments: constructor and withdraw proved; becomeRichest retained as unknown (quantified mapping-save leaf against the snapshot). |
+| `Examples/Benchmark/Patterns/RateLimiter.lean` | ConsenSys per-period withdrawal limit, timestamp periods: constructor proved; withdraw retained as unknown (repeated-save normalization with the ledger debit). |
+| `Examples/Benchmark/Patterns/CircuitBreaker.lean` | ConsenSys circuit breaker with silent-skip modifiers: all four function specifications proved. |
+| `Examples/Benchmark/Patterns/Mutex.lean` | Solidity by Example re-entrancy guard on EtherStore: deposit, guarded withdraw and getBalance proved. |
+| `Examples/Benchmark/Patterns/TwoStepOwnership.lean` | Compound Unitroller pending-admin handover with error codes: all three function specifications proved. |
