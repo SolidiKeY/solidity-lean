@@ -1411,15 +1411,11 @@ theorem statement_production (hk : Solidity.Goals.elabKernelTotal) :
   · rfl
   · exact ⟨⟨rfl, rfl, rfl⟩, rfl, rfl⟩
 
-/-- The unchanged production checker accepts the standalone assignment. -/
-theorem statement_accepted : Accepted statementEmitted := by
-  repeat constructor
-
 /-- The new domain is nonvacuous under the authorized kernel-totality hypothesis. -/
 theorem statement_coverage (hk : Solidity.Goals.elabKernelTotal) :
     ∃ b' : Body, b'.SameInput statementBody ∧ ∃ m, diagram.Assoc b' statementEmitted m :=
   diagram_total_boolean_statements statementBody statementEmitted statement_in_domain
-    (statement_production hk) statement_accepted
+    (statement_production hk) block_accepted
 
 /-- The original Match smoke is still covered, through the two domain inclusions. -/
 theorem smoke_statements_coverage (hk : Solidity.Goals.elabKernelTotal) :
