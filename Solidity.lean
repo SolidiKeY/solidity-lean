@@ -2081,6 +2081,7 @@ import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanExprInference
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanLocals
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanSpelling
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStatements
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanStmtInference
 import Solidity.Correctness.Lowering.Sim.Coverage.LoweringReceipt
 import Solidity.Correctness.Lowering.Sim.Coverage.Obstruction

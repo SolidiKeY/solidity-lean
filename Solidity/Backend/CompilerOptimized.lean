@@ -1,5 +1,6 @@
 import Solidity.Backend.CompilerEndpoint
 import Solidity.Backend.CompilerTotal
+import Solidity.Backend.CompilerOptimizerDomain
 import Solidity.Optimizer.Pipeline
 
 /-! The optimizing entry retains the selected program's compilation certificate
@@ -142,6 +143,16 @@ theorem compileOptimized_accepts (n : Nat) (C : Contract) (Γ Δ : Ctx)
   cases hc : compileOptimized n b (Frag.init Γ) P with
   | none => exact False.elim (h hc)
   | some r => exact ⟨r, rfl⟩
+
+theorem compiler_optimized_total : CompilerOptimizedTotal := by
+  intro n C Γ Δ P hP b L frame hL
+  obtain ⟨r, hr, hs⟩ := compiler_total C Γ Δ (P.optimize n)
+    (CompilerOptimizerDomain.optimize_ok n hP) b L frame hL
+  refine ⟨⟨P.optimize n, P.optimize_runC n, r⟩, ?_, hs⟩
+  simp only [compileOptimized, hr]
+
+theorem compiler_optimized_endpoint : CompilerOptimizedEndpoint ∧ CompilerOptimizedTotal :=
+  ⟨compiler_optimized_correct, compiler_optimized_total⟩
 
 end Solidity.Backend
 
