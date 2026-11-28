@@ -13,12 +13,11 @@ inlined into a contract holding one `Counter`).
 Changes: only the spelling of `contract!{ … }` and solkey's `@custom:key`
 clauses written above the functions they annotate.
 
-Verdicts: `current`, `reset`: proved.  `increment`, `decrement`: unknown.
-Both clauses are true (the `requires` keeps `+= 1` below `2^256 - 1`, the
-`require(value > 0)` keeps `value - 1` at or above zero), but the leaf keeps
-the wrapping operation (`se2 +% 1`, `se1 -% 1`) and the closer has no law
-rewriting a wrapping `+%`/`-%` to the exact one under a range premise; the
-obligations are kept below as `def`s.
+Verdicts: `current`, `increment`, `decrement`, `reset`: proved.  The
+unchecked `+= 1` and `value - 1` leave a wrapping `+%`/`-%` in their leaf,
+which `sol_prove` alone does not close; its leaf closer (`sol_leaf`,
+`sol_close`, found by `sol_prove?`) does, from the `requires` and the
+`require(value > 0)`.
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyOz.OZCounters
@@ -63,14 +62,18 @@ open scoped Scoped
 theorem spec_current : ⊢ spec!{ current } := by
   sol_prove
 
-/-- UNKNOWN: `ensures _counter._value == \old(_counter._value) + 1`; the leaf
-keeps `se2 +% 1` under `_counter._value < 2^256 - 1` (no wrapping-add closer). -/
-def increment_obligation := spec!{ increment }
+/-- `requires _counter._value < 2^256 - 1`,
+`ensures _counter._value == \old(_counter._value) + 1`. -/
+theorem spec_increment : ⊢ spec!{ increment } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
 
-/-- UNKNOWN: `ensures \old(_counter._value) > 0 && _counter._value ==
-\old(_counter._value) - 1`; the leaf keeps `se1 -% 1` under `se1 > 0` (no
-wrapping-sub closer). -/
-def decrement_obligation := spec!{ decrement }
+/-- `ensures \old(_counter._value) > 0 && _counter._value == \old(_counter._value) - 1`. -/
+theorem spec_decrement : ⊢ spec!{ decrement } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
 
 /-- `ensures _counter._value == 0`. -/
 theorem spec_reset : ⊢ spec!{ reset } := by
