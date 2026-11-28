@@ -1,15 +1,8 @@
-import Solidity.Calculus.Closers
-import Solidity.Automation.SummaryCache
+import Solidity.Examples.Summaries.Support
 
-/-!
-# Token transfer with a shared storage-writing helper
-
-Storage writes are outside the symbolic-call rule; these calls expand. The verdict cache below
-is a separate, explicitly encoded consumer: it does not claim that the current
-front end extracts canonical keys or consumes `Specification.Certified`.
--/
+/-! Token: cached typed helper certificates and actual source-edit key controls. -/
 namespace Solidity.Examples.Summaries.Token
-open Solidity.Automation.Summary
+open Solidity.Automation.Summary Solidity.Examples.Summaries.Support
 
 def Token : Contract := contract!{
   uint senderBalance;
@@ -26,57 +19,54 @@ def Token : Contract := contract!{
 local instance : InContract := ⟨Token⟩
 open scoped Solidity.Scoped
 
-/-- The helper transfers any amount at most ten from a ten-unit sender to an empty recipient. This is the callee verdict saved below. -/
 def calleeGoal : Fml Token [] := dl!{
   senderBalance == 10 ∧ recipientBalance == 0 ∧ a <= 10 →
   ⟨ _transfer(a); ⟩ (senderBalance == 10 - a ∧ recipientBalance == a) }
 
-/-- Solidity: `_transfer(a)` debits the sender and credits the recipient. -/
-theorem _transferVerified : Fml.Valid calleeGoal := by
-  unfold calleeGoal
+def spec (m : Modality) : Specification Token [.val .uint] [] [.val .uint] :=
+  { body := summary_body dl!{ [ _transfer(4); ] true }
+    requires := cdlIn![uint x]{ senderBalance == 10 ∧ recipientBalance == 0 ∧ x <= 10 }
+    ensures := cdlIn![uint x, old, oldNet]{ (senderBalance == 10 - x ∧ recipientBalance == x) ∧ find(storage, allowance) = find(old, allowance) }
+    modality := m, mutability := .nonpayable }
+/-- Solidity: the box obligation for `_transfer`, including allowance preservation. -/
+private theorem obligationBox : Fml.Valid (closedObligation (spec .box) .none) := by
   sol_prove
   sol_leaf
   sol_close
+/-- Solidity: the diamond obligation also proves `_transfer` returns. -/
+private theorem obligationDiamond : Fml.Valid (closedObligation (spec .diamond) .none) := by
+  sol_prove
+  sol_leaf
+  sol_close
+/-- Solidity: `_transfer` is certified once, including the unchanged allowance frame. -/
+theorem certified (m : Modality) : (spec m).Certified := by
+  apply certifyVoid _ (.snoc .nil .uint (.user "x") (.simple (.lit 0 rfl))) ?_ rfl rfl
+  cases m with
+  | box => exact obligationBox
+  | diamond => exact obligationDiamond
 
-/-- Solidity: `transfer(4)` executes the common `_transfer` body (summary unsupported). -/
+def keyFor (C : Contract) : Key := leafKey C "_transfer" "sender=10; recipient=0; x<=10; sender=10-x; recipient=x; allowance=old allowance; nonpayable; box and diamond"
+def key : Key := keyFor Token
+private def calleeEdit := editFunction Token "_transfer"
+  (contract!{ function _transfer(uint amount) { senderBalance -= amount; recipientBalance += 1; } })
+private def checked : CheckedSummary key (∀ m, (spec m).Certified) := ⟨certified⟩
+/-- Solidity: retrieve the stored `_transfer` certificate. -/
+private theorem cached : ∀ m, (spec m).Certified := checked.fromCache
+#guard checked.edits (keyFor (editUnrelated Token)) (keyFor calleeEdit)
+
+/-- Solidity: the original `_transfer` result claim consumes the cached certificate. -/
+theorem _transferVerified : Fml.Valid calleeGoal := by
+  unfold calleeGoal
+  summary_calls 1 (spec .diamond) (cached .diamond)
+
+/-- Solidity: `transfer` uses the helper certificate 1 time(s). -/
 theorem transferVerified : ⊨ᶠ dl!{ senderBalance == 10 ∧ recipientBalance == 0 →
   [ transfer(4); ] (senderBalance == 6 ∧ recipientBalance == 4) } := by
-  sol_prove
+  summary_calls 1 (spec .box) (cached .box)
 
-/-- Solidity: `transferFrom(4)` debits allowance and executes the common helper (summary unsupported). -/
+/-- Solidity: `transferFrom` uses the helper certificate 1 time(s). -/
 theorem transferFromVerified : ⊨ᶠ dl!{ senderBalance == 10 ∧ recipientBalance == 0 ∧ allowance == 10 →
   [ transferFrom(4); ] (senderBalance == 6 ∧ recipientBalance == 4 ∧ allowance == 6) } := by
-  sol_prove
-
-/-- The helper has no calls; all other semantic metadata is retained in context.
-`reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
-def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "_transfer" C.funs), "senderBalance=10,recipientBalance=0,a<=10 -> <_transfer(a)> senderBalance=10-a,recipientBalance=a",
-    reprStr { C with funs := [] }, []⟩
-def key : Key := keyFor Token
-
-private def unrelatedEdit : Contract := { Token with
-  funs := Token.funs.map (fun (n, f) => if n == "version" then
-    (n, (contract!{ function version() pure returns (uint r) { r = 2; } }).funs.head!.2)
-    else (n, f)) }
-private def calleeEdit : Contract := { Token with
-  funs := Token.funs.map (fun (n, f) => if n == "_transfer" then
-    (n, (contract!{ function _transfer(uint amount) { senderBalance = senderBalance - amount; recipientBalance += 1; } }).funs.head!.2) else (n, f)) }
-
-private def valid (k : Key) : Prop := k = key ∧ Fml.Valid calleeGoal
-private def verdict : Verdict valid key := .proved ⟨rfl, _transferVerified⟩
-private def saved : Cache valid := ({} : Cache valid).insert key verdict
-
-/-- Reusing the saved helper verdict invokes no checker. -/
-theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
-    saved.check key verify = (some verdict, saved, false) :=
-  Cache.check_hit _ _ _ _ (Cache.lookup_insert _ _ _)
-
--- Real source fixtures: change the unrelated declaration, then the helper body.
-#guard keyFor unrelatedEdit == key
-#guard (saved.lookup (keyFor unrelatedEdit)).isSome
-#guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
-#guard (saved.lookup (keyFor calleeEdit)).isNone
-#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
+  summary_calls 1 (spec .box) (cached .box)
 
 end Solidity.Examples.Summaries.Token

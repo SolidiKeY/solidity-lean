@@ -209,6 +209,7 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
+| `Examples/Benchmark/Inheritance/ModifierOrder.lean` | solc `modifiers/evaluation_order`: base constructor arguments in linearization order, then modifier arguments in written order, then the body (`[4, 2, 6, 1, 3, 5, 7]`); `f` and constructor proved by `sol_prove`, `query` (memory copy) without a clause. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/MathLib/Average.lean` | OpenZeppelin v4.9.6 `Math.average` (`(a & b) + (a ^ b) / 2`): exact floor-average target, overflow-free form. Unknown: bitwise carry identity over `uintBitwise` missing. |
@@ -275,6 +276,11 @@ At the root, the notation's own tests:
 | `Examples/SolkeyOpen/SolcControlFlow.lean` | solkey `semantics/open/SolcControlFlow.sol`: `conditionalExpressionTuples` unknown (conditional of tuples refused by the front end). |
 | `Examples/SolkeyOpen/SolcFunctionCalls.lean` | solkey `semantics/open/SolcFunctionCalls.sol`: `functionsRecursiveUnbounded` unknown (diamond of an unbounded recursion). |
 | `Examples/SolkeyOpen/ArrayRemoveByShifting.lean` | solkey `contracts/real-world/open/ArrayRemoveByShifting.sol`: `remove` unknown (invariant leaves; the use case owes `ensures` the invariant does not carry). |
+| `Examples/SolkeyOpen/SolcPayments.lean` | solkey `semantics/open/SolcPayments.sol` (no `receive`): the five `msg.sender`/`msg.value` obligations, `tryArgumentSideEffect` and `callKeepsStorageUnsound` (no callbacks) proved; `transferUnfundedReverts` refuted; five `try` obligations and `callRunsReceive` unknown (leaves stated); `callWithoutCodeReverts` unknown (refused by the front end). |
+| `Examples/SolkeyOpen/SolcHigherLevel.lean` | solkey `semantics/open/SolcHigherLevel.sol`, the most derived contract only: `creationF3`, `creationF4` unknown (`\|` at a leaf); four base-qualified calls unknown (refused by the front end); the constructor has no reading (no inheritance). |
+| `Examples/SolkeyOpen/SolcStructsMappings.lean` | solkey `semantics/open/SolcStructsMappings.sol`: both obligations unknown (a `calldata` struct written to storage is refused by the front end). |
+| `Examples/SolkeyOpen/SolcArrayMembers.lean` | solkey `semantics/open/SolcArrayMembers.sol`: `copyIncludingArray` unknown (`\|` at the leaf). |
+| `Examples/SolkeyOpen/SolcLoops.lean` | solkey `semantics/open/SolcLoops.sol`: the three never-ending loops' boxes proved; `multiArrayFillByPushLoops`, `pushNoArgs2dLoop` unknown (walk over budget); the two `binomial` obligations are `Examples/Tactics/OpenLoops`'s. |
 | `Examples/Benchmark/SolkeyOz/OZCounters.lean` | solkey's OpenZeppelin `Counters` port: all four clauses proved (unchecked increment/decrement by the leaf closer). |
 | `Examples/Benchmark/SolkeyOz/OZMath.lean` | solkey's OpenZeppelin `Math` port: `tryAdd`, `max`, `min` proved; `trySub`, `tryMul`, `tryDiv`, `tryMod`, `average`, `ceilDiv` unknown, each with its stuck leaf and missing closer law. |
 | `Examples/Benchmark/SolkeyOz/OZNonces.lean` | solkey's OpenZeppelin `Nonces` port: `nonces`, `useNonce` proved; `useCheckedNonce` unknown (wrapping add with a Boolean `!=` binding). |
@@ -282,6 +288,16 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyOz/OZPausable.lean` | solkey's OpenZeppelin `Pausable` mock port: all six clauses proved. |
 | `Examples/Benchmark/SolkeyOz/OZReentrancyGuard.lean` | solkey's OpenZeppelin `ReentrancyGuard` mock port: all five clauses with both contract invariants proved, the recursive re-entry reverting. |
 | `Examples/Benchmark/SolkeyOz/SolmateOwned.lean` | solkey's Solmate `Owned` port: both clauses proved. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/SolcVerify/CaseAnalysisSimple.lean` | solc-verify case-analysis postconditions on signed storage; correct proved, wrong default refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/DoWhile.lean` | solc-verify `do … while` invariants; all four unknown (invariant not inductive, or needs an inferred bound). |
+| `Examples/Benchmark/SolcVerify/LoopInvar.lean` | solc-verify loop invariants with `assert`; two proved, two refuted (`sol_refute`), `forLoop` unknown. |
+| `Examples/Benchmark/SolcVerify/OldExpr.lean` | solc-verify `\old` postconditions on owner and counters; incorrect owner change refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/OverflowSpec.lean` | solc-verify `uint8` contract invariant `x == y + 1`; `inc` proved, `set` refuted by `sol_refute` (overflow in the clause). |
+| `Examples/Benchmark/SolcVerify/Simple.lean` | solc-verify contract invariant `x == y`; `add`, constructor and `add_incorrect_2` (call inlined, no entry invariant owed) proved, `add_incorrect` refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/Storage.lean` | solc-verify records in a mapping of structs; frame (`modifies`) and postconditions all proved. |
+| `Examples/Benchmark/SolcVerify/StructMapping.lean` | SMTChecker `struct_1`: a struct stored in a mapping agrees with its memory copy; proved. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/Swc/IntegerOverflowMinimal.lean` | SWC-101 `integer_overflow_minimal.sol` (registry 1b62270), 0.4 wrapping `-=` as `unchecked`: `run` (`count == \old(count) - input`) refuted by a kernel-checked run from `count = 1` wrapping to 2^256-1. |
@@ -308,11 +324,13 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Tokens/ERC721Burnable.lean` | Pinned OpenZeppelin 4.9.6 authorized NFT burn with owner/approval deletion, former-owner count and full frame; unchecked zero-count case retained. Full burn obligation unknown at guarded wrapped-subtraction/old-owner normalization; owner/approval-clearing component proved separately. |
 | Module | Its examples |
 |---|---|
-| `Examples/Summaries/Vault.lean` | Vault arithmetic helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/Token.lean` | Two-slot token transfer and allowance caller; storage-writing symbolic summary unsupported; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/CallChain.lean` | Three call edges and repeated intermediate helper; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/Library.lean` | Recursion-free library-style helper used twice per caller; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/Pricing.lean` | Shared pricing helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Vault.lean` | Both callers and the bounded diamond result consume the cached typed math certificate. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Token.lean` | Both transfer callers consume the cached storage-writing certificate, retaining the allowance frame and bounded diamond result. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Library.lean` | Both recursion-free library-style callers consume the same cached increment certificate twice. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Pricing.lean` | Both quote callers and the bounded diamond result consume one cached typed certificate. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/CallChain.lean` | The original three-edge value chain and repeated intermediate call consume the cached leaf certificate; intermediate wrappers are expanded. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/StorageChain.lean` | Three call edges with seed, middle and outer each certified once; callers reuse the cached outer certificate once/twice, and leaf edits invalidate its transitive dependency key. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Support.lean` | Example-only typed certification, semantic wrapper expansion, bounded certificate-use-count checks, cache evidence retrieval and actual source-edit controls. Fixture serialization and edited-contract transport are not asserted. |
 | `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `scripts/trust/executable-goal-replay.lean` in Lean CI. |
 | `Examples/ExecutableRequestData.lean` | Shared synthetic request and nondefault raw contract data for quotation and retained-candidate examples; not source admission. |
 | Module | Its examples |

@@ -14,7 +14,8 @@ Unchanged but for the spelling of `contract!{ … }`.  The three applications
 of `mod` are inlined around `f`'s body outermost first, `mod(2)`, `mod(5)`,
 then `mod(x)`, each with its own copy of the parameter `x`, so the body
 reads `a` after all three additions.  The additions commute, so the clause
-does not tell the three orders apart: this module shows stacking, not order.
+does not tell the three orders apart: this module shows stacking, not order
+(`ModifierOrder.lean` shows order).
 ```solidity
 contract C {
     uint256 public a;
