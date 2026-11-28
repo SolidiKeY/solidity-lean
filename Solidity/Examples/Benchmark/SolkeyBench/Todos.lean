@@ -8,6 +8,10 @@ import Solidity.Calculus.Closers
 # Benchmark: `Todos`
 
 Source: <https://github.com/SolidiKeY/solkey/blob/50a1469c8c34abf522c7027e47e6f53292d6920a/keyext.solidity.examples/contracts/benchmark/Todos.sol>.
+
+Changes: none beyond `contract!{ … }` spelling; the `@custom:key` clauses are written above their functions, invariants first. `payable(x)` is the identity on an address and is dropped (as in `Benchmark/EtherWallet.lean`); `if (c) s;` gets braces. (solkey's file already drops `create()`).
+
+Verdicts are on the declarations below: a `theorem` is proved, a `def …_obligation` is unknown (its stuck goal and the missing closer or rule in its docstring).
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyBench.Todos

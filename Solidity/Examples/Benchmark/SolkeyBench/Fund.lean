@@ -8,6 +8,10 @@ import Solidity.Calculus.Closers
 # Benchmark: `Fund`
 
 Source: <https://github.com/SolidiKeY/solkey/blob/50a1469c8c34abf522c7027e47e6f53292d6920a/keyext.solidity.examples/contracts/benchmark/Fund.sol>.
+
+Changes: none beyond `contract!{ … }` spelling; the `@custom:key` clauses are written above their functions, invariants first. `payable(x)` is the identity on an address and is dropped (as in `Benchmark/EtherWallet.lean`); `if (c) s;` gets braces.
+
+Verdicts are on the declarations below: a `theorem` is proved, a `def …_obligation` is unknown (its stuck goal and the missing closer or rule in its docstring).
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyBench.Fund
@@ -29,6 +33,7 @@ local instance : InContract := ⟨Fund⟩
 
 open scoped Scoped
 
-theorem spec_withdraw : ⊢ spec!{ withdraw } := by sol_prove
+/-- Unknown: after save then pay(msg.sender, share), the cleared entry, the debit against oldNet and the mapping frame stay open; mapping-frame and snapshot closure missing (cf. Escrow.withdraw), pay ledger rule missing. A caller that is the contract itself pays itself and books nothing, so the net clause may fail there. -/
+def withdraw_obligation : Fml Fund [] := spec!{ withdraw }
 
 end Solidity.Examples.Benchmark.SolkeyBench.Fund
