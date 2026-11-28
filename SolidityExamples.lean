@@ -244,6 +244,7 @@ import Solidity.Examples.ElabTotal.Guard
 import Solidity.Examples.ElabTotal.HashCongruence
 import Solidity.Examples.ElabTotal.Lower
 import Solidity.Examples.ElabTotal.Measure
+import Solidity.Examples.ElabTotal.StmtCongruence
 import Solidity.Examples.ElabTotal.Stmts
 import Solidity.Examples.ElabTotal.Values
 import Solidity.Examples.ExactReduction
