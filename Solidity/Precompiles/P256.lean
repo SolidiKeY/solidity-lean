@@ -77,7 +77,7 @@ def p256Verify (d : Bytes) : Option Bytes :=
 
 theorem p256Verify_isSome (d : Bytes) : (p256Verify d).isSome := rfl
 
-/-! ## Vectors (signed by `cryptography`, run by Osaka's execution specification) -/
+/-! ## Vectors -/
 
 #guard p256Verify (ofHex "bc691003939b33f22ac89afc39417969b3240c6fba15b987c3e9a576cdb15b0b93a3a1686593b7b992cae7fc2dd19983412beb4ff1c7c7d4a8fdc719a0de44c7ebfafd96902a95743fcfbd59f10fffdaae2cc7dc3af7a5a60dc655a3639802c9471c3e758c4904285bba7e53118ed0f524adeb0757d25bd2f8e7b0d76dfa714cdd520f7aca8a8b917acc37f51de8f0c9bbe3ad858382e702dc25a12d09f7a858") == some (ofHex "0000000000000000000000000000000000000000000000000000000000000001")
 #guard gas (ofHex "bc691003939b33f22ac89afc39417969b3240c6fba15b987c3e9a576cdb15b0b93a3a1686593b7b992cae7fc2dd19983412beb4ff1c7c7d4a8fdc719a0de44c7ebfafd96902a95743fcfbd59f10fffdaae2cc7dc3af7a5a60dc655a3639802c9471c3e758c4904285bba7e53118ed0f524adeb0757d25bd2f8e7b0d76dfa714cdd520f7aca8a8b917acc37f51de8f0c9bbe3ad858382e702dc25a12d09f7a858") == 6900

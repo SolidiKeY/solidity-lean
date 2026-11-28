@@ -74,7 +74,7 @@ theorem mapping_save {K : PrimTy} {V : Ty} {entries : SMap K V} {d new : SVal V}
       intro x hx hy
       exact occ_keys_disjoint (fun he => eq (keyWord_inj he)) hx hy
 
-/-- One mapping step composes an arbitrary already-proved typed path save. -/
+/-- One mapping step composes an arbitrary typed path save. -/
 theorem mapping_path_source_save {K : PrimTy} {V U : Ty} (entries : SMap K V)
     (d changed : SVal V) (k : K.Denote) (p : Path V U) (new : SVal U)
     (inner : ((Semantics.lookupBy k entries.toList).getD d).save p new = some changed) :

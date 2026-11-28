@@ -167,6 +167,14 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Algorithms/Sum.lean` | Array prefix sum; exact fold target retained pending specification lowering. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/DataStructures/BitMap.lean` | OpenZeppelin bitmap set; bucket frames proved, membership after set/unset unknown (bitwise laws). |
+| `Examples/Benchmark/DataStructures/EnumerableSet.lean` | OpenZeppelin swap-and-pop set with inverse-index invariant; contains proved, add/remove unknown. |
+| `Examples/Benchmark/DataStructures/LinkedList.lean` | Mapping-linked list insert/remove link consistency; node clearing proved, full specs unknown. |
+| `Examples/Benchmark/DataStructures/Queue.lean` | OpenZeppelin two-index queue; front and slot components proved, int128 index advance unknown. |
+| `Examples/Benchmark/DataStructures/RingBuffer.lean` | OpenZeppelin fixed-size circular buffer; push, count and last proved. |
+| `Examples/Benchmark/DataStructures/Stack.lean` | Storage-array stack; top and length/top components proved, element frames unknown. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/Defi/ConstantProduct.lean` | Uniswap v2 zero-fee reserve kernel: `swap` proved by `sol_prove`, including exact reserve effects and nondecreasing k. No external token/callback claim. |
 | `Examples/Benchmark/Defi/Escrow.lean` | OpenZeppelin v4.9.6 fixed-owner escrow: constructor and `depositsOf` proved. `deposit` unknown: payable old-storage snapshot plus mapping save does not close credit equality/owner frame. `withdraw` unknown: cleared credit, owner frame and oldNet debit/self-payment remain after save/pay; mapping-frame/ledger snapshot closure missing. |
 | `Examples/Benchmark/Defi/FixedRateVault.lean` | EIP-4626-inspired 1:1 native-asset accounting example (not the ERC4626 API): `withdraw` and deposit/withdraw round trip proved. `deposit` unknown: shares/assets/supply = old values + msg.value after payable snapshot and three saves; snapshot normalization across mapping/scalar saves missing. |
@@ -188,6 +196,12 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/SolkeyGames/KingOfEther.lean` | solkey's pull-payment King of the Ether (DoS fix): `claimThrone` proved by `sol_prove`, including the dethroned king's credit and the payable booking. `withdraw` refuted (`¬ ⊢`, kernel-checked): the contract calling itself with a credit pays itself and books nothing, so the `net(msg.sender)` clause fails. |
+| `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
+| `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |
+| `Examples/Benchmark/SolkeyGames/SendEther.lean` | solkey's three ways to send ether: `sendViaTransfer`, `sendViaSend` and `sendViaCall` each refuted by `sol_refute`: with `_to == msg.sender == this` the booked `msg.value` is never paid out, so the self-payment clauses fail. |
 | `Examples/Benchmark/Tokens/ERC20.lean` | Pinned Solidity by Example ERC20. Full `transfer`, `_mint`, `_burn`, `mint`, `burn` clauses/frames proved. `approve`, `transferFrom`: unknown guarded two-key allowance frames. Supply equals finite-support balance sum: unknown sum syntax/update laws; approve normal-termination diamond proved; six other no-overflow diamonds unknown at checked-update definedness/range propagation. |
 | `Examples/Benchmark/Tokens/ERC721.lean` | Pinned Solidity by Example non-safe ERC721 core. `ownerOf`, `balanceOf`, `approve`, `getApproved`, `transferFrom`, `_mint`, `_burn` proved, including unique owner slot, transfer approval clearing and frames. `setApprovalForAll`: unknown two-key frame; `_isApprovedOrOwner`: unknown short-circuit Boolean equivalence. Aggregate owner-count invariant and safe receiver callbacks unproved. |
 | `Examples/Benchmark/Tokens/ERC1155.lean` | Pinned OpenZeppelin 5.0.2 callback-free `_update` core. `balanceOf`, `isApprovedForAll` proved. `_setApprovalForAll`, `setApprovalForAll`: unknown two-key frames. `_update`: unknown memory length lower bound, quantified snapshot frame and filtered prefix-sum invariant/update laws (duplicates, self-transfer and zero-address cases retained). |
@@ -199,6 +213,11 @@ At the root, the notation's own tests:
 | Module | Its examples |
 |---|---|
 | `Examples/FrontendValidation/SolcJson.lean` | Accepted and rejected literal controls for `J.get`, `J.opt`, `J.str`, `J.arr`, `J.str?`, `J.arr?`, `J.ref?`, `J.id?`, `J.hasOperatorFunction`, `J.operatorFunction?`, and `J.typeRef?`. |
+| `Examples/FrontendValidation/SolcJson/Ir.lean` | Literal accepting/rejecting controls for IR channel selection, source/contract paths, lookup, and extracted text. |
+| `Examples/FrontendValidation/SolcJson/CallMetadata.lean` | Literal profile, call-shape, static-target, location and attachment controls; structural metadata only. |
+| `Examples/FrontendValidation/SolcJson/YulIngress.lean` | Literal JSON grammar, metadata, documentation safety and closed/scoped ingress controls; no source or execution authentication. |
+| `Examples/FrontendValidation/SolcJson/BodyHelpers.lean` | Literal rational, expression, tuple, storage-reference, aggregate and declaration-owner acceptance/refusal controls. |
+| `Examples/FrontendValidation/SolcJson/YulReferences.lean` | Literal declaration IDs, namespace selection, shadowing, source spans, occurrence collection and unique reference coverage controls. |
 | `Examples/FrontendValidation/SolcValidation.lean` | Inline accepted and rejected controls for the frozen solc literal, lexer, parser, data lookup, structural and renaming validators. |
 | `Examples/DecisionResidue.lean` | M7-next: residue members (halting `||` APF guard valid and false; VA1 mapping-field and normalization-budget labels; a leaf every hash try refuses), witness controls (in-target non-residue feature fixtures of earlier milestones answered through `DecisionTheorem'`; the answering route is not pinned) and the negative control (a valid and a false residue leaf, neither claimed). |
 
@@ -208,6 +227,9 @@ At the root, the notation's own tests:
 |---|---|
 | `Examples/Tactics/OpenLoops/RowsNine.lean` | Existing `binomialRowsNine` obligation, checked with chunk 128 and preserved in the non-default H109 slow library and CI/full/lane-end/axiom-audit closure. Scoped CI acceptance uses 600 s; the 300 s default/VM STOP remains. |
 | `Examples/Tactics/OpenLoops/RowsNine/{Checkpoint,Stage1,Stage2,Stage3,Finish}.lean` | Kernel-checked continuation checkpoints for the unchanged nine-row binomial walk; 128-step chunks, the original aggregate iteration allowance, and one slow-library time cap per module. |
+| `Examples/RedTeam/Statements/InFragmentNames.lean` | Witness: `Shrink.Lowering.InFragment` (premise of `loweringBySimulation`/`V2`) is name matching alone; a compilation with no entries is `Accepted`. |
+| `Examples/RedTeam/Statements/BackendTotalZeroBound.lean` | Witness: `compilerTotal`'s conclusion holds at array bound `L = 0` for a dynamic-array contract while every input is refused. |
+| `Examples/RedTeam/Statements/GoalPinsUnsat.lean` | Witness: `goalPinsCorrect` is false as stated (`Laws.check_exact` parses as `(Observed → check = out) ↔ CheckGraph`); also the pin graph of a folded definition ignores its body. |
 | `Examples/RedTeam/Trust/ExternBoundary.lean` | Controlled kernel/native disagreement exposing the source trust lint's missing external-implementation inventory; no false theorem. Companion Node test pins the weak lint and stronger census boundaries. |
 | `Examples/RedTeam/Trust/HeadlineAxioms.lean` | Exact registered headline/endpoint type checks and transitive axiom queries; intrinsic model and instruction-list boundary only. |
 | `Examples/Panic/Origins.lean` | Typed panic-origin regressions V1 erases the cause of a panic. |
