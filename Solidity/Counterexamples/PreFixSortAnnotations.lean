@@ -1,13 +1,7 @@
 import Solidity.SortCheck.Faithfulness
 
 /-!
-# The `12e72a1b4b` sort bug, caught
-
-solkey commit `12e72a1b4b` ("removed find<int> to be more generic") replaced
-`find<[int]>` reads that values of other sorts could reach.  The rows it
-changed are kept as data (`TacletAnnotations.preFixTacletReadAnns`); this
-module shows the faithfulness layer refutes them, so a table updated to
-match the buggy taclets would not build against `Faithfulness.lean`:
+# Sort annotation counterexamples
 
 - `preFix_rootCopy_not_faithful` — the pre-fix `storageRootWriteCopySource`
   (`find<[int]>` on the copy source) at `alice = bob;`: the rule reads a
@@ -15,14 +9,6 @@ match the buggy taclets would not build against `Faithfulness.lean`:
 - `preFix_readSelect_not_faithful` — the pre-fix varcond-less
   `storageRootReadSelect` (`find<[int]>`) at `x = flag;` on a `bool` root.
 
-The typed syntax moves the old witness.  Before, the bug was `flag = flag2`
-over two `bool` roots, matched by the copy rule; here a `bool` is written
-by value (`Src.val`, `storageRootWriteStore`), and only a reference type
-reaches the copy rule.  So the pre-fix *struct* twin,
-`storageRootWriteCopySource_struct` (`find<[Struct]>`), which the fix deleted
-as half of a mis-split pair, is faithful at every statement the copy rule
-fires on (`preFix_rootCopyStruct_faithful`): the split the pre-fix pair
-attempted is the one the syntax now makes.
 -/
 
 namespace Solidity
@@ -37,7 +23,7 @@ open SortFaithfulness
 /-- Two `Person` roots. -/
 def People : Contract := contract!{ Person alice; Person bob; }
 
-/-- Two `bool` roots, the fix commit's `storageBoolRootCopy()` test. -/
+/-- Two `bool` roots. -/
 def Flags : Contract := contract!{ bool flag; bool flag2; }
 
 /-- A `Person` is a `Struct` node, never an `int`. -/

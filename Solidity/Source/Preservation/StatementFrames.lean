@@ -1,6 +1,5 @@
 import Solidity.Source.Preservation.Expressions
 
-/-! Actual scope and return-slot operations for the statement Hoare induction. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {H : HeapTy}
