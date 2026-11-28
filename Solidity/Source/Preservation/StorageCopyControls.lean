@@ -1,9 +1,5 @@
 import Solidity.Source.Preservation.AllocationControls
 
-/-! A real storage-reference copy at distinct source/destination paths.
-Nested arrays force allocation of the copied inner memory object. Flat byte
-copies alone would not witness allocation in `storeVal`'s storage branch.
--/
 namespace Solidity.Source.Preservation.StorageCopyControls
 open EM
 
@@ -15,6 +11,8 @@ def E : Env := unit.env
 def frame := AllocationControls.frame
 def src : SPath := ⟨⟨some "C", "src"⟩, []⟩
 def dst : SPath := ⟨⟨some "C", "dst"⟩, []⟩
+
+example : src ≠ dst := by decide
 def arrayTy : STy := .array .storage (.array .storage (.int IntTy.u256) none) none
 def sourceRef : Val E.layout arrayTy := .storRef rfl src
 
