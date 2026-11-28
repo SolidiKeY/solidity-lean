@@ -176,6 +176,11 @@ import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.FixedArrayRoot
 import Solidity.Examples.FreshNamesLaw
 import Solidity.Examples.FrontendValidation.SolcJson
+import Solidity.Examples.FrontendValidation.SolcJson.BodyHelpers
+import Solidity.Examples.FrontendValidation.SolcJson.CallMetadata
+import Solidity.Examples.FrontendValidation.SolcJson.Ir
+import Solidity.Examples.FrontendValidation.SolcJson.YulIngress
+import Solidity.Examples.FrontendValidation.SolcJson.YulReferences
 import Solidity.Examples.FrontendValidation.SolcValidation
 import Solidity.Examples.Goals
 import Solidity.Examples.Goals.AuditData
