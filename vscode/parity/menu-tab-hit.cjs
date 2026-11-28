@@ -24,4 +24,19 @@ function assertHit(probe,anchor,point,owner){
  assert.equal(probe.styleChain[0].visibility,'visible','Hidden tab visibility');
  require('./menu-tab-ownership.cjs').assertDOM(probe,owner);
 }
-module.exports={observe,assertHit};
+const version='tab-hit-endpoint';
+// Replay recorded endpoints only; this does not authenticate input or raster output.
+function assertAdmission(admission,binding,owner,before,after){
+ assert.ok(admission&&typeof admission==='object'&&!Array.isArray(admission),'Missing tab-hit admission');
+ assert.deepEqual(Reflect.ownKeys(admission).sort(),['anchorRecord','hitRecord','version']);
+ assert.equal(admission.version,version,'Unknown tab-hit admission version');
+ const {anchorRecord:a,hitRecord:h}=admission;
+ assert.equal(a?.kind,'tab');assert.equal(a.status,'admitted');
+ assert.deepEqual(a.binding,binding,'Foreign tab anchor binding');assert.deepEqual(h?.binding,binding,'Foreign tab hit binding');
+ assert.deepEqual(a.point,require('./menu-lifecycle.cjs').menuAnchorPoint(a.anchor,binding.uri),'Tab anchor point changed');
+ require('./menu-tab-ownership.cjs').assertDOM(a.anchor,owner);
+ assertHit(h.probe,a.anchor,a.point,owner);
+ assert.deepEqual(h.probe.rendererLifetime,before?.rendererLifetime,'Tab before lifetime changed');
+ assert.deepEqual(h.probe.rendererLifetime,after?.rendererLifetime,'Tab after lifetime changed');
+}
+module.exports={observe,assertHit,version,assertAdmission};
