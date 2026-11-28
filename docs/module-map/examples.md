@@ -221,6 +221,15 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Patterns/TwoStepOwnership.lean` | Compound Unitroller pending-admin handover with error codes: all three function specifications proved. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/SolkeyBench/AccessRestriction.lean` | solkey 50a1469 `benchmark/AccessRestriction.sol`, modifiers inlined: `changeOwner` proved. `disown` unknown: owner = 0 after `delAt` (delete) not closed. `forceOwnerChange` unknown: `x & 0 == 1` branch not refuted (bitwise-and closer missing) and refund needs the pay ledger rule. |
+| `Examples/Benchmark/SolkeyBench/Fund.lean` | solkey 50a1469 `benchmark/Fund.sol`: `withdraw` unknown: cleared share, oldNet debit and mapping frame after save/pay; mapping-frame closure and pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/SendContract.lean` | solkey 50a1469 `benchmark/SendContract.sol`: constructor proved. `becomeRichest` unknown: net debit of the old richest after `pay`; pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/SendingEther.lean` | solkey 50a1469 `benchmark/SendingEther.sol` (`SendEther` only): `sendViaTransfer`, `sendViaSend`, `sendViaCall` unknown: net clauses after `pay(_to, msg.value)`; pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/SimpleAuction.lean` | solkey 50a1469 `benchmark/SimpleAuction.sol` (solkey variant; distinct from Governance/EnglishAuction): constructor proved. `bid`, `withdraw` unknown: mapping/snapshot closure (and pay for withdraw). `auctionEnd` unknown: pay ledger rule missing. |
+| `Examples/Benchmark/SolkeyBench/Todos.lean` | solkey 50a1469 `benchmark/Todos.sol`: `toggleCompleted` proved (struct array field toggle, length frame). `get`, `updateText` carry no clauses. |
+| `Examples/Benchmark/SolkeyBench/WithdrawalContract.lean` | solkey 50a1469 `benchmark/WithdrawalContract.sol`: constructor proved. `becomeRichest` unknown: credit to old richest and mapping frame; `withdraw` unknown: as Fund. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/SolkeyGames/KingOfEther.lean` | solkey's pull-payment King of the Ether (DoS fix): `claimThrone` proved by `sol_prove`, including the dethroned king's credit and the payable booking. `withdraw` refuted (`¬ ⊢`, kernel-checked): the contract calling itself with a credit pays itself and books nothing, so the `net(msg.sender)` clause fails. |
 | `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
 | `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |

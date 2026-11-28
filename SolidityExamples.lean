@@ -69,6 +69,13 @@ import Solidity.Examples.Benchmark.Patterns.TwoStepOwnership
 import Solidity.Examples.Benchmark.Patterns.Withdrawal
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.SolkeyBench.AccessRestriction
+import Solidity.Examples.Benchmark.SolkeyBench.Fund
+import Solidity.Examples.Benchmark.SolkeyBench.SendContract
+import Solidity.Examples.Benchmark.SolkeyBench.SendingEther
+import Solidity.Examples.Benchmark.SolkeyBench.SimpleAuction
+import Solidity.Examples.Benchmark.SolkeyBench.Todos
+import Solidity.Examples.Benchmark.SolkeyBench.WithdrawalContract
 import Solidity.Examples.Benchmark.SolkeyGames.EtherGame
 import Solidity.Examples.Benchmark.SolkeyGames.EtherStore
 import Solidity.Examples.Benchmark.SolkeyGames.KingOfEther
