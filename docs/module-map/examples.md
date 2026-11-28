@@ -324,11 +324,13 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Tokens/ERC721Burnable.lean` | Pinned OpenZeppelin 4.9.6 authorized NFT burn with owner/approval deletion, former-owner count and full frame; unchecked zero-count case retained. Full burn obligation unknown at guarded wrapped-subtraction/old-owner normalization; owner/approval-clearing component proved separately. |
 | Module | Its examples |
 |---|---|
-| `Examples/Summaries/Vault.lean` | Vault arithmetic helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/Token.lean` | Two-slot token transfer and allowance caller; storage-writing symbolic summary unsupported; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/CallChain.lean` | Three call edges and repeated intermediate helper; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/Library.lean` | Recursion-free library-style helper used twice per caller; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
-| `Examples/Summaries/Pricing.lean` | Shared pricing helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Vault.lean` | Both callers and the bounded diamond result consume the cached typed math certificate. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Token.lean` | Both transfer callers consume the cached storage-writing certificate, retaining the allowance frame and bounded diamond result. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Library.lean` | Both recursion-free library-style callers consume the same cached increment certificate twice. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Pricing.lean` | Both quote callers and the bounded diamond result consume one cached typed certificate. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/CallChain.lean` | The original three-edge value chain and repeated intermediate call consume the cached leaf certificate; intermediate wrappers are expanded. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/StorageChain.lean` | Three call edges with seed, middle and outer each certified once; callers reuse the cached outer certificate once/twice, and leaf edits invalidate its transitive dependency key. Actual unrelated/callee source edits test cache hit/miss. |
+| `Examples/Summaries/Support.lean` | Example-only typed certification, semantic wrapper expansion, bounded certificate-use-count checks, cache evidence retrieval and actual source-edit controls. Fixture serialization and edited-contract transport are not asserted. |
 | `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `scripts/trust/executable-goal-replay.lean` in Lean CI. |
 | `Examples/ExecutableRequestData.lean` | Shared synthetic request and nondefault raw contract data for quotation and retained-candidate examples; not source admission. |
 | Module | Its examples |
