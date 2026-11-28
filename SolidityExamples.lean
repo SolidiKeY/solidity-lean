@@ -74,6 +74,12 @@ import Solidity.Examples.Benchmark.SolkeyGames.EtherStore
 import Solidity.Examples.Benchmark.SolkeyGames.KingOfEther
 import Solidity.Examples.Benchmark.SolkeyGames.SendEther
 import Solidity.Examples.Benchmark.Syntax
+import Solidity.Examples.Benchmark.TokenExtensions.AllowanceDelta
+import Solidity.Examples.Benchmark.TokenExtensions.Burnable
+import Solidity.Examples.Benchmark.TokenExtensions.CappedSupply
+import Solidity.Examples.Benchmark.TokenExtensions.FeeOnTransfer
+import Solidity.Examples.Benchmark.TokenExtensions.RoleMint
+import Solidity.Examples.Benchmark.TokenExtensions.VestingWallet
 import Solidity.Examples.Benchmark.Tokens.ERC1155
 import Solidity.Examples.Benchmark.Tokens.ERC20
 import Solidity.Examples.Benchmark.Tokens.ERC20Burnable
