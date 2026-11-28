@@ -10,8 +10,8 @@ for representable boolean fields and fixed arrays. For
 `b` at slot 1 and `tail` at slot 4. This is an external-layout mismatch,
 not a refutation of the full-word arithmetic theorems.
 
-Culprit: Solidity/Semantics/Storage/TypeLayout.lean:12 (sizeF primitive
-fallback) and :29 (offsetIn); Solidity/Evm/Layout.lean:6 claims solc layout.
+Culprit: Solidity/Semantics/Storage/TypeLayout.lean:16 (sizeF primitive
+fallback) and :25 (offsetIn); Solidity/Evm/Layout.lean:10 claims solc layout.
 Suggested fix: track byte widths and offsets, pack booleans, and round arrays
 and structs to slot boundaries, or restrict external agreement to unpacked
 layouts. No production definition is changed by this witness.
