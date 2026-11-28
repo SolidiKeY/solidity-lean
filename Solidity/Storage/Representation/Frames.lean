@@ -1,6 +1,5 @@
 import Solidity.Storage.Representation.Reads
 
-/-! Representation is local to the existing `Occ` footprint. -/
 namespace Solidity.Storage.Representation
 
 private theorem fields_head_occ {t : STy} {ts : List STy} {l x : Loc}
@@ -113,7 +112,6 @@ private theorem local_econs {E : Ty} (v : SVal E) (rest : List (SVal E))
     (ih w' (fun x hx => agree x (elements_head_occ hx)))
     (it w' (fun x hx => agree x (elements_tail_occ hx)))
 
-/-- Changing no occupied word preserves a represented value. -/
 theorem ValueRep.congr {T : Ty} {v : SVal T} {t : STy} {l : Loc} {w w' : Store}
     (h : ValueRep v t l w) (agree : ∀ x, Occ t l x → w' x = w x) : ValueRep v t l w' :=
   ValueRep.rec (motive_1 := fun v t l w _ => VLocal v t l w)
@@ -140,7 +138,6 @@ theorem ElementsRep.congr {E : Ty} {vs : List (SVal E)} {t : STy} {l : Loc} {w w
     local_scalar local_struct local_fixed local_array local_mapping
     local_fnil local_fcons local_enil local_econs h w' agree
 
-/-- A write outside a subtree's occupied terms preserves its representation. -/
 theorem ValueRep.frame {T : Ty} {v : SVal T} {t : STy} {l x : Loc} {w : Store}
     (h : ValueRep v t l w) (outside : ¬ Occ t l x) (new : Semantics.Word) :
     ValueRep v t l (write w x new) := by
@@ -150,14 +147,12 @@ theorem ValueRep.frame {T : Ty} {v : SVal T} {t : STy} {l x : Loc} {w : Store}
   intro eq
   exact outside (eq ▸ hy)
 
-/-- Different mapping keys frame every represented nested value. -/
 theorem mapping_entry_frame {T : Ty} {v : SVal T} {t u : STy} {l x : Loc}
     {k k' : Nat} {w : Store} (h : ValueRep v t (.hash k l 0) w)
     (different : k ≠ k') (touched : Occ u (.hash k' l 0) x) (new : Semantics.Word) :
     ValueRep v t (.hash k l 0) (write w x new) :=
   h.frame (fun hx => occ_keys_disjoint different hx touched) new
 
-/-- A header write cannot alter any represented nested element value. -/
 theorem array_element_header_frame {T : Ty} {v : SVal T} {t : STy} {l : Loc} {i : Nat}
     {w : Store} (h : ValueRep v t (.data l (i * t.size)) w) (new : Semantics.Word) :
     ValueRep v t (.data l (i * t.size)) (write w l new) :=

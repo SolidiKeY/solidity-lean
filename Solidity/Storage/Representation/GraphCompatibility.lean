@@ -1,12 +1,8 @@
 import Solidity.Storage.Representation.GraphRepresentation
 import Solidity.Semantics.RecursiveStorage.Legacy
 
-/-! Compatibility with finite intrinsic legacy/graph layouts.
-The ordinary and graph sources remain independently defined; these are
-representation bridge theorems, not new source semantics. -/
 namespace Solidity.Storage.Representation.Graph
 
-/-- Existing finite legacy layout evidence and TypeRep choose the same sizes. -/
 theorem inlineSize_legacy {n : Nat} {G : TypeGraph.Schema n} {A : Solidity.Ty}
     {B : TypeGraph.Ty n} (layout : TypeGraph.Legacy.Layout G A B) {t : STy}
     (shape : TypeRep A t) : t.size = inlineSize G B := by
@@ -43,7 +39,6 @@ theorem inlineSize_legacy {n : Nat} {G : TypeGraph.Schema n} {A : Solidity.Ty}
       rw [ih h, it r]
       rfl
 
-/-- Mapping-only path compatibility reuses the intrinsic KeyPath. -/
 theorem keypath_supported {n : Nat} {G : TypeGraph.Schema n}
     {A U : Solidity.Ty} {B V : TypeGraph.Ty n}
     {layout : TypeGraph.Legacy.Layout G A B} {leaf : TypeGraph.Legacy.Layout G U V}
@@ -52,8 +47,6 @@ theorem keypath_supported {n : Nat} {G : TypeGraph.Schema n}
   | nil => exact True.intro
   | key K k rest ih => exact ⟨True.intro, ih⟩
 
-/-- Every typed mapping-chain read reaches a represented subtree,
-at the graph path's same symbolic Loc, with no chain-length cutoff. -/
 theorem keypath_subvalue_rep {n : Nat} {G : TypeGraph.Schema n}
     {A U : Solidity.Ty} {B V : TypeGraph.Ty n}
     {layout : TypeGraph.Legacy.Layout G A B} {leaf : TypeGraph.Legacy.Layout G U V}
@@ -81,8 +74,6 @@ theorem keypath_subvalue_rep {n : Nat} {G : TypeGraph.Schema n}
             simp only [h, Option.getD_none, Option.getD_some] at found ⊢ <;> exact found
         exact ih selected value (values k) selectedFound
 
-/-- Existing whole legacy mapping representation extends to a graph word
-observation through the semantic compatibility interface. -/
 theorem keypath_word_represented {n : Nat} {G : TypeGraph.Schema n} {A : Solidity.Ty}
     {B : TypeGraph.Ty n} {layout : TypeGraph.Legacy.Layout G A B} {p : PrimTy}
     (path : TypeGraph.Legacy.KeyPath layout (TypeGraph.Legacy.Layout.prim p))
@@ -98,8 +89,6 @@ theorem keypath_word_represented {n : Nat} {G : TypeGraph.Schema n} {A : Solidit
     (Represented.prefix path.graph graphFound (keypath_supported path)
       (represented_scalar (G := G) value leafRep))
 
-/-- A legacy represented array provides a graph header with exact length and
-bounded retained extent; the existing bridge's extent cap never adds slots. -/
 theorem legacy_array_header {n : Nat} {G : TypeGraph.Schema n} {E : Solidity.Ty}
     {F : TypeGraph.Ty n} (elem : TypeGraph.Legacy.Layout G E F)
     {count : Nat} {vs : SVec E count} {sh : SList E} {hn : count < 2 ^ 256}
@@ -118,7 +107,6 @@ theorem legacy_array_header {n : Nat} {G : TypeGraph.Schema n} {E : Solidity.Ty}
       change some (lengthWord count hn) = some value at observed
       exact (Subtype.ext header).trans (Option.some.inj observed)
 
-/-- Mapping-chain array-header representation also crosses the bridge. -/
 theorem keypath_header_represented {n : Nat} {G : TypeGraph.Schema n} {A E : Solidity.Ty}
     {B F : TypeGraph.Ty n} {layout : TypeGraph.Legacy.Layout G A B}
     (elem : TypeGraph.Legacy.Layout G E F)
