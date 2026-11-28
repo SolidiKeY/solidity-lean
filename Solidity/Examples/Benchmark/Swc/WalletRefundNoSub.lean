@@ -16,7 +16,8 @@ refund() is called. An attacker can pay in a small amount of Ether and call
 refund() repeatedly to empty the contract."
 
 Changes: `this.balance` is spelled `address(this).balance`; `assert` is
-`require` (both revert; the model has no distinct panic); comments dropped.
+`require` (both revert; the model has no distinct panic); comments and the
+constructor's `public` dropped.
 The 0.4 arithmetic is kept as written: each `+=`/`-=` is guarded so that
 checked and wrapping arithmetic agree.  The clauses are the ones the fixed
 `wallet_01_ok.sol` (`Swc/WalletOk.lean`) is held to.

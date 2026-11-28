@@ -10,7 +10,7 @@ import Solidity.Calculus.Closers
 Source: SWC registry, `integer_overflow_minimal_fixed.sol`, pinned revision:
 <https://github.com/SmartContractSecurity/SWC-registry/blob/1b6227074ecd180b374e4844153afdda0332f979/entries/docs/SWC-101.md#integer_overflow_minimal_fixedsol>.
 
-Changes: the initializer `count = 1` is dropped, as in the vulnerable
+Changes: the initializer `count = 1` and comments are dropped, as in the vulnerable
 module (`Swc/IntegerOverflowMinimal.lean`), which carries the same clause.
 SafeMath's `sub` is kept as an internal function, declared before
 `run` (`contract!` resolves a call against earlier functions); inside it `a - b` is the

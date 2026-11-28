@@ -14,7 +14,8 @@ Source: SWC registry, `multiowned_vulnerable.sol`, pinned revision:
 The access modifier `onlyOwner` is missing on `newOwner` ("Note that the
 "onlyOwner" modifier is missing here."), so anyone makes anyone an owner.
 
-Changes: address zero is spelled `0`; NatSpec comments dropped; the test
+Changes: address zero is spelled `0`; NatSpec comments and the
+constructor's `public` dropped; the test
 harness `TestContract is MultiOwnable` (an `onlyOwner` `withdrawAll` and an
 empty payable fallback) is not modelled: its guard is the modifier proved in
 `deleteOwner`.  The natural clauses state that only an owner (a sender with a

@@ -39,7 +39,7 @@ private def initialStore : Storage IntegerOverflowMinimal :=
   .cons (.prim (uintOfNat 1)) .nil
 
 /-- Refuted: from `count = 1`, `run(2)` returns with `count = 2^256 - 1`,
-not `1 - 2 = -1`. -/
+while the clause's `1 - 2` underflows: the equation is false. -/
 example :
     ((Prog.run (State.ofStorage initialStore)
       (sol{ run(2); uint c = count; })).toOption.map

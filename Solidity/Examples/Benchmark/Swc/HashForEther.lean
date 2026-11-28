@@ -14,9 +14,9 @@ Source: SWC registry, `visibility_not_set.sol`, pinned revision:
 Under 0.4 a function without a visibility specifier is `public`, so anyone
 calls `_sendWinnings` and is paid without the winner check.
 
-Changes: the implicit `public` is written (0.8 requires it); `this.balance`
-is `address(this).balance` and `msg.sender.transfer` is
-`payable(msg.sender).transfer`; `_sendWinnings` is declared first
+Changes: the implicit `public` is written; `this.balance` is
+`address(this).balance` and `msg.sender.transfer` is
+`payable(msg.sender).transfer` (the 0.4 `uint32(msg.sender)` is kept); `_sendWinnings` is declared first
 (`contract!` resolves a call against earlier functions).  The natural clause,
 on every public function: it returns only to a winner, `uint32(msg.sender)
 == 0`, written `msg.sender % 4294967296 == 0` (the clause grammar has no
@@ -47,7 +47,7 @@ theorem spec_withdrawWinnings : ⊢ spec!{ withdrawWinnings } := by
 def sendWinnings_obligation : Fml HashForEther [] := spec!{ _sendWinnings }
 
 /-- Refuted: account `1` (`uint32(1) == 1`, not a winner) calls
-`_sendWinnings()` on a contract holding `5` and the call returns: it is paid. -/
+`_sendWinnings()` on a contract holding `5` and the call returns, unguarded. -/
 example :
     (Prog.run { State.ofStorage (show Storage HashForEther from .nil) with
         selfBalance := uintOfNat 5,
