@@ -14,6 +14,13 @@ import Solidity.Examples.Benchmark.Algorithms.LinearSearch
 import Solidity.Examples.Benchmark.Algorithms.Maximum
 import Solidity.Examples.Benchmark.Algorithms.Reverse
 import Solidity.Examples.Benchmark.Algorithms.Sum
+import Solidity.Examples.Benchmark.Bytes.ByteAt
+import Solidity.Examples.Benchmark.Bytes.Bytes32Cast
+import Solidity.Examples.Benchmark.Bytes.ConcatLength
+import Solidity.Examples.Benchmark.Bytes.EncodePackedLength
+import Solidity.Examples.Benchmark.Bytes.HexDigit
+import Solidity.Examples.Benchmark.Bytes.SliceCopy
+import Solidity.Examples.Benchmark.Bytes.StringEquality
 import Solidity.Examples.Benchmark.Coin
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.Defi.ConstantProduct
