@@ -1,7 +1,7 @@
 import Solidity.Storage.Representation.Arrays
 import Solidity.Theory.Typed.Obs.Values
 
-/-! Finite touched-set transport through the committed `Loc.word`.
+/-! Finite touched-set transport through the `Loc.word`.
 All hash/region conditions below are exactly the existing per-run conditions.
 There is no injectivity claim outside the explicitly covered touched list. -/
 namespace Solidity.Storage.Representation

@@ -1,10 +1,5 @@
 import Solidity.Source.WellTyped
 
-/-! Heap-growing frame preservation for the actual `EM.sub`. The callee's
-preservation theorem remains an explicit premise; this is the restoration
-bridge, not an assumption that all interpreter computations preserve memory.
-Caller locals are restored on success and every halt, including revert/stuck.
--/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {Γ Δ : RCtx} {α : Type}
@@ -21,6 +16,14 @@ theorem sub_locals (l : Locals E.layout Γ) (s : St E)
   rcases h : m.run (l', s) with ⟨r, ⟨l'', s'⟩⟩
   have h' : m (l', s) = (r, (l'', s')) := h
   cases r <;> simp only [ExceptT.run, ExceptT.mk, h']
+
+example {E : Env} {Γ Δ : RCtx} {α : Type} (l : Locals E.layout Γ) (s : St E)
+    (l' : Locals E.layout Δ) (m : EM E Δ α) :
+    ((sub l' m : EM E Γ (α × Locals E.layout Δ)).run (l,s)).2.2 = (m.run (l',s)).2.2 := by
+  unfold EM.sub
+  rcases h : m.run (l',s) with ⟨r,⟨l'',s'⟩⟩
+  have h' : m (l',s) = (r,(l'',s')) := h
+  cases r <;> simp only [ExceptT.run,ExceptT.mk,h']
 
 theorem sub_mem {H : HeapTy} (l' : Locals E.layout Δ) (m : EM E Δ α)
     (hm : ∀ H', Hoare (MemOK E H') m (fun _ y => MemOK E H' y)

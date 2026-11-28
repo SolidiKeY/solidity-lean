@@ -30,7 +30,6 @@ Prague's BLS12-381 operations, as Osaka's execution specification
 - **Gas** is a function of the length alone; the MSM discount tables are
   EIP-2537's.
 
-The `#guard`s are vectors computed by the execution specification itself.
 -/
 
 namespace Solidity.Precompiles.Bls12381
@@ -50,10 +49,10 @@ abbrev F2 := Fp2 p
 
 def f2 (c : Nat × Nat) : F2 := ⟨Fin.ofNat p c.1, Fin.ofNat p c.2⟩
 
-/-- `G1`: `y² = x³ + 4`. -/
+/-- `y² = x³ + 4`. -/
 def curve1 : Curve Fp := ⟨0, 4⟩
 
-/-- `G2`'s curve, the M-twist `y² = x³ + 4·(1 + u)`. -/
+/-- curve, the M-twist `y² = x³ + 4·(1 + u)`. -/
 def curve2 : Curve F2 := ⟨FieldOps.zero, ⟨4, 4⟩⟩
 
 /-- `w⁻¹ = w⁵ - w¹¹/2` in `Fp[w] / (w¹² - 2·w⁶ + 2)`. -/
@@ -87,10 +86,10 @@ def decodeFp2 (b : List Nat) : Option F2 := do
   let c₁ ← decodeFp ((b.drop 64).take 64)
   some ⟨c₀, c₁⟩
 
-/-- A decoded `G1` point: on the curve. -/
+/-- A decoded point: on the curve. -/
 abbrev G1 := { P : Pt Fp // curve1.onCurve P = true }
 
-/-- A decoded `G2` point: on the curve. -/
+/-- A decoded point: on the curve. -/
 abbrev G2 := { Q : Pt F2 // curve2.onCurve Q = true }
 
 def decodeG1 (b : List Nat) : Option G1 := do
@@ -105,7 +104,7 @@ def decodeG2 (b : List Nat) : Option G2 := do
   let Q : Pt F2 := if x.re.val = 0 ∧ x.im.val = 0 ∧ y.re.val = 0 ∧ y.im.val = 0 then .inf else .aff x y
   if h : curve2.onCurve Q = true then some ⟨Q, h⟩ else none
 
-/-- A `G1` point that is also in the order-`r` subgroup. -/
+/-- A point that is also in the order-`r` subgroup. -/
 def decodeG1Sub (b : List Nat) : Option G1 := do
   let P ← decodeG1 b
   if curve1.mul r P.1 = .inf then some P else none
@@ -274,7 +273,7 @@ def isoMap {α : Type} [FieldOps α] [DecidableEq α] (xn xd yn yd : List α) (p
   if dx = FieldOps.zero ∨ dy = FieldOps.zero then .inf
   else .aff (poly xn pt.1 * FieldOps.inv dx) (pt.2 * poly yn pt.1 * FieldOps.inv dy)
 
-/-- `G1`'s effective cofactor. -/
+/-- effective cofactor. -/
 def hEff1 : Nat := 0xd201000000010001
 
 def mapToG1 (u : Fp) : Pt Fp :=

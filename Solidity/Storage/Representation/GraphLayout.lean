@@ -67,7 +67,7 @@ theorem inlineSize_node {n : Nat} (G : TypeGraph.Schema n) (i : Fin n) :
     (G.guarded i f hf) (Nat.lt_succ_self _)
 
 /-- Existing typed steps interpreted with the same Loc/add/hash/data formulas.
-Recursors preserve Gate G0; no alternate untyped path language is introduced. -/
+no alternate untyped path language is introduced. -/
 noncomputable def stepLoc {n : Nat} {G : TypeGraph.Schema n} {A B : TypeGraph.Ty n}
     (s : TypeGraph.Step G A B) (l : Loc) : Loc :=
   @TypeGraph.Step.rec n G (fun _ _ _ => Loc → Loc)
