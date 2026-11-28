@@ -1,14 +1,4 @@
-/-!
-# BLS12-381 hash-to-curve constants (RFC 9380, section 8.8)
 
-The isogeny maps of the simplified SWU maps to BLS12-381's `G1` (11-isogeny)
-and `G2` (3-isogeny), their isogenous curves' `A`, `B` (and `G2`'s `Z`), and
-`G2`'s effective cofactor, as data: coefficients lowest degree first, each
-`Fp2` constant `(c₀, c₁)` for `c₀ + c₁·u`.  Extracted from py_ecc 8.0.0
-(`py_ecc/optimized_bls12_381/constants.py`), the library Osaka's execution
-specification maps with; `Solidity/Precompiles/Bls12381.lean` checks the
-maps against that specification's outputs.
--/
 
 namespace Solidity.Precompiles.Bls12381.Iso
 

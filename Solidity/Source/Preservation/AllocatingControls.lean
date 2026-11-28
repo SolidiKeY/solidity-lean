@@ -1,10 +1,6 @@
 import Solidity.Source.Preservation.ReferenceArguments
 import Solidity.Source.Preservation.NewArrayFragmentControls
 
-/-! Inhabited memory-expression and exact-argument witnesses in both source
-pipelines. An alias branch keeps object 0; an allocating branch returns fresh
-object 1. A later argument allocation keeps an earlier argument reference valid.
-These are source preservation controls, not compiler/EVM observations. -/
 namespace Solidity.Source.Preservation.AllocatingControls
 open EM Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls
 

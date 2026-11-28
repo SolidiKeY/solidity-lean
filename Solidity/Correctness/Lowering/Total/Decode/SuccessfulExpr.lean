@@ -82,6 +82,25 @@ theorem inferN_compound {b : Syn .expr} {σ : STy} {l : LVal Γ a τ} {d : Typed
   cases op <;> first | exact False.elim (ho rfl) |
     (change (LVal.inferN n Γ a >>= _) = _; simp [hl, hr, hf])
 
+/-- Array reads retain index-type and static-bound checks at every location. -/
+theorem inferN_indexArray {i : Syn .expr} {l : Source.DataLoc} {len : Option Nat} {σ : STy}
+    {da : Typed Γ a (.array l τ len)} {di : Typed Γ i σ}
+    (ha : Typed.inferN n Γ a = some ⟨.array l τ len, da⟩)
+    (hi : Typed.inferN n Γ i = some ⟨σ, di⟩)
+    (hk : σ.isIndex = true) (hb : Source.inBounds σ len = true) :
+    Typed.inferN (n + 1) Γ (.index a (.some i)) = some ⟨τ, .indexArray da di hk hb⟩ := by
+  show (Typed.inferN n Γ a >>= _) = _
+  simp [ha, hi, hk, hb]
+
+/-- Mapping reads retain the declared key-conversion check. -/
+theorem inferN_indexMapping {i : Syn .expr} {κ σ : STy}
+    {da : Typed Γ a (.mapping κ τ)} {di : Typed Γ i σ}
+    (ha : Typed.inferN n Γ a = some ⟨.mapping κ τ, da⟩)
+    (hi : Typed.inferN n Γ i = some ⟨σ, di⟩)
+    (hk : σ.implicit Γ.isBase Γ.mapFree κ = true) :
+    Typed.inferN (n + 1) Γ (.index a (.some i)) = some ⟨τ, .indexMapping da di hk⟩ := by
+  show (Typed.inferN n Γ a >>= _) = _; simp [ha, hi, hk]
+
 /-- Inline arrays keep the inferred common type and all element-fit checks. -/
 theorem inferN_inlineArray {xs : Syn (.list .expr)} {τs : List STy} {σ : STy}
     {d : Typed Γ a τ} {ds : Source.TypedArgs Γ xs τs}
@@ -95,14 +114,9 @@ theorem inferN_inlineArray {xs : Syn (.list .expr)} {τs : List STy} {σ : STy}
       some ⟨_, .inlineArray d ds hc hw hf⟩ := by
   show (Typed.inferN n Γ a >>= _) = _
   simp only [ha, hs, Option.bind_eq_bind, Option.bind_some]
-  split
-  · rename_i ρ hρ
-    have he : ρ = σ := Option.some.inj (hρ.symm.trans hc)
-    subst ρ
-    simp [hw, hf]
-  · rename_i hρ
-    rw [hc] at hρ
-    cases hρ
+  split <;> rename_i h
+  · cases Option.some.inj (h.symm.trans hc); simp [hw, hf]
+  · simp_all
 
 /-- Allocation checks the decoded memory type before inferring its size. -/
 theorem inferN_newArray {t : Syn .typeName} {σ : STy} {d : Typed Γ a σ}
@@ -110,22 +124,10 @@ theorem inferN_newArray {t : Syn .typeName} {σ : STy} {d : Typed Γ a σ}
     (ha : Typed.inferN n Γ a = some ⟨σ, d⟩) (hi : σ.isIndex = true) :
     Typed.inferN (n + 1) Γ (.call (.new t) (.positional (.cons a .nil))) =
       some ⟨τ, .newArray ht hn d hi⟩ := by
-  change (match ht' : t.ty Γ.env Γ.scope .memory with
-    | some ρ => if hn' : ρ.newable = true then do
-        let ⟨σ', d'⟩ ← Typed.inferN n Γ a
-        if hi' : σ'.isIndex = true then
-          pure (⟨ρ, Typed.newArray ht' hn' d' hi'⟩ :
-            Source.Inferred Γ (.call (.new t) (.positional (.cons a .nil)))) else none
-      else none
-    | none => none) = _
-  split
-  · rename_i ρ hρ
-    have he : ρ = τ := Option.some.inj (hρ.symm.trans ht)
-    subst ρ
-    simp [hn, ha, hi]
-  · rename_i hρ
-    rw [ht] at hρ
-    cases hρ
+  change (match ht' : t.ty Γ.env Γ.scope .memory with | some ρ => _ | none => none) = _
+  split <;> rename_i h
+  · cases Option.some.inj (h.symm.trans ht); simp [hn, ha, hi]
+  · simp_all
 
 /-- Nonempty tuple tails use their inferred slot types, preserving mobility. -/
 theorem inferN_tuple {b : Syn (.opt .expr)} {bs : Syn (.list (.opt .expr))}
@@ -309,25 +311,11 @@ theorem named_run (rc : ElabRec C) (f : String) (ns : List String) (args : List 
       (ns != fs && args.any (·.hasIncDec)) = false ∧
       rc.hoist (.call f (fs.map fun g => (Semantics.lookupBy g (ns.zip args)).getD (.num 0)))
         sc st m = .ok ((out, st'), m') := by
-  constructor
-  · intro h
-    dsimp only
-    rw [named_step] at h
-    dsimp only at h
-    split at h
-    · cases h
-    · rename_i h1
-      split at h
-      · rename_i h2
-        split at h
-        · cases h
-        · rename_i h3
-          exact ⟨by simpa using h1, h2, by simpa using h3, h⟩
-      · cases h
-  · rintro ⟨h1, h2, h3, h4⟩
-    rw [named_step]
-    dsimp only
-    simp only [h1, h2, h3, Bool.false_eq_true, ↓reduceIte, pure_bind]
-    exact h4
+  rw [named_step]; dsimp only
+  cases h1 : ((C.structFields f).map (·.1)).isEmpty <;>
+    cases h2 : (ns.length == ((C.structFields f).map (·.1)).length &&
+      ((C.structFields f).map (·.1)).all ns.contains) <;>
+    cases h3 : (ns != (C.structFields f).map (·.1) && args.any (·.hasIncDec)) <;>
+    simp_all [pure_bind] <;> (intro h; cases h)
 
 end Solidity.Correctness.Lowering.Total.Decode.SuccessfulExpr

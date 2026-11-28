@@ -67,6 +67,19 @@ example : ∃ d, Typed.inferN 4 copyΓ
     some ⟨.array .storage (.int IntTy.u256) none, d⟩ :=
   ⟨_, inferN_assignCopy rfl rfl rfl rfl rfl⟩
 
+example : ∃ d, Typed.inferN 3 copyΓ (.index (.ident "ys") (.some one)) =
+    some ⟨.int IntTy.u256, d⟩ := ⟨_, inferN_indexArray rfl rfl rfl rfl⟩
+#guard (Typed.infer copyΓ (.index (.ident "ys") (.some (.lit (.bool true))))).isNone
+#guard ty (.index (.inlineArray (.ident "x") .nil) (.some one)) = none
+
+private def mapΓ : Source.Ctx := {Γ with locals := [("m", .mapping (.int IntTy.u256) .bool)]}
+example : ∃ d, Typed.inferN 3 mapΓ (.index (.ident "m") (.some one)) =
+    some ⟨.bool, d⟩ := ⟨_, inferN_indexMapping rfl rfl rfl⟩
+#guard (Typed.infer mapΓ (.index (.ident "m") (.some (.lit (.bool true))))).isNone
+example : ∃ d, Typed.inferN 3 {mapΓ with locals := [("m", .mapping .bool .bool)]}
+    (.index (.ident "m") (.some (.lit (.bool true)))) = some ⟨.bool, d⟩ :=
+  ⟨_, inferN_indexMapping rfl rfl rfl⟩
+
 -- Tuple mobility, environment admission, shadowing, and refusal boundaries.
 example : ∃ d, Typed.inferN 3 Γ (.tuple (.some (.ident "x"))
     (.cons (.some (.ident "b")) .nil)) =
