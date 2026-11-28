@@ -11,3 +11,7 @@ contract Shapes {
 }
 contract Base { bool baseFlag; }
 contract Derived is Base { bool derivedFlag; uint256 tail; }
+contract Left { uint256 left; }
+contract Right { uint256 right; }
+contract Diamond is Left, Right { uint256 last; }
+contract Reversed is Right, Left { uint256 last; }
