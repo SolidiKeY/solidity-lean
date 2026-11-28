@@ -165,6 +165,13 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Algorithms/Maximum.lean` | Nonempty-array maximum; upper bound and attained-element specification. |
 | `Examples/Benchmark/Algorithms/Reverse.lean` | In-place storage-array reversal; entry-state element and length specification. |
 | `Examples/Benchmark/Algorithms/Sum.lean` | Array prefix sum; exact fold target retained pending specification lowering. |
+| `Examples/Benchmark/Bytes/StringEquality.lean` | Pinned OpenZeppelin 5.3.0 `Strings.equal` (length check and `keccak256`). Natural clauses (equal contents give `true`; `true` gives equal lengths): unknown, `spec!` cannot name `string memory` parameters (error pinned). Two concrete runs proved. |
+| `Examples/Benchmark/Bytes/ConcatLength.lean` | Solidity 0.8.28 docs `bytes.concat`/`string.concat` contract `C`; its two length `assert`s unknown (`sol_prove` exhausts heartbeats over byte-wise copies; needs a concat length rule). |
+| `Examples/Benchmark/Bytes/ByteAt.lean` | Storage `bytes` index accessor: in-bounds result `data[i]` proved; normal termination implies `i < data.length` (out-of-bounds revert) proved. |
+| `Examples/Benchmark/Bytes/HexDigit.lean` | OpenZeppelin 5.3.0 `HEX_DIGITS[value & 0xf]` lookup; ASCII digit clauses unknown (closer lacks mask-as-modulo and symbolic `bytes16` byte); two lookups proved concretely. |
+| `Examples/Benchmark/Bytes/Bytes32Cast.lean` | `bytes32`/`uint256` explicit conversions (Solidity 0.8.28 docs): both conversions and both round trips proved (number equalities), byte order checked at one value. |
+| `Examples/Benchmark/Bytes/EncodePackedLength.lean` | `abi.encodePacked` lengths: the ABI spec's documented 18-byte example and `int16, bytes1, uint16` at any arguments (5 bytes) proved. |
+| `Examples/Benchmark/Bytes/SliceCopy.lean` | Calldata `bytes` slice copied to storage (Solidity 0.8.28 docs "Array Slices" and data-location copies): stored length clause unknown (`sol_prove` exhausts heartbeats; elementwise clause unstatable over calldata). |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/DataStructures/BitMap.lean` | OpenZeppelin bitmap set; bucket frames proved, membership after set/unset unknown (bitwise laws). |
@@ -202,6 +209,7 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
+| `Examples/Benchmark/Inheritance/ModifierOrder.lean` | solc `modifiers/evaluation_order`: base constructor arguments in linearization order, then modifier arguments in written order, then the body (`[4, 2, 6, 1, 3, 5, 7]`); `f` and constructor proved by `sol_prove`, `query` (memory copy) without a clause. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/MathLib/Average.lean` | OpenZeppelin v4.9.6 `Math.average` (`(a & b) + (a ^ b) / 2`): exact floor-average target, overflow-free form. Unknown: bitwise carry identity over `uintBitwise` missing. |
@@ -240,6 +248,14 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyBench/WithdrawalContract.lean` | solkey 50a1469 `benchmark/WithdrawalContract.sol`: constructor proved. `becomeRichest` unknown: credit to old richest and mapping frame; `withdraw` unknown: as Fund. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/SolkeyData/ArrayRemoveByShifting.lean` | solkey real-world shift-remove with its bounds clause and concrete `test`; both unknown at the loop leaves. |
+| `Examples/Benchmark/SolkeyData/ArrayRemoveByShiftingOpen.lean` | solkey's open variant: full shift specification, unknown (the invariant cannot read the entry state). |
+| `Examples/Benchmark/SolkeyData/ArrayReplaceFromEnd.lean` | Swap-with-last removal; length clause and `test` proved, element clauses unknown past `delAt`. |
+| `Examples/Benchmark/SolkeyData/Enum.lean` | Enum state variable: `get`, `set`, `cancel`, `reset` obligations proved. |
+| `Examples/Benchmark/SolkeyData/IterableMapping.lean` | Struct-of-array-and-mappings with three class invariants; every clause by hand, obligations unknown. |
+| `Examples/Benchmark/SolkeyData/NestedMapping.lean` | solkey real-world clauses with the two-key frame; `get` proved, frame cases by hand. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/SolkeyGames/KingOfEther.lean` | solkey's pull-payment King of the Ether (DoS fix): `claimThrone` proved by `sol_prove`, including the dethroned king's credit and the payable booking. `withdraw` refuted (`¬ ⊢`, kernel-checked): the contract calling itself with a credit pays itself and books nothing, so the `net(msg.sender)` clause fails. |
 | `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
 | `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |
@@ -251,6 +267,15 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyMisc/FunctionModifier.lean` | solkey real-world `FunctionModifier`: constructor, `changeOwner` and recursive reentrancy-guarded `decrement` proved. |
 | `Examples/Benchmark/SolkeyMisc/TimeLock.lean` | solkey real-world `TimeLock` (0.8 overflow port): `deposit`, `increaseLockTime` proved. `withdraw` refuted by a kernel run: a self-withdrawal books no net debit. |
 | `Examples/Benchmark/SolkeyMisc/WETH9.lean` | solkey real-world `WETH9` (canonical WETH, 0.8 port): `deposit`, `approve` proved. `withdraw` unknown: the contract's own `transfer` shadows `address.transfer` in the front end. `transferFrom` unknown: closer exhausts heartbeats on consecutive mapping saves. |
+| Module | Its examples |
+|---|---|
+| `Examples/SolkeyOpen/SolcArithmetic.lean` | solkey `semantics/open/SolcArithmetic.sol`: five wrapping obligations proved (`sol_prove`); `checkedCalledByUncheckedWraps` unknown (`+%`, `% 2^16` under parameter equations); `uncheckedIncrementWraps` refuted in the model (checked `2**256`). |
+| `Examples/SolkeyOpen/SolcTypes.lean` | solkey `semantics/open/SolcTypes.sol`: twelve cast and enum obligations proved; `nestedTuplesParenthesized` unknown (refused by the front end); `ternaryLiteralOverflow` refuted (`uint8` overflow). |
+| `Examples/SolkeyOpen/SolcSmtControlFlow.lean` | solkey `semantics/open/SolcSmtControlFlow.sol`: both `msg.value` obligations proved. |
+| `Examples/SolkeyOpen/SolcConstructors.lean` | solkey `semantics/open/SolcConstructors.sol`: deployment, `msgValueZero`, `mappingLocalCompoundAssignment` proved; `immutableUninitialized` refuted; `multipleInitializationsAssignExpr` unknown (does not parse). |
+| `Examples/SolkeyOpen/SolcControlFlow.lean` | solkey `semantics/open/SolcControlFlow.sol`: `conditionalExpressionTuples` unknown (conditional of tuples refused by the front end). |
+| `Examples/SolkeyOpen/SolcFunctionCalls.lean` | solkey `semantics/open/SolcFunctionCalls.sol`: `functionsRecursiveUnbounded` unknown (diamond of an unbounded recursion). |
+| `Examples/SolkeyOpen/ArrayRemoveByShifting.lean` | solkey `contracts/real-world/open/ArrayRemoveByShifting.sol`: `remove` unknown (invariant leaves; the use case owes `ensures` the invariant does not carry). |
 | `Examples/Benchmark/SolkeyOz/OZCounters.lean` | solkey's OpenZeppelin `Counters` port: all four clauses proved (unchecked increment/decrement by the leaf closer). |
 | `Examples/Benchmark/SolkeyOz/OZMath.lean` | solkey's OpenZeppelin `Math` port: `tryAdd`, `max`, `min` proved; `trySub`, `tryMul`, `tryDiv`, `tryMod`, `average`, `ceilDiv` unknown, each with its stuck leaf and missing closer law. |
 | `Examples/Benchmark/SolkeyOz/OZNonces.lean` | solkey's OpenZeppelin `Nonces` port: `nonces`, `useNonce` proved; `useCheckedNonce` unknown (wrapping add with a Boolean `!=` binding). |
@@ -258,6 +283,16 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyOz/OZPausable.lean` | solkey's OpenZeppelin `Pausable` mock port: all six clauses proved. |
 | `Examples/Benchmark/SolkeyOz/OZReentrancyGuard.lean` | solkey's OpenZeppelin `ReentrancyGuard` mock port: all five clauses with both contract invariants proved, the recursive re-entry reverting. |
 | `Examples/Benchmark/SolkeyOz/SolmateOwned.lean` | solkey's Solmate `Owned` port: both clauses proved. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/SolcVerify/CaseAnalysisSimple.lean` | solc-verify case-analysis postconditions on signed storage; correct proved, wrong default refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/DoWhile.lean` | solc-verify `do … while` invariants; all four unknown (invariant not inductive, or needs an inferred bound). |
+| `Examples/Benchmark/SolcVerify/LoopInvar.lean` | solc-verify loop invariants with `assert`; two proved, two refuted (`sol_refute`), `forLoop` unknown. |
+| `Examples/Benchmark/SolcVerify/OldExpr.lean` | solc-verify `\old` postconditions on owner and counters; incorrect owner change refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/OverflowSpec.lean` | solc-verify `uint8` contract invariant `x == y + 1`; `inc` proved, `set` refuted by `sol_refute` (overflow in the clause). |
+| `Examples/Benchmark/SolcVerify/Simple.lean` | solc-verify contract invariant `x == y`; `add`, constructor and `add_incorrect_2` (call inlined, no entry invariant owed) proved, `add_incorrect` refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/Storage.lean` | solc-verify records in a mapping of structs; frame (`modifies`) and postconditions all proved. |
+| `Examples/Benchmark/SolcVerify/StructMapping.lean` | SMTChecker `struct_1`: a struct stored in a mapping agrees with its memory copy; proved. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/Swc/IntegerOverflowMinimal.lean` | SWC-101 `integer_overflow_minimal.sol` (registry 1b62270), 0.4 wrapping `-=` as `unchecked`: `run` (`count == \old(count) - input`) refuted by a kernel-checked run from `count = 1` wrapping to 2^256-1. |
@@ -282,6 +317,13 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Tokens/ERC20Capped.lean` | Pinned OpenZeppelin 4.9.6 cap constructor/getter and inlined capped base mint; exact unchecked balance-addition cases retained. Constructor and cap getter proved; full mint unknown at wrapped-add piecewise normalization/frame closure. Cap-bound component proved separately; no reachable supply-sum premise assumed. |
 | `Examples/Benchmark/Tokens/ERC20Burnable.lean` | Pinned OpenZeppelin 4.9.6 burn/burnFrom, finite/infinite allowance spending and base burn; exact unchecked supply-underflow case retained. All four full obligations unknown at guarded two-key frames and wrapped-subtraction piecewise normalization; infinite-allowance component proved separately. |
 | `Examples/Benchmark/Tokens/ERC721Burnable.lean` | Pinned OpenZeppelin 4.9.6 authorized NFT burn with owner/approval deletion, former-owner count and full frame; unchecked zero-count case retained. Full burn obligation unknown at guarded wrapped-subtraction/old-owner normalization; owner/approval-clearing component proved separately. |
+| Module | Its examples |
+|---|---|
+| `Examples/Summaries/Vault.lean` | Vault arithmetic helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Token.lean` | Two-slot token transfer and allowance caller; storage-writing symbolic summary unsupported; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/CallChain.lean` | Three call edges and repeated intermediate helper; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Library.lean` | Recursion-free library-style helper used twice per caller; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
+| `Examples/Summaries/Pricing.lean` | Shared pricing helper and two callers; proof-carrying helper verdict cache with actual unrelated/helper source edit controls. Certificate-to-caller automation remains unsupported. |
 | `Examples/ExecutableGoalBinding.lean` | Exact-target refutation and wrong-target, retained-value, argument and layout refusal examples. Test-only kernel replay is checked by `scripts/trust/executable-goal-replay.lean` in Lean CI. |
 | `Examples/ExecutableRequestData.lean` | Shared synthetic request and nondefault raw contract data for quotation and retained-candidate examples; not source admission. |
 | Module | Its examples |

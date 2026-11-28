@@ -1,8 +1,6 @@
 import Solidity.Source.Preservation.ArrayLiterals
 import Solidity.Source.Preservation.AllocationControls
 
-/-! Typed Boolean inline-array allocation, both pipelines, and the one-word
-element boundary. -/
 namespace Solidity.Source.Preservation.ArrayLiteralControls
 open AllocationControls
 
