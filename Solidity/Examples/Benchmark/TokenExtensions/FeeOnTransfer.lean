@@ -21,6 +21,9 @@ Natural spec: for distinct `src`, `dst` and sink, the three touched balances
 keep their sum (the fee goes to the sink), each has its exact effect, other
 balances and `totalSupply` are unchanged, and a finite allowance of a third
 party is spent. Verdicts are on each theorem/definition below.
+
+Verdicts: constructor proved; transferFrom and transfer UNKNOWN at the
+three-slot sum leaf, every other clause proved as a component.
 -/
 namespace Solidity.Examples.Benchmark.TokenExtensions.FeeOnTransfer
 
@@ -70,12 +73,13 @@ theorem constructor_obligation : ⊢ spec!{ constructor } := by
   sol_prove
 
 /-- UNKNOWN: the complete clauses. Every clause but the three-slot sum is
-proved in `transferFrom_effects`; the sum leaf
+proved by the components below; the sum leaf
 `find(storage, balanceOf[src]) + find(storage, balanceOf[dst]) + find(storage, balanceOf[0]) = …`
 after the three saves stays open (no closer sums several resolved reads). -/
 def transferFrom_obligation := spec!{ transferFrom }
 
-/-- UNKNOWN, for the same three-slot sum leaf, through the inlined `transferFrom`. -/
+/-- UNKNOWN, for the same three-slot sum leaf, through the inlined
+`transferFrom`; every other clause is `transfer_effects`. -/
 def transfer_obligation := spec!{ transfer }
 
 /-- PROVED component: result and supply. -/
