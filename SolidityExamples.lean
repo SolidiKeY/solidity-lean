@@ -93,6 +93,13 @@ import Solidity.Examples.Benchmark.SolkeyMisc.DocsBallot
 import Solidity.Examples.Benchmark.SolkeyMisc.FunctionModifier
 import Solidity.Examples.Benchmark.SolkeyMisc.TimeLock
 import Solidity.Examples.Benchmark.SolkeyMisc.WETH9
+import Solidity.Examples.Benchmark.SolkeyOz.OZCounters
+import Solidity.Examples.Benchmark.SolkeyOz.OZMath
+import Solidity.Examples.Benchmark.SolkeyOz.OZNonces
+import Solidity.Examples.Benchmark.SolkeyOz.OZOwnable2Step
+import Solidity.Examples.Benchmark.SolkeyOz.OZPausable
+import Solidity.Examples.Benchmark.SolkeyOz.OZReentrancyGuard
+import Solidity.Examples.Benchmark.SolkeyOz.SolmateOwned
 import Solidity.Examples.Benchmark.Swc.HashForEther
 import Solidity.Examples.Benchmark.Swc.HashForEtherFixed
 import Solidity.Examples.Benchmark.Swc.IntegerOverflowMinimal
