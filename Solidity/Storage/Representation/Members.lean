@@ -1,6 +1,5 @@
 import Solidity.Storage.Representation.Updates
 
-/-! Member observations retain the source's first-name lookup. -/
 namespace Solidity.Storage.Representation
 
 theorem FieldsRep.get {fs : List (Name × Ty)} {vs : SFields fs}
@@ -35,7 +34,6 @@ private theorem tail_head_disjoint {t : STy} {ts : List STy} {l x : Loc}
     exact occ_fields_disjoint (fs := t :: ts) (i := i + 1) (i' := 0)
       hi rfl (Nat.succ_ne_zero i) ht hh
 
-/-- Replacing the source member and its footprint preserves the whole field store. -/
 theorem FieldsRep.set {fs : List (Name × Ty)} {vs : SFields fs}
     {ts : List STy} {l : Loc} {w : Store} (h : FieldsRep vs ts l w)
     {f : Name} {T : Ty} (member : Semantics.lookupBy f fs = some T) :
@@ -76,7 +74,6 @@ theorem FieldsRep.set {fs : List (Name × Ty)} {vs : SFields fs}
             simpa only [Loc.add_add] using fresh
           simpa only [Loc.add_add] using update new replacement fresh'
 
-/-- Source member reads and existing layout location agree at the leaf. -/
 theorem struct_member_read {s f : Name} {T : Ty} {fs : SFields (Semantics.structDef s)}
     {ts : List STy} {l : Loc} {w : Store}
     (h : ValueRep (.struct (s := s) fs) (.strct ts) l w)
@@ -93,7 +90,6 @@ theorem struct_member_read {s f : Name} {T : Ty} {fs : SFields (Semantics.struct
     · simp only [STy.locate, hi]
     · rw [SVal.find_field, SVal.find_nil]
 
-/-- Exact source member-save equation, independent of the word update. -/
 theorem struct_source_save {s f : Name} {T : Ty}
     (fs : SFields (Semantics.structDef s))
     (member : Semantics.lookupBy f (Semantics.structDef s) = some T) (new : SVal T) :
@@ -102,7 +98,6 @@ theorem struct_source_save {s f : Name} {T : Ty}
   rw [SVal.save_eq_saveM, SVal.saveM, saveM_nil]
   rfl
 
-/-- A source member replacement has a whole-value representation after patching. -/
 theorem struct_save {s f : Name} {T : Ty} {fs : SFields (Semantics.structDef s)}
     {ts : List STy} {l : Loc} {w : Store}
     (old : ValueRep (.struct (s := s) fs) (.strct ts) l w)
@@ -119,7 +114,6 @@ theorem struct_save {s f : Name} {T : Ty} {fs : SFields (Semantics.structDef s)}
     exact ⟨t, i, hi, shape, fun new replacement fresh =>
       ⟨struct_source_save fs member new, .strct _ _ _ _ (update new replacement fresh)⟩⟩
 
-/-- Replacing a member's footprint preserves every distinct represented member. -/
 theorem member_patch_frame {T : Ty} {v : SVal T} {fs : List STy}
     {i j : Nat} {t u : STy} {l : Loc} {w new : Store}
     (hi : fs[i]? = some t) (hj : fs[j]? = some u) (different : i ≠ j)
