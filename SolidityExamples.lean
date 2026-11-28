@@ -31,6 +31,13 @@ import Solidity.Examples.Benchmark.Governance.Ownable
 import Solidity.Examples.Benchmark.Governance.Pausable
 import Solidity.Examples.Benchmark.Governance.Timelock
 import Solidity.Examples.Benchmark.Governance.Voting
+import Solidity.Examples.Benchmark.Inheritance.AbstractHook
+import Solidity.Examples.Benchmark.Inheritance.ConstructorArgs
+import Solidity.Examples.Benchmark.Inheritance.ExplicitBase
+import Solidity.Examples.Benchmark.Inheritance.ModifierOverride
+import Solidity.Examples.Benchmark.Inheritance.ModifierStacking
+import Solidity.Examples.Benchmark.Inheritance.SuperInConstructor
+import Solidity.Examples.Benchmark.Inheritance.UsingFor
 import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
