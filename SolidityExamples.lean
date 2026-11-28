@@ -73,6 +73,11 @@ import Solidity.Examples.Benchmark.SolkeyGames.EtherGame
 import Solidity.Examples.Benchmark.SolkeyGames.EtherStore
 import Solidity.Examples.Benchmark.SolkeyGames.KingOfEther
 import Solidity.Examples.Benchmark.SolkeyGames.SendEther
+import Solidity.Examples.Benchmark.SolkeyMisc.Account
+import Solidity.Examples.Benchmark.SolkeyMisc.DocsBallot
+import Solidity.Examples.Benchmark.SolkeyMisc.FunctionModifier
+import Solidity.Examples.Benchmark.SolkeyMisc.TimeLock
+import Solidity.Examples.Benchmark.SolkeyMisc.WETH9
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.TokenExtensions.AllowanceDelta
 import Solidity.Examples.Benchmark.TokenExtensions.Burnable
