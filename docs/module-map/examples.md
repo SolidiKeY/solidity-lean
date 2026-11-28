@@ -209,6 +209,7 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
+| `Examples/Benchmark/Inheritance/ModifierOrder.lean` | solc `modifiers/evaluation_order`: base constructor arguments in linearization order, then modifier arguments in written order, then the body (`[4, 2, 6, 1, 3, 5, 7]`); `f` and constructor proved by `sol_prove`, `query` (memory copy) without a clause. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/MathLib/Average.lean` | OpenZeppelin v4.9.6 `Math.average` (`(a & b) + (a ^ b) / 2`): exact floor-average target, overflow-free form. Unknown: bitwise carry identity over `uintBitwise` missing. |
@@ -282,6 +283,16 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyOz/OZPausable.lean` | solkey's OpenZeppelin `Pausable` mock port: all six clauses proved. |
 | `Examples/Benchmark/SolkeyOz/OZReentrancyGuard.lean` | solkey's OpenZeppelin `ReentrancyGuard` mock port: all five clauses with both contract invariants proved, the recursive re-entry reverting. |
 | `Examples/Benchmark/SolkeyOz/SolmateOwned.lean` | solkey's Solmate `Owned` port: both clauses proved. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/SolcVerify/CaseAnalysisSimple.lean` | solc-verify case-analysis postconditions on signed storage; correct proved, wrong default refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/DoWhile.lean` | solc-verify `do … while` invariants; all four unknown (invariant not inductive, or needs an inferred bound). |
+| `Examples/Benchmark/SolcVerify/LoopInvar.lean` | solc-verify loop invariants with `assert`; two proved, two refuted (`sol_refute`), `forLoop` unknown. |
+| `Examples/Benchmark/SolcVerify/OldExpr.lean` | solc-verify `\old` postconditions on owner and counters; incorrect owner change refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/OverflowSpec.lean` | solc-verify `uint8` contract invariant `x == y + 1`; `inc` proved, `set` refuted by `sol_refute` (overflow in the clause). |
+| `Examples/Benchmark/SolcVerify/Simple.lean` | solc-verify contract invariant `x == y`; `add`, constructor and `add_incorrect_2` (call inlined, no entry invariant owed) proved, `add_incorrect` refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/Storage.lean` | solc-verify records in a mapping of structs; frame (`modifies`) and postconditions all proved. |
+| `Examples/Benchmark/SolcVerify/StructMapping.lean` | SMTChecker `struct_1`: a struct stored in a mapping agrees with its memory copy; proved. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/Swc/IntegerOverflowMinimal.lean` | SWC-101 `integer_overflow_minimal.sol` (registry 1b62270), 0.4 wrapping `-=` as `unchecked`: `run` (`count == \old(count) - input`) refuted by a kernel-checked run from `count = 1` wrapping to 2^256-1. |
