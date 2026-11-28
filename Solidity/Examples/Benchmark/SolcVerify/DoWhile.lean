@@ -67,14 +67,8 @@ def DoWhile : Contract := contract!{
 local instance : InContract := ⟨DoWhile⟩
 open scoped Scoped
 
-/--
-info: ok
--/
+/-- info: ok -/
 #guard_msgs in #run DoWhile.f1()
-/--
-info: ok
--/
-#guard_msgs in #run DoWhile.f4()
 /-- `f1`'s obligation, unknown. -/
 def f1_target := spec!{ f1 }
 

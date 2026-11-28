@@ -81,22 +81,16 @@ an invariant): the loop's bound is concrete and the strategy unwinds it. -/
 theorem cannotProveWithoutInvariant_spec : ⊢ spec!{ cannotProveWithoutInvariant } := by
   sol_prove
 /- `doesNotHoldOnEntry`: refuted, the loop ends with `x == 11`, `i == 10`. -/
-/--
-info: panic (an `assert` failed)
--/
+/-- info: panic (an `assert` failed) -/
 #guard_msgs in #run LoopInvar.doesNotHoldOnEntry()
 /- `isNotMaintainedByLoop`: refuted, the loop ends with `x == 0`, `i == 10`. -/
-/--
-info: panic (an `assert` failed)
--/
+/-- info: panic (an `assert` failed) -/
 #guard_msgs in #run LoopInvar.isNotMaintainedByLoop()
 /- `forLoop`: unknown. The run is `ok`; the annotated invariant `i == x`
 leaves the exit leaf `x == i, !(i < 10) ⟹ x <= 10`, false without `i <= 10`,
 which solc-verify's Boogie infers. Missing: loop-invariant inference (an
 interval bound) beside the invariant rule. -/
-/--
-info: ok
--/
+/-- info: ok -/
 #guard_msgs in #run LoopInvar.forLoop()
 /-- `forLoop`'s obligation, unknown. -/
 def forLoop_target := spec!{ forLoop }
