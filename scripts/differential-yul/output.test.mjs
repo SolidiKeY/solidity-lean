@@ -151,3 +151,29 @@ test('directory replacement or symlink redirection is rejected before append or 
     }
   }
 });
+
+test('findings are hash-bound and metadata is snapshotted',t=>{
+  const {dir,options}=fixture(t),metadata={fuel:12};
+  const writer=openRun(join(dir,'run'),{...options,metadata});t.after(()=>writer.abort());
+  metadata.fuel=99;
+  for(const record of records()) writer.append(entry(record));
+  const path=writer.writeFinding({stage:'ir',complete:false});
+  const report=writer.finish();
+  assert.deepEqual(report.metadata,{fuel:12});
+  assert.deepEqual(report.findings,[{path,sha256:sha(readFileSync(join(writer.directory,path)))}]);
+});
+test('changed finding bytes cannot be finalized',t=>{
+  const {dir,options}=fixture(t),writer=openRun(join(dir,'run'),options);t.after(()=>writer.abort());
+  for(const record of records()) writer.append(entry(record));
+  const path=writer.writeFinding({stage:'ir'});
+  writeFileSync(join(writer.directory,path),'changed');
+  assert.throws(()=>writer.finish(),/saved finding changed/);
+  assert.equal(existsSync(join(writer.directory,'report.json')),false);
+});
+test('directory substitution cannot redirect a finding',t=>{
+  const {dir,options}=fixture(t),writer=openRun(join(dir,'run'),options);t.after(()=>writer.abort());
+  renameSync(writer.directory,join(dir,'original'));
+  mkdirSync(writer.directory);
+  assert.throws(()=>writer.writeFinding({stage:'ir'}),/output directory changed/);
+  assert.deepEqual(readdirSync(writer.directory),[]);
+});
