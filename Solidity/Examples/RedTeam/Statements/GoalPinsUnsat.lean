@@ -9,7 +9,9 @@ snapshot that no `readSnapshot` run returns the left side holds for every `out`,
 `CheckGraph` must relate it to every output, against `Laws.check_deterministic`.
 **Witness**: `laws_force_observed` (any `Laws ops` makes every `Snapshot` observed), `not_observed`
 (`⟨env, []⟩` never is: `GoalPinSpec.required` returns a nonempty list), so `¬ goalPinsCorrect`.
-**Suggested fix**: parenthesize, `ObservedSnapshot snapshot → (ops.check … = output ↔ CheckGraph …)`.
+**Status**: a recorded limitation, not a pending repair. The law stays frozen as it is (decision
+H1597, restated by H1669); the claim stays unproven until the all-snapshots-observed obligation has
+an authoritative solution. (The parenthesized reading `ObservedSnapshot s → (… ↔ …)` was declined.)
 Second witness, a documented boundary (`GoalPinsSpec.lean:96`): `folded_ignores_body`, the pin
 graph of a folded (data or non-`Solidity`) definition never reads its body. -/
 namespace Solidity.Examples.RedTeam.Statements.GoalPinsUnsat
