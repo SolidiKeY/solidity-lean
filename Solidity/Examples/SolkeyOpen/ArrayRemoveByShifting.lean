@@ -6,7 +6,8 @@ import Solidity.Calculus.Surface
 # solkey open problems: `ArrayRemoveByShifting`
 
 Source: <https://github.com/SolidiKeY/solkey/blob/8f0bb7a56bdc7292240250d93bafe93727ef266b/keyext.solidity.examples/contracts/real-world/open/ArrayRemoveByShifting.sol>.
-Changes: none (comments dropped); the clauses are solkey's.  Its obligation is `spec!{remove}`.
+Changes: comments dropped; solkey's `@custom:key` clauses are `requires`/`ensures` members and
+the loop invariant stays where it is.  The obligation is `spec!{remove}`.
 solkey: the invariant can state neither the shifted prefix nor the unchanged length, and the loop
 rule anonymises storage, so the `ensures` are lost across the loop.
 -/

@@ -91,8 +91,8 @@ theorem total_enumExplicitConversionInRange : ⊢ dl!{ msg.value == 0 → wt(sto
 theorem spec_enumFromUint : ⊢ spec!{ enumFromUint } := by sol_prove
 /-- A `uint` state variable is non-negative.  Proved. -/
 theorem spec_storageValueVarsNonNegative : ⊢ spec!{ storageValueVarsNonNegative } := by sol_prove
-/-- `uint8(x) < 300` for a `uint16` argument.  Proved. -/
-theorem total_castSmallerBoundsRange : ⊢ dl!{ x <= 65535 → msg.value == 0 → wt(storage) →
+/-- `uint8(x) < 300`; the `uint16` argument is `uint16(x)` of a free `uint`.  Proved. -/
+theorem total_castSmallerBoundsRange : ⊢ dl!{ msg.value == 0 → wt(storage) →
     ⟨ castSmallerBoundsRange(uint16(x)); ⟩ true } := by sol_prove
 /-- `uint16(0x12345678) == 0x5678`.  Proved. -/
 theorem total_castSmallerTruncates : ⊢ dl!{ msg.value == 0 → wt(storage) → ⟨ castSmallerTruncates(); ⟩ true } := by sol_prove

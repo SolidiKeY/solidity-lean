@@ -7,7 +7,7 @@ import Solidity.Tools.Counterexample
 Source: <https://github.com/SolidiKeY/solkey/blob/8f0bb7a56bdc7292240250d93bafe93727ef266b/keyext.solidity.examples/semantics/open/SolcArithmetic.sol>.
 Changes: the unused modifier `addUnchecked` dropped.  A function solkey tags `@custom:key box` or specifies has the obligation `spec!{f}`; an untagged
 one solkey's diamond, `msg.value == 0 → wt(storage) → ⟨ f(); ⟩ true`.
-solkey's integers are unbounded; the model's wrap, so the `unchecked` ports close
+solkey's integers are unbounded; the model's wrap, so five of the seven ports close
 (`Examples/Tactics/SolcOpen.lean`, `Examples/Tactics/SignedCasts.lean` prove such programs inline).
 -/
 
@@ -75,7 +75,7 @@ se14 := se9 +% se3, se4 := se14 % 65536 ⟹ se4 == 0`; `sol_leaf; sol_close` tim
 finds nothing.  Missing closer: `+%` and `% 2^16` under equations of the parameters
 (`Examples/Tactics/SolcOpen.lean` proves the run from literals). -/
 def checkedCalledByUncheckedWraps_obligation : Fml SolcArithmetic [] := spec!{ checkedCalledByUncheckedWraps }
-/-- `2**256 - 1 + 1` wraps to `0` inside `unchecked`.  Proved. -/
+/-- Proved: inside `unchecked` the model's `2**256` wraps to `0`, `- 1` to `2**256 - 1`, and `+ 1` to `0`. -/
 theorem total_blockInsideUnchecked : ⊢ dl!{ msg.value == 0 → wt(storage) → ⟨ blockInsideUnchecked(); ⟩ true } := by sol_prove
 /-- Refuted in the model: outside `unchecked` the model's `2**256` is a checked `uint` power and
 reverts, where solc folds the literal expression `2**256 - 1` (a deviation of the front end). -/
