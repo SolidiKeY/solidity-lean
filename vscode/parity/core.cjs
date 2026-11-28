@@ -210,7 +210,15 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='contribution-menus'){if(config.menuTrust==='recovery')errors.push(...require('./menu-lifecycle.cjs').recoveryErrors(result.scenarios.find(s=>s.id==='native-contribution-menu-recovery')?.observation,config.runId,config.target,config.menuRecovery));else errors.push(...require('./menu-lifecycle.cjs').validateCurrent(result.scenarios.find(s=>s.id==='native-contribution-menus')?.observation,config.runId,config.target,config.workspace,config.menuTrust,config.sourceHead,config.menuAnchor));
+  if(config.menuTabHit!==undefined&&config.suite!=='contribution-menus')errors.push('Tab-hit replay requires contribution-menus');
+  if(config.suite==='contribution-menus'){
+   const lifecycle=require('./menu-lifecycle.cjs'),observation=result.scenarios.find(s=>s.id==='native-contribution-menus')?.observation;
+   if(observation?.tabHitAdmissionMode!==config.menuTabHit)errors.push('Tab-hit launch mode differs');
+   if(config.menuTabHit!==undefined){
+    if(config.menuTabHit!==require('./menu-tab-hit.cjs').version||config.menuTrust!==undefined||config.menuAnchor!==undefined)errors.push('Invalid tab-hit launch profile');
+    errors.push(...lifecycle.validateTabHitCurrent(observation,config.runId,config.target,config.workspace,config.menuTrust,config.sourceHead,config.menuAnchor));
+   }else if(config.menuTrust==='recovery')errors.push(...lifecycle.recoveryErrors(result.scenarios.find(s=>s.id==='native-contribution-menu-recovery')?.observation,config.runId,config.target,config.menuRecovery));
+   else errors.push(...lifecycle.validateCurrent(observation,config.runId,config.target,config.workspace,config.menuTrust,config.sourceHead,config.menuAnchor));
   }else if(['workspace-symbols','workspace-symbols-resolved'].includes(config.suite)){errors.push(...require('./workspace-symbol-lifecycle.cjs').errors(result.scenarios.find(s=>s.id==='native-workspace-symbols')?.observation,config));
   }else if(config.suite==='editor-language-scope'){errors.push(...require('./symbol-provider-observer.cjs').recordingErrors(result.observations?.symbolProviderRecordingFailures));errors.push(...require('./editor-language-lifecycle.cjs').errors(result.scenarios.find(s=>s.id==='native-editor-language-scope')?.observation,config));
   }else if(config.suite==='related-diagnostics'){if(config.diagnosticLifecycle)errors.push(...require('./related-diagnostic-lifecycle.cjs').errors(result.scenarios.find(s=>s.id==='native-related-diagnostic-lifecycle')?.observation,config));else errors.push(...require('./related-diagnostics.cjs').errors(result.scenarios.find(s=>s.id==='native-related-diagnostics')?.observation,config));

@@ -1,8 +1,5 @@
 import Solidity.Source.Preservation.MemoryBodyControls
 
-/-! Conditional memory statements over inhabited runtime inputs. Branch selection
-keeps pointer rebinding distinct from block-local restoration; a skipped bounds
-failure is not executed. These are source, not compiler or frontend controls. -/
 namespace Solidity.Source.Preservation.MemoryBranchControls
 open EM MemoryBodyControls
 
