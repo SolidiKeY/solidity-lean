@@ -1,8 +1,6 @@
 import Solidity.Storage.Representation.GraphLayout
 import Solidity.Semantics.RecursiveStorage.Observations
 
-/-! Exact observation frames on the committed typed graph paths. All paths
-are arbitrary finite values of the existing Path family; no depth bound. -/
 namespace Solidity.Storage.Representation.Graph
 
 inductive StepApart {n : Nat} (G : TypeGraph.Schema n) :
@@ -18,8 +16,6 @@ inductive StepApart {n : Nat} (G : TypeGraph.Schema n) :
   | key {K : PrimTy} {V : TypeGraph.Ty n} (k k' : K.Denote) (different : k ≠ k') :
       StepApart G (TypeGraph.Step.key (V := V) k) (.key k')
 
-/-- Distinct typed selectors preserve the other's exact subtree read,
-including a failed read, implicit default, length and retained extent. -/
 theorem StepApart.frame {n : Nat} {G : TypeGraph.Schema n} {A B C : TypeGraph.Ty n}
     {s : TypeGraph.Step G A B} {t : TypeGraph.Step G A C} (apart : StepApart G s t)
     (defaults : (T : TypeGraph.Ty n) → TypeGraph.Value G T)
@@ -66,7 +62,6 @@ theorem StepApart.frame {n : Nat} {G : TypeGraph.Schema n} {A B C : TypeGraph.Ty
         · simp only [TypeGraph.Step.get, dif_neg hj]
       next hi => cases saved
 
-/-- Typed graph paths diverge at any finite depth. -/
 inductive Apart {n : Nat} (G : TypeGraph.Schema n) :
     {A B C : TypeGraph.Ty n} → TypeGraph.Path G A B → TypeGraph.Path G A C → Prop where
   | fork {A B C U V : TypeGraph.Ty n} {s : TypeGraph.Step G A B} {t : TypeGraph.Step G A C}
@@ -76,7 +71,6 @@ inductive Apart {n : Nat} (G : TypeGraph.Schema n) :
       {p : TypeGraph.Path G B U} {q : TypeGraph.Path G B V} (tail : Apart G p q) :
       Apart G (.cons s p) (.cons s q)
 
-/-- Recursive typed path source frame, with no runtime-depth premise. -/
 theorem Apart.read_save {n : Nat} {G : TypeGraph.Schema n} {A B C : TypeGraph.Ty n}
     {p : TypeGraph.Path G A B} {q : TypeGraph.Path G A C} (apart : Apart G p q)
     (defaults : (T : TypeGraph.Ty n) → TypeGraph.Value G T)
@@ -110,8 +104,6 @@ theorem Apart.read_save {n : Nat} {G : TypeGraph.Schema n} {A B C : TypeGraph.Ty
         simp only [TypeGraph.Path.read, freshRead, oldRead, Option.bind_some]
         exact ih old changed new innerSave
 
-/-- Exact existing graph observations are framed, including presence/failure
-and retained extent; this is source semantics, not numeric extent decoding. -/
 theorem Apart.observe_save {n : Nat} {G : TypeGraph.Schema n} {A B C : TypeGraph.Ty n}
     {p : TypeGraph.Path G A B} {q : TypeGraph.Path G A C} (apart : Apart G p q)
     (root result : TypeGraph.Value G A) (new : TypeGraph.Value G B)
@@ -120,7 +112,6 @@ theorem Apart.observe_save {n : Nat} {G : TypeGraph.Schema n} {A B C : TypeGraph
   exact congrArg (fun x => x.map TypeGraph.Value.head)
     (apart.read_save TypeGraph.Value.dflt root result new saved)
 
-/-- An element put changes neither the live length nor retained extent. -/
 theorem index_put_header {n : Nat} {G : TypeGraph.Schema n} {E : TypeGraph.Ty n}
     (root result : TypeGraph.Value G (.array E)) (i : TypeGraph.Index) (new : TypeGraph.Value G E)
     (saved : (TypeGraph.Step.index i).put root new = some result) : result.head = root.head := by
@@ -131,7 +122,6 @@ theorem index_put_header {n : Nat} {G : TypeGraph.Schema n} {E : TypeGraph.Ty n}
     next bound => cases saved; rfl
     next bound => cases saved
 
-/-- An arbitrary inner element save preserves its ancestor array header. -/
 theorem element_save_header {n : Nat} {G : TypeGraph.Schema n} {E U : TypeGraph.Ty n}
     (root result : TypeGraph.Value G (.array E)) (i : TypeGraph.Index)
     (tail : TypeGraph.Path G E U) (new : TypeGraph.Value G U)
@@ -147,7 +137,6 @@ theorem element_save_header {n : Nat} {G : TypeGraph.Schema n} {E U : TypeGraph.
       simp only [oldRead, innerSave, Option.bind_some] at saved
       exact index_put_header root result i changed saved
 
-/-- A single typed child put preserves its parent's exact head observation. -/
 theorem step_put_head {n : Nat} {G : TypeGraph.Schema n} {A B : TypeGraph.Ty n}
     (step : TypeGraph.Step G A B) (root result : TypeGraph.Value G A) (new : TypeGraph.Value G B)
     (saved : step.put root new = some result) : result.head = root.head := by
@@ -178,7 +167,6 @@ private theorem descendant_save_head {n : Nat} {G : TypeGraph.Schema n} {A B U :
       simp only [oldRead, innerSave, Option.bind_some] at saved
       exact step_put_head step root result changed saved
 
-/-- Every strict-descendant save frames its ancestor head at arbitrary depth. -/
 theorem ancestor_observation_frame {n : Nat} {G : TypeGraph.Schema n} {A B : TypeGraph.Ty n}
     (stem : TypeGraph.Path G A B) : ∀ {C U : TypeGraph.Ty n}
       (step : TypeGraph.Step G B C) (tail : TypeGraph.Path G C U)
@@ -209,7 +197,6 @@ theorem ancestor_observation_frame {n : Nat} {G : TypeGraph.Schema n} {A B : Typ
         simp only [freshRead, oldRead, Option.bind_some]
         exact ih step tail old changed new innerSave
 
-/-- Recursive ancestor array-header frame, as a typed specialization. -/
 theorem ancestor_header_frame {n : Nat} {G : TypeGraph.Schema n} {A E U : TypeGraph.Ty n}
     (stem : TypeGraph.Path G A (.array E)) (i : TypeGraph.Index) (tail : TypeGraph.Path G E U)
     (root result : TypeGraph.Value G A) (new : TypeGraph.Value G U)

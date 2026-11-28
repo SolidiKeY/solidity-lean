@@ -1,24 +1,5 @@
 import Solidity.Precompiles.Field
 
-/-!
-# `MODEXP` (0x05) at Osaka
-
-EIP-198's modular exponentiation with Osaka's input bounds (EIP-7823) and
-gas (EIP-2565 as repriced by EIP-7883), as Osaka's execution specification
-(`modexp.py`) runs it.  The input is three 32-byte lengths `Lb, Le, Lm`,
-then `base` (`Lb` bytes), `exp` (`Le`) and `mod` (`Lm`), all zero-padded.
-
-- **Failure**: exactly when a length exceeds 1024 (`modexp_eq_none_iff`).
-- **Result**: `base ^ exp % mod` in `Lm` bytes, zeros when `mod = 0`
-  (`modexp_length`).
-- **Gas**: `max 500 (complexity · iterations)`, where `complexity` is `16`
-  up to 32-byte operands and `2·⌈max(Lb, Lm)/8⌉²` above, and `iterations`
-  is the bit length minus one of the exponent's first 32 bytes, `16` per exponent byte past 32
-  (EIP-7883's doubled factor), at least `1`.  It does not depend on the
-  input's length; a malformed input charges nothing here, since an
-  exceptional halt consumes the frame's gas whatever the formula says.
--/
-
 namespace Solidity.Precompiles.Modexp
 
 open Solidity.Roadmap.Evm (Bytes)
@@ -27,20 +8,16 @@ def baseLen (d : Bytes) : Nat := readNat d 0 32
 def expLen (d : Bytes) : Nat := readNat d 32 32
 def modLen (d : Bytes) : Nat := readNat d 64 32
 
-/-- EIP-7823's bound: a length above 1024 bytes halts exceptionally. -/
 def Malformed (d : Bytes) : Prop := 1024 < baseLen d ∨ 1024 < expLen d ∨ 1024 < modLen d
 
 instance (d : Bytes) : Decidable (Malformed d) := by unfold Malformed; infer_instance
 
-/-- The exponent's first `min 32 Le` bytes. -/
 def expHead (d : Bytes) : Nat := readNat d (96 + baseLen d) (min 32 (expLen d))
 
-/-- EIP-7883's multiplication complexity. -/
 def complexity (b m : Nat) : Nat :=
   let l := max b m
   if l ≤ 32 then 16 else 2 * ((l + 7) / 8) ^ 2
 
-/-- EIP-7883's iteration count. -/
 def iterations (e head : Nat) : Nat :=
   max 1 (if e ≤ 32 then bitLength head - 1 else 16 * (e - 32) + (bitLength head - 1))
 
@@ -48,7 +25,6 @@ def gas (d : Bytes) : Nat :=
   if Malformed d then 0
   else max 500 (complexity (baseLen d) (modLen d) * iterations (expLen d) (expHead d))
 
-/-- `MODEXP` (0x05). -/
 def modexp (d : Bytes) : Option Bytes :=
   if Malformed d then none
   else
@@ -64,7 +40,6 @@ theorem modexp_eq_none_iff (d : Bytes) : modexp d = none ↔ Malformed d := by
   unfold modexp
   by_cases h : Malformed d <;> simp only [h, if_true, if_false, reduceCtorEq]
 
-/-- A well-formed call returns exactly `Lm` bytes. -/
 theorem modexp_length {d o : Bytes} (h : modexp d = some o) : o.length = modLen d := by
   unfold modexp at h
   by_cases hm : Malformed d
@@ -72,12 +47,9 @@ theorem modexp_length {d o : Bytes} (h : modexp d = some o) : o.length = modLen 
   · simp only [hm, if_false, Option.some.injEq] at h
     rw [← h, toBE_length]
 
-/-- A well-formed call charges at least 500. -/
 theorem gas_ge {d : Bytes} (h : ¬Malformed d) : 500 ≤ gas d := by
   simp only [gas, h, if_false]
   exact Nat.le_max_left _ _
-
-/-! ## Vectors (Osaka's execution specification) -/
 
 #guard modexp (ofHex "0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200300000000000000000000000000000000000000000000000000000000000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2efffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f") == some (ofHex "428f4f92af1aaa80bc37c6fe22d2edec4aa4f55ead35061c3710b7ef5f01b49f")
 #guard gas (ofHex "0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200300000000000000000000000000000000000000000000000000000000000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2efffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f") == 500

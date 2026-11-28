@@ -1,9 +1,5 @@
 import Solidity.Source.Preservation.MemoryExpressions
 
-/-! An additive memory-body certificate and joint statement/sequence Hoare
-proof. Default and initialized declarations, reference rebindings, primitive
-array writes, scopes and reference returns reuse the actual evaluator frames.
-Old value-fragment statements/loops remain available with all old premises. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env}
@@ -35,6 +31,10 @@ inductive MemoryItems {E : Env} (A : Decl → Prop) (R : List STy) (M : Bool) :
   | unchecked {l Γ Ξ Δ} {b : RItems E R M ⟨l,true⟩ Γ Ξ} {rest : RItems E R M ⟨l,false⟩ Γ Δ} :
       MemoryItems A R M b → MemoryItems A R M rest → MemoryItems A R M (.unchecked b rest)
 end
+
+example {E : Env} {A : Decl → Prop} {R : List STy} {M : Bool} {k : SCtx} {Γ Δ : RCtx}
+    (s : RStmt E R M k Γ Δ) (hf : s.ValFragC A) (ho : s.OpsOK) : MemoryStmt A R M s :=
+  .value hf ho
 
 structure MemoryBodyAt (A : Decl → Prop) (G : Glob E) (c : String) (n : Nat) : Prop where
   stmt : ∀ F, F.contract = c → ∀ nps ph {R : List STy} {M : Bool} {k : SCtx} {Γ Δ : RCtx}

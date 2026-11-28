@@ -1,46 +1,13 @@
 import Solidity.Precompiles.Pairing
 import Solidity.Precompiles.Bls12381Iso
 
-/-!
-# BLS12-381: the EIP-2537 precompiles (0x0b–0x11)
-
-Prague's BLS12-381 operations, as Osaka's execution specification
-(`bls12_381/*.py`) runs them:
-
-| Address | Operation | Input | Gas |
-|---|---|---|---|
-| 0x0b | `G1ADD` | 256 bytes | 375 |
-| 0x0c | `G1MSM` | `k ≥ 1` pairs of 160 | `k·12000·discount₁(k)/1000` |
-| 0x0d | `G2ADD` | 512 bytes | 600 |
-| 0x0e | `G2MSM` | `k ≥ 1` pairs of 288 | `k·22500·discount₂(k)/1000` |
-| 0x0f | `PAIRING_CHECK` | `k ≥ 1` pairs of 384 | `32600·k + 37700` |
-| 0x10 | `MAP_FP_TO_G1` | 64 bytes | 5500 |
-| 0x11 | `MAP_FP2_TO_G2` | 128 bytes | 23800 |
-
-- **Encoding.**  An `Fp` element is 64 big-endian bytes below `p` (so its
-  top 16 bytes are zero); an `Fp2` element is `c₀` then `c₁`; a point is
-  `x` then `y`, all zeros being infinity.  Any other length, a coordinate at
-  or above `p`, a point off its curve, or (for the MSMs and the pairing) a
-  point outside the order-`r` subgroup is malformed: the call halts
-  exceptionally (`*_eq_none_iff`).
-- **The maps** are RFC 9380's simplified SWU map to the isogenous curve,
-  its isogeny (`Bls12381Iso.lean`) and cofactor clearing by the effective
-  cofactor, written as the RFC's straight-line `map_to_curve_simple_swu`;
-  any square root serves, since the sign is fixed by `sgn0`.
-- **Gas** is a function of the length alone; the MSM discount tables are
-  EIP-2537's.
-
-The `#guard`s are vectors computed by the execution specification itself.
--/
-
 namespace Solidity.Precompiles.Bls12381
 
 open Solidity.Roadmap.Evm (Bytes)
 
-/-- The base field's prime. -/
 def p : Nat :=
   0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab
-/-- The group order. -/
+
 def r : Nat := 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
 
 instance : NeZero p := ⟨by decide⟩
@@ -50,18 +17,13 @@ abbrev F2 := Fp2 p
 
 def f2 (c : Nat × Nat) : F2 := ⟨Fin.ofNat p c.1, Fin.ofNat p c.2⟩
 
-/-- `G1`: `y² = x³ + 4`. -/
 def curve1 : Curve Fp := ⟨0, 4⟩
 
-/-- `G2`'s curve, the M-twist `y² = x³ + 4·(1 + u)`. -/
 def curve2 : Curve F2 := ⟨FieldOps.zero, ⟨4, 4⟩⟩
 
-/-- `w⁻¹ = w⁵ - w¹¹/2` in `Fp[w] / (w¹² - 2·w⁶ + 2)`. -/
 def wInv : Fp12 p := Fp12.ofFn fun i =>
   if i.val = 5 then 1 else if i.val = 11 then Fin.ofNat p ((p - 1) / 2) else 0
 
-/-- BLS12-381 for the pairing check: `w¹² = 2·w⁶ - 2`, `u = w⁶ - 1`, the
-M-twist (`t_k = w^(-k)`) and the ate loop count `|x|`. -/
 def pairingCurve : PairingCurve p where
   order := r
   g1 := curve1
@@ -75,9 +37,6 @@ def pairingCurve : PairingCurve p where
   loop := 15132376222941642752
   frob := none
 
-/-! ## Encoding -/
-
-/-- A field element in 64 bytes, if below `p`. -/
 def decodeFp (b : List Nat) : Option Fp :=
   let n := ofBE b
   if h : n < p then some ⟨n, h⟩ else none
@@ -87,10 +46,8 @@ def decodeFp2 (b : List Nat) : Option F2 := do
   let c₁ ← decodeFp ((b.drop 64).take 64)
   some ⟨c₀, c₁⟩
 
-/-- A decoded `G1` point: on the curve. -/
 abbrev G1 := { P : Pt Fp // curve1.onCurve P = true }
 
-/-- A decoded `G2` point: on the curve. -/
 abbrev G2 := { Q : Pt F2 // curve2.onCurve Q = true }
 
 def decodeG1 (b : List Nat) : Option G1 := do
@@ -105,7 +62,6 @@ def decodeG2 (b : List Nat) : Option G2 := do
   let Q : Pt F2 := if x.re.val = 0 ∧ x.im.val = 0 ∧ y.re.val = 0 ∧ y.im.val = 0 then .inf else .aff x y
   if h : curve2.onCurve Q = true then some ⟨Q, h⟩ else none
 
-/-- A `G1` point that is also in the order-`r` subgroup. -/
 def decodeG1Sub (b : List Nat) : Option G1 := do
   let P ← decodeG1 b
   if curve1.mul r P.1 = .inf then some P else none
@@ -124,11 +80,8 @@ def encodeG2 : Pt F2 → Bytes
   | .inf => toBE 256 0
   | .aff x y => encodeFp x.re ++ encodeFp x.im ++ encodeFp y.re ++ encodeFp y.im
 
-/-! ## Addition and multi-scalar multiplication -/
-
 def g1AddGas (_ : Bytes) : Nat := 375
 
-/-- `G1ADD` (0x0b). -/
 def g1Add (d : Bytes) : Option Bytes := do
   if d.length ≠ 256 then none
   let b := d.map UInt8.toNat
@@ -138,7 +91,6 @@ def g1Add (d : Bytes) : Option Bytes := do
 
 def g2AddGas (_ : Bytes) : Nat := 600
 
-/-- `G2ADD` (0x0d). -/
 def g2Add (d : Bytes) : Option Bytes := do
   if d.length ≠ 512 then none
   let b := d.map UInt8.toNat
@@ -146,7 +98,6 @@ def g2Add (d : Bytes) : Option Bytes := do
   let Q ← decodeG2 (b.drop 256)
   some (encodeG2 (curve2.add P.1 Q.1))
 
-/-- EIP-2537's `G1MSM` discounts for `k = 1 … 128` (per mille); 519 above. -/
 def g1Discount : List Nat := [
   1000, 949, 848, 797, 764, 750, 738, 728, 719, 712, 705, 698, 692, 687, 682, 677, 673, 669,
   665, 661, 658, 654, 651, 648, 645, 642, 640, 637, 635, 632, 630, 627, 625, 623, 621, 619,
@@ -157,7 +108,6 @@ def g1Discount : List Nat := [
   533, 532, 532, 531, 530, 529, 528, 528, 527, 526, 525, 525, 524, 523, 522, 522, 521, 520,
   520, 519]
 
-/-- EIP-2537's `G2MSM` discounts for `k = 1 … 128` (per mille); 524 above. -/
 def g2Discount : List Nat := [
   1000, 1000, 923, 884, 855, 832, 812, 796, 782, 770, 759, 749, 740, 732, 724, 717, 711, 704,
   699, 693, 688, 683, 679, 674, 670, 666, 663, 659, 655, 652, 649, 646, 643, 640, 637, 634,
@@ -171,7 +121,6 @@ def g2Discount : List Nat := [
 theorem g1Discount_length : g1Discount.length = 128 := by decide +kernel
 theorem g2Discount_length : g2Discount.length = 128 := by decide +kernel
 
-/-- Structural lookup without the unused proof fields of an indexing instance. -/
 private def msmLookup (table : List Nat) (index cap : Nat) : Nat :=
   List.casesOn table cap fun a tail =>
     Nat.casesOn index a fun i => msmLookup tail i cap
@@ -185,8 +134,6 @@ private theorem msmLookup_eq_getD (table : List Nat) (index cap : Nat) :
     | zero => rfl
     | succ i => exact ih i
 
-/-- The MSM gas of `k` pairs with base cost `c`, the discount table and its
-cap. -/
 def msmGas (c : Nat) (table : List Nat) (cap k : Nat) : Nat :=
   k * c * (if k = 0 then 0 else table.getD (k - 1) cap) / 1000
 
@@ -194,7 +141,6 @@ def g1MsmGas (d : Bytes) : Nat := msmGas 12000 g1Discount 519 (d.length / 160)
 
 def g2MsmGas (d : Bytes) : Nat := msmGas 22500 g2Discount 524 (d.length / 288)
 
-/-- `G1MSM` (0x0c). -/
 def g1Msm (d : Bytes) : Option Bytes := do
   if d.length = 0 ∨ d.length % 160 ≠ 0 then none
   let terms ← (chunks 160 (d.map UInt8.toNat)).mapM fun c => do
@@ -202,7 +148,6 @@ def g1Msm (d : Bytes) : Option Bytes := do
     some (curve1.mul (ofBE (c.drop 128)) P.1)
   some (encodeG1 (terms.foldl curve1.add .inf))
 
-/-- `G2MSM` (0x0e). -/
 def g2Msm (d : Bytes) : Option Bytes := do
   if d.length = 0 ∨ d.length % 288 ≠ 0 then none
   let terms ← (chunks 288 (d.map UInt8.toNat)).mapM fun c => do
@@ -210,11 +155,8 @@ def g2Msm (d : Bytes) : Option Bytes := do
     some (curve2.mul (ofBE (c.drop 256)) Q.1)
   some (encodeG2 (terms.foldl curve2.add .inf))
 
-/-! ## The pairing check -/
-
 def pairingGas (d : Bytes) : Nat := 32600 * (d.length / 384) + 37700
 
-/-- `PAIRING_CHECK` (0x0f). -/
 def pairing (d : Bytes) : Option Bytes := do
   if d.length = 0 ∨ d.length % 384 ≠ 0 then none
   let pairs ← (chunks 384 (d.map UInt8.toNat)).mapM fun c => do
@@ -223,15 +165,24 @@ def pairing (d : Bytes) : Option Bytes := do
     some (P.1, Q.1)
   some (word (if pairingCurve.check pairs then 1 else 0))
 
-/-! ## Mapping to the curves (RFC 9380) -/
+private theorem checkedSquare_some {α : Type} [Mul α] [DecidableEq α]
+    {a c x : α}
+    (h : (if c * c = a then some c else none) = some x) : x * x = a := by
+  by_cases hc : c * c = a
+  · rw [if_pos hc] at h
+    have hx : c = x := Option.some.inj h
+    simpa only [hx] using hc
+  · rw [if_neg hc] at h
+    cases h
 
-/-- A square root in `Fp` (`p ≡ 3 mod 4`), if one exists. -/
 def sqrtFp (a : Fp) : Option Fp :=
   let c := FieldOps.pow a ((p + 1) / 4)
   if c * c = a then some c else none
 
-/-- A square root in `Fp2` (Adj and Rodríguez-Henríquez, algorithm 9, for
-`p ≡ 3 mod 4`), if one exists. -/
+example {a x : Fp} (h : sqrtFp a = some x) : x * x = a := by
+  unfold sqrtFp at h
+  exact checkedSquare_some h
+
 def sqrtFp2 (a : F2) : Option F2 :=
   let a₁ := FieldOps.pow a ((p - 3) / 4)
   let α := a₁ * (a₁ * a)
@@ -240,13 +191,14 @@ def sqrtFp2 (a : F2) : Option F2 :=
     if α = -FieldOps.one then ⟨0, 1⟩ * x₀ else FieldOps.pow (FieldOps.one + α) ((p - 1) / 2) * x₀
   if x * x = a then some x else none
 
-/-- RFC 9380's `sgn0`. -/
+example {a x : F2} (h : sqrtFp2 a = some x) : x * x = a := by
+  unfold sqrtFp2 at h
+  exact checkedSquare_some h
+
 def sgn0Fp (a : Fp) : Bool := a.val % 2 = 1
 
 def sgn0Fp2 (a : F2) : Bool := a.re.val % 2 = 1 || (a.re.val = 0 && a.im.val % 2 = 1)
 
-/-- RFC 9380's `map_to_curve_simple_swu` onto `y² = x³ + A·x + B`, with
-`Z`, the field's square root and `sgn0`. -/
 def sswu {α : Type} [FieldOps α] [DecidableEq α] (A B Z : α) (sqrt : α → Option α)
     (sgn0 : α → Bool) (u : α) : α × α :=
   let g (x : α) : α := x * x * x + A * x + B
@@ -257,24 +209,19 @@ def sswu {α : Type} [FieldOps α] [DecidableEq α] (A B Z : α) (sqrt : α → 
     | some y => (x₁, y)
     | none =>
       let x₂ := Z * (u * u) * x₁
-      -- One of `g x₁`, `g x₂` is a square (RFC 9380, section 6.6.2): the
-      -- default is unreachable, by that theorem, which is not proved here.
+
       (x₂, (sqrt (g x₂)).getD FieldOps.zero)
   (x, if sgn0 u = sgn0 y then y else -y)
 
-/-- A polynomial with coefficients lowest degree first, at `x` (Horner). -/
 def poly {α : Type} [FieldOps α] (cs : List α) (x : α) : α :=
   cs.foldr (fun c acc => acc * x + c) FieldOps.zero
 
-/-- RFC 9380's isogeny map: `(x_num/x_den, y·y_num/y_den)`, infinity on a
-vanishing denominator. -/
 def isoMap {α : Type} [FieldOps α] [DecidableEq α] (xn xd yn yd : List α) (pt : α × α) : Pt α :=
   let dx := poly xd pt.1
   let dy := poly yd pt.1
   if dx = FieldOps.zero ∨ dy = FieldOps.zero then .inf
   else .aff (poly xn pt.1 * FieldOps.inv dx) (pt.2 * poly yn pt.1 * FieldOps.inv dy)
 
-/-- `G1`'s effective cofactor. -/
 def hEff1 : Nat := 0xd201000000010001
 
 def mapToG1 (u : Fp) : Pt Fp :=
@@ -289,7 +236,6 @@ def mapToG2 (u : F2) : Pt F2 :=
 
 def mapFpToG1Gas (_ : Bytes) : Nat := 5500
 
-/-- `MAP_FP_TO_G1` (0x10). -/
 def mapFpToG1 (d : Bytes) : Option Bytes := do
   if d.length ≠ 64 then none
   let u ← decodeFp (d.map UInt8.toNat)
@@ -297,13 +243,10 @@ def mapFpToG1 (d : Bytes) : Option Bytes := do
 
 def mapFp2ToG2Gas (_ : Bytes) : Nat := 23800
 
-/-- `MAP_FP2_TO_G2` (0x11). -/
 def mapFp2ToG2 (d : Bytes) : Option Bytes := do
   if d.length ≠ 128 then none
   let u ← decodeFp2 (d.map UInt8.toNat)
   some (encodeG2 (mapToG2 u))
-
-/-! ## Failure cases and gas -/
 
 theorem decodeFp_eq_none_iff (b : List Nat) : decodeFp b = none ↔ p ≤ ofBE b := by
   unfold decodeFp
@@ -337,8 +280,6 @@ theorem g2Add_eq_none_iff (d : Bytes) :
   · simp only [h, ne_eq, not_false_eq_true, if_true, true_or, iff_true]
     exact rfl
 
-/-- A `do` block that decodes then returns fails exactly when the decoding
-does. -/
 theorem bind_some_eq_none {α β : Type} (o : Option α) (f : α → β) :
     (do let a ← o; some (f a)) = none ↔ o = none := by
   cases o <;> simp only [Option.bind_eq_bind, Option.bind_some, Option.bind_none, reduceCtorEq]
@@ -377,7 +318,6 @@ theorem g2Msm_eq_none_iff (d : Bytes) :
     rw [mapM_eq_none_iff]
     simp only [bind_some_eq_none]
 
-/-- One pair of the pairing check decodes exactly when both points do. -/
 theorem pair_eq_none (c : List Nat) :
     (do let P ← decodeG1Sub (c.take 128); let Q ← decodeG2Sub (c.drop 128); some (P.1, Q.1)) = none ↔
       decodeG1Sub (c.take 128) = none ∨ decodeG2Sub (c.drop 128) = none := by
@@ -403,7 +343,6 @@ theorem pairing_eq_none_iff (d : Bytes) :
     rw [mapM_eq_none_iff]
     simp only [pair_eq_none]
 
-/-- The MSM gas grows with the number of pairs. -/
 theorem msmGas_succ (c : Nat) (table : List Nat) (cap k : Nat) (hlen : table.length = 128)
     (htab : ∀ i < 128, (i + 1) * table.getD i cap ≤ (i + 2) * table.getD (i + 1) cap) :
     msmGas c table cap k ≤ msmGas c table cap (k + 1) := by
@@ -468,14 +407,11 @@ theorem mapFp2ToG2_eq_none_iff (d : Bytes) :
   · simp only [h, ne_eq, not_false_eq_true, if_true, true_or, iff_true]
     exact rfl
 
-/-! ## Vectors (Osaka's execution specification) -/
-
 #guard g1Msm (ofHex "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000a989badd40d6212b33cffc3f3763e9bc760f988c9926b26da9dd85e928483446346b8ed00e1de5d5ea93e354abe706c0000000000000000000000000000000000000000000000000000000000000001") == none
 #guard g1Add (ofHex "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000a989badd40d6212b33cffc3f3763e9bc760f988c9926b26da9dd85e928483446346b8ed00e1de5d5ea93e354abe706c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000a989badd40d6212b33cffc3f3763e9bc760f988c9926b26da9dd85e928483446346b8ed00e1de5d5ea93e354abe706c") == some (ofHex "00000000000000000000000000000000061e5e9176f0eaf720bb36853d02bf41bd493ef21b2e5ec39fcf409e5829a353cafb4b4afc8c3c3c2bc38787878773740000000000000000000000000000000003dce838b58d784d9e663fdf809f630c630692751c8af8af9b42d50ff90694b2e211bc0c19a333160a1ee6891b38838e")
 #guard g1AddGas (ofHex "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000a989badd40d6212b33cffc3f3763e9bc760f988c9926b26da9dd85e928483446346b8ed00e1de5d5ea93e354abe706c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000a989badd40d6212b33cffc3f3763e9bc760f988c9926b26da9dd85e928483446346b8ed00e1de5d5ea93e354abe706c") == 375
 #guard g2Msm (ofHex "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018c6b864ae17dc9da64203ffefb966306425a7bc6aeb7c75247438372716284a4173830420cd476ba1a365b95bfcec3800000000000000000000000000000000172e93db764a8400a7d5071b6b6f5de0da2f0f4a063119abca014006b7c40a2cfe291a1924e65db0d6d0fcfbf3bf3d5c0000000000000000000000000000000000000000000000000000000000000001") == none
 #guard pairing (ofHex "0000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018c6b864ae17dc9da64203ffefb966306425a7bc6aeb7c75247438372716284a4173830420cd476ba1a365b95bfcec3800000000000000000000000000000000172e93db764a8400a7d5071b6b6f5de0da2f0f4a063119abca014006b7c40a2cfe291a1924e65db0d6d0fcfbf3bf3d5c") == none
-
 
 #guard g1Add (ofHex "0000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e10000000000000000000000000000000009ece308f9d1f0131765212deca99697b112d61f9be9a5f1f3780a51335b3ff981747a0b2ca2179b96d2c0c9024e522400000000000000000000000000000000032b80d3a6f5b09f8a84623389c5f80ca69a0cddabc3097f9d9c27310fd43be6e745256c634af45ca3473b0590ae30d1") == some (ofHex "000000000000000000000000000000000c9b60d5afcbd5663a8a44b7c5a02f19e9a77ab0a35bd65809bb5c67ec582c897feb04decc694b13e08587f3ff9b5b6000000000000000000000000000000000143be6d078c2b79a7d4f1d1b21486a030ec93f56aa54e1de880db5a66dd833a652a95bee27c824084006cb5644cbd43f")
 #guard g1AddGas (ofHex "0000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e10000000000000000000000000000000009ece308f9d1f0131765212deca99697b112d61f9be9a5f1f3780a51335b3ff981747a0b2ca2179b96d2c0c9024e522400000000000000000000000000000000032b80d3a6f5b09f8a84623389c5f80ca69a0cddabc3097f9d9c27310fd43be6e745256c634af45ca3473b0590ae30d1") == 375
@@ -517,6 +453,5 @@ theorem mapFp2ToG2_eq_none_iff (d : Bytes) :
 #guard mapFp2ToG2 (ofHex "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002") == some (ofHex "0000000000000000000000000000000003affe41434a0ba0c57a12a44659cb0a3880ab68671d59e14ada0697e1e284a24bbd1027e73fb2a5fa1b7b83a2ee3693000000000000000000000000000000000afb7419b48cf4b1d4205cb7a65b76bb00da7a3bdfa1b8da5bfda384aa78e27dbe4838d2660c885c80845e83ff4eea300000000000000000000000000000000016472687b24e83cbb72b626b04f37e880ff22701500ab276f7a553cd95315b06f39f8f21218aabc3367aeca0152322e8000000000000000000000000000000000a17e8006aa32586025a73fb9f5147067aeec10241a8eca8d8e2f121cf18080cfb0618c528d92a5ad538c7ffcf46d81f")
 #guard mapFp2ToG2Gas (ofHex "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002") == 23800
 #guard mapFp2ToG2 (ofHex "000000000000000000000000000000001a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000") == none
-
 
 end Solidity.Precompiles.Bls12381
