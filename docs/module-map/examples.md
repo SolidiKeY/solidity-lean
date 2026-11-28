@@ -202,6 +202,16 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Inheritance/UsingFor.lean` | solc `using_for_function_on_int`: a library function bound with `using … for uint`, inlined; both specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorArgs.lean` | solc `base_constructor_arguments`: a base constructor's header argument, then the derived body (`m_a == 49`); all four specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Inheritance/ConstructorOrder.lean` | solc `order_of_evaluation`: base constructor arguments evaluated in linearization order, not header order (`[1, 3, 2, 4]`); `f` and constructor proved by `sol_prove`, `g` (memory copy) without a clause. |
+| Module | Its examples |
+|---|---|
+| `Examples/Benchmark/MemoryAlgorithms/ArrayEquals.lean` | Equality of two memory arrays; result iff equal lengths and elements (unknown: quantified step leaf). |
+| `Examples/Benchmark/MemoryAlgorithms/BubbleSort.lean` | In-place bubble sort of at most eight elements; sortedness clauses, full permutation target (unknown: memory-write loop frame). |
+| `Examples/Benchmark/MemoryAlgorithms/CountOccurrences.lean` | Occurrences of a key; exact counting target retained pending a counting aggregate (unknown). |
+| `Examples/Benchmark/MemoryAlgorithms/Dedupe.lean` | Distinct values of a sorted array into a caller's array; increasing and covering clauses (unknown: memory-write loop frame). |
+| `Examples/Benchmark/MemoryAlgorithms/IsSorted.lean` | Adjacent-pair sortedness scan; result iff every adjacent pair is ordered (unknown: quantified step leaf). |
+| `Examples/Benchmark/MemoryAlgorithms/PairSum.lean` | Two-pointer pair sum on a sorted array; result iff two positions sum to the target (unknown: existential leaf). |
+| `Examples/Benchmark/MemoryAlgorithms/PrefixSums.lean` | Prefix sums into a caller's array; zero entry and recurrence clauses (unknown: memory-write loop frame). |
+| `Examples/Benchmark/MemoryAlgorithms/Rotate.lean` | Rotation by k into a caller's array; placement clause, false when `r` aliases `xs` (counterexample in the docstring). |
 | `Examples/Benchmark/Patterns/CommitReveal.lean` | Solidity by Example SecuredFindThisHash commit-reveal: constructor and commitSolution proved, getMySolution's guard proved, its returns unspecified (an unnamed tuple cannot be named by a clause); revealSolution retained as unknown (heartbeat exhaustion on string hashes and payment branches). |
 | `Examples/Benchmark/Patterns/StateMachine.lean` | Solidity docs StateMachine with timed transitions: forward-only stage clauses for g, h, i proved; bid and reveal retained as unknown (read-after-save stage arithmetic missing in the leaf closer). |
 | `Examples/Benchmark/Patterns/Withdrawal.lean` | Solidity docs WithdrawalContract pull payments: constructor and withdraw proved; becomeRichest retained as unknown (quantified mapping-save leaf against the snapshot). |
@@ -215,16 +225,6 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
 | `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |
 | `Examples/Benchmark/SolkeyGames/SendEther.lean` | solkey's three ways to send ether: `sendViaTransfer`, `sendViaSend` and `sendViaCall` each refuted by `sol_refute`: with `_to == msg.sender == this` the booked `msg.value` is never paid out, so the self-payment clauses fail. |
-| Module | Its examples |
-|---|---|
-| `Examples/Benchmark/MemoryAlgorithms/ArrayEquals.lean` | Equality of two memory arrays; result iff equal lengths and elements (unknown: quantified step leaf). |
-| `Examples/Benchmark/MemoryAlgorithms/BubbleSort.lean` | In-place bubble sort of at most eight elements; sortedness clauses, full permutation target (unknown: memory-write loop frame). |
-| `Examples/Benchmark/MemoryAlgorithms/CountOccurrences.lean` | Occurrences of a key; exact counting target retained pending a counting aggregate (unknown). |
-| `Examples/Benchmark/MemoryAlgorithms/Dedupe.lean` | Distinct values of a sorted array into a caller's array; increasing and covering clauses (unknown: memory-write loop frame). |
-| `Examples/Benchmark/MemoryAlgorithms/IsSorted.lean` | Adjacent-pair sortedness scan; result iff every adjacent pair is ordered (unknown: quantified step leaf). |
-| `Examples/Benchmark/MemoryAlgorithms/PairSum.lean` | Two-pointer pair sum on a sorted array; result iff two positions sum to the target (unknown: existential leaf). |
-| `Examples/Benchmark/MemoryAlgorithms/PrefixSums.lean` | Prefix sums into a caller's array; zero entry and recurrence clauses (unknown: memory-write loop frame). |
-| `Examples/Benchmark/MemoryAlgorithms/Rotate.lean` | Rotation by k into a caller's array; placement clause, false when `r` aliases `xs` (counterexample in the docstring). |
 | `Examples/Benchmark/Tokens/ERC20.lean` | Pinned Solidity by Example ERC20. Full `transfer`, `_mint`, `_burn`, `mint`, `burn` clauses/frames proved. `approve`, `transferFrom`: unknown guarded two-key allowance frames. Supply equals finite-support balance sum: unknown sum syntax/update laws; approve normal-termination diamond proved; six other no-overflow diamonds unknown at checked-update definedness/range propagation. |
 | `Examples/Benchmark/Tokens/ERC721.lean` | Pinned Solidity by Example non-safe ERC721 core. `ownerOf`, `balanceOf`, `approve`, `getApproved`, `transferFrom`, `_mint`, `_burn` proved, including unique owner slot, transfer approval clearing and frames. `setApprovalForAll`: unknown two-key frame; `_isApprovedOrOwner`: unknown short-circuit Boolean equivalence. Aggregate owner-count invariant and safe receiver callbacks unproved. |
 | `Examples/Benchmark/Tokens/ERC1155.lean` | Pinned OpenZeppelin 5.0.2 callback-free `_update` core. `balanceOf`, `isApprovedForAll` proved. `_setApprovalForAll`, `setApprovalForAll`: unknown two-key frames. `_update`: unknown memory length lower bound, quantified snapshot frame and filtered prefix-sum invariant/update laws (duplicates, self-transfer and zero-address cases retained). |
