@@ -92,6 +92,15 @@ theorem inferN_indexArray {i : Syn .expr} {l : Source.DataLoc} {len : Option Nat
   show (Typed.inferN n Γ a >>= _) = _
   simp [ha, hi, hk, hb]
 
+/-- Mapping reads retain the declared key-conversion check. -/
+theorem inferN_indexMapping {i : Syn .expr} {κ σ : STy}
+    {da : Typed Γ a (.mapping κ τ)} {di : Typed Γ i σ}
+    (ha : Typed.inferN n Γ a = some ⟨.mapping κ τ, da⟩)
+    (hi : Typed.inferN n Γ i = some ⟨σ, di⟩)
+    (hk : σ.implicit Γ.isBase Γ.mapFree κ = true) :
+    Typed.inferN (n + 1) Γ (.index a (.some i)) = some ⟨τ, .indexMapping da di hk⟩ := by
+  show (Typed.inferN n Γ a >>= _) = _; simp [ha, hi, hk]
+
 /-- Inline arrays keep the inferred common type and all element-fit checks. -/
 theorem inferN_inlineArray {xs : Syn (.list .expr)} {τs : List STy} {σ : STy}
     {d : Typed Γ a τ} {ds : Source.TypedArgs Γ xs τs}
@@ -105,14 +114,9 @@ theorem inferN_inlineArray {xs : Syn (.list .expr)} {τs : List STy} {σ : STy}
       some ⟨_, .inlineArray d ds hc hw hf⟩ := by
   show (Typed.inferN n Γ a >>= _) = _
   simp only [ha, hs, Option.bind_eq_bind, Option.bind_some]
-  split
-  · rename_i ρ hρ
-    have he : ρ = σ := Option.some.inj (hρ.symm.trans hc)
-    subst ρ
-    simp [hw, hf]
-  · rename_i hρ
-    rw [hc] at hρ
-    cases hρ
+  split <;> rename_i h
+  · cases Option.some.inj (h.symm.trans hc); simp [hw, hf]
+  · simp_all
 
 /-- Allocation checks the decoded memory type before inferring its size. -/
 theorem inferN_newArray {t : Syn .typeName} {σ : STy} {d : Typed Γ a σ}
@@ -120,22 +124,10 @@ theorem inferN_newArray {t : Syn .typeName} {σ : STy} {d : Typed Γ a σ}
     (ha : Typed.inferN n Γ a = some ⟨σ, d⟩) (hi : σ.isIndex = true) :
     Typed.inferN (n + 1) Γ (.call (.new t) (.positional (.cons a .nil))) =
       some ⟨τ, .newArray ht hn d hi⟩ := by
-  change (match ht' : t.ty Γ.env Γ.scope .memory with
-    | some ρ => if hn' : ρ.newable = true then do
-        let ⟨σ', d'⟩ ← Typed.inferN n Γ a
-        if hi' : σ'.isIndex = true then
-          pure (⟨ρ, Typed.newArray ht' hn' d' hi'⟩ :
-            Source.Inferred Γ (.call (.new t) (.positional (.cons a .nil)))) else none
-      else none
-    | none => none) = _
-  split
-  · rename_i ρ hρ
-    have he : ρ = τ := Option.some.inj (hρ.symm.trans ht)
-    subst ρ
-    simp [hn, ha, hi]
-  · rename_i hρ
-    rw [ht] at hρ
-    cases hρ
+  change (match ht' : t.ty Γ.env Γ.scope .memory with | some ρ => _ | none => none) = _
+  split <;> rename_i h
+  · cases Option.some.inj (h.symm.trans ht); simp [hn, ha, hi]
+  · simp_all
 
 /-- Nonempty tuple tails use their inferred slot types, preserving mobility. -/
 theorem inferN_tuple {b : Syn (.opt .expr)} {bs : Syn (.list (.opt .expr))}
