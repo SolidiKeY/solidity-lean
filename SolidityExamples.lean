@@ -34,6 +34,14 @@ import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.SolcVerify.CaseAnalysisSimple
+import Solidity.Examples.Benchmark.SolcVerify.DoWhile
+import Solidity.Examples.Benchmark.SolcVerify.LoopInvar
+import Solidity.Examples.Benchmark.SolcVerify.OldExpr
+import Solidity.Examples.Benchmark.SolcVerify.OverflowSpec
+import Solidity.Examples.Benchmark.SolcVerify.Simple
+import Solidity.Examples.Benchmark.SolcVerify.Storage
+import Solidity.Examples.Benchmark.SolcVerify.StructMapping
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Tokens.ERC1155
 import Solidity.Examples.Benchmark.Tokens.ERC20
