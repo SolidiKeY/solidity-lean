@@ -150,7 +150,7 @@ theorem dispatch_zero_complete (G : Glob E) :
       pure 7 : EM E [.bytes .memory,.bool] Nat)).run (caller,seed) =
       (.error .timeout,(caller,startedExpected)) := by rfl
 
-/- BEGIN GENERATED H16 AXIOM PINS -/
+/- BEGIN GENERATED AXIOM PINS -/
 /-- info: 'Solidity.Source.FailureExecution.Controls.own_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.Controls.own_complete
 /-- info: 'Solidity.Source.FailureExecution.Controls.disabled_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -205,6 +205,6 @@ theorem dispatch_zero_complete (G : Glob E) :
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.Controls.panic_bytes
 /-- info: 'Solidity.Source.FailureExecution.Controls.dispatch_zero_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.Controls.dispatch_zero_complete
-/- END GENERATED H16 AXIOM PINS -/
+/- END GENERATED AXIOM PINS -/
 
 end Solidity.Source.FailureExecution.Controls

@@ -6,7 +6,7 @@ These controls consume the intrinsic SemanticsExamples program, bodies and
 strategy unchanged (including its toy Fixed hash); they do not build another
 interpreter or assert compiler/EVM correspondence. Expected full states are
 source-derived. Request/ancestor examples use preinitialized typed cursors,
-not a deployment/session execution; H18 root wiring and H19 funding remain
+not a deployment/session execution; root wiring and funding remain
 open. Heap indices are logical Source references, not physical EVM pointers.
 The entered-transfer composition is proved; the outer CALL-prefix lemma is
 not supplied. No final Y10/P8 or fixed-plan horizon adequacy is claimed. -/

@@ -2,7 +2,7 @@ import Solidity.Source.Eval
 import Solidity.Source.FailurePrimitives
 
 /-!
-# Explicit-plan Source frame operations (H16 execution leaf)
+# Explicit-plan Source frame operations (execution leaf)
 
 These operations run in the actual Source EM and use its existing event
 emitter. The immutable plan is a parameter, never a mutable St field. None
@@ -22,7 +22,7 @@ by the eventual root driver; this helper does not classify receipt events. -/
 def emit (plan : RuntimePlan) (event : Roadmap.Event) : EM E Γ Unit :=
   Source.emitEvent event plan
 
-/- BEGIN GENERATED H16 AXIOM PINS -/
+/- BEGIN GENERATED AXIOM PINS -/
 /-- info: 'Solidity.Source.FailureExecution.check' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.check
 /-- info: 'Solidity.Source.FailureExecution.pending' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -31,6 +31,6 @@ def emit (plan : RuntimePlan) (event : Roadmap.Event) : EM E Γ Unit :=
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.frame
 /-- info: 'Solidity.Source.FailureExecution.emit' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Source.FailureExecution.emit
-/- END GENERATED H16 AXIOM PINS -/
+/- END GENERATED AXIOM PINS -/
 
 end Solidity.Source.FailureExecution
