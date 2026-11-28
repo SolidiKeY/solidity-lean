@@ -6,9 +6,13 @@ import Solidity.Calculus.Closers
 /-!
 # Benchmark: a byte at an index, reverting out of bounds
 
-Source: <https://raw.githubusercontent.com/ethereum/solidity/v0.8.28/docs/types/reference-types.rst> ("bytes and string as Arrays":
-`bytes` is a `bytes1[]`) and <https://raw.githubusercontent.com/ethereum/solidity/v0.8.28/docs/control-structures.rst> (an index
-out of bounds panics with 0x32), Solidity 0.8.28 documentation.
+Source: <https://raw.githubusercontent.com/ethereum/solidity/v0.8.28/docs/types/reference-types.rst>, lines 152–165 ("bytes and string
+as Arrays": `bytes` is a `bytes1[]`) and
+<https://raw.githubusercontent.com/ethereum/solidity/v0.8.28/docs/control-structures.rst>, line 626 (an index out of bounds fails with
+`Panic(0x32)`), Solidity 0.8.28 documentation.  The model reverts there
+with no data (`docs/semantic-gaps.md`, "Panic data"); the box accepts the
+revert, as solc's `Panic(0x32)` is a revert too (unlike KeY's reading of
+`assert`).
 Adaptation: one storage `bytes` and its read accessor.
 
 Natural specification: within bounds the result is the stored byte; out of

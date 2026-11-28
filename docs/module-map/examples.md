@@ -169,9 +169,9 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Bytes/ConcatLength.lean` | Solidity 0.8.28 docs `bytes.concat`/`string.concat` contract `C`; its two length `assert`s unknown (`sol_prove` exhausts heartbeats over byte-wise copies; needs a concat length rule). |
 | `Examples/Benchmark/Bytes/ByteAt.lean` | Storage `bytes` index accessor: in-bounds result `data[i]` proved; normal termination implies `i < data.length` (out-of-bounds revert) proved. |
 | `Examples/Benchmark/Bytes/HexDigit.lean` | OpenZeppelin 5.3.0 `HEX_DIGITS[value & 0xf]` lookup; ASCII digit clauses unknown (closer lacks mask-as-modulo and symbolic `bytes16` byte); two lookups proved concretely. |
-| `Examples/Benchmark/Bytes/Bytes32Cast.lean` | `bytes32`/`uint256` explicit conversions (Solidity 0.8.28 docs): both conversions and both round trips proved. |
+| `Examples/Benchmark/Bytes/Bytes32Cast.lean` | `bytes32`/`uint256` explicit conversions (Solidity 0.8.28 docs): both conversions and both round trips proved (number equalities), byte order checked at one value. |
 | `Examples/Benchmark/Bytes/EncodePackedLength.lean` | `abi.encodePacked` lengths: the ABI spec's documented 18-byte example and `int16, bytes1, uint16` at any arguments (5 bytes) proved. |
-| `Examples/Benchmark/Bytes/SliceCopy.lean` | Calldata `bytes` slice copied to storage (docs "Array Slices", OpenZeppelin `Bytes.slice` semantics): stored length clause unknown (`sol_prove` exhausts heartbeats; elementwise clause unstatable over calldata). |
+| `Examples/Benchmark/Bytes/SliceCopy.lean` | Calldata `bytes` slice copied to storage (Solidity 0.8.28 docs "Array Slices" and data-location copies): stored length clause unknown (`sol_prove` exhausts heartbeats; elementwise clause unstatable over calldata). |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/Defi/ConstantProduct.lean` | Uniswap v2 zero-fee reserve kernel: `swap` proved by `sol_prove`, including exact reserve effects and nondecreasing k. No external token/callback claim. |

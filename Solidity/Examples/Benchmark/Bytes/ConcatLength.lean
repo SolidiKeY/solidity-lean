@@ -15,7 +15,7 @@ concatenation as the sum of its parts' lengths; `spec!{f}` owes them (an
 `assert` is a panic, which the box does not accept).
 
 Status of `f`: **unknown**.  `sol_prove` exhausts the default heartbeat
-budget after its 16384-step stage (about 8 minutes): each concatenation is
+budget after its 16384-step stage (about 8 minutes), so no leaf is reached: each concatenation is
 copied byte by byte over symbolic lengths.  Missing: a length rule for
 `concat` (its result's `.length` as the sum of the arguments') instead of
 the byte-wise copy loop.

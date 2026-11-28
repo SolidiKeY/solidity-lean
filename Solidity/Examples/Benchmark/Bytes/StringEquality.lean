@@ -7,7 +7,7 @@ import Solidity.Calculus.Closers
 # Benchmark: string equality by `keccak256`
 
 Source: <https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v5.3.0/contracts/utils/Strings.sol>, lines 131–136 (OpenZeppelin 5.3.0 `Strings.equal`).
-Changes: none (an internal library function, written as a function of the contract).
+Adaptation: the library function written as an internal function of a contract; its body unchanged.
 
 Natural specification: equal contents give `true`, and `true` implies
 equal lengths.  (That `true` implies equal contents rests on collision

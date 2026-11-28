@@ -6,13 +6,15 @@ import Solidity.Calculus.Closers
 /-!
 # Benchmark: `bytes32` / `uint256` casts round trip
 
-Source: <https://raw.githubusercontent.com/ethereum/solidity/v0.8.28/docs/types/conversion.rst>, lines 100–108 (Solidity 0.8.28
+Source: <https://raw.githubusercontent.com/ethereum/solidity/v0.8.28/docs/types/conversion.rst>, lines 98–108 (Solidity 0.8.28
 documentation: integers and fixed-size byte arrays of the same size convert
 explicitly, `uint32(bytes4(a))`).
 Adaptation: the conversions at 32 bytes, each way and both round trips.
 
-Natural specification: a `bytes32` holds its bytes big-endian, so each
-conversion keeps the number and each round trip is the identity.
+Natural specification: each conversion keeps the number and each round
+trip is the identity.  The clauses compare the underlying numbers (the
+model holds a `bytesN` as its bytes read big-endian, `Examples/Tactics/Bytes.lean`);
+the byte order itself is checked at one value (`toBytes32_byteOrder`).
 Status: `toBytes32`, `toUint256`, `uintRoundTrip`, `bytesRoundTrip`
 all **proved**.
 -/
@@ -53,5 +55,11 @@ theorem spec_uintRoundTrip : ⊢ spec!{ uintRoundTrip } := by
 /-- `bytes32(uint256(b)) == b`. -/
 theorem spec_bytesRoundTrip : ⊢ spec!{ bytesRoundTrip } := by
   sol_prove
+
+/-- `bytes32(258)`: byte 31 is `0x02`, byte 30 is `0x01`, byte 0 is `0`. -/
+theorem toBytes32_byteOrder : ⊨ᶠ dl!{ ⟨ bytes32 b = toBytes32(258); bytes1 lo = b[31];
+    bytes1 mid = b[30]; bytes1 hi = b[0]; ⟩ lo == 2 && mid == 1 && hi == 0 } := by
+  sol_symex
+  sol_decide
 
 end Solidity.Examples.Benchmark.Bytes.Bytes32Cast

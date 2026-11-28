@@ -8,8 +8,9 @@ import Solidity.Calculus.Closers
 
 Source: <https://raw.githubusercontent.com/ethereum/solidity/v0.8.28/docs/types/reference-types.rst>, lines 599–626 (Solidity 0.8.28
 documentation, "Array Slices": `x[start:end]`, implemented for calldata
-arrays) and the copy semantics of <https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v5.3.0/contracts/utils/Bytes.sol> lines 87–100
-(OpenZeppelin 5.3.0 `Bytes.slice`, a fresh array of `end - start` bytes).
+arrays; a slice out of range reverts) and lines 58–59 (a calldata slice
+assigned to storage is copied).  Not OpenZeppelin's `Bytes.slice`, which
+clamps its bounds and never reverts.
 Adaptation: the slice of a calldata `bytes` copied to storage; `start`
 and `end` are spelled `startIndex` and `endIndex` (`end` is a Lean
 keyword).
@@ -20,7 +21,8 @@ elementwise clause cannot be written: it names the calldata parameter,
 which an obligation cannot (as in `StringEquality`).
 
 Status of `keep`: **unknown**.  `sol_prove` exhausts the default
-heartbeat budget after its 16384-step stage (about 5 minutes).  Missing: a
+heartbeat budget after its 16384-step stage (about 5 minutes), so no leaf
+is reached.  Missing: a
 rule for a calldata slice saved to storage at a symbolic length (its
 `.length` read back) instead of the byte-wise copy loop.
 -/
