@@ -52,6 +52,14 @@ import Solidity.Examples.Benchmark.Inheritance.ModifierStacking
 import Solidity.Examples.Benchmark.Inheritance.SuperInConstructor
 import Solidity.Examples.Benchmark.Inheritance.UsingFor
 import Solidity.Examples.Benchmark.Mapping
+import Solidity.Examples.Benchmark.MathLib.Average
+import Solidity.Examples.Benchmark.MathLib.CeilDiv
+import Solidity.Examples.Benchmark.MathLib.Log2
+import Solidity.Examples.Benchmark.MathLib.MinMax
+import Solidity.Examples.Benchmark.MathLib.MulDiv64
+import Solidity.Examples.Benchmark.MathLib.Saturating
+import Solidity.Examples.Benchmark.MathLib.SignedAbs
+import Solidity.Examples.Benchmark.MathLib.Sqrt
 import Solidity.Examples.Benchmark.MemoryAlgorithms.ArrayEquals
 import Solidity.Examples.Benchmark.MemoryAlgorithms.BubbleSort
 import Solidity.Examples.Benchmark.MemoryAlgorithms.CountOccurrences
