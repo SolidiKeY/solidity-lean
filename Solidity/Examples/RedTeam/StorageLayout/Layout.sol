@@ -15,3 +15,8 @@ contract Left { uint256 left; }
 contract Right { uint256 right; }
 contract Diamond is Left, Right { uint256 last; }
 contract Reversed is Right, Left { uint256 last; }
+contract Narrow { uint8 a; int16 b; bytes3 c; address d; bool e; uint256 tail; }
+contract Ancestor { uint256 ancestor; }
+contract BranchLeft is Ancestor { uint256 left; }
+contract BranchRight is Ancestor { uint256 right; }
+contract Shared is BranchLeft, BranchRight { uint256 last; }
