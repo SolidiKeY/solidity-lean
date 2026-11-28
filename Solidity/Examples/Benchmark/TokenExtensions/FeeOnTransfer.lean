@@ -14,8 +14,7 @@ Natural spec: for distinct `src`, `dst` and the sink `balanceOf[address(0)]`,
 the three balances keep their sum (the fee goes to the sink), each moves by its
 exact amount, nothing else or `totalSupply` changes, and a third party's finite
 allowance is spent.
-Verdicts: constructor proved; transferFrom, transfer UNKNOWN at the three-slot
-sum leaf, every other clause proved as a component.
+Verdicts: on each declaration below.
 -/
 namespace Solidity.Examples.Benchmark.TokenExtensions.FeeOnTransfer
 def TransferFeeToken : Contract := contract!{

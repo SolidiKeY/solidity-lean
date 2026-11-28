@@ -14,10 +14,9 @@ Sources (OpenZeppelin 4.9.6): <https://raw.githubusercontent.com/OpenZeppelin/op
 `RoleData` is the mappings `_members[role][account]` and `_admin[role]`. Events,
 pausing and inheritance are omitted.
 Natural spec: only a minter mints; a mint adds `amount` to the supply and to
-`to` (under `balance <= supply`, the supply-sum instance that rules out the
-unchecked wrap) and touches no other balance; granting needs the admin role.
-Verdicts: hasRole, _grantRole, grantRole proved; _mint, mint UNKNOWN at the
-unchecked credit, every other clause (role guard, supply, frame) proved.
+`to` (both unchecked wrap cases kept) and touches no other balance; granting
+needs the admin role.
+Verdicts: on each declaration below.
 -/
 namespace Solidity.Examples.Benchmark.TokenExtensions.RoleMint
 def RoleMint : Contract := contract!{
@@ -43,7 +42,8 @@ def RoleMint : Contract := contract!{
     _grantRole(role, account);
   }
   ensures account != address(0) && _totalSupply == \old(_totalSupply) + amount;
-  ensures \old(_balances[account]) <= \old(_totalSupply) -> _balances[account] == \old(_balances[account]) + amount;
+  ensures \old(_balances[account]) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount -> _balances[account] == \old(_balances[account]) + amount;
+  ensures \old(_balances[account]) > 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount -> _balances[account] == \old(_balances[account]) - (115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount) - 1;
   ensures \forall address a; a != account -> _balances[a] == \old(_balances[a]);
   function _mint(address account, uint amount) {
     require(account != address(0));
@@ -52,7 +52,8 @@ def RoleMint : Contract := contract!{
   }
   ensures \old(_members[_minterRole][msg.sender]);
   ensures to != address(0) && _totalSupply == \old(_totalSupply) + amount;
-  ensures \old(_balances[to]) <= \old(_totalSupply) -> _balances[to] == \old(_balances[to]) + amount;
+  ensures \old(_balances[to]) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount -> _balances[to] == \old(_balances[to]) + amount;
+  ensures \old(_balances[to]) > 115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount -> _balances[to] == \old(_balances[to]) - (115792089237316195423570985008687907853269984665640564039457584007913129639935 - amount) - 1;
   ensures \forall address a; a != to -> _balances[a] == \old(_balances[a]);
   function mint(address to, uint amount) {
     bool ok = hasRole(_minterRole, msg.sender);
@@ -68,8 +69,8 @@ theorem hasRole_obligation : ⊢ spec!{ hasRole } := by sol_prove
 theorem grantRoleCore_obligation : ⊢ spec!{ _grantRole } := by sol_prove
 /-- PROVED: `grantRole` needs the admin role and makes the account a member. -/
 theorem grantRole_obligation : ⊢ spec!{ grantRole } := by sol_prove
-/-- UNKNOWN: the unchecked credit leaves `se5 +% se2` against `… + amount` under
-`balance <= supply`; every other clause is `mintCore_supplyFrame`. -/
+/-- UNKNOWN: the unchecked credit leaves `se5 +% se2` against both wrap
+cases; every other clause is `mintCore_supplyFrame`. -/
 def mintCore_obligation := spec!{ _mint }
 /-- UNKNOWN: the same wrapped credit, inlined; every other clause is `mint_gated`. -/
 def mint_obligation := spec!{ mint }

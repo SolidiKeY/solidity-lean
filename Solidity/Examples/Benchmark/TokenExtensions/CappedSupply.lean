@@ -13,10 +13,9 @@ base `_update` (inlined at the head of the override), on the new supply, on
 the mint path only. Custom-error reverts are `revert();`; `from` is a Lean
 keyword (`from_`); events, metadata and inheritance are omitted.
 Natural spec: the mint path never leaves the supply above the cap; a mint adds
-exactly `value` to the supply, credits the account (under `balance <= supply`,
-the supply-sum instance that rules out the unchecked wrap), nothing else.
-Verdicts: constructor, cap proved; _update, _mint UNKNOWN (cap bound beside
-unchecked saves, wrapped credit); mint supply and frame proved.
+exactly `value` to the supply, credits the account (both unchecked wrap cases kept, as in
+the 4.9.6 port), nothing else.
+Verdicts: on each declaration below.
 -/
 namespace Solidity.Examples.Benchmark.TokenExtensions.CappedSupply
 def ERC20Capped : Contract := contract!{
@@ -47,7 +46,8 @@ def ERC20Capped : Contract := contract!{
     }
   }
   ensures account != address(0) && _totalSupply == \old(_totalSupply) + value && _totalSupply <= _cap;
-  ensures \old(_balances[account]) <= \old(_totalSupply) -> _balances[account] == \old(_balances[account]) + value;
+  ensures \old(_balances[account]) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 - value -> _balances[account] == \old(_balances[account]) + value;
+  ensures \old(_balances[account]) > 115792089237316195423570985008687907853269984665640564039457584007913129639935 - value -> _balances[account] == \old(_balances[account]) - (115792089237316195423570985008687907853269984665640564039457584007913129639935 - value) - 1;
   ensures \forall address a; a != account -> _balances[a] == \old(_balances[a]);
   function _mint(address account, uint value) {
     if (account == address(0)) { revert(); }

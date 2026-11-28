@@ -12,11 +12,10 @@ and the same commit's `token/ERC20/ERC20.sol` (`_update`, `_burn`,
 (`Benchmark/Tokens/ERC20Burnable.lean`) burning runs through the 5.x
 `_update(account, address(0), value)` hub. Custom-error reverts are `revert();`;
 `from` is `from_`; the event flag, events and inheritance are omitted.
-Natural spec: `burn`/`burnFrom` debit holder and supply by `value` (under
-`balance <= supply`, the supply-sum instance that rules out the unchecked
-wrap), touch no other balance; `burnFrom` spends a finite allowance only.
-Verdicts: _approve proved; _spendAllowance, _burn, burn, burnFrom UNKNOWN at
-guarded unchecked subtractions; burn frame and infinite allowance proved.
+Natural spec: `burn`/`burnFrom` debit the holder by `value` and the supply by
+`value` (its unchecked wrap case kept, as in the 4.9.6 port), touch no other
+balance; `burnFrom` spends a finite allowance only.
+Verdicts: on each declaration below.
 -/
 namespace Solidity.Examples.Benchmark.TokenExtensions.Burnable
 def ERC20Burnable : Contract := contract!{
@@ -48,20 +47,23 @@ def ERC20Burnable : Contract := contract!{
     }
   }
   ensures account != address(0) && \old(_balances[account]) >= value;
-  ensures \old(_balances[account]) <= \old(_totalSupply) -> _balances[account] == \old(_balances[account]) - value && _totalSupply == \old(_totalSupply) - value;
+  ensures _balances[account] == \old(_balances[account]) - value && (\old(_totalSupply) >= value -> _totalSupply == \old(_totalSupply) - value);
+  ensures \old(_totalSupply) < value -> _totalSupply == 115792089237316195423570985008687907853269984665640564039457584007913129639935 - (value - \old(_totalSupply)) + 1;
   ensures \forall address a; a != account -> _balances[a] == \old(_balances[a]);
   function _burn(address account, uint value) {
     if (account == address(0)) { revert(); }
     _update(account, address(0), value);
   }
   ensures msg.sender != address(0) && \old(_balances[msg.sender]) >= value;
-  ensures \old(_balances[msg.sender]) <= \old(_totalSupply) -> _balances[msg.sender] == \old(_balances[msg.sender]) - value && _totalSupply == \old(_totalSupply) - value;
+  ensures _balances[msg.sender] == \old(_balances[msg.sender]) - value && (\old(_totalSupply) >= value -> _totalSupply == \old(_totalSupply) - value);
+  ensures \old(_totalSupply) < value -> _totalSupply == 115792089237316195423570985008687907853269984665640564039457584007913129639935 - (value - \old(_totalSupply)) + 1;
   ensures \forall address a; a != msg.sender -> _balances[a] == \old(_balances[a]);
   function burn(uint value) {
     _burn(msg.sender, value);
   }
   ensures account != address(0) && \old(_balances[account]) >= value;
-  ensures \old(_balances[account]) <= \old(_totalSupply) -> _balances[account] == \old(_balances[account]) - value && _totalSupply == \old(_totalSupply) - value;
+  ensures _balances[account] == \old(_balances[account]) - value && (\old(_totalSupply) >= value -> _totalSupply == \old(_totalSupply) - value);
+  ensures \old(_totalSupply) < value -> _totalSupply == 115792089237316195423570985008687907853269984665640564039457584007913129639935 - (value - \old(_totalSupply)) + 1;
   ensures \forall address a; a != account -> _balances[a] == \old(_balances[a]);
   ensures \old(_allowances[account][msg.sender]) == 115792089237316195423570985008687907853269984665640564039457584007913129639935 -> _allowances[account][msg.sender] == 115792089237316195423570985008687907853269984665640564039457584007913129639935;
   ensures \old(_allowances[account][msg.sender]) != 115792089237316195423570985008687907853269984665640564039457584007913129639935 -> _allowances[account][msg.sender] == \old(_allowances[account][msg.sender]) - value;
@@ -76,7 +78,7 @@ open scoped Scoped
 theorem approve_obligation : ⊢ spec!{ _approve } := by sol_prove
 /-- UNKNOWN: the finite branch saves `currentAllowance -% value` (guarded). -/
 def spendAllowance_obligation := spec!{ _spendAllowance }
-/-- UNKNOWN: the leaf saves `se9 -% se8` and `se16 -% se8` (guarded), and stays open. -/
+/-- UNKNOWN: the leaf saves `se9 -% se8` (guarded) and `se16 -% se8`, and stays open. -/
 def burnCore_obligation := spec!{ _burn }
 /-- UNKNOWN: as `_burn`, inlined; the frame is `burn_frame`. -/
 def burn_obligation := spec!{ burn }

@@ -12,9 +12,7 @@ Source: <https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/d
 increase is checked, the decrease unchecked after its `require`, as published.
 Natural spec: the caller's allowance for `spender` moves by exactly the delta,
 both addresses are nonzero, and no other allowance changes.
-Verdicts: allowance, _approve proved; increaseAllowance UNKNOWN as one
-obligation (disjunctive frame), every clause proved as a component;
-decreaseAllowance UNKNOWN at the guarded unchecked subtraction, frames proved.
+Verdicts: on each declaration below.
 -/
 namespace Solidity.Examples.Benchmark.TokenExtensions.AllowanceDelta
 def AllowanceDelta : Contract := contract!{
