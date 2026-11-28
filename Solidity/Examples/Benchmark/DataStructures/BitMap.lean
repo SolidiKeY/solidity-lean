@@ -19,7 +19,8 @@ bitwise operators, so the membership clauses are stated as boxes over
 `get` (`set_get`, `unset_get`) and the clauses keep the frame, the bucket
 written as `index / 256`.
 
-Verdicts: `get`, `set`, `unset`: unknown.  Membership stops on raw
+Verdicts: `get` has no clauses of its own; membership (`get` after `set`,
+`unset`) and the `set`, `unset` clauses: unknown.  Membership stops on raw
 `band`/`bor`/`bnot`/`<<` terms (`(x | 1 << (i & 255)) & 1 << (i & 255) != 0`):
 no closer has bitwise laws.  The frame clauses stop on
 `b != index / 256` against the written bucket `index >> 8`: no law equates

@@ -18,7 +18,7 @@ indexing (in range: the index is reduced modulo the length), `Math.min` an
 `last` are kept; `setup`, `clear`, `length`, `includes` are omitted.
 
 Natural specification: `push` advances the counter and writes slot
-`old count % 4`; `count` is `min(_count, 4)`; `last(i)` is slot
+`old count % 4`, keeping the other slots; `count` is `min(_count, 4)`; `last(i)` is slot
 `(_count - i - 1) % 4` for `i < min(_count, 4)`.
 
 Verdicts: `push`, `count`, `last`: proved.
@@ -30,6 +30,7 @@ def RingBuffer : Contract := contract!{
   bytes32[4] _data;
   ensures _count == \old(_count) + 1;
   ensures _data[\old(_count) % 4] == value;
+  ensures \forall uint256 j; j < 4 && j != \old(_count) % 4 -> _data[j] == \old(_data[j]);
   function push(bytes32 value) public {
     uint256 index = _count++;
     uint256 modulus = _data.length;

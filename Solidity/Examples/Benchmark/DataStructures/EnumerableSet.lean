@@ -19,7 +19,8 @@ state variables, at `uint256` element type (the library's `UintSet` view;
 Natural specification: the representation invariant (`_indexes` is the
 1-based inverse of `_values`) is required and re-established; `add`
 reports a fresh element and makes it a member, growing the array exactly
-then; `remove` reports a member and makes it a non-member; `contains` reads
+then; `remove` reports a member and makes it a non-member, shrinking the array exactly
+then; `contains` reads
 membership.
 
 Verdicts: `contains` proved.  `add`, `remove`: unknown (`remove`'s
@@ -42,6 +43,7 @@ def EnumerableSet : Contract := contract!{
   ensures \old(_indexes[value]) == 0 -> _values.length == \old(_values.length) + 1;
   ensures \old(_indexes[value]) != 0 -> _values.length == \old(_values.length);
   ensures \forall uint256 j; j < _values.length -> _indexes[_values[j]] == j + 1;
+  ensures \forall uint256 v; _indexes[v] != 0 -> _indexes[v] <= _values.length && _values[_indexes[v] - 1] == v;
   function add(uint256 value) public returns (bool) {
     if (!(_indexes[value] != 0)) {
       _values.push(value);
@@ -55,7 +57,10 @@ def EnumerableSet : Contract := contract!{
   requires \forall uint256 v; _indexes[v] != 0 -> _indexes[v] <= _values.length && _values[_indexes[v] - 1] == v;
   ensures \result == (\old(_indexes[value]) != 0);
   ensures _indexes[value] == 0;
+  ensures \old(_indexes[value]) != 0 -> _values.length == \old(_values.length) - 1;
+  ensures \old(_indexes[value]) == 0 -> _values.length == \old(_values.length);
   ensures \forall uint256 j; j < _values.length -> _indexes[_values[j]] == j + 1;
+  ensures \forall uint256 v; _indexes[v] != 0 -> _indexes[v] <= _values.length && _values[_indexes[v] - 1] == v;
   function remove(uint256 value) public returns (bool) {
     uint256 valueIndex = _indexes[value];
     if (valueIndex != 0) {

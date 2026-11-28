@@ -17,12 +17,15 @@ with `NEXT`) and `remove` become public functions, with the constants
 inlined at its two (resp. one) call sites in the published order.
 The other functions are omitted.
 
-Natural specification: inserting a fresh nonzero node after an existing
-node links it between that node and its old successor (both directions)
-and grows the size; removing an existing node joins its neighbours to each
-other and clears its links.  Both require local link consistency at the
-node (`list[list[n][NEXT]][PREV] == n`, and the `PREV` analogue for
-`remove`).
+Natural specification: `insertAfter` succeeds exactly when the new node is
+absent and the anchor exists; then it links the new node between the
+anchor and its old successor (both directions) and grows the size, and
+otherwise it changes nothing.  Removing an existing node joins its
+neighbours to each other and clears its links.  Both require local link
+consistency at the node (`list[list[n][NEXT]][PREV] == n`, and the `PREV`
+analogue for `remove`); `remove` also requires that the node is not its own
+neighbour, which holds in every list built from the empty one (without it
+the clause is false: a self-linked node `n` ends with `list[n][NEXT] == 0`).
 
 Verdicts: `insertAfter`, `remove`: unknown (`remove` clearing proved).
 The obligations stop on nested mapping writes whose outer keys may alias
@@ -35,13 +38,13 @@ namespace Solidity.Examples.Benchmark.DataStructures.LinkedList
 def LinkedList : Contract := contract!{
   mapping(uint256 => mapping(bool => uint256)) list;
   uint256 size;
-  requires _new != 0 && list[_new][false] == 0 && list[_new][true] == 0 && list[0][true] != _new;
-  requires _node == 0 || list[_node][false] != 0 || list[_node][true] != 0 || list[0][true] == _node;
   requires list[list[_node][true]][false] == _node;
-  ensures \result;
-  ensures list[_node][true] == _new && list[_new][false] == _node;
-  ensures list[_new][true] == \old(list[_node][true]) && list[\old(list[_node][true])][false] == _new;
-  ensures size == \old(size) + 1;
+  ensures \result == (!(\old(list[_new][false]) != 0 || \old(list[_new][true]) != 0 || \old(list[0][true]) == _new) && (\old(list[_node][false]) != 0 || \old(list[_node][true]) != 0 || \old(list[0][true]) == _node));
+  ensures \result -> list[_node][true] == _new && list[_new][false] == _node;
+  ensures \result -> list[_new][true] == \old(list[_node][true]) && list[\old(list[_node][true])][false] == _new;
+  ensures \result -> size == \old(size) + 1;
+  ensures !\result -> size == \old(size);
+  ensures !\result -> \forall uint256 a; list[a][false] == \old(list[a][false]) && list[a][true] == \old(list[a][true]);
   function insertAfter(uint256 _node, uint256 _new) public returns (bool) {
     bool newExists = list[_new][false] != 0 || list[_new][true] != 0 || list[0][true] == _new;
     bool nodeExists = list[_node][false] != 0 || list[_node][true] != 0 || list[0][true] == _node;
@@ -58,6 +61,7 @@ def LinkedList : Contract := contract!{
   }
   requires _node != 0 && (list[_node][false] != 0 || list[_node][true] != 0 || list[0][true] == _node);
   requires list[list[_node][false]][true] == _node && list[list[_node][true]][false] == _node;
+  requires list[_node][false] != _node && list[_node][true] != _node;
   ensures \result == _node;
   ensures list[\old(list[_node][false])][true] == \old(list[_node][true]);
   ensures list[\old(list[_node][true])][false] == \old(list[_node][false]);
