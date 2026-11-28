@@ -51,7 +51,8 @@ theorem default_step (p : PrimTy) (ps : List PrimTy) (name : Var)
         default_model p ps name model, ?_⟩
       exact LocalsRel.cons (ofModel_related E.layout p (PrimTy.dflt p)) related
 
-/-- Each default and intermediate context is derived. -/
+/-- Two declaration pairs instantiate both conditional step hypotheses of the
+sequence consumer. Each default and intermediate context is derived. -/
 theorem two_defaults_agree (p q : PrimTy) (ps : List PrimTy) (x y : Var)
     (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E)) :
     NormalLocalsObligation (C := C) (R := R) (M := M) (k := k)

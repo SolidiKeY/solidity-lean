@@ -88,6 +88,7 @@ theorem bool_double_toggle_model (pre tail : List PrimTy)
         (!(TEnv.get (modelBoolSlot tail pre) after.env)), List.prefix_refl _⟩ := by rfl
   simpa only [restored] using ran
 
+/-- Both normal-step premises of the sequence consumer are concrete producers. -/
 theorem bool_double_toggle_agree (pre tail : List PrimTy)
     (G : Glob E) (F : Fr) (nps : Nat) (ph : Option (Ph E)) :
     NormalLocalsObligation (C := C) (R := R) (M := M) (k := k)
