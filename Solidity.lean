@@ -2042,6 +2042,7 @@ import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.WkOver
 import Solidity.Correctness.Elab.Congruence
 import Solidity.Correctness.Elab.HashCongruence
+import Solidity.Correctness.Elab.StmtCongruence
 import Solidity.Correctness.Elab.Total
 import Solidity.Correctness.IntrinsicSession.Laws.Boundary
 import Solidity.Correctness.IntrinsicSession.Laws.Common
@@ -2073,6 +2074,7 @@ import Solidity.Correctness.Lowering.Loops.WhileBreak
 import Solidity.Correctness.Lowering.Loops.WhileContinue
 import Solidity.Correctness.Lowering.Loops.WhileReset
 import Solidity.Correctness.Lowering.Sim.Coverage.Alignment
+import Solidity.Correctness.Lowering.Sim.Coverage.BooleanBlocksV3
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanCoverage
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDecoding
 import Solidity.Correctness.Lowering.Sim.Coverage.BooleanDomain
