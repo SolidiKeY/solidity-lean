@@ -1,13 +1,8 @@
 import Solidity.Storage.Representation.GraphFrames
 import Solidity.Storage.Representation.Transport
 
-/-! Finite represented observations of existing typed graph values. Source
-reads are the Value.observe, including failures. Successful word/
-length observations are transported; presence and extent stay source metadata.
-No finite STy unrolling or public runtime-depth cutoff is required. -/
 namespace Solidity.Storage.Representation.Graph
 
-/-- Typed observation demands, not a source/value/path IR. -/
 inductive Query {n : Nat} (G : TypeGraph.Schema n) (A : TypeGraph.Ty n) where
   | word {p : PrimTy} (path : TypeGraph.Path G A (.prim p))
   | length {E : TypeGraph.Ty n} (path : TypeGraph.Path G A (.array E))
@@ -23,16 +18,11 @@ noncomputable def Query.supported {n : Nat} {G : TypeGraph.Schema n} {A : TypeGr
   | .word p => PathSupported p
   | .length p => PathSupported p
 
-/-- Only terminal primitive normalization/length-word conversion, not encoding
-executed to define a source read. -/
 def Query.read {n : Nat} {G : TypeGraph.Schema n} {A : TypeGraph.Ty n}
     (source : TypeGraph.Value G A) : Query G A → Option Semantics.Word
   | .word p => (source.observe p).map PrimTy.toWord
   | .length p => (source.observe p).map (fun h => lengthWord h.1.val h.1.isLt)
 
-/-- Query-local terminal-header bounds. Word queries do not assert bounds
-for every intermediate array; whole legacy ValueRep remains the stronger
-full-value relation. Path index bounds are checked separately. -/
 def Query.compatible {n : Nat} {G : TypeGraph.Schema n} {A : TypeGraph.Ty n}
     (source : TypeGraph.Value G A) : Query G A → Prop
   | .word _ => True
@@ -75,13 +65,11 @@ theorem Query.compatible_prefix {n : Nat} {G : TypeGraph.Schema n} {A B : TypeGr
   | length q => simp only [Query.compatible, Query.prefix, TypeGraph.Value.observe_append,
       found, Option.bind_some]
 
-/-- A finite observation relation for the actual typed graph source. -/
 noncomputable def Represented {n : Nat} {G : TypeGraph.Schema n} {A : TypeGraph.Ty n}
     (source : TypeGraph.Value G A) (queries : List (Query G A)) (l : Loc) (w : Store) : Prop :=
   ∀ q ∈ queries, q.supported ∧ q.compatible source ∧
     ∀ value, q.read source = some value → w (q.location l) = value
 
-/-- The primitive base case extends the existing intrinsic value relation. -/
 theorem represented_scalar {n : Nat} {G : TypeGraph.Schema n} {p : PrimTy}
     (v : p.Denote) {l : Loc} {w : Store} (h : ValueRep (.prim v) .word l w) :
     Represented (TypeGraph.Value.prim (G := G) v) [.word .nil] l w := by
@@ -93,8 +81,6 @@ theorem represented_scalar {n : Nat} {G : TypeGraph.Schema n} {p : PrimTy}
   change some (PrimTy.toWord v) = some value at observed
   exact (scalar_read h).trans (Option.some.inj observed)
 
-/-- Representation composes through any existing typed graph path, including
-recursive declaration paths of arbitrary finite length. -/
 theorem Represented.prefix {n : Nat} {G : TypeGraph.Schema n} {A B : TypeGraph.Ty n}
     {root : TypeGraph.Value G A} {child : TypeGraph.Value G B}
     (p : TypeGraph.Path G A B) {queries : List (Query G B)} {l : Loc} {w : Store}
@@ -131,9 +117,12 @@ theorem Query.compatible_frame {n : Nat} {G : TypeGraph.Schema n} {A U : TypeGra
   | word q => rfl
   | length q => simp only [Query.compatible, Apart.observe_save apart root result new saved]
 
-/-- Recursive source frames and an explicit symbolic nonalias boundary preserve
-represented observations. Numeric nonalias follows from FiniteRun on the
-covered locations, never from global injectivity. -/
+example {N L R : Nat} {H : Solidity.Storage.Pre → Nat} {P : List Solidity.Storage.Pre}
+    {xs : List Loc} (run : FiniteRun N L R H P xs) {a b : Loc}
+    (ha : a ∈ xs) (hb : b ∈ xs) (different : a ≠ b) :
+    Loc.word N H a ≠ Loc.word N H b :=
+  fun eq => different (run.word_inj ha hb eq)
+
 theorem Represented.write_frame {n : Nat} {G : TypeGraph.Schema n} {A U : TypeGraph.Ty n}
     {root result : TypeGraph.Value G A} {queries : List (Query G A)} {l x : Loc} {w : Store}
     (h : Represented root queries l w) (p : TypeGraph.Path G A U) (new : TypeGraph.Value G U)
@@ -150,8 +139,6 @@ theorem Represented.write_frame {n : Nat} {G : TypeGraph.Schema n} {A U : TypeGr
     apply represented word
     rwa [Query.read_frame root result p new saved q (apart q member)] at observed
 
-/-- Recursive ancestor array-header representation frames an element write,
-with the explicit symbolic header/word nonalias boundary. -/
 theorem Represented.header_write_frame {n : Nat} {G : TypeGraph.Schema n}
     {A E U : TypeGraph.Ty n} {root result : TypeGraph.Value G A} {l x : Loc} {w : Store}
     (stem : TypeGraph.Path G A (.array E)) (i : TypeGraph.Index) (tail : TypeGraph.Path G E U)
@@ -173,7 +160,6 @@ theorem Represented.header_write_frame {n : Nat} {G : TypeGraph.Schema n}
     apply represented word
     simpa only [Query.read, header] using observed
 
-/-- A covered successful graph demand exports the exact numeric word. -/
 theorem Represented.numeric {n : Nat} {G : TypeGraph.Schema n} {A : TypeGraph.Ty n}
     {root : TypeGraph.Value G A} {queries : List (Query G A)} {l : Loc} {w : Store}
     (h : Represented root queries l w) {N : Nat} {H : Pre → Nat} {xs : List Loc} {m : WordStore}
