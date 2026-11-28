@@ -49,9 +49,13 @@ theorem passes_yet_no_input {Γ Δ : Ctx} (P : Prog C Γ Δ) (hP : ProgOk [] P) 
 /-- The premise is inhabited: the empty program is in the domain. -/
 example := passes_yet_no_input (Γ := []) .nil .nil 0 0
 
-/-- info: 'Solidity.Examples.RedTeam.Statements.BackendTotalZeroBound.passes_yet_no_input' depends on axioms: [propext,
- Classical.choice,
- Quot.sound] -/
-#guard_msgs in #print axioms passes_yet_no_input
+-- Reject any dependency outside Lean's three standard logical axioms.
+open Lean Elab Command in
+run_elab do
+  for target in [``passes_yet_no_input] do
+    let dependencies ← collectAxioms target
+    unless dependencies.all (fun name =>
+        [``propext, ``Classical.choice, ``Quot.sound].contains name) do
+      throwError "unexpected logical dependencies for {target}: {dependencies}"
 
 end Solidity.Examples.RedTeam.Statements.BackendTotalZeroBound

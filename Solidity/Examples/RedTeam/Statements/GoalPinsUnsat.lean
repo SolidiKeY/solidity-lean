@@ -105,16 +105,17 @@ theorem not_observed (env : Environment) : ¬ ObservedSnapshot ⟨env, []⟩ := 
   exact required_nonempty _ hr rfl
 theorem goalPinsCorrect_false : ¬ goalPinsCorrect := fun ⟨_, h⟩ =>
   let ⟨env⟩ := (inferInstance : Nonempty Environment); not_observed env (laws_force_observed h _)
-
-/--
-info: 'Solidity.Examples.RedTeam.Statements.GoalPinsUnsat.goalPinsCorrect_false' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in #print axioms goalPinsCorrect_false
 theorem folded_ignores_body (t : Task) (d d' : DefinitionVal) (args : List Task)
     (h : d.toConstantVal = d'.toConstantVal) : folded t (.defnInfo d) args = folded t (.defnInfo d') args := by
   simp [folded, template, ConstantInfo.type, ConstantInfo.name, ConstantInfo.levelParams, ConstantInfo.toConstantVal, h]
-/-- info: 'Solidity.Examples.RedTeam.Statements.GoalPinsUnsat.folded_ignores_body' depends on axioms: [propext, Quot.sound] -/
-#guard_msgs in #print axioms folded_ignores_body
+
+-- Reject any dependency outside Lean's three standard logical axioms.
+open Lean Elab Command in
+run_elab do
+  for target in [``goalPinsCorrect_false, ``folded_ignores_body] do
+    let dependencies ← collectAxioms target
+    unless dependencies.all (fun name =>
+        [``propext, ``Classical.choice, ``Quot.sound].contains name) do
+      throwError "unexpected logical dependencies for {target}: {dependencies}"
+
 end Solidity.Examples.RedTeam.Statements.GoalPinsUnsat

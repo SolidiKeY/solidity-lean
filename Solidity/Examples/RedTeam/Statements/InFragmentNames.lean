@@ -38,14 +38,13 @@ theorem inFragment_iff_names {E : Source.Env} (P : Source.SrcProg E) :
   ⟨fun ⟨c, h, _⟩ => ⟨c, h⟩,
    fun ⟨c, h⟩ => ⟨⟨c.C, fun _ => none, fun _ => none⟩, h, accepted_of_no_entries c.C⟩⟩
 
-/-- info: 'Solidity.Examples.RedTeam.Statements.InFragmentNames.accepted_of_no_entries' depends on axioms: [propext, Quot.sound] -/
-#guard_msgs in #print axioms accepted_of_no_entries
-
-/--
-info: 'Solidity.Examples.RedTeam.Statements.InFragmentNames.inFragment_iff_names' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]
--/
-#guard_msgs in #print axioms inFragment_iff_names
+-- Reject any dependency outside Lean's three standard logical axioms.
+open Lean Elab Command in
+run_elab do
+  for target in [``accepted_of_no_entries, ``inFragment_iff_names] do
+    let dependencies ← collectAxioms target
+    unless dependencies.all (fun name =>
+        [``propext, ``Classical.choice, ``Quot.sound].contains name) do
+      throwError "unexpected logical dependencies for {target}: {dependencies}"
 
 end Solidity.Examples.RedTeam.Statements.InFragmentNames
