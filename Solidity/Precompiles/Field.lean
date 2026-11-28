@@ -1,57 +1,22 @@
 import Solidity.Roadmap.Evm
 import Solidity.Hashes
 
-/-!
-# Bytes, prime fields and elliptic curves for the Osaka precompiles
-
-The arithmetic the computed precompiles of `Solidity/Precompiles/` share,
-written as `Solidity/Hashes.lean` and `Solidity/Secp256k1.lean` are: over
-`Nat` and `Fin p`, every recursion structural or fuelled by a bit count, so
-that `#guard` evaluates each precompile on the EIPs' vectors.
-
-- **Bytes.**  A precompile reads its input as the execution specification's
-  `buffer_read` does: zero bytes past the end (`readPad`, `readNat`), and
-  writes fixed-width big-endian words (`toBE`).  `words` is the
-  `ceil32(len) / 32` of the linear gas formulas.
-- **Fields.**  `FieldOps` is the arithmetic a curve formula uses; `Fin p`
-  (with Fermat inversion, `p` prime at every use) and `Fp2 p` (`u² = -1`,
-  BN254's and BLS12-381's quadratic extension) are its instances.  No field
-  law is proved or assumed: the formulas are evaluated, not reasoned about.
-- **Curves.**  `Pt` is an affine point or infinity of a short Weierstrass
-  curve `y² = x³ + a·x + b` (`Curve`); `add`, `double`, `neg` and `mul` are
-  the textbook affine formulas, total on every input.  An *input* point is
-  validated when it is decoded (each precompile's `decode*` returns the
-  point with its curve equation, or fails), so the precompiles' failure
-  cases are the decoding failures (and, for point evaluation, a proof that
-  does not verify); results are computed totally.
--/
-
 namespace Solidity.Precompiles
 
 open Solidity.Roadmap.Evm (Bytes)
 
-/-! ## Bytes -/
-
-/-- The 32-byte words an input of `n` bytes occupies, rounded up
-(`ceil32(n) // 32`). -/
 def words (n : Nat) : Nat := (n + 31) / 32
 
-/-- `len` bytes of `d` from `start`, zero past its end: the execution
-specification's `buffer_read`. -/
 def readPad (d : Bytes) (start len : Nat) : List Nat :=
   let s := ((d.drop start).take len).map UInt8.toNat
   s ++ List.replicate (len - s.length) 0
 
-/-- Big-endian bytes as a number. -/
 def ofBE (bs : List Nat) : Nat := Hashes.ofBytes bs
 
-/-- The big-endian number in `len` bytes of `d` from `start`, zero-padded. -/
 def readNat (d : Bytes) (start len : Nat) : Nat := ofBE (readPad d start len)
 
-/-- `n` as exactly `k` big-endian bytes (its low `8·k` bits). -/
 def toBE (k n : Nat) : Bytes := (Hashes.beBytes k n).map Nat.toUInt8
 
-/-- The 32-byte word of `n`. -/
 def word (n : Nat) : Bytes := toBE 32 n
 
 theorem readPad_length (d : Bytes) (start len : Nat) : (readPad d start len).length = len := by
@@ -62,10 +27,8 @@ theorem readPad_length (d : Bytes) (start len : Nat) : (readPad d start len).len
 theorem toBE_length (k n : Nat) : (toBE k n).length = k := by
   simp only [toBE, Hashes.beBytes, List.length_map, List.length_reverse, List.length_range]
 
-/-- The number of bits of `n` (`0` has none): Python's `int.bit_length`. -/
 def bitLength (n : Nat) : Nat := if n = 0 then 0 else Nat.log2 n + 1
 
-/-- `b ^ e % m` by binary exponentiation over the bits of `e`. -/
 def powMod (b e m : Nat) : Nat :=
   go (bitLength e) (b % m) e (1 % m)
 where
@@ -78,26 +41,18 @@ where
 #guard powMod 0 0 7 == 1
 #guard powMod 5 3 1 == 0
 
-/-! ## Fields -/
-
-/-- The arithmetic a curve formula uses.  `inv 0` is unspecified (`0` in
-the instances); no formula below divides by zero on a valid input. -/
 class FieldOps (α : Type) extends Add α, Sub α, Mul α, Neg α, BEq α where
   zero : α
   one : α
   inv : α → α
   ofNat : Nat → α
 
-/-- Integers modulo `p`, inverted by Fermat (`a ^ (p - 2)`): a field at every
-prime `p`, which is how every precompile uses it. -/
 instance finFieldOps (p : Nat) [NeZero p] : FieldOps (Fin p) where
   zero := Fin.ofNat p 0
   one := Fin.ofNat p 1
   inv a := Fin.ofNat p (powMod a.val (p - 2) p)
   ofNat n := Fin.ofNat p n
 
-/-- The quadratic extension `Fp[u] / (u² + 1)`, BN254's and BLS12-381's
-`Fp2`: `re + im·u`. -/
 structure Fp2 (p : Nat) where
   re : Fin p
   im : Fin p
@@ -107,10 +62,8 @@ namespace Fp2
 
 variable {p : Nat} [NeZero p]
 
-/-- The conjugate `re - im·u`, the Frobenius map of `Fp2`. -/
 def conj (a : Fp2 p) : Fp2 p := ⟨a.re, -a.im⟩
 
-/-- `a · c` for `c` in the base field. -/
 def scale (c : Fin p) (a : Fp2 p) : Fp2 p := ⟨c * a.re, c * a.im⟩
 
 instance : FieldOps (Fp2 p) where
@@ -131,7 +84,6 @@ namespace FieldOps
 
 variable {α : Type} [FieldOps α]
 
-/-- `a ^ e` by square-and-multiply over the bits of `e`. -/
 def pow (a : α) (e : Nat) : α :=
   go (bitLength e) a e FieldOps.one
 where
@@ -141,14 +93,10 @@ where
 
 end FieldOps
 
-/-! ## Short Weierstrass curves -/
-
-/-- The curve `y² = x³ + a·x + b` over `α`. -/
 structure Curve (α : Type) where
   a : α
   b : α
 
-/-- A point of a curve: affine coordinates, or the point at infinity. -/
 inductive Pt (α : Type) where
   | inf
   | aff (x y : α)
@@ -158,17 +106,16 @@ namespace Curve
 
 variable {α : Type} [FieldOps α]
 
-/-- The curve equation (infinity is on every curve). -/
 def onCurve (C : Curve α) : Pt α → Bool
   | .inf => true
   | .aff x y => y * y == x * x * x + C.a * x + C.b
 
-/-- The opposite point. -/
+example (C : Curve α) : C.onCurve .inf = true := rfl
+
 def neg : Pt α → Pt α
   | .inf => .inf
   | .aff x y => .aff x (-y)
 
-/-- The tangent rule: `2·P`. -/
 def double (C : Curve α) : Pt α → Pt α
   | .inf => .inf
   | .aff x y =>
@@ -177,8 +124,6 @@ def double (C : Curve α) : Pt α → Pt α
       let x₃ := l * l - x - x
       .aff x₃ (l * (x - x₃) - y)
 
-/-- The chord rule: `P + Q`, with the doubling, opposite and infinity
-cases. -/
 def add (C : Curve α) : Pt α → Pt α → Pt α
   | .inf, q => q
   | p@(.aff _ _), .inf => p
@@ -190,7 +135,6 @@ def add (C : Curve α) : Pt α → Pt α → Pt α
       let x₃ := l * l - x₁ - x₂
       .aff x₃ (l * (x₁ - x₃) - y₁)
 
-/-- `k·P` by double-and-add over the bits of `k`. -/
 def mul (C : Curve α) (k : Nat) (p : Pt α) : Pt α :=
   go (bitLength k) k p .inf
 where
@@ -201,10 +145,6 @@ where
 
 end Curve
 
-/-! ## Test vectors -/
-
-/-- The consecutive blocks of `n` elements of `d` (a shorter last block
-included). -/
 def chunks {α : Type} (n : Nat) (d : List α) : List (List α) :=
   go d.length d
 where
@@ -212,7 +152,6 @@ where
     | 0, _ => []
     | k + 1, d => if d.isEmpty then [] else d.take n :: go k (d.drop n)
 
-/-- A list maps to `none` exactly when some element does. -/
 theorem mapM_eq_none_iff {α β : Type} (f : α → Option β) (l : List α) :
     l.mapM f = none ↔ ∃ a ∈ l, f a = none := by
   induction l with
@@ -226,8 +165,12 @@ theorem mapM_eq_none_iff {α β : Type} (f : α → Option β) (l : List α) :
       simp only [Option.bind_some, reduceCtorEq, false_or, ← ih]
       cases l.mapM f <;> simp only [Option.bind_none, Option.bind_some, reduceCtorEq]
 
-/-- The bytes of a hexadecimal string (two digits each, no prefix), for
-test vectors. -/
+structure HexInput where
+  text : String
+  evenLength : text.length % 2 = 0
+  digits : ∀ c ∈ text.toList,
+    c.isDigit = true ∨ ('a' ≤ c ∧ c ≤ 'f') ∨ ('A' ≤ c ∧ c ≤ 'F')
+
 def ofHex (s : String) : Bytes :=
   let digit (c : Char) : Nat :=
     if c.isDigit then c.toNat - '0'.toNat

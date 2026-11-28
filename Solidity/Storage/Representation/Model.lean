@@ -1,21 +1,12 @@
 import Solidity.Storage.HashedLayout
 import Solidity.Semantics.Storage.Ops
 
-/-!
-# Intrinsic values represented by symbolic storage
-
-The source values and reads are the existing intrinsic `SVal` and `find`.
-This relation does not define a source read by executing an encoder.
-Mapping headers have no observable content; array shadows are represented
-as well as their live prefixes. Packing and recursive declaration graphs
-are separate obligations, not additional constructors of `STy`.
--/
 namespace Solidity.Storage.Representation
 
 abbrev Store : Type := Loc → Semantics.Word
 
 mutual
-/-- A layout shape is fixed independently of the particular stored value. -/
+
 inductive TypeRep : Ty → STy → Prop where
   | scalar (p : PrimTy) : TypeRep (.prim p) .word
   | strct (s : Name) (ts : List STy)
@@ -36,7 +27,7 @@ inductive FieldTypesRep : List (Name × Ty) → List STy → Prop where
 end
 
 mutual
-/-- A typed source value represented at an existing layout location. -/
+
 inductive ValueRep : {T : Ty} → SVal T → STy → Loc → Store → Prop where
   | scalar {p : PrimTy} (v : p.Denote) (l : Loc) (w : Store)
       (read : w l = PrimTy.toWord v) : ValueRep (.prim v) .word l w
@@ -62,7 +53,6 @@ inductive ValueRep : {T : Ty} → SVal T → STy → Loc → Store → Prop wher
           (.hash (PrimTy.toWord k).val.toNat l 0) w) :
       ValueRep (.map entries fallback) (.map t) l w
 
-/-- Member types stay paired with their existing intrinsically typed values. -/
 inductive FieldsRep : {fs : List (Name × Ty)} → SFields fs → List STy → Loc → Store → Prop where
   | nil (l : Loc) (w : Store) : FieldsRep .nil [] l w
   | cons {f : Name} {T : Ty} {fs : List (Name × Ty)}
@@ -70,7 +60,6 @@ inductive FieldsRep : {fs : List (Name × Ty)} → SFields fs → List STy → L
       (head : ValueRep v t l w) (tail : FieldsRep rest ts (l.add t.size) w) :
       FieldsRep (SFields.cons (f := f) v rest) (t :: ts) l w
 
-/-- Physical slots include stale dynamic-array elements past the live end. -/
 inductive ElementsRep : {E : Ty} → List (SVal E) → STy → Loc → Store → Prop where
   | nil {E : Ty} (t : STy) (l : Loc) (w : Store) : ElementsRep (E := E) [] t l w
   | cons {E : Ty} (v : SVal E) (rest : List (SVal E)) (t : STy) (l : Loc) (w : Store)
@@ -78,7 +67,6 @@ inductive ElementsRep : {E : Ty} → List (SVal E) → STy → Loc → Store →
       ElementsRep (v :: rest) t l w
 end
 
-/-- Every represented value has a value-independent layout shape. -/
 theorem ValueRep.type {T : Ty} {v : SVal T} {t : STy} {l : Loc} {w : Store}
     (h : ValueRep v t l w) : TypeRep T t :=
   ValueRep.rec (motive_1 := fun {T} _ t _ _ _ => TypeRep T t)
@@ -94,16 +82,13 @@ theorem ValueRep.type {T : Ty} {v : SVal T} {t : STy} {l : Loc} {w : Store}
     (fun {_} _ _ _ => True.intro)
     (fun {_} _ _ _ _ _ _ _ _ _ => True.intro) h
 
-/-- The existing contract store is its intrinsic field family, not an erased map. -/
 abbrev StoreRep {C : Contract} (st : Solidity.Storage C) (ts : List STy)
     (l : Loc) (w : Store) : Prop := FieldsRep st ts l w
 
-/-- Scalar representation is inhabited, without selecting an encoder. -/
 theorem scalar_inhabited {p : PrimTy} (v : p.Denote) (l : Loc) :
     ∃ w : Store, ValueRep (.prim v) .word l w :=
   ⟨fun _ => PrimTy.toWord v, .scalar v l _ rfl⟩
 
-/-- The scalar relation pins the exact full word. -/
 theorem scalar_read {p : PrimTy} {v : p.Denote} {l : Loc} {w : Store}
     (h : ValueRep (.prim v) .word l w) : w l = PrimTy.toWord v := by
   cases h with

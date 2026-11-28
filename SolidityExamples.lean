@@ -38,6 +38,13 @@ import Solidity.Examples.Benchmark.Governance.Pausable
 import Solidity.Examples.Benchmark.Governance.Timelock
 import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Mapping
+import Solidity.Examples.Benchmark.Patterns.CircuitBreaker
+import Solidity.Examples.Benchmark.Patterns.CommitReveal
+import Solidity.Examples.Benchmark.Patterns.Mutex
+import Solidity.Examples.Benchmark.Patterns.RateLimiter
+import Solidity.Examples.Benchmark.Patterns.StateMachine
+import Solidity.Examples.Benchmark.Patterns.TwoStepOwnership
+import Solidity.Examples.Benchmark.Patterns.Withdrawal
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
 import Solidity.Examples.Benchmark.SolkeyGames.EtherGame

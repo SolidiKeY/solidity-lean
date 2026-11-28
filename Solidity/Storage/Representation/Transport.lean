@@ -1,16 +1,12 @@
 import Solidity.Storage.Representation.Arrays
 import Solidity.Theory.Typed.Obs.Values
 
-/-! Finite touched-set transport through the `Loc.word`.
-All hash/region conditions below are exactly the existing per-run conditions.
-There is no injectivity claim outside the explicitly covered touched list. -/
 namespace Solidity.Storage.Representation
 
 open Solidity.Hash
 
 abbrev WordStore : Type := Nat → Semantics.Word
 
-/-- A bundle of existing conditions, not a new cryptographic premise. -/
 structure FiniteRun (N L R : Nat) (H : Pre → Nat) (P : List Pre) (touched : List Loc) : Prop where
   hash_bound : ∀ p, H p < N
   region_bound : L ≤ N
@@ -19,7 +15,6 @@ structure FiniteRun (N L R : Nat) (H : Pre → Nat) (P : List Pre) (touched : Li
   bounded : ∀ l ∈ touched, Loc.Bounded L R l
   covered : ∀ l ∈ touched, ∀ p ∈ Loc.pres N H l, p ∈ P
 
-/-- The numeric store agrees at exactly the finite covered symbolic locations. -/
 def Transport (N : Nat) (H : Pre → Nat) (touched : List Loc) (w : Store) (m : WordStore) : Prop :=
   ∀ l ∈ touched, m (Loc.word N H l) = w l
 
@@ -38,11 +33,18 @@ theorem Transport.restrict {N : Nat} {H : Pre → Nat} {xs ys : List Loc} {w : S
     (h : Transport N H xs w m) (subset : ∀ l ∈ ys, l ∈ xs) : Transport N H ys w m :=
   fun l hl => h l (subset l hl)
 
-/-- Realize a finite symbolic observation set while preserving all other words.
-This is a witness constructor, never a definition of source reads. -/
 def realize (N : Nat) (H : Pre → Nat) (base : WordStore) (w : Store) : List Loc → WordStore
   | [] => base
   | l :: ls => fun a => if a = Loc.word N H l then w l else realize N H base w ls a
+
+theorem realize_outside (N : Nat) (H : Pre → Nat) (base : WordStore) (w : Store)
+    (xs : List Loc) (a : Nat) (outside : a ∉ xs.map (Loc.word N H)) :
+    realize N H base w xs a = base a := by
+  induction xs with
+  | nil => rfl
+  | cons l ls ih =>
+    have h := List.ne_and_not_mem_of_not_mem_cons outside
+    exact (if_neg h.1).trans (ih h.2)
 
 theorem realize_transport {N : Nat} {H : Pre → Nat} (base : WordStore) (w : Store)
     (xs : List Loc)
@@ -64,7 +66,6 @@ theorem realize_transport {N : Nat} {H : Pre → Nat} (base : WordStore) (w : St
         apply ih (fun x hx y hy he => injective x (List.mem_cons.mpr (Or.inr hx)) y
           (List.mem_cons.mpr (Or.inr hy)) he) l inside
 
-/-- An inhabited numeric representation exists for every covered finite run. -/
 theorem transport_exists {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : List Loc}
     (run : FiniteRun N L R H P xs) (base : WordStore) (w : Store) :
     ∃ m, Transport N H xs w m ∧
@@ -86,8 +87,6 @@ theorem transport_exists {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : Li
         obtain ⟨x, hx, eq⟩ := List.mem_map.mp member
         exact ⟨x, List.mem_cons.mpr (Or.inr hx), eq⟩))
 
-/-- Extending observation coverage preserves every already related observation.
-The region premise is required for the extended run, not inferred from its prefix. -/
 theorem transport_extend {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs ys : List Loc}
     (run : FiniteRun N L R H P (xs ++ ys)) {w : Store} {base : WordStore}
     (initial : Transport N H xs w base) :
@@ -98,11 +97,9 @@ theorem transport_extend {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs ys :
   exact ⟨m, represented, fun x hx =>
     (represented x (List.mem_append.mpr (Or.inl hx))).trans (initial x hx).symm, outside⟩
 
-/-- A numeric write at the interpreted word. -/
 def writeWord (m : WordStore) (a : Nat) (v : Semantics.Word) : WordStore :=
   fun b => if b = a then v else m b
 
-/-- One covered write commutes with finite transport, including all frames. -/
 theorem transport_write {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : List Loc}
     (run : FiniteRun N L R H P xs) {w : Store} {m : WordStore}
     (h : Transport N H xs w m) (l : Loc) (member : l ∈ xs) (v : Semantics.Word) :
@@ -117,7 +114,6 @@ theorem transport_write {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : Lis
     simp only [writeWord, if_neg ne]
     exact h x hx
 
-/-- Every finite sequence of covered writes commutes with transport. -/
 theorem transport_sequence {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : List Loc}
     (run : FiniteRun N L R H P xs) {w : Store} {m : WordStore}
     (initial : Transport N H xs w m) (updates : List (Loc × Semantics.Word))
@@ -132,15 +128,12 @@ theorem transport_sequence {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : 
     exact ih (transport_write run initial op.1 (covered op List.mem_cons_self) op.2)
       (fun next member => covered next (List.mem_cons.mpr (Or.inr member)))
 
-/-- Overlapping numeric observations must agree even without a region premise.
-Negative controls use this to expose the need for finite separation. -/
 theorem transport_alias_consistent {N : Nat} {H : Pre → Nat} {xs ys : List Loc}
     {w v : Store} {m : WordStore} {x y : Loc}
     (hx : Transport N H xs w m) (hy : Transport N H ys v m)
     (mx : x ∈ xs) (my : y ∈ ys) (alias : Loc.word N H x = Loc.word N H y) :
     w x = v y := (hx x mx).symm.trans ((congrArg m alias).trans (hy y my))
 
-/-- Numeric writes frame every address outside their finite image. -/
 theorem sequence_outside_frame (N : Nat) (H : Pre → Nat) (m : WordStore)
     (updates : List (Loc × Semantics.Word)) (a : Nat)
     (outside : ∀ op ∈ updates, a ≠ Loc.word N H op.1) :
@@ -153,7 +146,6 @@ theorem sequence_outside_frame (N : Nat) (H : Pre → Nat) (m : WordStore)
       (fun next member => outside next (List.mem_cons.mpr (Or.inr member)))).trans
       (if_neg (outside op List.mem_cons_self))
 
-/-- Abstract subtree replacement is transported only on the selected finite set. -/
 theorem transport_patch {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : List Loc}
     (run : FiniteRun N L R H P xs) (base : WordStore) (w replacement : Store)
     (t : STy) (l : Loc) :
@@ -161,8 +153,6 @@ theorem transport_patch {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : Lis
       ∀ a, a ∉ xs.map (Loc.word N H) → m a = base a :=
   transport_exists run base (patch w replacement t l)
 
-/-- Starting from a related store, finite patch realization preserves every
-covered cell outside the symbolic target and every word outside the image. -/
 theorem transport_patch_frames {N L R : Nat} {H : Pre → Nat} {P : List Pre} {xs : List Loc}
     (run : FiniteRun N L R H P xs) {base : WordStore} {w : Store}
     (initial : Transport N H xs w base) (replacement : Store) (t : STy) (l : Loc) :
@@ -174,22 +164,17 @@ theorem transport_patch_frames {N L R : Nat} {H : Pre → Nat} {P : List Pre} {x
     (represented x hx).trans ((patch_outside w replacement t l x apart).trans (initial x hx).symm),
     outside⟩
 
-/-- Failed source reads have an exact presence observation independently of memory. -/
 theorem source_failed_presence {T U : Ty} {source : SVal T} {path : Path T U}
     (missing : source.find path = none) : source.obs.has path = false := by
   rw [SVal.obs_has, ← SVal.find_eq_findM, missing]
   rfl
 
-/-- The existing source observation returns its typed default for a missing word.
-This does not authorize reading an unguarded numeric cell at that path. -/
 theorem source_failed_word_default {T : Ty} {p : PrimTy} {source : SVal T}
     {path : Path T (.prim p)} (missing : source.find path = none) :
     source.obs.word path = PrimTy.dflt p := by
   rw [SVal.obs_word, ← SVal.find_eq_findM, missing]
   rfl
 
-/-- Exact existing source word observation, at a represented successful read.
-Callers supply the independently proved source/layout read witness. -/
 theorem source_word_observation {T : Ty} {p : PrimTy} {source : SVal T}
     {path : Path T (.prim p)} {v : p.Denote} {l : Loc} {w : Store}
     {N : Nat} {H : Pre → Nat} {xs : List Loc} {m : WordStore}
@@ -202,7 +187,6 @@ theorem source_word_observation {T : Ty} {p : PrimTy} {source : SVal T}
   rw [observed]
   exact (transported l covered).trans (scalar_read represented)
 
-/-- Exact existing source length observation at a represented array header. -/
 theorem source_length_observation {T E : Ty} {source : SVal T}
     {path : Path T (.ref (.array E))} {n : Nat} {vs : SVec E n} {sh : SList E}
     {hn : n < 2 ^ 256} {t : STy} {l : Loc} {w : Store}

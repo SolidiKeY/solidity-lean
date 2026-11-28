@@ -1,28 +1,9 @@
 import Solidity.Precompiles.Field
 
-/-!
-# `BLAKE2F` (0x09)
-
-EIP-152: BLAKE2b's compression function `F` with a caller-chosen number of
-rounds, as Osaka's execution specification (`blake2f.py`,
-`ethereum/crypto/blake2.py`) runs it.  The input is exactly 213 bytes:
-`rounds` (4 bytes, big-endian), the state `h` (8 words), the message `m`
-(16 words), the offset counters `t₀, t₁` (words are 8 bytes,
-little-endian) and the final-block flag `f` (1 byte).
-
-- **Failure**: exactly when the length is not 213 or `f ∉ {0, 1}`
-  (`blake2f_eq_none_iff`).
-- **Result**: the new state's 8 words, 64 bytes little-endian.
-- **Gas**: one per round (`rounds`), independent of the input's length.
-
-Words are `UInt64`, whose arithmetic wraps as BLAKE2b's does.
--/
-
 namespace Solidity.Precompiles.Blake2f
 
 open Solidity.Roadmap.Evm (Bytes)
 
-/-- The message schedule `σ`. -/
 def sigma : Array (Array Nat) := #[
   #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
   #[14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3],
@@ -35,16 +16,14 @@ def sigma : Array (Array Nat) := #[
   #[6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5],
   #[10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0]]
 
-/-- BLAKE2b's initialization vector. -/
 def iv : Array UInt64 := #[
   0x6A09E667F3BCC908, 0xBB67AE8584CAA73B, 0x3C6EF372FE94F82B, 0xA54FF53A5F1D36F1,
   0x510E527FADE682D1, 0x9B05688C2B3E6C1F, 0x1F83D9ABFB41BD6B, 0x5BE0CD19137E2179]
 
-/-- Rotation right by `n < 64`. -/
+abbrev RotationAmount := { n : UInt64 // n.toNat < 64 }
+
 def rotr (x : UInt64) (n : UInt64) : UInt64 := (x >>> n) ||| (x <<< (64 - n))
 
-/-- The mixing function `G` on the working vector's `a, b, c, d` with
-message words `x, y`. -/
 def mix (v : Array UInt64) (a b c d : Nat) (x y : UInt64) : Array UInt64 :=
   let va := v[a]! + v[b]! + x
   let vd := rotr (v[d]! ^^^ va) 32
@@ -56,7 +35,6 @@ def mix (v : Array UInt64) (a b c d : Nat) (x y : UInt64) : Array UInt64 :=
   let vb := rotr (vb ^^^ vc) 63
   ((((v.set! a va).set! b vb).set! c vc).set! d vd)
 
-/-- One round with schedule `s`. -/
 def round (m : Array UInt64) (v : Array UInt64) (s : Array Nat) : Array UInt64 :=
   let g (v : Array UInt64) (i a b c d : Nat) := mix v a b c d m[s[2 * i]!]! m[s[2 * i + 1]!]!
   let v := g v 0 0 4 8 12
@@ -68,7 +46,6 @@ def round (m : Array UInt64) (v : Array UInt64) (s : Array Nat) : Array UInt64 :
   let v := g v 6 2 7 8 13
   g v 7 3 4 9 14
 
-/-- The compression function `F` with `rounds` rounds. -/
 def compress (rounds : Nat) (h m : Array UInt64) (t₀ t₁ : UInt64) (f : Bool) : Array UInt64 :=
   let v : Array UInt64 := h ++ iv
   let v := (v.set! 12 (iv[4]! ^^^ t₀)).set! 13 (iv[5]! ^^^ t₁)
@@ -76,7 +53,6 @@ def compress (rounds : Nat) (h m : Array UInt64) (t₀ t₁ : UInt64) (f : Bool)
   let v := (List.range rounds).foldl (fun v r => round m v sigma[r % 10]!) v
   (List.range 8).toArray.map fun i => h[i]! ^^^ v[i]! ^^^ v[i + 8]!
 
-/-- The little-endian 8-byte word of `d` at `start`. -/
 def leWord (d : List Nat) (start : Nat) : UInt64 :=
   (ofBE ((d.drop start).take 8).reverse).toUInt64
 
@@ -84,10 +60,8 @@ def rounds (d : Bytes) : Nat := readNat d 0 4
 
 def gas (d : Bytes) : Nat := rounds d
 
-/-- The flag byte, the input's last. -/
 def flag (d : Bytes) : Nat := readNat d 212 1
 
-/-- `BLAKE2F` (0x09). -/
 def blake2f (d : Bytes) : Option Bytes :=
   if d.length ≠ 213 ∨ 1 < flag d then none
   else
@@ -114,15 +88,12 @@ theorem blake2f_eq_none_iff (d : Bytes) : blake2f d = none ↔ d.length ≠ 213 
   unfold blake2f
   by_cases h : d.length ≠ 213 ∨ 1 < flag d <;> simp only [h, if_true, if_false, reduceCtorEq]
 
-/-- A well-formed call returns 64 bytes. -/
 theorem blake2f_length {d o : Bytes} (h : blake2f d = some o) : o.length = 64 := by
   unfold blake2f at h
   by_cases hm : d.length ≠ 213 ∨ 1 < flag d
   · simp only [hm, if_true, reduceCtorEq] at h
   · simp only [hm, if_false, Option.some.injEq] at h
     rw [← h, flatMap_length, Array.length_toList, compress_size]
-
-/-! ## Vectors (EIP-152) -/
 
 #guard blake2f (ofHex "00000c48c9bdf267e6096a3ba7ca8485ae67bb2bf894fe72f36e3cf1361d5f3af54fa5d182e6ad7f520e511f6c3e2b8c68059b6bbd41fbabd9831f79217e1319cde05b616263000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000") == none
 #guard blake2f (ofHex "000000000c48c9bdf267e6096a3ba7ca8485ae67bb2bf894fe72f36e3cf1361d5f3af54fa5d182e6ad7f520e511f6c3e2b8c68059b6bbd41fbabd9831f79217e1319cde05b61626300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000001") == none

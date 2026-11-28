@@ -1,9 +1,6 @@
 import Solidity.Storage.Representation.Words
 import Solidity.Semantics.RecursiveStorage.Paths
 
-/-! Full-word inline sizes and symbolic locations for the existing declaration
- graph. Private fuel follows the certified inline rank, never runtime path
- depth. Public path composition has no depth cutoff. -/
 namespace Solidity.Storage.Representation.Graph
 
 private def sizeBelow {n : Nat} (G : TypeGraph.Schema n) : Nat → TypeGraph.Ty n → Nat
@@ -40,7 +37,6 @@ private theorem sizeBelow_stable {n : Nat} (G : TypeGraph.Schema n) (a : Nat) :
         exact ih b f.2 (by change G.rank i < a + 1 at ha; omega)
           (by change G.rank i < b + 1 at hb; omega)
 
-/-- Canonical full-word inline size, stopping at mapping/dynamic-array headers. -/
 def inlineSize {n : Nat} (G : TypeGraph.Schema n) (T : TypeGraph.Ty n) : Nat :=
   sizeBelow G (T.inlineRank G.rank + 1) T
 
@@ -66,8 +62,6 @@ theorem inlineSize_node {n : Nat} (G : TypeGraph.Schema n) (i : Fin n) :
   exact sizeBelow_stable G (G.rank i) (f.2.inlineRank G.rank + 1) f.2
     (G.guarded i f hf) (Nat.lt_succ_self _)
 
-/-- Existing typed steps interpreted with the same Loc/add/hash/data formulas.
-no alternate untyped path language is introduced. -/
 noncomputable def stepLoc {n : Nat} {G : TypeGraph.Schema n} {A B : TypeGraph.Ty n}
     (s : TypeGraph.Step G A B) (l : Loc) : Loc :=
   @TypeGraph.Step.rec n G (fun _ _ _ => Loc → Loc)
@@ -93,7 +87,6 @@ noncomputable def PathSupported {n : Nat} {G : TypeGraph.Schema n} {A B : TypeGr
   @TypeGraph.Path.rec n G (fun _ _ _ => Prop) (fun {_} => True)
     (fun {_ _ _} step _ ih => StepSupported step ∧ ih) A B p
 
-/-- Arbitrarily long finite graph paths compose symbolically without truncation. -/
 theorem pathLoc_append {n : Nat} {G : TypeGraph.Schema n} {A B C : TypeGraph.Ty n}
     (p : TypeGraph.Path G A B) (q : TypeGraph.Path G B C) (l : Loc) :
     pathLoc (p.append q) l = pathLoc q (pathLoc p l) := by
