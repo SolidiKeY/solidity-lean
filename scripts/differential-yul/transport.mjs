@@ -4,7 +4,10 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {mkdtemp, writeFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join, dirname, resolve, sep} from 'node:path';
+import {realpathSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const root = realpathSync(resolve(dirname(fileURLToPath(import.meta.url)), '../..'));
 const exec = promisify(execFile);
 const word = x => typeof x === 'string' && /^(0|[1-9][0-9]*)$/.test(x) && BigInt(x) < 2n**256n;
 
@@ -57,7 +60,9 @@ export function transport({executable, prefix = [], fuel = 10000, outputLimit = 
         !Array.isArray(request.initialStorage) || request.initialStorage.length !== 2 || !request.initialStorage.every(word))
       throw Error('invalid stateful execution request');
     const path = runtimePath(request.ir);
-    const dir = await mkdtemp(join(tmpdir(),'differential-yul-'));
+    const parent = realpathSync(tmpdir());
+    if (parent === root || parent.startsWith(root + sep)) throw Error('temporary IR must be outside checkout');
+    const dir = await mkdtemp(join(parent,'differential-yul-'));
     try {
       const file = join(dir,'runtime.yul');
       await writeFile(file,request.ir,{flag:'wx'});
@@ -72,7 +77,10 @@ export function transport({executable, prefix = [], fuel = 10000, outputLimit = 
         }
         return {status:'blocked',reason:'driver process failed: '+String(error.message ?? error)};
       }
-      return decode(result.stdout);
+      const decoded = decode(result.stdout);
+      if (decoded.status === 'ok' && (decoded.observation.returnData.length - 2) / 2 > outputLimit)
+        throw Error('driver response exceeds output limit');
+      return decoded;
     } finally { await rm(dir,{recursive:true,force:true}); }
   };
 }

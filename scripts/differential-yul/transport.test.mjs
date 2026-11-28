@@ -39,3 +39,16 @@ test('refusals and process failures never become agreement',async()=>{
   assert.deepEqual(await lean(request),{status:'blocked',reason:'unsupported'});
   await assert.rejects(lean({...request,initialStorage:['-1','0']}));
 });
+
+test('driver cannot exceed configured return-data limit',async()=>{
+  const lean=transport({executable:'driver',outputLimit:1,invoke:async()=>({stdout:ok})});
+  await assert.rejects(lean(request),/exceeds output limit/);
+});
+test('checkout TMPDIR is rejected before creating temporary IR',async()=>{
+  const before=process.env.TMPDIR;
+  process.env.TMPDIR=process.cwd();
+  try {
+    const lean=transport({executable:'driver',invoke:async()=>{throw Error('must not invoke')}});
+    await assert.rejects(lean(request),/outside checkout/);
+  } finally { if(before===undefined) delete process.env.TMPDIR; else process.env.TMPDIR=before; }
+});
