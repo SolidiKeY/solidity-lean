@@ -1180,10 +1180,10 @@ private theorem narrow_block (sc : ElabScope) (k : Nat) (memo : CallMemo) :
     @narrowPost Match.C productionNames (.name "i") (.bool true) sc (blockLocals, k) memo =
       .ok (([], (blockLocals, k)), memo) := rfl
 
-/-- Actual elaboration of `i = true;` under the block reader scope. -/
-theorem block_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+/-- Shared assignment receipt for the default top-level and child scopes. -/
+private theorem assignment_write (hk : Solidity.Goals.elabKernelTotal) (top : Bool) (k : Nat) :
     (((@elabStmtP Match.C productionNames (.assign (.name "i") (.bool true))).run
-      { funs := [], top := false }).run (blockLocals, k)).run {} =
+      { funs := [], top := top }).run (blockLocals, k)).run {} =
       .ok ((blockProgram, (blockLocals, k)), {}) := by
   letI : FreshNames := productionNames
   have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
@@ -1228,6 +1228,13 @@ theorem block_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
   simp only [checkIn, check_bool]
   rfl
 
+
+/-- Actual elaboration under the block reader scope. -/
+theorem block_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
+    (((@elabStmtP Match.C productionNames (.assign (.name "i") (.bool true))).run
+      { funs := [], top := false }).run (blockLocals, k)).run {} =
+      .ok ((blockProgram, (blockLocals, k)), {}) :=
+  assignment_write hk _ k
 
 /-- The block restores the caller locals and changes neither counter nor memo. -/
 theorem block_outer (hk : Solidity.Goals.elabKernelTotal) :
@@ -1329,50 +1336,8 @@ def statementBody : Body :=
 theorem statement_write (hk : Solidity.Goals.elabKernelTotal) (k : Nat) :
     (((@elabStmtP Match.C productionNames (.assign (.name "i") (.bool true))).run
       { funs := [] }).run (blockLocals, k)).run {} =
-      .ok ((blockProgram, (blockLocals, k)), {}) := by
-  letI : FreshNames := productionNames
-  have hp : elabStmtP Match.C = elabStmtPWith Match.C (elabRec Match.C ()) :=
-    (hk.1 Match.C).1.2.2.1
-  have ha : (elabRec Match.C ()).hoistAssign (.name "i") (.bool true) =
-      pure ([], .assign (.name "i") (.bool true)) :=
-    kernel_hoist_assign_bool hk Match.C "i" true
-  rw [hp]
-  conv => lhs; whnf
-  simp only [RawStmt.mapExprsM, fnPure_other]
-  conv => lhs; whnf
-  simp only [bytesStmt, RawStmt.mapExprsM, bytesPure_other]
-  conv => lhs; whnf
-  simp only [RawStmt.exprs, List.map_cons, List.map_nil, List.forIn_cons, List.forIn_nil,
-    Bool.false_eq_true, if_false, narrowWholeUse?_other, narrowWholeUse?_name]
-  conv => lhs; whnf
-  simp only [narrowPure_other]
-  conv => lhs; whnf
-  rw [(hk.1 Match.C).1.2.2.2.2.1]
-  unfold hoistStmtWith
-  dsimp only
-  rw [ha]
-  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind, Pure.pure,
-    ReaderT.pure, StateT.pure, Except.pure]
-  rw [nctx_run]
-  conv => lhs; whnf
-  dsimp only
-  rw [(hk.1 Match.C).1.2.2.2.1]
-  unfold elabStmt1With
-  dsimp only
-  conv => lhs; whnf
-  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
-  rw [narrow_block]
-  dsimp only
-  unfold synthM
-  dsimp only [Bind.bind, ReaderT.bind, StateT.bind, Except.bind]
-  rw [nctx_run]
-  dsimp only
-  rw [synth_block]
-  dsimp only [ElabM.lift, StateT.lift, Bind.bind, ReaderT.bind, StateT.bind,
-    Pure.pure, ReaderT.pure, StateT.pure, Except.bind, Except.pure]
-  simp only [checkIn, check_bool]
-  rfl
-
+      .ok ((blockProgram, (blockLocals, k)), {}) :=
+  assignment_write hk _ k
 
 /-- Actual singleton-list elaboration, with no block wrapper. -/
 theorem statement_elaborated (hk : Solidity.Goals.elabKernelTotal) :
@@ -1425,6 +1390,37 @@ theorem smoke_statements_coverage (hk : Solidity.Goals.elabKernelTotal) :
     (BooleanStatements.of_blocks
       (BooleanBlocksV3.of_boolean (smoke_in_domain smokeOutput)))
     (smoke_production hk) smoke_program_accepted
+
+/-- The same assignment at the non-top-level checked caller scope. -/
+def checkedBody : Body :=
+  { statementBody with input := { statementBody.input with scope := { funs := [], top := false } } }
+def checkedOutput : Solidity.Correctness.Lowering.Checker.Output Match.C [.val .bool] :=
+  { statementOutput with elabScope := { funs := [], top := false } }
+def checkedEmitted : Emitted := ⟨Match.C, [.val .bool], checkedOutput⟩
+
+theorem checked_in_domain : BooleanStatements.CheckedInput checkedBody checkedEmitted := by
+  exact ⟨rfl, rfl, rfl, rfl, rfl, ["i"], _, rfl, rfl, .assign (by decide) (.bool true)⟩
+theorem checked_not_default : ¬ BooleanStatements.Input checkedBody checkedEmitted := by
+  intro h
+  have top := congrArg ElabScope.top h.2.2.2.1
+  cases top
+
+/-- Actual lowering, elaboration and placement reuse the existing child-scope receipt. -/
+theorem checked_production (hk : Solidity.Goals.elabKernelTotal) :
+    @ProductionV2 productionNames checkedBody checkedEmitted := by
+  letI : FreshNames := productionNames
+  refine ⟨⟨rfl, ?_⟩, ⟨?_, rfl⟩, ⟨⟨rfl, rfl, rfl⟩, rfl, rfl⟩⟩
+  · exact lowerAt_of_lowersTo (raw := statementRaw) (out := statementRaw)
+      (before := checkedBody.input.before) (after := checkedOutput.afterLower) ⟨4, rfl⟩
+  · simpa only [List.append_nil] using CoverageBranch.actual_list
+      (CoverageBranch.Children.cons (block_write hk 0)
+        (CoverageBranch.Children.nil (blockLocals, 0) ({} : CallMemo)))
+
+/-- Strict-extension nonvacuity with unchanged acceptance of the same intrinsic program. -/
+theorem checked_coverage (hk : Solidity.Goals.elabKernelTotal) :
+    ∃ b' : Body, b'.SameInput checkedBody ∧ ∃ m, diagram.Assoc b' checkedEmitted m :=
+  diagram_total_checked_boolean_statements checkedBody checkedEmitted checked_in_domain
+    (checked_production hk) block_accepted
 
 end Solidity.Examples.Lowering.Sim.Coverage
 
@@ -1495,3 +1491,6 @@ end Solidity.Examples.Lowering.Sim.Coverage
 
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.statement_production
 #print axioms Solidity.Examples.Lowering.Sim.Coverage.statement_coverage
+
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.checked_production
+#print axioms Solidity.Examples.Lowering.Sim.Coverage.checked_coverage
