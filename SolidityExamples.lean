@@ -84,6 +84,14 @@ import Solidity.Examples.Benchmark.Patterns.TwoStepOwnership
 import Solidity.Examples.Benchmark.Patterns.Withdrawal
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.SolcVerify.CaseAnalysisSimple
+import Solidity.Examples.Benchmark.SolcVerify.DoWhile
+import Solidity.Examples.Benchmark.SolcVerify.LoopInvar
+import Solidity.Examples.Benchmark.SolcVerify.OldExpr
+import Solidity.Examples.Benchmark.SolcVerify.OverflowSpec
+import Solidity.Examples.Benchmark.SolcVerify.Simple
+import Solidity.Examples.Benchmark.SolcVerify.Storage
+import Solidity.Examples.Benchmark.SolcVerify.StructMapping
 import Solidity.Examples.Benchmark.SolkeyBench.AccessRestriction
 import Solidity.Examples.Benchmark.SolkeyBench.Fund
 import Solidity.Examples.Benchmark.SolkeyBench.SendContract

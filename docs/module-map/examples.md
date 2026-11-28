@@ -284,6 +284,16 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyOz/SolmateOwned.lean` | solkey's Solmate `Owned` port: both clauses proved. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/SolcVerify/CaseAnalysisSimple.lean` | solc-verify case-analysis postconditions on signed storage; correct proved, wrong default refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/DoWhile.lean` | solc-verify `do … while` invariants; all four unknown (invariant not inductive, or needs an inferred bound). |
+| `Examples/Benchmark/SolcVerify/LoopInvar.lean` | solc-verify loop invariants with `assert`; two proved, two refuted (`sol_refute`), `forLoop` unknown. |
+| `Examples/Benchmark/SolcVerify/OldExpr.lean` | solc-verify `\old` postconditions on owner and counters; incorrect owner change refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/OverflowSpec.lean` | solc-verify `uint8` contract invariant `x == y + 1`; `inc` proved, `set` refuted by `sol_refute` (overflow in the clause). |
+| `Examples/Benchmark/SolcVerify/Simple.lean` | solc-verify contract invariant `x == y`; `add`, constructor and `add_incorrect_2` (call inlined, no entry invariant owed) proved, `add_incorrect` refuted (`sol_refute`). |
+| `Examples/Benchmark/SolcVerify/Storage.lean` | solc-verify records in a mapping of structs; frame (`modifies`) and postconditions all proved. |
+| `Examples/Benchmark/SolcVerify/StructMapping.lean` | SMTChecker `struct_1`: a struct stored in a mapping agrees with its memory copy; proved. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/Swc/IntegerOverflowMinimal.lean` | SWC-101 `integer_overflow_minimal.sol` (registry 1b62270), 0.4 wrapping `-=` as `unchecked`: `run` (`count == \old(count) - input`) refuted by a kernel-checked run from `count = 1` wrapping to 2^256-1. |
 | `Examples/Benchmark/Swc/IntegerOverflowMinimalFixed.lean` | SWC-101 `integer_overflow_minimal_fixed.sol`, SafeMath `sub`: `run` proved under the same clause. |
 | `Examples/Benchmark/Swc/WalletRefundNoSub.lean` | SWC-105 `wallet_02_refund_nosub.sol`: `refund` (`balances[msg.sender] == 0`) refuted by a run that pays and keeps the credit. Constructor, `withdraw`, `migrateTo` proved. `deposit` unknown (payable-snapshot leaf, as in WalletOk). |
