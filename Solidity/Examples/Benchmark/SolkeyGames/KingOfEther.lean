@@ -15,6 +15,16 @@ itself from
 <https://github.com/Cyfrin/solidity-by-example.github.io/blob/5bcdca0239409d7336a07b66a6fca8d0bcc710e6/contracts/src/hacks/denial-of-service/PreventDenialOfService.sol>
 (the pull-payment fix of the denial-of-service game).
 Changes: none but the spelling of `contract!{ … }`.
+The verdicts read `⊢` over every typed state (`Fml.Valid`), which includes
+a state where `msg.sender == this`: the contract calling itself, which the
+published contract never does.  A ledger clause that
+assumes the payment leaves the contract is false there, since a payment to
+oneself books nothing (`State.pay`, `Semantics/Run.lean`); such
+a clause is refuted by a kernel-checked counterexample at that state, and
+the clause is kept as solkey states it.
+
+Verdicts: `claimThrone` proved; `withdraw` refuted (`withdraw_refuted`:
+the contract, not king, withdrawing its own credit of `1`).
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyGames.KingOfEther
@@ -52,6 +62,9 @@ def KingOfEther : Contract := contract!{
 local instance : InContract := ⟨KingOfEther⟩
 open scoped Scoped
 
+/-- `claimThrone()`: `ensures msg.value > \old(balance) && king == msg.sender
+&& balance == msg.value`, the old king credited `\old(balance)`, every other
+credit kept, and the sender's ledger entry booked `msg.value`. -/
 theorem spec_claimThrone : ⊢ spec!{ claimThrone } := by
   sol_prove
   all_goals sol_leaf
@@ -68,6 +81,9 @@ def selfCall : State KingOfEther [] :=
 theorem balances_nonneg : ⊢ dl!{ ∀ uint a; balances[a] >= 0 } := by
   sol_prove
 
+/-- `withdraw()`'s `ensures net(msg.sender) == \old(net(msg.sender)) -
+\old(balances[msg.sender])` fails from `selfCall`: the call pays the
+contract itself, and its ledger entry stays. -/
 theorem withdraw_refuted : ¬ (⊢ spec!{ withdraw }) := by
   apply Proves.not_of_not_valid
   apply Fml.not_valid_of_peel [] selfCall

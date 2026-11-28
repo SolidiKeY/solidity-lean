@@ -15,6 +15,20 @@ itself from
 <https://github.com/Cyfrin/solidity-by-example.github.io/blob/5bcdca0239409d7336a07b66a6fca8d0bcc710e6/contracts/src/hacks/re-entrancy/ReEntrancy.sol>
 (the re-entrancy victim: it pays before it zeroes the balance).
 Changes: none but the spelling of `contract!{ … }`.
+The verdicts read `⊢` over every typed state (`Fml.Valid`), which includes
+a state where `msg.sender == this`: the contract calling itself, which the
+published contract never does.  A ledger clause that
+assumes the payment leaves the contract is false there, since a payment to
+oneself books nothing (`State.pay`, `Semantics/Run.lean`); such
+a clause is refuted by a kernel-checked counterexample at that state, and
+the clause is kept as solkey states it.
+
+The re-entrancy itself (the payment before `balances[msg.sender] = 0`) is
+solkey's open goal under `-O transferSemantics:withCallback`; it is not
+stated here, and the verdicts read the default payment, without callbacks.
+
+Verdicts: `deposit` unknown (`deposit_obligation`); `withdraw` refuted
+(`withdraw_refuted`: the contract withdrawing its own credit of `1`).
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyGames.EtherStore
@@ -53,6 +67,27 @@ def selfCall : State EtherStore [] :=
   { storage := .cons (.map (.cons (uintOfNat 0) (.prim (uintOfNat 1)) .nil) (.prim (uintOfNat 0))) .nil,
     H := [], heap := Heap.empty, env := (), net := [(uintOfNat 0, 1)], selfBalance := uintOfNat 1,
     tx := {} }
+
+/-- `withdraw()` refuted from `selfCall`, where the invariant holds. -/
+theorem withdraw_refuted : ¬ (⊢ spec!{ withdraw }) := by
+  apply Proves.not_of_not_valid
+  apply Fml.not_valid_of_peel [] selfCall
+  apply Fml.not_holds_imp_of_eval3 (Tools.poolDom [])
+  · repeat' apply Fml.holds_and_intro
+    all_goals first
+      | sol_decl_facts
+      | exact Fml.eval3_tt (dom := Tools.poolDom []) (by decide +kernel)
+      | skip
+    -- `∀ a; balances[a] == net(a)`: at `0` both are `1`, elsewhere both `0`.
+    intro v
+    by_cases hv : v = uintOfNat 0
+    · subst hv; exact Fml.eval3_tt (dom := Tools.poolDom []) (by decide +kernel)
+    · simp [holds, Tm.denote, Fml.peel, selfCall, State.push, hv, Op2.denote, Op0.denote,
+        State.glob, TEnv.get, Semantics.lookupBy, Op1.denote, Storage.obs, binopT, SLoc.app_ref,
+        SVal.obs_word, SVal.wordOf, SRef.append, SFields.get, SVal.findM, SRef.ofRoot, Path.append,
+        Path.index, SMap.toList]
+      exact ⟨by decide +kernel, rfl⟩
+  · decide +kernel
 
 /-- From `selfCall`, `withdraw()` returns with the credit `0` and the ledger
 entry still `1`: the invariant `balances[a] == net(a)` and the `ensures`

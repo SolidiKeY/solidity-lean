@@ -17,6 +17,20 @@ itself from
 reading `address(this).balance`).
 Changes: none but the spelling of `contract!{ … }`; `7 ether` and `1 ether`
 are written in wei, as solkey's clause writes them.
+The verdicts read `⊢` over every typed state (`Fml.Valid`), which includes
+a state where `msg.sender == this`: the contract calling itself, which the
+published contract never does.  A ledger clause that
+assumes the payment leaves the contract is false there, since a payment to
+oneself books nothing (`State.pay`, `Semantics/Run.lean`); such
+a clause is refuted by a kernel-checked counterexample at that state, and
+the clause is kept as solkey states it.
+
+`TARGET_AMOUNT` is a `constant`, which the model keeps as a storage root
+the constructor initializes (`Contract.inits`); a function's obligation
+ranges over every value of it, and the clauses hold for each.
+
+Verdicts: `deposit` proved; `claimReward` refuted (`claimReward_refuted`:
+a winner that is the contract itself).
 -/
 
 namespace Solidity.Examples.Benchmark.SolkeyGames.EtherGame
@@ -51,11 +65,15 @@ def EtherGame : Contract := contract!{
 local instance : InContract := ⟨EtherGame⟩
 open scoped Scoped
 
+/-- `deposit()`: `msg.value` is one ether, the balance grows by it, the
+sender wins at the target and the winner is kept below it. -/
 theorem spec_deposit : ⊢ spec!{ deposit } := by
   sol_prove
   all_goals sol_leaf
   all_goals sol_close
 
+/-- `claimReward()`'s `ensures net(msg.sender) == \old(net(msg.sender)) -
+\old(balance)` fails for a winner that is the contract: it pays itself. -/
 theorem claimReward_refuted : ¬ (⊢ spec!{ claimReward }) := by
   sol_refute
 
