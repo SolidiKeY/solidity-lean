@@ -2,16 +2,16 @@ import Solidity.Correctness.Lowering.Sim.Match
 import Solidity.Correctness.Lowering.Total.Versions.CalleeBinding.Frame
 
 /-!
-# P3 association contract, pending semantic review
+# Association contract with callee binding, pending semantic review
 
 Advances `Solidity.Goals.loweringBySimulation` additively. These are definitions
 of obligations, not proofs of them. No frozen diagram or association changes.
-The callee branch binds the original declared body using P2's actual producer;
-it does not use plain spelling. Ordinary here means non-constructor, as in P2.
+The callee branch binds the original declared body using the actual callee-binding producer;
+it does not use plain spelling. Ordinary here means non-constructor, as in `CalleeBinding`.
 
 The proposed relation extends frozen `Assoc`; it agrees with it on loops.
-The converse is intentionally only a loop statement. H2012 requires witnesses
-with successful production and actual recursive caller provenance. Coverage
+The converse is intentionally only a loop statement. Coverage requires witnesses
+with successful production and actual recursive caller provenance. It
 retains `Production` and `Accepted`; its recursive witness also retains the
 full caller success equation and canonical first-frame protocol. The witness
 has no parameters or returns; this does not restrict the association itself.
@@ -19,7 +19,7 @@ has no parameters or returns; this does not restrict the association itself.
 No obligation is proved here. The public `elabCallRet` and `elabStmtP` remain
 partial; their closed success equations need upstream kernel bridges, not
 axioms or external execution relabelled as proof. `Reads` still observes items,
-not `RBody.mods`; no execution simulation is claimed. P2 retains the complete
+not `RBody.mods`; no execution simulation is claimed. The callee binding retains the complete
 body but storage and local alignment remain explicit requirements.
 
 -/
@@ -31,19 +31,19 @@ open Solidity.Lowering.V07 (ContextMap)
 abbrev BindingSite := Total.Version.CalleeBinding.Site
 abbrev BindingOutput := Total.Version.CalleeBinding.Output
 
-/-- The fixed P2 producer, not an arbitrary output relation. -/
+/-- The fixed callee-binding producer, not an arbitrary output relation. -/
 def produce (site : BindingSite) (r : Total.Request) : Option BindingOutput :=
   Total.Version.CalleeBinding.fromFunctions site.tables site.registry site.settings
     site.scope site.leadingParts r.contract.funs site.index
 
-/-- The exact items program of P2's bound body. Modifiers are retained in the
+/-- The exact items program of the bound callee body. Modifiers are retained in the
 binding output, not asserted to execute by frozen `Reads`. -/
 def program (s : BindingOutput) : Total.SourceProgram :=
   ⟨s.source.res.env, s.body.rs, s.body.inModifier, .body,
     s.body.locals, s.body.out, s.body.items⟩
 
 /-- New branch: selected first-match alias, original raw input, successful
-fixed producer, exact P2 binding, exact resolved items and storage typing.
+fixed producer, exact callee binding, exact resolved items and storage typing.
 No `Total.Spells` hypothesis appears in this branch. -/
 def CalleeAt (b : Body) (u : Emitted) (alias : Name) : Prop :=
   ∃ (site : BindingSite) (c : Total.CalleeRequest) (s : BindingOutput),
@@ -115,11 +115,11 @@ def Coverage : Prop :=
     AssocV2 b u m ∧ CalleeAt b u alias ∧ Production b u ∧ Accepted u ∧
       RecursiveOrigin b u alias)
 
-/-- Draft obligations after H2012, not the final delivery contract. In addition
+/-- Draft obligations, not the final delivery contract. In addition
 to these same-input caller and canonical-frame conditions, the exact bridge
 from the caller result/state to the checked frame output must be stated and
 proved against the upstream producer interface. No inhabitant here alone
-completes that missing provenance obligation or P3. -/
+completes that missing provenance obligation or the association contract. -/
 def Contract : Prop := Compatibility ∧ InitialMatching ∧ Coverage
 
 end Solidity.Correctness.Lowering.Sim.AssociationV2
