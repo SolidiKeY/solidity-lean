@@ -1,56 +1,11 @@
 import Solidity.Typing.Values
 
-/-!
-# The leaves of a type, and the expansions they give
-
-A value of a *finite shape* (`Ty.Finite`, its test `Ty.finiteShape`: words,
-members, fixed-size arrays of finite shape, mappings left as they are, no
-dynamic array) is the words at its primitive leaves (`Ty.leaves`): the
-paths through members and in-range fixed indices that end at a word.  So a
-`delete` there, and a copy `a = b`, is one word written per leaf:
-
-* in the interpreter, at every shape with a leaf, with no premise on the
-  storage (`Storage.delete_expand`, `Storage.write_expand`,
-  `Storage.write_find_expand`): the storage a delete leaves is the one the
-  writes of the leaves' defaults leave, and a copy's is the one the writes of
-  the source's leaves, read before the copy, leave;
-* in the Theory (`Obs.delAt_expand`, `Obs.copyTo_find_expand`), where a value
-  is its observations: provided the locations are shaped as the typed
-  storage shapes them (`TVal.Shaped`, true of every typed value,
-  `SVal.obs_shaped`): a delete keeps whether a location is there, which a
-  word written makes true, and resets the words past a fixed array's end,
-  which no leaf reaches.
-
-**Why the leaves skip mappings.**  `delete` and a copy keep a mapping as it
-is (`SVal.defaultOf`, `SVal.overlay`), so its entries are no leaf of
-anything; a dynamic array is not of finite shape, since a delete truncates
-it, which no word written expresses.
-
-**Why `T.leaves ≠ []` in the interpreter.**  A delete saves at its location
-even where nothing is below it to reset (a `uint[0]`, a struct of mappings):
-through a mapping's default that save adds the key's entry, which reads as
-the default (the Theory cannot tell, `Obs` has no entries) but is another
-typed value.  With one leaf, the leaf's write adds the same entry.
-
-**Push and pop of a word** (`Obs.push_prim`, `Obs.pop_prim`,
-`Storage.push_prim`, `Storage.pop_prim`): a push is one more live slot,
-then a save at index `len`; a pop of a word is the slot at `len - 1`
-deleted, then the length shrunk keeping it.
-
-The leaves are computed by fuel over a rank bound, as `SVal.dflt` is
-(`Semantics/Storage.lean`); a fixed array's length is part of its type, so a
-`uint[2^200]` has that many leaves: a user of the expansion bounds
-`Ty.leafCount`.
--/
 
 namespace Solidity
 
 open Semantics (structDef lookupBy setBy tyRank fieldsRank structRank nodupKeysB)
 
-/-! ## Finite shapes -/
 
-/-- A type whose values are their words: no dynamic array outside a
-mapping, a fixed array addressable at every index (`n ≤ 2^256`). -/
 inductive Ty.Finite : Ty → Prop where
   | prim (P : PrimTy) : Ty.Finite (.prim P)
   | mapping (K : PrimTy) (V : Ty) : Ty.Finite (.ref (.mapping K V))
@@ -60,7 +15,6 @@ inductive Ty.Finite : Ty → Prop where
   | fixed (E : Ty) (n : Nat) (hn : n ≤ 2 ^ 256) (h : Ty.Finite E) :
       Ty.Finite (.ref (.fixed E n))
 
-/-- `Ty.Finite`'s test, by fuel. -/
 def Ty.finiteShapeAt : Nat → Ty → Bool
   | 0, _ => false
   | _ + 1, .prim _ => true
@@ -69,7 +23,6 @@ def Ty.finiteShapeAt : Nat → Ty → Bool
   | _ + 1, .ref (.array _) => false
   | _ + 1, .ref (.mapping _ _) => true
 
-/-- **A finite shape**: the values of `T` are their words at the leaves. -/
 def Ty.finiteShape (T : Ty) : Bool := Ty.finiteShapeAt (rankBound T + 1) T
 
 theorem Ty.finite_of_finiteShapeAt : (k : Nat) → (T : Ty) → Ty.finiteShapeAt k T = true →
@@ -89,20 +42,15 @@ theorem Ty.finite_of_finiteShapeAt : (k : Nat) → (T : Ty) → Ty.finiteShapeAt
 theorem Ty.finite_of_finiteShape {T : Ty} (h : T.finiteShape = true) : T.Finite :=
   Ty.finite_of_finiteShapeAt _ T h
 
-/-! ## Leaves -/
 
-/-- A word below a `T`: its type and its path. -/
 abbrev Leaf (T : Ty) := (P : PrimTy) × Path T (.prim P)
 
-/-- A member's leaf, below the struct. -/
 def Leaf.field {s f : Name} {T : Ty} (h : lookupBy f (structDef s) = some T) (l : Leaf T) :
     Leaf (.ref (.struct s)) := ⟨l.1, .field h l.2⟩
 
-/-- An element's leaf, below the fixed array. -/
 def Leaf.atF {E : Ty} {n : Nat} (i : PrimTy.uint.Denote) (l : Leaf E) :
     Leaf (.ref (.fixed E n)) := ⟨l.1, .atF i l.2⟩
 
-/-- A member of a list with distinct keys is what the list looks it up as. -/
 theorem lookupBy_of_mem_nodup {k : Name} {v : Ty} :
     {l : List (Name × Ty)} → nodupKeysB l = true → (k, v) ∈ l → lookupBy k l = some v
   | [], _, hm => absurd hm List.not_mem_nil
@@ -115,8 +63,6 @@ theorem lookupBy_of_mem_nodup {k : Name} {v : Ty} :
       simp only [lookupBy, hk, ↓reduceIte]
       exact lookupBy_of_mem_nodup hn.2 hm'
 
-/-- The leaves of `T` with fuel `k`: a word's own, each member's below it,
-each element's below it; none below a mapping or a dynamic array. -/
 def Ty.leavesAt : Nat → (T : Ty) → List (Leaf T)
   | 0, _ => []
   | _ + 1, .prim P => [⟨P, .nil⟩]
@@ -128,19 +74,21 @@ def Ty.leavesAt : Nat → (T : Ty) → List (Leaf T)
   | _ + 1, .ref (.array _) => []
   | _ + 1, .ref (.mapping _ _) => []
 
-/-- **The leaves of `T`**: its words, by members and in-range fixed indices,
-in the members' and the indices' order. -/
 def Ty.leaves (T : Ty) : List (Leaf T) := Ty.leavesAt (rankBound T + 1) T
 
-/-- How many words a `T` is. -/
+example : (Ty.ref (.fixed .uint 0)).leaves = [] := by
+  simp only [Ty.leaves, Ty.leavesAt, List.range_zero, List.flatMap_nil]
+
 def Ty.leafCount (T : Ty) : Nat := T.leaves.length
 
-/-! ## Direct paths -/
+
+example (n : Nat) : (Ty.ref (.fixed .uint n)).leafCount = n := by
+  change ((List.range n).flatMap fun i =>
+    [Leaf.atF (E := .uint) (n := n) (uintOfNat i) ⟨.uint, .nil⟩]).length = n
+  rw [← List.map_eq_flatMap, List.length_map, List.length_range]
 
 namespace Path
 
-/-- A path through members and fixed indices only: no mapping key, no
-dynamic index. -/
 def direct : {T U : Ty} → Path T U → Bool
   | _, _, .nil => true
   | _, _, .field _ p => p.direct
@@ -148,8 +96,6 @@ def direct : {T U : Ty} → Path T U → Bool
   | _, _, .at _ _ => false
   | _, _, .key _ _ => false
 
-/-- A path that goes past a fixed array's end before any key or dynamic
-index: nothing is there. -/
 def out : {T U : Ty} → Path T U → Bool
   | _, _, .nil => false
   | _, _, .field _ p => p.out
@@ -159,7 +105,6 @@ def out : {T U : Ty} → Path T U → Bool
 
 end Path
 
-/-- A `uint` is the `uintOfNat` of its value. -/
 theorem uintOfNat_toNat (i : PrimTy.uint.Denote) : uintOfNat i.1.toNat = i := by
   have hi : 0 ≤ i.1 ∧ i.1 < ((2 ^ 256 : Nat) : Int) := by
     have h := i.2
@@ -171,7 +116,6 @@ theorem uintOfNat_toNat (i : PrimTy.uint.Denote) : uintOfNat i.1.toNat = i := by
   show ((i.1.toNat : Nat) : Int) = i.1
   omega
 
-/-- An index below a length is below it as a `uint` too. -/
 theorem uintOfNat_toNat_lt {i n : Nat} (h : i < n) : (uintOfNat i).1.toNat < n := by
   by_cases hb : i < 2 ^ 256
   · rw [uintOfNat_val hb]; simp only [Int.toNat_natCast]; exact h
@@ -179,7 +123,6 @@ theorem uintOfNat_toNat_lt {i n : Nat} (h : i < n) : (uintOfNat i).1.toNat < n :
     show (0 : Int).toNat < n
     omega
 
-/-- A member's type is of a rank below its struct's. -/
 theorem tyRank_lt_of_lookup {s f : Name} {T : Ty} (h : lookupBy f (structDef s) = some T) :
     tyRank T < structRank s := by
   have hm := Semantics.lookupBy_eq_some_mem h
@@ -195,7 +138,6 @@ theorem tyRank_lt_of_lookup {s f : Name} {T : Ty} (h : lookupBy f (structDef s) 
       · exact Nat.le_trans (ih hm') (Nat.le_max_right _ _)
   exact Nat.lt_of_le_of_lt (hle _ hm) (Semantics.structDef_rank_lt s)
 
-/-- Every leaf is a direct path inside the value. -/
 theorem Ty.leavesAt_direct : (k : Nat) → (T : Ty) → ∀ l ∈ Ty.leavesAt k T,
     l.2.direct = true ∧ l.2.out = false
   | 0, _, l, hl => absurd hl List.not_mem_nil
@@ -216,7 +158,6 @@ theorem Ty.leavesAt_direct : (k : Nat) → (T : Ty) → ∀ l ∈ Ty.leavesAt k 
   | _ + 1, .ref (.array _), l, hl => absurd hl List.not_mem_nil
   | _ + 1, .ref (.mapping _ _), l, hl => absurd hl List.not_mem_nil
 
-/-- Every direct path to a word inside the value is a leaf, given the fuel. -/
 theorem Ty.mem_leavesAt_of_direct {P : PrimTy} : {T : Ty} → (r : Path T (.prim P)) →
     (k : Nat) → tyRank T < k → r.direct = true → r.out = false →
     (⟨P, r⟩ : Leaf T) ∈ Ty.leavesAt k T
@@ -240,17 +181,13 @@ theorem Ty.mem_leavesAt_of_direct {P : PrimTy} : {T : Ty} → (r : Path T (.prim
   | _, .at _ _, _, _, hd, _ => by simp only [Path.direct, Bool.false_eq_true] at hd
   | _, .key _ _, _, _, hd, _ => by simp only [Path.direct, Bool.false_eq_true] at hd
 
-/-- **The leaves are the direct paths to a word that stay inside the value.** -/
 theorem Ty.mem_leaves {T : Ty} {P : PrimTy} (r : Path T (.prim P)) :
     (⟨P, r⟩ : Leaf T) ∈ T.leaves ↔ r.direct = true ∧ r.out = false :=
   ⟨fun h => Ty.leavesAt_direct _ T _ h,
    fun h => Ty.mem_leavesAt_of_direct r _
      (Nat.lt_succ_of_le (tyRank_le_rankBound T)) h.1 h.2⟩
 
-/-! ## Distinct leaves are disjoint -/
 
-/-- Nothing goes on below a word: a path that goes through a word's path is
-that path. -/
 theorem Path.eq_of_strip?_prim {T V : Ty} {P : PrimTy} (l : Path T (.prim P)) (r : Path T V)
     {s : Path (.prim P) V} (h : Path.strip? l r = some s) :
     (⟨V, r⟩ : (V : Ty) × Path T V) = ⟨.prim P, l⟩ := by
@@ -258,12 +195,10 @@ theorem Path.eq_of_strip?_prim {T V : Ty} {P : PrimTy} (l : Path T (.prim P)) (r
   cases s with
   | nil => subst e; rw [Path.append_nil_right]
 
-/-- A word's path, past itself. -/
 theorem Path.strip?_self {T U : Ty} (p : Path T U) : Path.strip? p p = some .nil := by
   have e := Path.strip?_append p .nil
   rwa [Path.append_nil_right] at e
 
-/-- **Distinct leaves are disjoint**: neither goes through the other. -/
 theorem Leaf.strip?_ne {T : Ty} {l l' : Leaf T} (h : l ≠ l') :
     Path.strip? l.2 l'.2 = none := by
   cases hs : Path.strip? l.2 l'.2 with
@@ -280,7 +215,6 @@ theorem Ty.leaves_strip?_ne {T : Ty} {l l' : Leaf T} (_ : l ∈ T.leaves) (_ : l
     (h : l ≠ l') : Path.strip? l.2 l'.2 = none :=
   Leaf.strip?_ne h
 
-/-! ## Direct paths, below a value -/
 
 theorem Path.out_append {T U W : Ty} : (p : Path T U) → (s : Path U W) → p.direct = true →
     (p.append s).out = (p.out || s.out)
@@ -301,7 +235,6 @@ theorem Path.direct_append_of {T U W : Ty} : (p : Path T U) → (s : Path U W) �
   | .at _ _, _, hd => by rw [Path.append_at] at hd; exact hd
   | .key _ _, _, hd => by rw [Path.append_key] at hd; exact hd
 
-/-- A direct path from a finite shape reaches no dynamic array. -/
 theorem Ty.Finite.not_array {E : Ty} : {T : Ty} → T.Finite → (r : Path T (.ref (.array E))) →
     r.direct = true → False
   | _, hT, .nil, _ => by cases hT
@@ -314,12 +247,7 @@ theorem Ty.Finite.not_array {E : Ty} : {T : Ty} → T.Finite → (r : Path T (.r
   | _, _, .at _ _, hd => by simp only [Path.direct, Bool.false_eq_true] at hd
   | _, _, .key _ _, hd => by simp only [Path.direct, Bool.false_eq_true] at hd
 
-/-! ## Shaped values -/
 
-/-- **Shaped as the typed storage shapes it**: every location a direct path
-reaches inside the value is there, and nothing is there past a fixed array's
-end.  The Theory's delete and copy reset or copy what is there; a word
-written makes its location there. -/
 structure TVal.Shaped {T : Ty} (v : TVal T) : Prop where
   has_in : ∀ {V : Ty} (r : Path T V), r.direct = true → r.out = false → v.has r = true
   absent_out : ∀ {V : Ty} {α : Type} (c : Comp V α) (r : Path T V), r.out = true →
@@ -354,30 +282,25 @@ theorem SVal.findM_out : {T V : Ty} → (v : SVal T) → (r : Path T V) → r.ou
   | _, _, _, .at _ _, ho => by simp only [Path.out, Bool.false_eq_true] at ho
   | _, _, _, .key _ _, ho => by simp only [Path.out, Bool.false_eq_true] at ho
 
-/-- **Every typed value is shaped.** -/
 theorem SVal.obs_shaped {T : Ty} (v : SVal T) : v.obs.Shaped where
   has_in r hd ho := SVal.findM_direct v r hd ho
   absent_out c r ho := by
     rw [SVal.obs, c.read_obsOpt, Option.bind_some, SVal.findM_out v r ho]
 
-/-- **The storage is shaped at every location it has.** -/
 theorem Storage.obs_shaped {C : Contract} {U : Ty} (st : Storage C) (r : SRef C U) {v : SVal U}
     (h : st.find r = some v) : (st.obs.find (.ref r)).Shaped := by
   rw [Storage.obs_find, h]
   exact SVal.obs_shaped v
 
-/-! ## Words written at leaves, read -/
 
 namespace Obs
 
 variable {L : Ty → Type} [ObsLoc L]
 
-/-- A copy to a word is a save. -/
 theorem copyTo_prim (o : Obs L) {P : PrimTy} (q : L (.prim P)) (v : TVal (.prim P)) :
     o.copyTo q v = o.save q v := by
   rw [copyTo, TVal.overlay_prim]
 
-/-- Below a location not below `p`, nothing below `p` is. -/
 theorem strip?_app_none {T U : Ty} {p : L T} {q : L U} (h : ObsLoc.strip? p q = none)
     {V : Ty} (r : Path T V) : ObsLoc.strip? (ObsLoc.app p r) q = none := by
   cases hs : ObsLoc.strip? (ObsLoc.app p r) q with
@@ -388,7 +311,6 @@ theorem strip?_app_none {T U : Ty} {p : L T} {q : L U} (h : ObsLoc.strip? p q = 
     rw [e, ObsLoc.strip?_app] at h
     cases h
 
-/-- The words `g` written at the leaves `ls` below `p`. -/
 abbrev writeLeaves (o : Obs L) {T : Ty} (p : L T) (ls : List (Leaf T))
     (g : (l : Leaf T) → l.1.Denote) : Obs L :=
   ls.foldl (fun a l => a.copyTo (ObsLoc.app p l.2) (TVal.ofWord (g l))) o
@@ -472,7 +394,6 @@ theorem writeLeaves_has {T : Ty} (p : L T) (g : (l : Leaf T) → l.1.Denote) {V 
 
 end Obs
 
-/-! ## A delete and a copy at a finite shape, read -/
 
 theorem Path.direct_append {T U W : Ty} : (p : Path T U) → (r : Path U W) → p.direct = true →
     (p.append r).direct = r.direct
@@ -482,7 +403,6 @@ theorem Path.direct_append {T U W : Ty} : (p : Path T U) → (r : Path U W) → 
   | .at _ _, _, hd => by simp only [Path.direct, Bool.false_eq_true] at hd
   | .key _ _, _, hd => by simp only [Path.direct, Bool.false_eq_true] at hd
 
-/-- A word written at a leaf is at a direct path inside the value. -/
 theorem Ty.leaves_any {T V : Ty} {r : Path T V}
     (h : (T.leaves.any fun l => (Path.strip? l.2 r).isSome) = true) :
     r.direct = true ∧ r.out = false := by
@@ -503,7 +423,6 @@ theorem find_nil_self {T : Ty} (v : TVal T) : v.find .nil = v :=
     (fun _ => by simp only [Obs.find, ObsLoc.app_path, Path.append_nil])
     (fun _ => by simp only [Obs.find, ObsLoc.app_path, Path.append_nil])
 
-/-- A delete at a finite shape: every direct location reset, the rest as it is. -/
 theorem delR_finite (c : Comp V α) : {T : Ty} → T.Finite → (v : TVal T) → (r : Path T V) →
     TVal.delR c v r = if r.direct = true then c.reset (v.find r) else c.read v r
   | _, _, v, .nil => by simp only [TVal.delR, Path.direct, ↓reduceIte, find_nil_self]
@@ -520,9 +439,6 @@ theorem delR_finite (c : Comp V α) : {T : Ty} → T.Finite → (v : TVal T) →
   | _, hT, _, .at _ _ => by cases hT
   | _, _, v, .key k r => rfl
 
-/-- What a copy at a finite shape needs of its two sides: where the new one
-has a direct location the old one has it, and where it has not, nothing is
-below it in the old one. -/
 structure Agree {T : Ty} (old new : TVal T) : Prop where
   has : ∀ {V : Ty} (r : Path T V), r.direct = true → new.has r = true → old.has r = true
   absent : ∀ {V : Ty} (r : Path T V), r.direct = true → new.has r = false →
@@ -536,7 +452,6 @@ theorem Agree.find {T U : Ty} {old new : TVal T} (h : Agree old new) (p : Path T
     rw [c.read_find, ← Path.append_assoc]
     exact h.absent (p.append r) (by rw [Path.direct_append p r hp]; exact hd) hn c s
 
-/-- Two shaped values agree. -/
 theorem Shaped.agree {T : Ty} {old new : TVal T} (ho : old.Shaped) (hn : new.Shaped) :
     Agree old new where
   has r hd h := by
@@ -550,8 +465,6 @@ theorem Shaped.agree {T : Ty} {old new : TVal T} (ho : old.Shaped) (hn : new.Sha
     · rw [hn.has_in r hd hout] at h; cases h
     · exact ho.absent_out c _ (by rw [Path.out_append r s hd, hout, Bool.true_or])
 
-/-- A copy at a finite shape: the new value at every direct location, the
-old one below a key. -/
 theorem ovR_finite (c : Comp V α) : {T : Ty} → T.Finite → (old new : TVal T) → Agree old new →
     (r : Path T V) → TVal.ovR c old new r = if r.direct = true then c.read new r else c.read old r
   | _, _, _, _, _, .nil => rfl
@@ -581,8 +494,6 @@ namespace Obs
 
 variable {L : Ty → Type} [ObsLoc L]
 
-/-- At a finite shape, the leaves' writes leave a location's presence as a
-shaped value has it. -/
 theorem writeLeaves_has_shaped {T V : Ty} (p : L T) (g : (l : Leaf T) → l.1.Denote) (o : Obs L)
     (hs : (o.find p).Shaped) (r : Path T V) :
     (o.writeLeaves p T.leaves g).has (ObsLoc.app p r) = o.has (ObsLoc.app p r) := by
@@ -592,8 +503,6 @@ theorem writeLeaves_has_shaped {T V : Ty} (p : L T) (g : (l : Leaf T) → l.1.De
   · obtain ⟨hd, ho⟩ := Ty.leaves_any ha
     exact (hs.has_in r hd ho).symm
 
-/-- **`delete` at a finite shape is a word written per leaf**: the default
-at each, where the value is shaped. -/
 theorem delAt_expand {T : Ty} (hT : T.Finite) (o : Obs L) (p : L T) (hs : (o.find p).Shaped) :
     o.delAt p = T.leaves.foldl
       (fun a l => a.copyTo (ObsLoc.app p l.2) (TVal.ofWord (PrimTy.dflt l.1))) o := by
@@ -656,8 +565,6 @@ theorem delAt_expand {T : Ty} (hT : T.Finite) (o : Obs L) (p : L T) (hs : (o.fin
       · simp only [hd, Bool.false_eq_true, ↓reduceIte]
         rfl
 
-/-- **A copy at a finite shape is a word written per leaf**: the source's
-word at each, read before the copy, where both sides are shaped. -/
 theorem copyTo_find_expand {T : Ty} (hT : T.Finite) (o : Obs L) (p q : L T)
     (hp : (o.find p).Shaped) (hq : (o.find q).Shaped) :
     o.copyTo p (o.find q) = T.leaves.foldl
@@ -724,18 +631,15 @@ theorem copyTo_find_expand {T : Ty} (hT : T.Finite) (o : Obs L) (p q : L T)
 
 end Obs
 
-/-! ## Push and pop of a word -/
 
 namespace Obs
 
 variable {L : Ty → Type} [ObsLoc L]
 
-/-- The last of two saves at one location wins. -/
 theorem save_save_same (o : Obs L) {U : Ty} (p : L U) (a b : TVal U) :
     (o.save p a).save p b = o.save p b := by
   apply Obs.ext <;> intro _ q <;> simp only [save] <;> split <;> rfl
 
-/-- A save over a save below it wins. -/
 theorem save_save_above (o : Obs L) {U V : Ty} (p : L U) (s : Path U V) (v : TVal V)
     (Y : TVal U) : (o.save (ObsLoc.app p s) v).save p Y = o.save p Y := by
   apply Obs.ext <;> intro _ q <;> simp only [save] <;> split
@@ -743,7 +647,6 @@ theorem save_save_above (o : Obs L) {U V : Ty} (p : L U) (s : Path U V) (v : TVa
     | rfl
     | (rename_i hq; simp only [strip?_app_none hq s])
 
-/-- A save below a save is made in the value saved. -/
 theorem save_save_below (o : Obs L) {U V : Ty} (p : L U) (s : Path U V) (v : TVal V)
     (X : TVal U) : (o.save p X).save (ObsLoc.app p s) v = o.save p (X.save s v) := by
   apply Obs.ext <;> intro _ q
@@ -758,7 +661,6 @@ end Obs
 
 namespace TVal
 
-/-- A slot's save leaves the length set at the array. -/
 theorem setLen_save {E V : Ty} (a : TVal (.ref (.array E))) (k : Nat) (i : PrimTy.uint.Denote)
     (s : Path E V) (v : TVal V) : (a.setLen k).save (.at i s) v = TVal.setLen (a.save (.at i s) v) k := by
   apply Obs.ext <;> intro _ q
@@ -769,7 +671,6 @@ theorem setLen_save {E V : Ty} (a : TVal (.ref (.array E))) (k : Nat) (i : PrimT
     | «at» j r => simp only [Path.isNilB, Bool.false_eq_true, ↓reduceIte]
   · simp only [Obs.save, setLen]
 
-/-- A word with its location there, deleted: the default word. -/
 theorem del_prim {P : PrimTy} (v : TVal (.prim P)) (h : v.has .nil = true) :
     v.del = TVal.ofWord (PrimTy.dflt P) := by
   apply Obs.ext
@@ -783,7 +684,6 @@ namespace Obs
 
 variable {L : Ty → Type} [ObsLoc L]
 
-/-- **A push of a word is one more live slot, then a save at index `len`.** -/
 theorem push_prim (o : Obs L) {P : PrimTy} (p : L (.ref (.array (.prim P))))
     (v : TVal (.prim P)) :
     o.push p v = (o.extend p).copyTo (ObsLoc.app p (.at (uintOfNat (o.len p)) .nil)) v := by
@@ -795,8 +695,6 @@ theorem push_prim (o : Obs L) {P : PrimTy} (p : L (.ref (.array (.prim P))))
   simp only [TVal.extendA, Ty.isPrimitive, Bool.true_or, ↓reduceIte, TVal.pushA, hl,
     TVal.setLen_save, save_save_same]
 
-/-- **A pop of a word is the last slot deleted, then the length shrunk
-keeping it**, at a nonempty array. -/
 theorem pop_prim (o : Obs L) {P : PrimTy} (p : L (.ref (.array (.prim P))))
     (h : o.len p ≠ 0) :
     o.pop false p = (o.delAt (ObsLoc.app p (.at (uintOfNat (o.len p - 1)) .nil))).pop true p := by
@@ -810,8 +708,6 @@ theorem pop_prim (o : Obs L) {P : PrimTy} (p : L (.ref (.array (.prim P))))
     rw [← hl]; rfl
   simp only [TVal.popA, hl, hl', h, ↓reduceIte, Bool.false_eq_true]
 
-/-- The same with the slot's default saved, where the slot is there (as it
-is below the length of a typed array). -/
 theorem pop_prim_copyTo (o : Obs L) {P : PrimTy} (p : L (.ref (.array (.prim P))))
     (h : o.len p ≠ 0) (hs : o.has (ObsLoc.app p (.at (uintOfNat (o.len p - 1)) .nil)) = true) :
     o.pop false p = (o.copyTo (ObsLoc.app p (.at (uintOfNat (o.len p - 1)) .nil))
@@ -823,9 +719,7 @@ theorem pop_prim_copyTo (o : Obs L) {P : PrimTy} (p : L (.ref (.array (.prim P))
 
 end Obs
 
-/-! ## The interpreter: a typed value by its leaves -/
 
-/-- Distinct leaves part (`Path.Diverges`). -/
 theorem Leaf.diverges {T : Ty} {l l' : Leaf T} (h : l ≠ l') : Path.Diverges l.2 l'.2 := by
   rcases Path.strip?_none l.2 l'.2 (Leaf.strip?_ne h) with hd | ⟨r, hr, _⟩
   · exact hd
@@ -833,7 +727,6 @@ theorem Leaf.diverges {T : Ty} {l l' : Leaf T} (h : l ≠ l') : Path.Diverges l.
     cases r with
     | nil => exact absurd Path.labels_nil hr
 
-/-- A leaf and a direct path to a mapping part. -/
 theorem Leaf.diverges_map {T : Ty} (l : Leaf T) (hl : l.2.direct = true) {K : PrimTy} {V : Ty}
     (m : Path T (.ref (.mapping K V))) (hm : m.direct = true) : Path.Diverges l.2 m := by
   cases hs : Path.strip? l.2 m with
@@ -848,13 +741,11 @@ theorem Leaf.diverges_map {T : Ty} (l : Leaf T) (hl : l.2.direct = true) {K : Pr
       cases r with
       | key _ _ => simp only [Path.direct, Bool.false_eq_true] at hr
 
-/-- Two member lists with distinct names are equal where every member is. -/
 theorem SFields.ext_nodup : {fs : List (Name × Ty)} → nodupKeysB fs = true →
     (a b : SFields fs) →
     (∀ (f : Name) (T : Ty) (h : lookupBy f fs = some T), a.get h = b.get h) → a = b :=
   Solidity.SFields.ext_get
 
-/-- **A value of a finite shape is its leaves and its mappings.** -/
 theorem SVal.ext_finite {T : Ty} (hT : T.Finite) : (x z : SVal T) →
     (∀ (P : PrimTy) (l : Path T (.prim P)), l.direct = true → l.out = false →
       x.findM l = z.findM l) →
@@ -912,7 +803,6 @@ theorem SVal.ext_finite {T : Ty} (hT : T.Finite) : (x z : SVal T) →
         · rw [List.getElem?_eq_none (by rw [SVec.length_toList]; omega),
             List.getElem?_eq_none (by rw [SVec.length_toList]; omega)]
 
-/-- A copy read along a direct path: the new value laid over the old one there. -/
 theorem SVal.findM_overlay_direct : {T V : Ty} → (x y : SVal T) → (r : Path T V) →
     r.direct = true → r.out = false →
     ∃ a b, x.findM r = some a ∧ y.findM r = some b ∧ (x.overlay y).findM r = some (a.overlay b)
@@ -937,7 +827,6 @@ theorem SVal.findM_overlay_direct : {T V : Ty} → (x y : SVal T) → (r : Path 
   | _, _, _, _, .at _ _, hd, _ => by simp only [Path.direct, Bool.false_eq_true] at hd
   | _, _, _, _, .key _ _, hd, _ => by simp only [Path.direct, Bool.false_eq_true] at hd
 
-/-- A delete read along a direct path: the value there deleted. -/
 theorem SVal.findM_defaultOf_direct : {T V : Ty} → (x : SVal T) → (r : Path T V) →
     r.direct = true → r.out = false →
     ∃ a, x.findM r = some a ∧ x.defaultOf.findM r = some a.defaultOf
@@ -959,8 +848,6 @@ theorem SVal.findM_defaultOf_direct : {T V : Ty} → (x : SVal T) → (r : Path 
   | _, _, _, .at _ _, hd, _ => by simp only [Path.direct, Bool.false_eq_true] at hd
   | _, _, _, .key _ _, hd, _ => by simp only [Path.direct, Bool.false_eq_true] at hd
 
-/-- Words saved at leaves, read: each leaf its word, and what parts from
-every leaf as it was. -/
 theorem SVal.foldLeaves_read {T : Ty} (g : (l : Leaf T) → l.1.Denote) :
     (ls : List (Leaf T)) → (x : SVal T) → (∀ l ∈ ls, (x.findM l.2).isSome = true) →
     ∃ z, ls.foldlM (fun w l => w.saveM l.2 (.prim (g l))) x = some z ∧
@@ -994,8 +881,6 @@ theorem SVal.foldLeaves_read {T : Ty} (g : (l : Leaf T) → l.1.Denote) :
       rw [hzq q fun l' hl' => hq l' (List.mem_cons_of_mem _ hl'),
         SVal.findM_saveM_diverges (hq l List.mem_cons_self) x _ hx1]
 
-/-- **A copy at a finite shape, in the interpreter**: the new value's word
-saved at every leaf of the old one. -/
 theorem SVal.foldLeaves_overlay {T : Ty} (hT : T.Finite) (x y : SVal T) :
     T.leaves.foldlM (fun w l => w.saveM l.2 (.prim (SVal.wordOf (y.findM l.2)))) x =
       some (x.overlay y) := by
@@ -1016,8 +901,6 @@ theorem SVal.foldLeaves_overlay {T : Ty} (hT : T.Finite) (x y : SVal T) :
     cases a; cases b
     rw [SVal.overlay_map]
 
-/-- **A delete at a finite shape, in the interpreter**: the default word
-saved at every leaf. -/
 theorem SVal.foldLeaves_defaultOf {T : Ty} (hT : T.Finite) (x : SVal T) :
     T.leaves.foldlM (fun w l => w.saveM l.2 (.prim (PrimTy.dflt l.1))) x =
       some x.defaultOf := by
@@ -1037,20 +920,16 @@ theorem SVal.foldLeaves_defaultOf {T : Ty} (hT : T.Finite) (x : SVal T) :
     cases a
     rw [SVal.defaultOf_map]
 
-/-! ## The interpreter's storage -/
 
 namespace Storage
 
 variable {C : Contract}
 
-/-- A save below a reference: the value there found, saved below, saved
-back. -/
 theorem save_append {U W : Ty} (st : Storage C) (r : SRef C U) (q : Path U W) (v : SVal W) :
     st.save (r.append q) v = (st.find r).bind fun x => (x.saveM q v).bind fun y => st.save r y := by
   simp only [Storage.save, Storage.find, SRef.append, SVal.save_eq_saveM, SVal.find_eq_findM,
     SVal.saveM_append_eq, Option.bind_eq_bind, Option.bind_assoc]
 
-/-- Where a reference finds a value, a save at it lands. -/
 theorem save_of_find {U : Ty} {st : Storage C} {r : SRef C U} {x : SVal U}
     (h : st.find r = some x) (v : SVal U) : ∃ st', st.save r v = some st' := by
   simp only [Storage.find, SVal.find_eq_findM] at h
@@ -1058,7 +937,6 @@ theorem save_of_find {U : Ty} {st : Storage C} {r : SRef C U} {x : SVal U}
   exact ⟨st.set r.hroot x', by simp only [Storage.save, SVal.save_eq_saveM, hx',
     Option.bind_eq_bind, Option.bind_some]⟩
 
-/-- A save that lands finds the reference. -/
 theorem find_of_save {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     (h : st.save r v = some st') : (st.find r).isSome = true := by
   simp only [Storage.save, SVal.save_eq_saveM, Option.bind_eq_bind, Option.bind_eq_some_iff] at h
@@ -1068,7 +946,6 @@ theorem find_of_save {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
   obtain ⟨y, _, hy, _, _⟩ := SVal.saveM_append _ r.path .nil v hx''
   simp only [Storage.find, SVal.find_eq_findM, hy, Option.isSome_some]
 
-/-- The last of two saves at one reference wins. -/
 theorem save_save {U : Ty} {st st₁ : Storage C} {r : SRef C U} {a : SVal U}
     (h : st.save r a = some st₁) (b : SVal U) : st₁.save r b = st.save r b := by
   simp only [Storage.save, SVal.save_eq_saveM, Option.bind_eq_bind, Option.bind_eq_some_iff,
@@ -1079,8 +956,6 @@ theorem save_save {U : Ty} {st st₁ : Storage C} {r : SRef C U} {a : SVal U}
     SVal.saveM_saveM _ r.path a b hx₁ hx₂, Option.bind_eq_bind, Option.bind_some,
     SFields.set_set]
 
-/-- Saves below a reference, one after another, are their fold on the value
-there, saved back. -/
 theorem foldlM_save_append {T : Ty} (r : SRef C T) (val : (l : Leaf T) → SVal (.prim l.1)) :
     (l : Leaf T) → (ls : List (Leaf T)) → (st : Storage C) →
     (l :: ls).foldlM (fun s l => s.save (r.append l.2) (val l)) st =
@@ -1103,14 +978,10 @@ theorem foldlM_save_append {T : Ty} (r : SRef C T) (val : (l : Leaf T) → SVal 
         simp only [Option.bind_eq_bind] at ih ⊢
         simp only [Option.bind_some, hy, hs₁, ih st₁, find_save_same hs₁, save_save hs₁]
 
-/-- A word's write is its save. -/
 theorem write_word {P : PrimTy} (st : Storage C) (r : SRef C (.prim P)) (x : P.Denote) :
     st.write r (.prim x) = st.save r (.prim x) := by
   simp only [Storage.write, SVal.isPrim, Ty.isPrimitive, ↓reduceIte]
 
-/-- **`delete` at a finite shape, in the interpreter, is a word written per
-leaf**: the default at each.  At a shape with no leaf it is not
-(`delete` still saves; through a mapping's default that adds an entry). -/
 theorem delete_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Storage C)
     (r : SRef C T) :
     st.delete r = T.leaves.foldlM
@@ -1120,8 +991,13 @@ theorem delete_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Sto
   rw [e, foldlM_save_append r (fun l => .prim (PrimTy.dflt l.1)), ← e]
   simp only [SVal.foldLeaves_defaultOf hT, Option.bind_some, Storage.delete, Option.bind_eq_bind]
 
-/-- **A copy at a finite shape, in the interpreter, is a word written per
-leaf**: the new value's word at each. -/
+example :
+    (SVal.map (K := .bool) .nil (SVal.fixed (E := .uint) .nil)).saveM
+      (.key true .nil) (SVal.fixed (E := .uint) .nil).defaultOf =
+      some (.map (.cons true (.fixed .nil) .nil) (.fixed .nil)) := by
+  rw [SVal.defaultOf_fixed, SVec.defaultOf_nil]
+  simp only [SVal.saveM, SMap.toList_nil, lookupBy, setBy, Option.bind_eq_bind, Option.bind_some, SMap.ofList]
+
 theorem write_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Storage C)
     (r : SRef C T) (v : SVal T) :
     st.write r v = T.leaves.foldlM
@@ -1146,12 +1022,10 @@ theorem write_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Stor
           | some st' => have := find_of_save hs; rw [hf] at this; cases this
         | some y => simp only [Option.bind_some, SVal.overlay_prim]
 
-/-- A read below a reference is the read below the value there. -/
 theorem find_appendM {U W : Ty} (st : Storage C) (r : SRef C U) (q : Path U W) :
     st.find (r.append q) = (st.find r).bind (·.findM q) := by
   simp only [Storage.find, SRef.append, SVal.find_eq_findM, SVal.findM_append]
 
-/-- Two folds whose steps agree on the list's elements. -/
 theorem foldlM_congr_mem {α β : Type} {f g : β → α → Option β} : (ls : List α) →
     (∀ a ∈ ls, ∀ b, f b a = g b a) → ∀ b, ls.foldlM f b = ls.foldlM g b
   | [], _, _ => rfl
@@ -1162,8 +1036,6 @@ theorem foldlM_congr_mem {α β : Type} {f g : β → α → Option β} : (ls : 
     | some b' =>
       exact foldlM_congr_mem ls (fun a' ha' => h a' (List.mem_cons_of_mem _ ha')) b'
 
-/-- **`a = b` at a finite shape, in the interpreter, is a word written per
-leaf**: the source's word at each, read before the copy. -/
 theorem write_find_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Storage C)
     (r q : SRef C T) {v : SVal T} (hv : st.find q = some v) :
     st.write r v = T.leaves.foldlM
@@ -1180,13 +1052,10 @@ theorem write_find_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st :
   exact foldlM_congr_mem _ (fun l hl s => by
     simp only [key l hl, Option.bind_eq_bind, Option.bind_some]) st
 
-/-- A word's slot past the end starts at its default. -/
 theorem pushSlot_fst_prim {P : PrimTy} (l : List (SVal (.prim P))) :
     (pushSlot (.prim P) l).1 = SVal.dflt (.prim P) := by
   cases l <;> rfl
 
-/-- **A push of a word is one more live slot, then a save at index `len`**,
-in the interpreter. -/
 theorem push_prim {P : PrimTy} (st : Storage C) (r : SRef C (.ref (.array (.prim P))))
     (x : P.Denote) :
     st.push r (fun _ => some (.prim x)) = (st.len r).bind fun i =>
@@ -1229,8 +1098,6 @@ theorem push_prim {P : PrimTy} (st : Storage C) (r : SRef C (.ref (.array (.prim
             List.drop_tail, List.drop_one, List.self_eq_append_left, List.drop_eq_nil_iff,
             Nat.le_add_right]
       · simp only [dif_neg h, Option.bind_none]
-/-- **A pop of a word is the last slot reset, then the length shrunk
-keeping it**, in the interpreter (an empty array reverts either way). -/
 theorem pop_prim {P : PrimTy} (st : Storage C) (r : SRef C (.ref (.array (.prim P)))) :
     st.pop false r = (st.len r).bind fun i =>
       (st.save (r.append (.at (uintOfNat (i.1.toNat - 1)) .nil)) (.prim (PrimTy.dflt P))).bind

@@ -1,7 +1,5 @@
 import Solidity.Source.Preservation.Frames
 
-/-! Reference validity through the actual scope/call-frame packing operations.
-These lemmas retain each operation's existing checked failure paths. -/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {H : HeapTy}

@@ -1,6 +1,6 @@
 import Solidity.Storage.Representation.Model
 
-/-! Full-word normalization for the committed primitive/key types.
+/-! Full-word normalization for the primitive/key types.
 No packed-field layout or new arithmetic interface is introduced. -/
 namespace Solidity.Storage.Representation
 
