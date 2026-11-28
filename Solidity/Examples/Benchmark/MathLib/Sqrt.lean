@@ -18,7 +18,8 @@ Natural specification: `z = ⌊√y⌋`, i.e. `z * z <= y < (z + 1)^2`; the uppe
 bound is written `y / (z + 1) < z + 1` (equivalent over the naturals) since a
 clause's `(z + 1) * (z + 1)` overflows at `y = 2^256 - 1`.
 
-Loop invariant: `z` and `x` are positive, both bound `⌊√y⌋` from above,
+Loop invariant: `z` and `x` are positive, both bound `⌊√y⌋` from above
+(for `z`, through `z == y` where `z + 1` would overflow),
 and `x` is the Newton step from `z` except before the first iteration. At
 exit `x >= z` excludes the initial state (`y / 2 + 1 < y` for `y > 3`),
 so `(y / z + z) / 2 >= z`, whence `z * z <= y`. Variant: `z`.
@@ -32,7 +33,7 @@ def Sqrt : Contract := contract!{
       z = y;
       uint x = y / 2 + 1;
       /// @custom:key invariant 3 < y && 0 < z && 0 < x
-      /// @custom:key invariant y / (z + 1) < z + 1 && y / (x + 1) < x + 1
+      /// @custom:key invariant (z == y || y / (z + 1) < z + 1) && y / (x + 1) < x + 1
       /// @custom:key invariant (z == y && x == y / 2 + 1) || x == (y / z + z) / 2
       /// @custom:key decreases z
       while (x < z) {
@@ -47,11 +48,12 @@ def Sqrt : Contract := contract!{
 local instance : InContract := ⟨Sqrt⟩
 open scoped Scoped
 
-/-- Unknown: of `sol_prove`'s four leaves, the `y <= 3` branch closes by
-`sol_leaf; sol_close`; invariant initialization and the exit leaf stop
-`sol_close_nonlin`'s bounded search or exhaust the heartbeats, preservation
-likewise. Missing: a nonlinear division closer (`y / (x + 1) < x + 1` for the
-Newton step, AM–GM over floor division; `(y / z + z) / 2 >= z → z * z <= y`). -/
+/-- Unknown: `sol_prove` leaves four leaves (invariant initialization,
+preservation, exit, and the `y <= 3` branch). The last closes by
+`sol_leaf; sol_close`; on the loop leaves `sol_close_nonlin`'s bounded search
+stops or the heartbeats run out. Missing: a nonlinear floor-division closer
+(`y / (x + 1) < x + 1` for the Newton step, AM–GM over floor division;
+`(y / z + z) / 2 >= z → z * z <= y`). -/
 def sqrtTarget := spec!{ sqrt }
 
 end Solidity.Examples.Benchmark.MathLib.Sqrt
