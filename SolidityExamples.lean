@@ -34,6 +34,11 @@ import Solidity.Examples.Benchmark.Governance.Voting
 import Solidity.Examples.Benchmark.Mapping
 import Solidity.Examples.Benchmark.Purchase
 import Solidity.Examples.Benchmark.SimpleStorage
+import Solidity.Examples.Benchmark.SolkeyMisc.Account
+import Solidity.Examples.Benchmark.SolkeyMisc.DocsBallot
+import Solidity.Examples.Benchmark.SolkeyMisc.FunctionModifier
+import Solidity.Examples.Benchmark.SolkeyMisc.TimeLock
+import Solidity.Examples.Benchmark.SolkeyMisc.WETH9
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Tokens.ERC1155
 import Solidity.Examples.Benchmark.Tokens.ERC20

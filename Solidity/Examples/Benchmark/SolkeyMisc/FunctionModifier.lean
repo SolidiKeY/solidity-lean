@@ -60,6 +60,10 @@ local instance : InContract := ⟨FunctionModifier⟩
 
 open scoped Scoped
 
+/-- `constructor()`: `ensures owner == msg.sender && x == 10 && !locked`. -/
+theorem spec_constructor : ⊢ spec!{ constructor } := by
+  sol_prove
+
 /-- `changeOwner(_newOwner)`: both clauses. -/
 theorem spec_changeOwner : ⊢ spec!{ changeOwner } := by
   sol_prove
