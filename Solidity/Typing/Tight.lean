@@ -8,9 +8,7 @@ The converse needs three more facts, which every run keeps and
 `SVal.Canon` does not say; `SVal.Tight` (`tightH`) is exactly them:
 
 - an array whose element type has no well-formed default has no slots at
-  all: `push()` needs the default, and nothing else makes one (no struct of
-  the table lacks one since decision 16 refused a repeated member name,
-  `refusedStructs`; the clause stays for a type `defaultOkS` refuses);
+  all: `push()` needs the default, and nothing else makes one (the clause applies to a type `defaultOkS` refuses);
 - the slots past the end of an array of words are cleared: `pop`, `delete`
   and a shorter copy clear what they leave, and past an end only a reference
   reaches, never a word (`SVal.Live`, from `Storage.checkIndex`);
