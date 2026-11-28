@@ -97,6 +97,14 @@ import Solidity.Examples.Benchmark.SolkeyData.ArrayReplaceFromEnd
 import Solidity.Examples.Benchmark.SolkeyData.Enum
 import Solidity.Examples.Benchmark.SolkeyData.IterableMapping
 import Solidity.Examples.Benchmark.SolkeyData.NestedMapping
+import Solidity.Examples.Benchmark.SolcVerify.CaseAnalysisSimple
+import Solidity.Examples.Benchmark.SolcVerify.DoWhile
+import Solidity.Examples.Benchmark.SolcVerify.LoopInvar
+import Solidity.Examples.Benchmark.SolcVerify.OldExpr
+import Solidity.Examples.Benchmark.SolcVerify.OverflowSpec
+import Solidity.Examples.Benchmark.SolcVerify.Simple
+import Solidity.Examples.Benchmark.SolcVerify.Storage
+import Solidity.Examples.Benchmark.SolcVerify.StructMapping
 import Solidity.Examples.Benchmark.SolkeyGames.EtherGame
 import Solidity.Examples.Benchmark.SolkeyGames.EtherStore
 import Solidity.Examples.Benchmark.SolkeyGames.KingOfEther
