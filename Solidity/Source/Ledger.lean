@@ -1,51 +1,16 @@
 import Solidity.Source.TypingExamples
 import Solidity.Source.Semantics
 
-/-!
-# The source-constructor ledger
-
-Every expression and statement constructor of the source syntax
-(`Syn`) with its semantic status, checked mechanically against the typing
-coverage (`TypingExamples.exprCoverage`, `stmtCoverage`, which classify
-every constructor without a wildcard):
-
-- a constructor the typing judgment types has an interpreter arm: its derivations
-  elaborate to `RExpr`/`RStmt` (`Typed.toR`, `StmtD.toR`, total), and the
-  interpreter (`evalE`, `execS`, `Solidity/Source/Eval.lean`) matches every
-  constructor of `RExpr`, `RLVal`, `RStmt` and `RItems` without a
-  wildcard (Lean's exhaustiveness check).  An arm can still be `stuck` on
-  some inputs (dynamic ABI decoding, calldata references beyond
-  `bytes`/`string`/one-word arrays, `fallback` signatures solc refuses,
-  nested-array copies): `semExprCoverage_of_typed` is a
-  classification, not a progress theorem;
-- a deferred constructor is a recorded gap with its stage, never an
-  exclusion (the profile contains it);
-- a constructor read as another rule's operand (`Coverage.operand`:
-  `elemType`, the callee of a conversion and a type expression of
-  `abi.decode`) is evaluated inside that rule's node
-  (`semExprCoverage_of_operand`); the types `abi.decode` refuses (static
-  arrays, structs, nested arrays, fixed point, external function types)
-  have no derivation and are recorded in
-  `docs/feature-work/source-soundness.md`.
-
-`semExprCoverage_of_typed` and `semStmtCoverage_of_typed` prove the first
-point; `semExprCoverage_total` and `semStmtCoverage_total` that the ledger
-is total; `semExprGaps` lists the gaps.
--/
 
 namespace Solidity.Source.Ledger
 
 open Solidity.Source Solidity.Source.TypingExamples
 
-/-- A constructor's semantic status. -/
 inductive SemStatus where
-  /-- Typed and evaluated. -/
   | evaluated
-  /-- Untyped and unevaluated: a gap with its stage. -/
   | gap (stage reason : String)
   deriving DecidableEq, Repr
 
-/-- The semantic status of an expression constructor. -/
 def semExprCoverage (k : Ctor) : Option SemStatus :=
   match exprCoverage k with
   | some .typed | some (.operand _ _) => some .evaluated
@@ -57,7 +22,6 @@ def semExprCoverage (k : Ctor) : Option SemStatus :=
     | _ => some (.gap "S02" "deferred by S01")
   | none => none
 
-/-- The semantic status of a statement constructor. -/
 def semStmtCoverage (k : Ctor) : Option SemStatus :=
   match stmtCoverage k with
   | some .typed | some (.operand _ _) => some .evaluated
@@ -67,40 +31,32 @@ def semStmtCoverage (k : Ctor) : Option SemStatus :=
     | _ => some (.gap stage reason)
   | none => none
 
-/-- **The ledger is total** on expressions. -/
 theorem semExprCoverage_total (e : Syn .expr) : (semExprCoverage e.ctor).isSome = true := by
   cases e <;> rfl
 
-/-- **The ledger is total** on statements. -/
 theorem semStmtCoverage_total {k : SCtx} (s : Syn (.stmt k)) : (semStmtCoverage s.ctor).isSome = true := by
   cases s <;> rfl
 
-/-- **Every typed expression constructor is evaluated.** -/
 theorem semExprCoverage_of_typed (k : Ctor) (h : exprCoverage k = some .typed) :
     semExprCoverage k = some .evaluated := by
   simp only [semExprCoverage, h]
 
-/-- **Every typed statement constructor is executed.** -/
 theorem semStmtCoverage_of_typed (k : Ctor) (h : stmtCoverage k = some .typed) :
     semStmtCoverage k = some .evaluated := by
   simp only [semStmtCoverage, h]
 
-/-- **Every operand constructor is evaluated** inside its parent. -/
 theorem semExprCoverage_of_operand (k p : Ctor) (r : String) (h : exprCoverage k = some (.operand p r)) :
     semExprCoverage k = some .evaluated := by
   simp only [semExprCoverage, h]
 
-/-- The expression constructors still without semantics. -/
 def semExprGaps : List Ctor :=
   [.callOptions, .metaType, .new]
 
-/-- Whether the typing coverage defers a constructor. -/
 def deferred (k : Ctor) : Bool :=
   match exprCoverage k with
   | some (.deferred _ _) => true
   | _ => false
 
-/-- The gaps are exactly the constructors the typing coverage defers. -/
 theorem semExprGaps_spec (k : Ctor) : semExprGaps.contains k = deferred k := by
   cases k <;> rfl
 
