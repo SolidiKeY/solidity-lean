@@ -188,6 +188,13 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/Governance/Timelock.lean` | Bound Ether-operation timelock: delay, cancellation and permanent completion; all four function specifications proved by `sol_prove`. |
 | `Examples/Benchmark/Governance/EnglishAuction.lean` | Solidity SimpleAuction: constructor proved; bid, refund and final payout obligations retained as unknown, with snapshot/payment closer gaps documented in the module. |
 | `Examples/Benchmark/Governance/Multisig.lean` | Two-owner Ether multisig: constructor, revocation and threshold execution proved; fresh submission and no-double-confirmation specifications retained as unknown with snapshot/Boolean closer gaps. |
+| `Examples/Benchmark/Patterns/CommitReveal.lean` | Solidity by Example SecuredFindThisHash commit-reveal: constructor and commitSolution proved, getMySolution's guard proved, its returns unspecified (an unnamed tuple cannot be named by a clause); revealSolution retained as unknown (heartbeat exhaustion on string hashes and payment branches). |
+| `Examples/Benchmark/Patterns/StateMachine.lean` | Solidity docs StateMachine with timed transitions: forward-only stage clauses for g, h, i proved; bid and reveal retained as unknown (read-after-save stage arithmetic missing in the leaf closer). |
+| `Examples/Benchmark/Patterns/Withdrawal.lean` | Solidity docs WithdrawalContract pull payments: constructor and withdraw proved; becomeRichest retained as unknown (quantified mapping-save leaf against the snapshot). |
+| `Examples/Benchmark/Patterns/RateLimiter.lean` | ConsenSys per-period withdrawal limit, timestamp periods: constructor proved; withdraw retained as unknown (repeated-save normalization with the ledger debit). |
+| `Examples/Benchmark/Patterns/CircuitBreaker.lean` | ConsenSys circuit breaker with silent-skip modifiers: all four function specifications proved. |
+| `Examples/Benchmark/Patterns/Mutex.lean` | Solidity by Example re-entrancy guard on EtherStore: deposit, guarded withdraw (with its payment) and getBalance proved; calls run no recipient code here, so re-entry is not exercised. |
+| `Examples/Benchmark/Patterns/TwoStepOwnership.lean` | Compound Unitroller pending-admin handover with error codes: all three function specifications proved. |
 | Module | Its examples |
 |---|---|
 | `Examples/Benchmark/SolkeyGames/KingOfEther.lean` | solkey's pull-payment King of the Ether (DoS fix): `claimThrone` proved by `sol_prove`, including the dethroned king's credit and the payable booking. `withdraw` refuted (`¬ ⊢`, kernel-checked): the contract calling itself with a credit pays itself and books nothing, so the `net(msg.sender)` clause fails. |

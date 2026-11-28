@@ -1,6 +1,5 @@
 import Solidity.Storage.Representation.Arrays
 
-/-! Heterogeneous array observations, writes and header/element controls. -/
 namespace Solidity.Storage.Representation.ArrayControls
 private def zero : PrimTy.uint.Denote := ⟨0, by decide⟩
 private def one : PrimTy.uint.Denote := ⟨1, by decide⟩
@@ -26,7 +25,6 @@ theorem heterogeneous_represented : ValueRep value (.darr .word) (.root 0) words
     exact .cons _ _ _ _ _ (.scalar seven _ _ rfl)
       (.cons _ _ _ _ _ (.scalar nine _ _ rfl) (.nil _ _ _))
 
-/-- Word representation, source live read and source stale-slot read agree. -/
 theorem distinct_source_reads :
     value.find (.at zero .nil) = some (.prim seven) ∧
     value.find (.at one .nil) = some (.prim nine) ∧
@@ -41,7 +39,6 @@ theorem distinct_source_reads :
       rfl
     · exact array_live_missing live shadow _ one .nil (by decide)
 
-/-- Updating the live slot preserves a distinct shadow slot and the header. -/
 theorem update_preserves_shadow :
     ∃ (changed : SVal (.ref (.array Ty.uint))) (w : Store),
       value.save (.at zero .nil) (.prim zero) = some changed ∧
@@ -62,7 +59,6 @@ theorem update_preserves_shadow :
   · rw [array_header_patch_frame]
     rfl
 
-/-- Empty array defaults have a zero length and no occupied elements. -/
 theorem empty_default_represented :
     ValueRep (.array (SVec.nil (E := Ty.uint)) SList.nil (by decide))
       (.darr .word) (.root 0) (fun _ => zero) := by
@@ -75,7 +71,6 @@ theorem empty_default_represented :
   · simp only [SVec.toList_nil, SList.toList_nil, List.nil_append]
     exact .nil _ _ _
 
-/-- Failure past the retained extent is independent of word contents. -/
 theorem beyond_extent : value.find (.at two .nil) = none ∧
     value.save (.at two .nil) (.prim zero) = none := by
   constructor
@@ -88,7 +83,6 @@ theorem beyond_extent : value.find (.at two .nil) = none ∧
       SList.toList_nil, List.cons_append, List.nil_append, List.length_cons, List.length_nil]
     decide
 
-/-- Positive live-read success is linked to representation, not just retention. -/
 theorem live_success_and_representation :
     value.findLive (.at zero .nil) = some (.prim seven) ∧
       ValueRep (.prim seven) .word (.data (.root 0) 0) words := by
@@ -96,7 +90,6 @@ theorem live_success_and_representation :
   simp only [live, SVec.toList_cons, SVec.toList_nil]
   rfl
 
-/-- A stale alias may write its retained slot while live reads still reject it. -/
 theorem shadow_write_combination :
     ∃ (changed : SVal (.ref (.array Ty.uint))) (w : Store),
       value.save (.at one .nil) (.prim zero) = some changed ∧
@@ -152,7 +145,6 @@ theorem fixed_update_combination :
       simp only [SVal.find_atF, fixedSlots, SVec.toList_cons, SVec.toList_nil]
       rfl)
 
-/-- The source fixed-array default has represented zero words. -/
 theorem fixed_default_represented :
     ValueRep (SVal.dflt (.ref (.fixed Ty.uint 2))) (.sarr .word 2) (.root 0) (fun _ => zero) := by
   change ValueRep (.fixed (SVec.replicate (.prim zero) 2)) (.sarr .word 2) (.root 0) (fun _ => zero)
@@ -168,7 +160,6 @@ theorem fixed_out_of_range :
   ⟨fixed_missing fixedSlots two (by decide),
    fixed_save_missing fixedSlots two .nil (.prim zero) (by decide)⟩
 
-/-- Header zeroing preserves the retained nonzero slots, instead of clearing them. -/
 theorem repartition_combination :
     ValueRep (.array (SVec.nil (E := Ty.uint))
       (.cons (.prim seven) (.cons (.prim nine) .nil)) (by decide)) (.darr .word)
@@ -181,7 +172,6 @@ private def nestedLive : SVec (.ref (.fixed Ty.uint 2)) 1 := .cons (.fixed fixed
 private def nestedValue : SVal (.ref (.array (.ref (.fixed Ty.uint 2)))) :=
   .array nestedLive .nil (by decide)
 
-/-- Nested fixed-element layout under the dynamic data origin is inhabited. -/
 theorem nested_array_represented :
     ValueRep nestedValue (.darr (.sarr .word 2)) (.root 0) words := by
   apply ValueRep.array
@@ -201,7 +191,6 @@ theorem nested_array_represented :
           (.cons _ _ _ _ _ (.scalar nine _ _ rfl) (.nil _ _ _))
     · exact .nil _ _ _
 
-/-- Actual composition of two array source saves and two represented updates. -/
 theorem nested_array_save_combination :
     ∃ (changed : SVal (.ref (.array (.ref (.fixed Ty.uint 2))))) (w : Store),
       nestedValue.save (.at zero (.atF one .nil)) (.prim zero) = some changed ∧
