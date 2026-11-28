@@ -1,15 +1,8 @@
-import Solidity.Calculus.Closers
-import Solidity.Automation.SummaryCache
+import Solidity.Examples.Summaries.Support
 
-/-!
-# Vault arithmetic through a shared math helper
-
-The symbolic-call rule summarizes value computations. The verdict cache below
-is a separate, explicitly encoded consumer: it does not claim that the current
-front end extracts canonical keys or consumes `Specification.Certified`.
--/
+/-! Vault: cached typed helper certificates and actual source-edit key controls. -/
 namespace Solidity.Examples.Summaries.Vault
-open Solidity.Automation.Summary
+open Solidity.Automation.Summary Solidity.Examples.Summaries.Support
 
 def Vault : Contract := contract!{
   function shares(uint assets) pure returns (uint r) { r = assets * 2; }
@@ -20,53 +13,38 @@ def Vault : Contract := contract!{
 local instance : InContract := ⟨Vault⟩
 open scoped Solidity.Scoped
 
-/-- The helper returns its specified result for every input below 1000. -/
 def calleeGoal : Fml Vault [] := dl!{ a < 1000 → ⟨ uint y = shares(a); ⟩ y == a + a }
 
-/-- Solidity: `function shares(uint assets) { return assets * 2; }`. -/
+def spec (m : Modality) : Specification Vault [.val .uint] [.val .uint] [.val .uint, .val .uint] :=
+  { body := summary_body dl!{ [ y = shares(4); ] true }
+    requires := cdlIn![uint x]{ x < 1000 }
+    ensures := cdlIn![uint x, old, oldNet, uint r]{ r == x + x }
+    modality := m, mutability := .pure }
+/-- Solidity: `shares` is certified once for all caller frames, targets and modalities. -/
+theorem certified (m : Modality) : (spec m).Certified := by
+  apply certifyScalar _ ?_ rfl rfl
+  cases m <;> (sol_prove; all_goals (sol_leaf; sol_close))
+
+def keyFor (C : Contract) : Key := leafKey C "shares" "x<1000; r=x+x; pure; box and diamond"
+def key : Key := keyFor Vault
+private def calleeEdit := editFunction Vault "shares"
+  (contract!{ function shares(uint assets) pure returns (uint r) { r = assets * 3; } })
+private def checked : CheckedSummary key (∀ m, (spec m).Certified) := ⟨certified⟩
+/-- Solidity: retrieve the stored `shares` certificate. -/
+private theorem cached : ∀ m, (spec m).Certified := checked.fromCache
+#guard checked.edits (keyFor (editUnrelated Vault)) (keyFor calleeEdit)
+
+/-- Solidity: the original `shares` result claim consumes the cached certificate. -/
 theorem sharesVerified : Fml.Valid calleeGoal := by
   unfold calleeGoal
-  sol_prove
-  sol_leaf
-  sol_close
+  summary_calls 1 (spec .diamond) (cached .diamond)
 
-/-- Solidity: `deposit(4)` reuses the symbolic summary of `shares`. -/
+/-- Solidity: `deposit` uses the helper certificate 1 time(s). -/
 theorem depositVerified : ⊨ᶠ dl!{ [ uint y = deposit(4); ] y == 8 } := by
-  sol_prove
+  summary_calls 1 (spec .box) (cached .box)
 
-/-- Solidity: `preview(4)` uses the same helper body at another call site. -/
+/-- Solidity: `preview` uses the helper certificate 1 time(s). -/
 theorem previewVerified : ⊨ᶠ dl!{ [ uint y = preview(4); ] y == 8 } := by
-  sol_prove
-
-/-- The helper has no calls; all other semantic metadata is retained in context.
-`reprStr` is only a fixture encoding, not a canonical serialization theorem. -/
-def keyFor (C : Contract) : Key :=
-  ⟨reprStr (Semantics.lookupBy "shares" C.funs), "a < 1000 -> <uint y = shares(a);> y == a + a",
-    reprStr { C with funs := [] }, []⟩
-def key : Key := keyFor Vault
-
-private def unrelatedEdit : Contract := { Vault with
-  funs := Vault.funs.map (fun (n, f) => if n == "version" then
-    (n, (contract!{ function version() pure returns (uint r) { r = 2; } }).funs.head!.2)
-    else (n, f)) }
-private def calleeEdit : Contract := { Vault with
-  funs := Vault.funs.map (fun (n, f) => if n == "shares" then
-    (n, (contract!{ function shares(uint assets) pure returns (uint r) { r = assets * 3; } }).funs.head!.2) else (n, f)) }
-
-private def valid (k : Key) : Prop := k = key ∧ Fml.Valid calleeGoal
-private def verdict : Verdict valid key := .proved ⟨rfl, sharesVerified⟩
-private def saved : Cache valid := ({} : Cache valid).insert key verdict
-
-/-- Reusing the saved helper verdict invokes no checker. -/
-theorem cachedVerdictReused (verify : (k : Key) → Option (Verdict valid k)) :
-    saved.check key verify = (some verdict, saved, false) :=
-  Cache.check_hit _ _ _ _ (Cache.lookup_insert _ _ _)
-
--- Real source fixtures: change the unrelated declaration, then the helper body.
-#guard keyFor unrelatedEdit == key
-#guard (saved.lookup (keyFor unrelatedEdit)).isSome
-#guard (saved.check (keyFor unrelatedEdit) (fun _ => none)).2.2 == false
-#guard (saved.lookup (keyFor calleeEdit)).isNone
-#guard (saved.check (keyFor calleeEdit) (fun _ => none)).2.2 == true
+  summary_calls 1 (spec .box) (cached .box)
 
 end Solidity.Examples.Summaries.Vault

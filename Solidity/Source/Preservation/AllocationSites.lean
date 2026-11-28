@@ -1,14 +1,31 @@
 import Solidity.Source.Decode
 import Solidity.Source.Preservation.Frames
 
-/-! Actual allocation-site bridges. Raw string/hex literals do not allocate;
-string materialization, struct member packing and byte encoding allocate through
-`allocRef`. Decoder preservation is reused from the published source theorem.
-All triples retain every halt and the full existing `MemOK` invariant.
--/
 namespace Solidity.Source.Preservation
 open EM
 variable {E : Env} {Γ : RCtx}
+
+example {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat) (bs : List UInt8)
+    (s : EMState E Γ) :
+    (evalE G F (n+1) (Γ := Γ) (.str bs)).run s = (.ok (.strLit bs), s) := by rfl
+example {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat) (nl : NumLit) (len : Nat)
+    (s : EMState E Γ) :
+    (evalE G F (n+1) (Γ := Γ) (.bytesLit nl len)).run s = (.ok (.hex nl.value len), s) := by rfl
+example {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat) (bs : List UInt8)
+    (plan : FailureExecution.RuntimePlan) (known : Bool) (s : EMState E Γ) :
+    ((evalE (plan := plan) (calldataKnown := known) G F n (Γ := Γ) (.str bs)).run s).2 = s := by
+  cases n <;> cases known <;> rfl
+example {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat) (nl : NumLit) (len : Nat)
+    (plan : FailureExecution.RuntimePlan) (known : Bool) (s : EMState E Γ) :
+    ((evalE (plan := plan) (calldataKnown := known) G F n (Γ := Γ) (.bytesLit nl len)).run s).2 = s := by
+  cases n <;> cases known <;> rfl
+
+example {E : Env} {Γ : RCtx} (F : Fr) (n : Nat) (bs : List UInt8) :
+    (convRV F n (.bytes .memory) (.strLit bs) : EM E Γ _) =
+      (do let v ← allocRef (Data.bytes (l := .memory) bs); pure (.val v)) := by rfl
+example {E : Env} {Γ : RCtx} (F : Fr) (n : Nat) (bs : List UInt8) :
+    (convRV F n (.string .memory) (.strLit bs) : EM E Γ _) =
+      (do let v ← allocRef (Data.string (l := .memory) bs); pure (.val v)) := by rfl
 
 theorem allocBytes_mem {H : HeapTy} (bs : Roadmap.Bytes) :
     Hoare (MemOK E H) (allocRef (Data.bytes (l := .memory) bs) : EM E Γ (Val E.layout (.bytes .memory)))

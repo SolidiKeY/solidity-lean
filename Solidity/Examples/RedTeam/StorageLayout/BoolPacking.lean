@@ -53,4 +53,14 @@ theorem dynamic_bool_stride_mismatch :
     1 * size (.prim .bool) = 1 ∧ 1 * size (.prim .bool) ≠ 0 := by
   decide
 
+/-- Shared-ancestor Solidity fixture `Shared`: given solc's flattened order,
+word-sized fields agree. This tests offsets, not a Lean C3 linearizer. -/
+theorem shared_ancestor_offsets :
+    (let fields : List (Name × Ty) :=
+      [("ancestor", .prim .uint), ("left", .prim .uint),
+       ("right", .prim .uint), ("last", .prim .uint)]
+     [offsetIn fields "ancestor", offsetIn fields "left",
+      offsetIn fields "right", offsetIn fields "last"]) = [0, 1, 2, 3] := by
+  decide
+
 end Solidity.Examples.RedTeam.StorageLayout.BoolPacking

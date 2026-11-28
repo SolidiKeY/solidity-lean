@@ -22,6 +22,8 @@ layout('Mixed', [['a','0',0],['n','1',0],['b','2',0],['c','2',1]]);
 layout('Derived', [['baseFlag','0',0],['derivedFlag','0',1],['tail','1',0]]);
 layout('Diamond', [['left','0',0],['right','1',0],['last','2',0]]);
 layout('Reversed', [['right','0',0],['left','1',0],['last','2',0]]);
+layout('Narrow', [['a','0',0],['b','0',1],['c','0',3],['d','0',6],['e','0',26],['tail','1',0]]);
+layout('Shared', [['ancestor','0',0],['left','1',0],['right','2',0],['last','3',0]]);
 const l = layout('Shapes', [['packed','0',0],['afterPacked','1',0],
   ['wallet','2',0],['fixedWords','4',0],['words','7',0],['bits','8',0],['wallets','9',0]]);
 const types = Object.values(l.types);
