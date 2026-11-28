@@ -56,15 +56,9 @@ def audit_forwarding(source):
  return counts
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('output',type=Path);p.add_argument('--pin',type=Path);p.add_argument('--clean-process-comments',action='store_true',help='only normalize historical labels in the existing generated output');a=p.parse_args()
- if a.clean_process_comments and a.pin:p.error('cleanup and pin generation are mutually exclusive')
- file=Path('Solidity/Source/FailureRuntimeControls.lean');ns='Solidity.Source.FailureExecution.RuntimeControls'
- if a.clean_process_comments:
-  source=file.read_text()
-  source=source.replace('H18 root wiring and H19 funding', 'root wiring and funding')
-  file.write_text(source)
-  return
  audit_forwarding(Path('Solidity/Source/Eval.lean').read_text())
+ p=argparse.ArgumentParser();p.add_argument('output',type=Path);p.add_argument('--pin',type=Path);a=p.parse_args()
+ file=Path('Solidity/Source/FailureRuntimeControls.lean');ns='Solidity.Source.FailureExecution.RuntimeControls'
  laws=[ns+'.'+n for n in re.findall(r'^theorem ([A-Za-z0-9_]+)',file.read_text(),re.M)]
  assert len(laws)==23,len(laws)
  names=['Solidity.Source.'+n for n in ops]+['Solidity.Source.FailureExecution.preflight']+laws
