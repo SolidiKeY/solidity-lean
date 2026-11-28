@@ -247,6 +247,14 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/SolkeyBench/WithdrawalContract.lean` | solkey 50a1469 `benchmark/WithdrawalContract.sol`: constructor proved. `becomeRichest` unknown: credit to old richest and mapping frame; `withdraw` unknown: as Fund. |
 | Module | Its examples |
 |---|---|
+| `Examples/Benchmark/SolkeyData/ArrayRemoveByShifting.lean` | solkey real-world shift-remove with its bounds clause and concrete `test`; both unknown at the loop leaves. |
+| `Examples/Benchmark/SolkeyData/ArrayRemoveByShiftingOpen.lean` | solkey's open variant: full shift specification, unknown (the invariant cannot read the entry state). |
+| `Examples/Benchmark/SolkeyData/ArrayReplaceFromEnd.lean` | Swap-with-last removal; length clause and `test` proved, element clauses unknown past `delAt`. |
+| `Examples/Benchmark/SolkeyData/Enum.lean` | Enum state variable: `get`, `set`, `cancel`, `reset` obligations proved. |
+| `Examples/Benchmark/SolkeyData/IterableMapping.lean` | Struct-of-array-and-mappings with three class invariants; every clause by hand, obligations unknown. |
+| `Examples/Benchmark/SolkeyData/NestedMapping.lean` | solkey real-world clauses with the two-key frame; `get` proved, frame cases by hand. |
+| Module | Its examples |
+|---|---|
 | `Examples/Benchmark/SolkeyGames/KingOfEther.lean` | solkey's pull-payment King of the Ether (DoS fix): `claimThrone` proved by `sol_prove`, including the dethroned king's credit and the payable booking. `withdraw` refuted (`¬ ⊢`, kernel-checked): the contract calling itself with a credit pays itself and books nothing, so the `net(msg.sender)` clause fails. |
 | `Examples/Benchmark/SolkeyGames/EtherGame.lean` | solkey's forced-ether-proof EtherGame: `deposit` proved (winner and target clauses under the invariant). `claimReward` refuted by `sol_refute`: a winner that is the contract itself pays itself, so `net(msg.sender)` does not drop. |
 | `Examples/Benchmark/SolkeyGames/EtherStore.lean` | solkey's re-entrancy victim with the invariant `balances[a] == net(a)`: `deposit` unknown (the quantified invariant after the save and the booking is left to the closer). `withdraw` refuted (`¬ ⊢`, kernel-checked) at a self-call state that satisfies the invariant: the credit is zeroed while the ledger entry stays. The callback re-entrancy is not stated (default payment semantics). |
@@ -292,14 +300,6 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/TokenExtensions/CappedSupply.lean` | Pinned OpenZeppelin 5.0.2 `ERC20Capped` (post-`_update` cap check). Constructor and `cap` proved. `_update`, `_mint`: unknown (cap bound beside unchecked saves, wrapped credit); mint supply and frame proved. |
 | `Examples/Benchmark/TokenExtensions/Burnable.lean` | Pinned OpenZeppelin 5.0.2 `ERC20Burnable` over the `_update` hub. `_approve` proved. `_spendAllowance`, `_burn`, `burn`, `burnFrom`: unknown at guarded unchecked subtractions; burn frame and infinite allowance proved. |
 | `Examples/Benchmark/TokenExtensions/VestingWallet.lean` | Pinned OpenZeppelin 5.0.2 `VestingWallet` ether release. Constructor and `end` proved. `_vestingSchedule`: unknown (ternary, nonlinear bound), before-start clause proved. `release`: unknown at the payment update. |
-| Module | Its examples |
-|---|---|
-| `Examples/Benchmark/SolkeyData/ArrayRemoveByShifting.lean` | solkey real-world shift-remove with its bounds clause and concrete `test`; both unknown at the loop leaves. |
-| `Examples/Benchmark/SolkeyData/ArrayRemoveByShiftingOpen.lean` | solkey's open variant: full shift specification, unknown (the invariant cannot read the entry state). |
-| `Examples/Benchmark/SolkeyData/ArrayReplaceFromEnd.lean` | Swap-with-last removal; length clause and `test` proved, element clauses unknown past `delAt`. |
-| `Examples/Benchmark/SolkeyData/Enum.lean` | Enum state variable: `get`, `set`, `cancel`, `reset` obligations proved. |
-| `Examples/Benchmark/SolkeyData/IterableMapping.lean` | Struct-of-array-and-mappings with three class invariants; every clause by hand, obligations unknown. |
-| `Examples/Benchmark/SolkeyData/NestedMapping.lean` | solkey real-world clauses with the two-key frame; `get` proved, frame cases by hand. |
 | `Examples/Benchmark/Tokens/ERC20.lean` | Pinned Solidity by Example ERC20. Full `transfer`, `_mint`, `_burn`, `mint`, `burn` clauses/frames proved. `approve`, `transferFrom`: unknown guarded two-key allowance frames. Supply equals finite-support balance sum: unknown sum syntax/update laws; approve normal-termination diamond proved; six other no-overflow diamonds unknown at checked-update definedness/range propagation. |
 | `Examples/Benchmark/Tokens/ERC721.lean` | Pinned Solidity by Example non-safe ERC721 core. `ownerOf`, `balanceOf`, `approve`, `getApproved`, `transferFrom`, `_mint`, `_burn` proved, including unique owner slot, transfer approval clearing and frames. `setApprovalForAll`: unknown two-key frame; `_isApprovedOrOwner`: unknown short-circuit Boolean equivalence. Aggregate owner-count invariant and safe receiver callbacks unproved. |
 | `Examples/Benchmark/Tokens/ERC1155.lean` | Pinned OpenZeppelin 5.0.2 callback-free `_update` core. `balanceOf`, `isApprovedForAll` proved. `_setApprovalForAll`, `setApprovalForAll`: unknown two-key frames. `_update`: unknown memory length lower bound, quantified snapshot frame and filtered prefix-sum invariant/update laws (duplicates, self-transfer and zero-address cases retained). |
