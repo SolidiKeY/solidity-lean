@@ -1,6 +1,5 @@
 import Solidity.Source.Preservation.FrameControls
 
-/-! An inhabited caller memory reference survives callee heap growth. -/
 namespace Solidity.Source.Preservation.CallerReferenceControls
 open EM
 variable {E : Env}
@@ -23,6 +22,13 @@ theorem run_preserves_caller :
     (.ok (.memRef rfl 1, .nil), (caller, {original with heap :=
       ((original (E := E)).heap.alloc ⟨.bytes .memory, FrameControls.bytes [7, 9]⟩).1})) :=
   FrameControls.allocation_success caller original
+
+example : MemOK E (Heap.empty : Heap E.layout).ty
+    (caller, {original with heap :=
+      ((original (E := E)).heap.alloc ⟨.bytes .memory, FrameControls.bytes [7, 9]⟩).1}) := by
+  have h := allocBytes_mem (E := E) (Γ := [.bytes .memory])
+    (H := (Heap.empty : Heap E.layout).ty) [7, 9] _ (caller_valid (E := E))
+  exact h.1
 
 theorem distinct_contents :
     ((original (E := E)).heap.alloc ⟨.bytes .memory, FrameControls.bytes [7, 9]⟩).1.get 0 =

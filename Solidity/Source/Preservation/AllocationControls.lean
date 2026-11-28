@@ -3,10 +3,6 @@ import Solidity.Source.Preservation.Encoding
 import Solidity.Source.Preservation.FrameControls
 import Solidity.Source.Elaborate
 
-/-! Actual typed constructor/ABI allocation and count/type refusal controls.
-These source-only observations use the existing evaluator and arbitrary fixed
-parameters. They assert neither compiler refinement nor universal coverage.
--/
 namespace Solidity.Source.Preservation.AllocationControls
 open EM
 
